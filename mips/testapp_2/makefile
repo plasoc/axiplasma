@@ -24,7 +24,6 @@ CONVERT_BIN = $(LINUX_PWD)convert_bin.exe
 else
 
 # Customized for Linux
-# See http://www.opencores.com/projects.cgi/web/mips/linux_tools.htm
 CC_X86 = gcc -Wall -O -g
 CP = cp
 RM = rm -rf 
