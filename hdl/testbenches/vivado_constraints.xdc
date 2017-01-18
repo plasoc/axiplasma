@@ -1,0 +1,6 @@
+create_clock -period 20.000 -name clock [get_ports aclk]
+set_input_delay -clock [get_clocks clock] 2.000 [get_ports aresetn]
+set_input_delay -clock [get_clocks clock] 2.000 [get_ports intr_in]
+set_input_delay -clock [get_clocks clock] 2.000 [get_ports mem_in_data]
+set_input_delay -clock [get_clocks clock] 1.000 [get_ports mem_in_valid]
+set_input_delay -clock [get_clocks clock] 1.000 [get_ports mem_out_ready]

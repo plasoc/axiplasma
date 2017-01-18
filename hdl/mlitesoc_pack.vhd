@@ -26,7 +26,10 @@ package mlitesoc_pack is
             cache_way_width : integer := 1; 
             cache_index_width : integer := 4;
             cache_offset_width : integer := 5;
-            cache_replace_strat : string := "plru" );
+            cache_replace_strat : string := "plru";
+            -- cpu addresses
+            cache_invalidate_address : std_logic_vector := X"10000000";
+            cache_flush_address : std_logic_vector := X"10000004" );
         port(
             -- global signals
             aclk : in std_logic;
@@ -57,7 +60,10 @@ package mlitesoc_pack is
             cache_way_width : integer := 1; 
             cache_index_width : integer := 4;
             cache_offset_width : integer := 4;
-            cache_replace_strat : string := "plru");
+            cache_replace_strat : string := "plru";
+            -- cache control constants
+            cache_invalidate_address : std_logic_vector := X"10000000";
+            cache_flush_address : std_logic_vector := X"10000004" );
         port ( 
             -- global interface.
             clock : in std_logic; 
@@ -95,6 +101,27 @@ package mlitesoc_pack is
             mem_out_enable : out std_logic;
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic);
+    end component;
+    
+    component l1_cache_buff is
+        generic (
+            -- Global parameters.
+            glb_data_width : integer := 32;
+            -- Cache related parameters.
+            cache_tag_width : integer := 22;
+            cache_index_width : integer := 5;
+            cache_offset_width : integer := 4;
+            cache_way_width : integer := 2 );
+        port(
+            -- Global interface.
+            clock : in std_logic;
+            -- Cache controller interface.
+            cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            cache_in_index : in std_logic_vector(cache_index_width-1 downto 0);
+            cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0);
+            cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
+            cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
     end component;
 
 end; --package body

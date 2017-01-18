@@ -28,7 +28,10 @@ entity memplasma is
         cache_way_width : integer := 1; 
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
-        cache_replace_strat : string := "plru" );
+        cache_replace_strat : string := "plru";
+        -- cpu addresses
+        cache_invalidate_address : std_logic_vector := X"10000000";
+        cache_flush_address : std_logic_vector := X"10000004"  );
     port(
         -- global signals
         aclk : in std_logic;
@@ -58,12 +61,8 @@ architecture Behavioral of memplasma is
     constant cache_word_offset_width : integer := cache_offset_width-clogb2(cpu_width/8);
     constant cache_line_width : integer := (cache_tag_width+8*2**cache_offset_width);
     subtype cache_address_type is std_logic_vector(cache_index_width-1 downto 0);
-    subtype cache_data_type is std_logic_vector(
-        cache_line_width*2**cache_way_width-1 downto 0);
-    subtype cache_write_block_enable_type is std_logic_vector(
-        2**(cache_way_width+cache_word_offset_width)-1 downto 0);
-    subtype cache_line_type is std_logic_vector(cache_line_width-1 downto 0);
-    type cache_buffer_type is array(0 to 2**cache_index_width-1) of cache_data_type;
+    subtype cache_data_type is std_logic_vector(cache_line_width*2**cache_way_width-1 downto 0);
+    subtype cache_write_block_enable_type is std_logic_vector(2**(cache_way_width+cache_word_offset_width)-1 downto 0);
     signal reset_in : std_logic;
     signal cpu_write_data : std_logic_vector(cpu_width-1 downto 0);
     signal cpu_read_data : std_logic_vector(cpu_width-1 downto 0);
@@ -76,7 +75,6 @@ architecture Behavioral of memplasma is
     signal cache_write_block_enable : cache_write_block_enable_type;
     signal cache_read_address : cache_address_type;
     signal cache_read_data :cache_data_type := (others=>'0');
-    signal cache_buffer : cache_buffer_type := (others=>(others=>'0'));
 begin
     cpu_address_next(1 downto 0) <= "00";
     debug_cpu_pause <= cpu_pause;
@@ -93,7 +91,7 @@ begin
         port map (
             clk => aclk,
             reset_in => "not" (aresetn),
-            intr_in => '0',
+            intr_in => intr_in,
             address_next => cpu_address_next(cpu_width-1 downto 2),
             byte_we_next => cpu_strobe_next,
             address => open,
@@ -111,7 +109,9 @@ begin
             cache_way_width => cache_way_width, 
             cache_index_width => cache_index_width,
             cache_offset_width => cache_offset_width,
-            cache_replace_strat => cache_replace_strat )
+            cache_replace_strat => cache_replace_strat,
+            cache_invalidate_address=> cache_invalidate_address,
+            cache_flush_address=> cache_flush_address )
          port map ( 
             clock => aclk,
             resetn => aresetn,
@@ -137,37 +137,21 @@ begin
             mem_out_valid => mem_out_valid,
             mem_out_ready => mem_out_ready);
             
-        -- Cache buffer process.
-        cache_read_data <= cache_buffer(to_integer(unsigned(cache_read_address)));
-        process (aclk)
-            variable address : integer range 0 to 2**cache_index_width-1;
-            variable buff_lineset : cache_data_type;
-            variable buff_line : cache_line_type;
-            variable write_lineset : cache_data_type;
-            variable write_line : cache_line_type;
-        begin
-            if rising_edge(aclk) then
-                 address := to_integer(unsigned(cache_write_address));
-                 buff_lineset := cache_buffer(address);
-                 write_lineset := cache_write_data;
-                 for each_way in 0 to 2**cache_way_width-1 loop
-                    buff_line := buff_lineset((each_way+1)*cache_line_width-1 downto each_way*cache_line_width);
-                    write_line := write_lineset((each_way+1)*cache_line_width-1 downto each_way*cache_line_width);
-                    if cache_write_tag_enable(each_way)='1' then
-                        buff_line(cache_line_width-1 downto cache_line_width-cache_tag_width) :=
-                            write_line(cache_line_width-1 downto cache_line_width-cache_tag_width);
-                    end if;
-                    for each_word in 0 to 2**cache_word_offset_width-1 loop
-                        if cache_write_block_enable(each_way*2**cache_word_offset_width+each_word)='1' then
-                            buff_line((each_word+1)*cpu_width-1 downto each_word*cpu_width) := 
-                                write_line((each_word+1)*cpu_width-1 downto each_word*cpu_width);
-                        end if;
-                    end loop;
-                    buff_lineset((each_way+1)*cache_line_width-1 downto each_way*cache_line_width) := buff_line;
-                 end loop;
-                 cache_buffer(address) <= buff_lineset;
-            end if;
-        end process;
-
+    l1_cache_buff_inst : 
+    l1_cache_buff 
+        generic map (
+            glb_data_width => cpu_width,
+            cache_tag_width => cache_tag_width,
+            cache_index_width => cache_index_width,
+            cache_offset_width => cache_offset_width,
+            cache_way_width => cache_way_width )
+        port map (
+            clock => aclk,
+            cache_in_data => cache_write_data,
+            cache_in_index => cache_write_address,
+            cache_in_tag_enable => cache_write_tag_enable,
+            cache_in_offset_enable => cache_write_block_enable,
+            cache_out_data => cache_read_data,
+            cache_out_index => cache_read_address);
 
 end Behavioral;
