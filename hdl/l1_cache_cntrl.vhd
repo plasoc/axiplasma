@@ -118,7 +118,9 @@ architecture Behavioral of l1_cache_cntrl is
     signal cache_invalidate_enable : boolean := False;
     signal cache_flush : boolean;
     signal cache_flush_enable : boolean := False;
-    signal cache_write_oper : boolean;
+    signal cache_oper_tag : cache_tag_type := (others=>'0');
+    signal cache_oper_index : cache_index_type := (others=>'0');
+    signal cache_oper : boolean;
     signal cache_way : cache_way_type;
     signal cache_way_replace : cache_way_type;
     signal cache_plruset_replace : cache_plruset_type;
@@ -142,11 +144,11 @@ begin
     cache_tag <= cpu_address(glb_address_width-1 downto glb_address_width-cache_tag_width);
     cache_index <= cpu_address(glb_address_width-cache_tag_width-1 downto cache_offset_width);
     cache_word_offset <= cpu_address(cache_offset_width-1 downto clogb2(glb_data_width/8));
-    cache_write_oper <= cache_write_zeros/=cpu_strobe;
     cache_in_validset <= cache_validsets(to_integer(unsigned(cache_index)));
     cache_in_plruset <= cache_plrusets(to_integer(unsigned(cache_index)));
     cache_invalidate <= True when cpu_address=cache_invalidate_address else False;
     cache_flush <= True when cpu_address=cache_flush_address else False;
+    cache_oper <= True when (cache_oper_tag=cache_tag and cache_oper_index=cache_index) and (cache_flush_enable or cache_invalidate_enable) else False;
     mem_in_enable <= '1' when mem_read_needed else '0';
     mem_out_enable <= '1' when mem_write_needed else '0';
     mem_in_ready <= mem_in_ready_buff;
@@ -262,6 +264,7 @@ begin
         variable blockset : cache_blockset_type;
         variable tagset : cache_tagset_type;
         variable validset : cache_validset_type;
+        variable out_control_enables : std_logic_vector(2**cache_way_width-1 downto 0);
         variable out_block_enable : cache_out_block_enable_type;
     begin
         if rising_edge(clock) then
@@ -270,7 +273,6 @@ begin
                 cache_out_tag_enable <= (others=>'0');
                 cache_out_block_enable <= (others=>'0');
                 cache_flush_enable <= False;
-                cache_invalidate_enable <= False;
                 cpu_pause_buff <= '0';
                 cpu_pause_delayed <= False;
                 cache_state <= cache_state_run;
@@ -278,49 +280,56 @@ begin
                 -- Main State Machine.
                 case cache_state is
                 when cache_state_run=>
-                    -- Check for flush
-                    if cache_flush or cache_flush_enable then
+                    -- Check for flush.
+                    if cache_flush or cache_invalidate then
                         -- Ensure writing control and block enables are disabled.
                         cache_out_control_enables <= (others=>'0');  
                         cache_out_block_enable <= (others=>'0');
-                        -- If flushing is enabled, check and see if the requested
-                        -- tag and index is actually valid in the cache. If it is,
-                        -- write cache block into memory.
-                        if cache_flush_enable then
-                            if cache_hit then
+                        -- Set flag corresponding to the appropriate cache operation.
+                        if cache_flush then
+                            cache_flush_enable <= True;
+                        elsif cache_invalidate then
+                            cache_invalidate_enable <= True;
+                        end if;
+                        -- Store cache operation information.
+                        cache_oper_tag <= cpu_in_data(glb_address_width-1 downto glb_address_width-cache_tag_width);
+                        cache_oper_index <= cpu_in_data(glb_address_width-cache_tag_width-1 downto cache_offset_width);
+                    -- Check for cache operation.
+                    elsif cache_oper then
+                        -- The default value of cache_out_control_enables.
+                        out_control_enables := (others=>'0');
+                        -- Check for hit and then check to see which operation is enabled.
+                        if cache_hit then
+                            -- If flush is enabled, check and see if the 
+                            -- requested tag and index is actually valid in the cache. If
+                            -- they is, flush cache line. 
+                            if cache_flush_enable then
                                 cpu_pause_delayed <= True;
                                 cpu_pause_buff <= '1';
                                 cache_state <= cache_state_mem;
+                                mem_way_replace <= cache_way;
                                 mem_write_needed <= True;
                                 mem_write_counter <= 1;
                                 mem_out_data <= cache_in_blockset(cache_way)(0);
                                 mem_out_address(glb_address_width-1 downto glb_address_width-cache_tag_width-cache_index_width)  <= 
                                     cache_in_tagset(cache_way) & cache_index;
-                            end if;
-                            cache_flush_enable <= False;
-                        else
-                            cache_flush_enable <= True;
-                        end if;
-                    -- Check for invalidation
-                    elsif cache_invalidate or cache_invalidate_enable then
-                        -- Ensure writing block enables are disabled.
-                        cache_out_block_enable <= (others=>'0'); 
-                        -- If invalidation is enabled, check and see if the 
-                        -- requested tag and index is actually valid in the cache. If
-                        -- they is, invalidate cache line. 
-                        if cache_invalidate_enable then
-                            if cache_hit then
-                                cache_out_control_enables(cache_way_replace) <= '1';
+                            -- If invalidation is enabled, check and see if the 
+                            -- requested tag and index is actually valid in the cache. If
+                            -- they is, invalidate cache line. 
+                            elsif cache_invalidate_enable then
+                                out_control_enables(cache_way_replace) := '1';
                                 cache_out_validset(cache_way_replace) <= '0';
                                 if cache_replace_strat="plru" then
                                     cache_out_plruset <= cache_in_plruset;
                                 end if;
                             end if;
-                            cache_invalidate_enable <= False;
-                        else
-                            cache_invalidate_enable <= True; 
-                            cache_out_control_enables <= (others=>'0');  
                         end if;
+                        -- Make sure operation is disabled once started.
+                        cache_flush_enable <= False;
+                        cache_invalidate_enable <= False;
+                        -- Ensure writing control and block enables are disabled.
+                        cache_out_control_enables <= out_control_enables;  
+                        cache_out_block_enable <= (others=>'0');
                     -- Check for cache hit
                     elsif cache_hit then
                         cache_out_control_enables <= (others=>'0');  

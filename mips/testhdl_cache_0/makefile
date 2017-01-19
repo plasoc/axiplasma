@@ -13,7 +13,7 @@ LD_MIPS = $(BIN_MIPS)mips-ld $(LFLAGS)
 DUMP_MIPS = $(BIN_MIPS)mips-objdump
 CONVERT_BIN = $(BIN_MIPS)mips-objcopy -I elf32-big -O binary main.axf main.bin 
 
-CFLAGS = -O3 -Wall -c -s
+CFLAGS = -O0 -Wall -c -s
 CFLAGS += -fno-pic -mips1 -mno-abicalls -I$(PLASMA_DIR)
 LFLAGS = -L$(LD_DIR)
 

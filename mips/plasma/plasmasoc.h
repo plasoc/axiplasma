@@ -12,7 +12,7 @@
 #ifndef PLASMA_SOC_H_
 #define PLASMA_SOC_H_
 
-#define L1_CACHE_OFFSET_WIDTH			(4)
+#define L1_CACHE_OFFSET_WIDTH			(5)
 #define L1_CACHE_OFFSET_MASK			((1<<L1_CACHE_OFFSET_WIDTH)-1)
 #define L1_CACHE_ADDRESS_BASE			(0x10000000)
 #define L1_CACHE_INVALIDATE_OFFSET		(0)
@@ -22,8 +22,8 @@ static inline __attribute__ ((always_inline))
 void l1_cache_operate_on_line(unsigned oper_offset,unsigned addr)
 {
 	__asm__ __volatile__ ( 
-		"sw $0, 0(%0)\n" /* Write cache control base + offset. */ 
-		"sw $0, 0(%1)\n" /* Write selected tag and index. */ 
+		"sw %1, 0(%0)\n" /* Write selected tag and index to cache control base + offset. */ 
+		"sw $0, 0(%1)\n" /* Perform memory access to initiate cache operation. */ 
 		: 
 		: "r" (L1_CACHE_ADDRESS_BASE+oper_offset), "r" (((unsigned)addr)&~L1_CACHE_OFFSET_MASK) 
 		: "memory" ); 

@@ -4,9 +4,9 @@ static void l1_cache_find_range(unsigned addr, unsigned size, unsigned* cur_addr
 {
 	const unsigned inc_addr = (L1_CACHE_OFFSET_MASK+1);
 	unsigned addr_0 = addr+size;
-	unsigned addr_1 = addr_0&L1_CACHE_OFFSET_MASK;
+	unsigned addr_1 = addr_0&~L1_CACHE_OFFSET_MASK;
 
-	*cur_addr = addr&L1_CACHE_OFFSET_MASK;
+	*cur_addr = addr&~L1_CACHE_OFFSET_MASK;
 	*end_addr = addr_1+inc_addr;
 	*end_addr += (addr_0>addr_1)?inc_addr:0;
 }
