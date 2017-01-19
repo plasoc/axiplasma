@@ -66,7 +66,7 @@ begin
              for each_way in 0 to 2**cache_way_width-1 loop
                 buff_line := buff_lineset((each_way+1)*cache_line_width-1 downto each_way*cache_line_width);
                 write_line := write_lineset((each_way+1)*cache_line_width-1 downto each_way*cache_line_width);
-                if cache_in_offset_enable(each_way)='1' then
+                if cache_in_tag_enable(each_way)='1' then
                     buff_line(cache_line_width-1 downto cache_line_width-cache_tag_width) :=
                         write_line(cache_line_width-1 downto cache_line_width-cache_tag_width);
                 end if;

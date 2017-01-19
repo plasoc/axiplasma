@@ -15,6 +15,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
+use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.mlitesoc_pack.all;
 
@@ -163,9 +164,13 @@ begin
                 for each_way in 0 to 2**cache_way_width-1 loop
                     if cache_out_control_enables(each_way)='1' then
                         cache_validsets(index)(each_way) <= cache_out_validset(each_way);
-                        cache_plrusets(index) <= cache_out_plruset;
                     end if;
                 end loop;
+                if or_reduce(cache_out_control_enables)='1' then
+                    if cache_replace_strat="plru" then
+                        cache_plrusets(index) <= cache_out_plruset;
+                    end if;
+                end if;
             end if;
         end if;
     end process;
