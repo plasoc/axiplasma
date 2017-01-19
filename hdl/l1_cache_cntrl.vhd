@@ -28,9 +28,7 @@ entity l1_cache_cntrl is
         cache_index_width : integer := 4;
         cache_offset_width : integer := 4;
         cache_replace_strat : string := "plru";
-        -- cache control constants
-        cache_invalidate_address : std_logic_vector := X"1000";
-        cache_flush_address : std_logic_vector := X"1004" ); -- 
+        cache_base_address : std_logic_vector := X"0000" ); 
     port ( 
         -- global interface.
         clock : in std_logic; 
@@ -69,12 +67,16 @@ architecture Behavioral of l1_cache_cntrl is
             result := result+each_way;
         end loop; 
         return result;
-    end; --function
+    end; 
     constant cache_word_offset_width : integer := cache_offset_width-clogb2(glb_data_width/8);
     constant cache_tag_width : integer := glb_address_width-cache_index_width-cache_offset_width;
     constant cache_line_width : integer := cache_tag_width+8*2**cache_offset_width;
     constant cache_lineset_width : integer := cache_line_width*2**cache_way_width;
     constant cache_write_zeros : std_logic_vector(glb_data_width/8-1 downto 0) := (others=>'0');
+    constant cache_invalidate_offset : integer := 0;
+    constant cache_flush_offset : integer := 4;
+    constant cache_invalidate_address : std_logic_vector := add_offset2base(cache_base_address,cache_invalidate_offset);
+    constant cache_flush_address : std_logic_vector := add_offset2base(cache_base_address,cache_flush_offset);
     subtype byte_type is std_logic_vector(7 downto 0);
     subtype word_type is std_logic_vector(glb_data_width-1 downto 0);
     subtype cache_tag_type is std_logic_vector(cache_tag_width-1 downto 0);
@@ -144,8 +146,6 @@ begin
     cache_in_plruset <= cache_plrusets(to_integer(unsigned(cache_index)));
     cache_invalidate <= True when cpu_address=cache_invalidate_address else False;
     cache_flush <= True when cpu_address=cache_flush_address else False;
---    cache_inval_tag <= cpu_in_data(glb_address_width-1 downto glb_address_width-cache_tag_width);
---    cache_inval_index <= cpu_in_data(glb_address_width-cache_tag_width-1 downto cache_offset_width);
     mem_in_enable <= '1' when mem_read_needed else '0';
     mem_out_enable <= '1' when mem_write_needed else '0';
     mem_in_ready <= mem_in_ready_buff;

@@ -11,10 +11,13 @@
 ---------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
+use ieee.numeric_std.all;
 
 package mlitesoc_pack is
 
     function clogb2(bit_depth : in integer ) return integer;
+    function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
 
     component memplasma is
         generic(
@@ -28,8 +31,7 @@ package mlitesoc_pack is
             cache_offset_width : integer := 5;
             cache_replace_strat : string := "plru";
             -- cpu addresses
-            cache_invalidate_address : std_logic_vector := X"10000000";
-            cache_flush_address : std_logic_vector := X"10000004" );
+            cache_base_address : std_logic_vector := X"10000000");
         port(
             -- global signals
             aclk : in std_logic;
@@ -61,9 +63,7 @@ package mlitesoc_pack is
             cache_index_width : integer := 4;
             cache_offset_width : integer := 4;
             cache_replace_strat : string := "plru";
-            -- cache control constants
-            cache_invalidate_address : std_logic_vector := X"10000000";
-            cache_flush_address : std_logic_vector := X"10000004" );
+            cache_base_address : std_logic_vector := X"0000" );
         port ( 
             -- global interface.
             clock : in std_logic; 
@@ -138,5 +138,12 @@ package body mlitesoc_pack is
 		end loop; 
 		return result;
 	end; --function
+	
+	function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector is
+        variable result : std_logic_vector(base_address'length-1 downto 0);
+    begin
+        result := std_logic_vector(to_unsigned(to_integer(unsigned(base_address))+offset,base_address'length));
+        return result;
+    end;
 
 end; --package body

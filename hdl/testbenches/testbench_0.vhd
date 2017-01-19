@@ -30,8 +30,7 @@ entity testbench_0 is
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
-        cache_invalidate_address : std_logic_vector := X"10000000";
-        cache_flush_address : std_logic_vector := X"10000004" );
+        cache_base_address : std_logic_vector := X"10000000" );
 end testbench_0;
 
 architecture Behavioral of testbench_0 is
@@ -100,8 +99,7 @@ begin
             cache_index_width => cache_index_width,
             cache_offset_width => cache_offset_width,
             cache_replace_strat => cache_replace_strat,
-            cache_invalidate_address=>cache_invalidate_address,
-            cache_flush_address=>cache_flush_address )
+            cache_base_address=>cache_base_address)
         port map(
             aclk => clock,
             aresetn => resetn,

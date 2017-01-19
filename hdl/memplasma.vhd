@@ -30,8 +30,7 @@ entity memplasma is
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
         -- cpu addresses
-        cache_invalidate_address : std_logic_vector := X"10000000";
-        cache_flush_address : std_logic_vector := X"10000004"  );
+        cache_base_address : std_logic_vector := X"10000000" );
     port(
         -- global signals
         aclk : in std_logic;
@@ -110,8 +109,7 @@ begin
             cache_index_width => cache_index_width,
             cache_offset_width => cache_offset_width,
             cache_replace_strat => cache_replace_strat,
-            cache_invalidate_address=> cache_invalidate_address,
-            cache_flush_address=> cache_flush_address )
+            cache_base_address => cache_base_address)
          port map ( 
             clock => aclk,
             resetn => aresetn,
