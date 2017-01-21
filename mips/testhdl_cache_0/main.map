@@ -1,7 +1,3 @@
-Archive member included because of file (symbol)
-
-/opt/cross-compiler-mips/lib//libc.a(memset.o)
-                              main.o (memset)
 
 Allocating common symbols
 Common symbol       size              file
@@ -14,9 +10,6 @@ Discarded input sections
  .reginfo       0x0000000000000000        0x0 main.o
  .reginfo       0x0000000000000000        0x0 no_os.o
  .reginfo       0x0000000000000000        0x0 plasmasoc.o
- .reginfo       0x0000000000000000        0x0 /opt/cross-compiler-mips/lib//libc.a(memset.o)
- .note.GNU-stack
-                0x0000000000000000        0x0 /opt/cross-compiler-mips/lib//libc.a(memset.o)
 
 Memory Configuration
 
@@ -30,16 +23,15 @@ LOAD boot.o
 LOAD main.o
 LOAD no_os.o
 LOAD plasmasoc.o
-LOAD /opt/cross-compiler-mips/lib//libc.a
                 0x0000000000400000                PROVIDE (__executable_start, 0x400000)
-                0x00000000004000b4                . = (0x400000 + SIZEOF_HEADERS)
+                0x0000000000400094                . = (0x400000 + SIZEOF_HEADERS)
 
 .interp
  *(.interp)
 
-.reginfo        0x00000000004000b4       0x18
+.reginfo        0x0000000000400094       0x18
  *(.reginfo)
- .reginfo       0x00000000004000b4       0x18 boot.o
+ .reginfo       0x0000000000400094       0x18 boot.o
 
 .dynamic
  *(.dynamic)
@@ -170,7 +162,7 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
 .plt
  *(.plt)
 
-.text           0x0000000000000000      0x5d0
+.text           0x0000000000000000      0x660
                 0x0000000000000000                _ftext = .
  *(.text .stub .text.* .gnu.linkonce.t.*)
  .text          0x0000000000000000      0x200 boot.o
@@ -182,20 +174,18 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
                 0x000000000000003c                interrupt_service_routine
                 0x00000000000001f4                OS_Syscall
                 0x0000000000000128                OS_AsmInterruptEnable
- .text          0x0000000000000200      0x130 main.o
-                0x0000000000000234                main
- .text          0x0000000000000330      0x1a0 no_os.o
-                0x0000000000000330                putchar
-                0x0000000000000420                puts
-                0x0000000000000358                kbhit
-                0x00000000000004a0                getch
-                0x000000000000036c                OS_InterruptServiceRoutine
-                0x0000000000000394                print_hex
- .text          0x00000000000004d0       0x70 plasmasoc.o
-                0x00000000000004d0                l1_cache_operate_on_line_range
- .text          0x0000000000000540       0x90 /opt/cross-compiler-mips/lib//libc.a(memset.o)
-                0x0000000000000540                __GI_memset
-                0x0000000000000540                memset
+ .text          0x0000000000000200      0x250 main.o
+                0x000000000000021c                memset
+                0x0000000000000258                main
+ .text          0x0000000000000450      0x1a0 no_os.o
+                0x0000000000000450                putchar
+                0x0000000000000540                puts
+                0x0000000000000478                kbhit
+                0x00000000000005c0                getch
+                0x000000000000048c                OS_InterruptServiceRoutine
+                0x00000000000004b4                print_hex
+ .text          0x00000000000005f0       0x70 plasmasoc.o
+                0x00000000000005f0                l1_cache_operate_on_line_range
  *(.text.*personality*)
  *(.gnu.warning)
  *(.mips16.fn.*)
@@ -203,9 +193,9 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
 
 .fini
  *(.fini)
-                0x00000000000005d0                PROVIDE (__etext, .)
-                0x00000000000005d0                PROVIDE (_etext, .)
-                0x00000000000005d0                PROVIDE (etext, .)
+                0x0000000000000660                PROVIDE (__etext, .)
+                0x0000000000000660                PROVIDE (_etext, .)
+                0x0000000000000660                PROVIDE (etext, .)
 
 .rodata
  *(.rodata .rodata.* .gnu.linkonce.r.*)
@@ -227,7 +217,7 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
 
 .gcc_except_table
  *(.gcc_except_table .gcc_except_table.*)
-                0x00000000000005d0                . = .
+                0x0000000000000660                . = .
 
 .eh_frame
  *(.eh_frame)
@@ -242,22 +232,22 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x00000000000005d0        0x0
-                0x00000000000005d0                PROVIDE (__preinit_array_start, .)
+.preinit_array  0x0000000000000660        0x0
+                0x0000000000000660                PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
-                0x00000000000005d0                PROVIDE (__preinit_array_end, .)
+                0x0000000000000660                PROVIDE (__preinit_array_end, .)
 
-.init_array     0x00000000000005d0        0x0
-                0x00000000000005d0                PROVIDE (__init_array_start, .)
+.init_array     0x0000000000000660        0x0
+                0x0000000000000660                PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*))
  *(.init_array)
-                0x00000000000005d0                PROVIDE (__init_array_end, .)
+                0x0000000000000660                PROVIDE (__init_array_end, .)
 
-.fini_array     0x00000000000005d0        0x0
-                0x00000000000005d0                PROVIDE (__fini_array_start, .)
+.fini_array     0x0000000000000660        0x0
+                0x0000000000000660                PROVIDE (__fini_array_start, .)
  *(.fini_array)
  *(SORT(.fini_array.*))
-                0x00000000000005d0                PROVIDE (__fini_array_end, .)
+                0x0000000000000660                PROVIDE (__fini_array_end, .)
 
 .ctors
  *crtbegin*.o(.ctors)
@@ -278,20 +268,20 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
  *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
  *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*)
 
-.data           0x00000000000005d0        0x0
-                0x00000000000005d0                _fdata = .
+.data           0x0000000000000660       0x10
+                0x0000000000000660                _fdata = .
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00000000000005d0        0x0 boot.o
- .data          0x00000000000005d0        0x0 main.o
- .data          0x00000000000005d0        0x0 no_os.o
- .data          0x00000000000005d0        0x0 plasmasoc.o
- .data          0x00000000000005d0        0x0 /opt/cross-compiler-mips/lib//libc.a(memset.o)
+ .data          0x0000000000000660        0x0 boot.o
+ .data          0x0000000000000660       0x10 main.o
+                0x0000000000000660                noncacheable
+ .data          0x0000000000000670        0x0 no_os.o
+ .data          0x0000000000000670        0x0 plasmasoc.o
  *(.gnu.linkonce.d.*personality*)
 
 .data1
  *(.data1)
-                0x00000000000005d0                . = .
-                0x00000000000085c0                _gp = (ALIGN (0x10) + 0x7ff0)
+                0x0000000000000670                . = .
+                0x0000000000008660                _gp = (ALIGN (0x10) + 0x7ff0)
 
 .got
  *(.got.plt)
@@ -305,34 +295,33 @@ LOAD /opt/cross-compiler-mips/lib//libc.a
 
 .lit4
  *(.lit4)
-                0x00000000000005d0                _edata = .
-                0x00000000000005d0                PROVIDE (edata, .)
-                0x00000000000005d0                __bss_start = .
-                0x00000000000005d0                _fbss = .
+                0x0000000000000670                _edata = .
+                0x0000000000000670                PROVIDE (edata, .)
+                0x0000000000000670                __bss_start = .
+                0x0000000000000670                _fbss = .
 
 .sbss
  *(.dynsbss)
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
  *(.scommon)
 
-.bss            0x00000000000005d0      0x240
+.bss            0x0000000000000670      0x240
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x00000000000005d0        0x0 boot.o
- .bss           0x00000000000005d0        0x0 main.o
- .bss           0x00000000000005d0        0x0 no_os.o
- .bss           0x00000000000005d0        0x0 plasmasoc.o
- .bss           0x00000000000005d0        0x0 /opt/cross-compiler-mips/lib//libc.a(memset.o)
+ .bss           0x0000000000000670        0x0 boot.o
+ .bss           0x0000000000000670        0x0 main.o
+ .bss           0x0000000000000670        0x0 no_os.o
+ .bss           0x0000000000000670        0x0 plasmasoc.o
  *(COMMON)
- COMMON         0x00000000000005d0      0x200 boot.o
-                0x00000000000005d0                InitStack
- COMMON         0x00000000000007d0       0x40 main.o
-                0x00000000000007d0                data
-                0x0000000000000810                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x0000000000000810                . = ALIGN (0x4)
-                0x0000000000000810                . = ALIGN (0x4)
-                0x0000000000000810                _end = .
-                0x0000000000000810                PROVIDE (end, .)
+ COMMON         0x0000000000000670      0x200 boot.o
+                0x0000000000000670                InitStack
+ COMMON         0x0000000000000870       0x40 main.o
+                0x0000000000000870                data
+                0x00000000000008b0                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x00000000000008b0                . = ALIGN (0x4)
+                0x00000000000008b0                . = ALIGN (0x4)
+                0x00000000000008b0                _end = .
+                0x00000000000008b0                PROVIDE (end, .)
 
 .stab
  *(.stab)
@@ -450,7 +439,6 @@ OUTPUT(main.axf elf32-tradbigmips)
 
 .pdr            0x0000000000000000      0x260
  .pdr           0x0000000000000000      0x100 boot.o
- .pdr           0x0000000000000100       0x60 main.o
- .pdr           0x0000000000000160       0xc0 no_os.o
- .pdr           0x0000000000000220       0x20 plasmasoc.o
- .pdr           0x0000000000000240       0x20 /opt/cross-compiler-mips/lib//libc.a(memset.o)
+ .pdr           0x0000000000000100       0x80 main.o
+ .pdr           0x0000000000000180       0xc0 no_os.o
+ .pdr           0x0000000000000240       0x20 plasmasoc.o

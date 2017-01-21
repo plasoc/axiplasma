@@ -23,7 +23,7 @@ all:
 	$(GCC_MIPS) $(PLASMA_DIR)plasmasoc.c 
 	$(GCC_MIPS) $(PLASMA_DIR)plasmasoc.c -S
 	$(LD_MIPS) -Ttext 0 -e entry -Map main.map -s -N -o main.axf \
-		boot.o main.o no_os.o plasmasoc.o -static -lc
+		boot.o main.o no_os.o plasmasoc.o -static 
 	-$(DUMP_MIPS) --disassemble-all main.axf > main.lst
 	$(CONVERT_BIN)
 
