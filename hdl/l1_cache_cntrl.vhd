@@ -88,7 +88,10 @@ architecture Behavioral of l1_cache_cntrl is
     subtype cache_plruset_type is std_logic_vector(cache_plru_width-1 downto 0);
     subtype cache_line_type is std_logic_vector(cache_line_width-1 downto 0);
     subtype cache_way_type is integer range 0 to 2**cache_way_width-1;
-    subtype cache_out_block_enable_type is std_logic_vector(2**cache_way_width*2**cache_word_offset_width-1 downto 0);
+    subtype cache_valid_enable_type is std_logic_vector(2**cache_way_width-1 downto 0);
+    subtype cache_plru_enable_type is std_logic;
+    subtype cache_tag_enable_type is std_logic_vector(2**cache_way_width-1 downto 0);
+    subtype cache_block_enable_type is std_logic_vector(2**cache_way_width*2**cache_word_offset_width-1 downto 0);
     type cache_tagset_type is array(0 to 2**cache_way_width-1) of cache_tag_type;
     type cache_block_type is array(0 to 2**cache_word_offset_width-1) of word_type;
     type cache_blockset_type is array(0 to 2**cache_way_width-1) of cache_block_type;
@@ -110,7 +113,8 @@ architecture Behavioral of l1_cache_cntrl is
     signal cache_out_blockset : cache_blockset_type := (others=>(others=>(others=>'0')));
     signal cache_out_validset : cache_validset_type := (others=>'0');
     signal cache_out_plruset : cache_plruset_type := (others=>'0');
-    signal cache_out_control_enables : std_logic_vector(2**cache_way_width-1 downto 0) := (others=>'0');
+    signal cache_out_valid_enable : cache_valid_enable_type := (others=>'0');
+    signal cache_out_plru_enable : cache_plru_enable_type := '0';
     signal cache_validsets : cache_validsets_type := (others=>(others=>'0'));
     signal cache_plrusets : cache_plrusets_type := (others=>(others=>'0'));
     signal cache_hit : boolean;
@@ -160,19 +164,13 @@ begin
         if rising_edge(clock) then
             if resetn='0' then
                 cache_validsets <= (others=>(others=>'0'));
-                cache_plrusets <= (others=>(others=>'0'));
             else
                 index := to_integer(unsigned(cache_index));
                 for each_way in 0 to 2**cache_way_width-1 loop
-                    if cache_out_control_enables(each_way)='1' then
+                    if cache_out_valid_enable(each_way)='1' then
                         cache_validsets(index)(each_way) <= cache_out_validset(each_way);
                     end if;
                 end loop;
-                if or_reduce(cache_out_control_enables)='1' then
-                    if cache_replace_strat="plru" then
-                        cache_plrusets(index) <= cache_out_plruset;
-                    end if;
-                end if;
             end if;
         end if;
     end process;
@@ -221,9 +219,25 @@ begin
         cache_hit <= hit;
         cache_way <= way;
     end process;
-    -- Replacement Strategy: Pseudo Least Recently Used
+    -- Replacement Strategy: Pseudo Least Recently Used.
     gen_plru : 
     if cache_replace_strat="plru" generate
+        -- Set control register.
+        process (clock)
+            variable index : integer;
+        begin
+            if rising_edge(clock) then
+                if resetn='0' then
+                    cache_plrusets <= (others=>(others=>'0'));
+                else
+                    if cache_out_plru_enable='1' then
+                        index := to_integer(unsigned(cache_index));
+                        cache_plrusets(index) <= cache_out_plruset;
+                    end if;
+                end if;
+            end if;
+        end process;
+        -- Pseudo Least Recently Used Implementation.
         process (cache_in_plruset)
             subtype int_type is integer range 0 to 2**(cache_way_width+1);
             variable plruset : cache_plruset_type;
@@ -264,27 +278,34 @@ begin
         variable blockset : cache_blockset_type;
         variable tagset : cache_tagset_type;
         variable validset : cache_validset_type;
-        variable out_control_enables : std_logic_vector(2**cache_way_width-1 downto 0);
-        variable out_block_enable : cache_out_block_enable_type;
+        variable out_valid_enable : cache_valid_enable_type;
+        variable out_plru_enable : cache_plru_enable_type;
+        variable out_tag_enable : cache_tag_enable_type;
+        variable out_block_enable : cache_block_enable_type;
     begin
         if rising_edge(clock) then
+            -- Reset control signals upon reset.
             if resetn='0' then
-                cache_out_control_enables <= (others=>'0');
+                cache_out_valid_enable <= (others=>'0');
+                cache_out_plru_enable <= '0';
                 cache_out_tag_enable <= (others=>'0');
                 cache_out_block_enable <= (others=>'0');
                 cache_flush_enable <= False;
+                cache_invalidate_enable <= False;
                 cpu_pause_buff <= '0';
                 cpu_pause_delayed <= False;
                 cache_state <= cache_state_run;
             else
+                -- Ensure the default value of all the enables are zero.
+                out_valid_enable := (others=>'0');
+                out_plru_enable := '0';
+                out_tag_enable := (others=>'0');
+                out_block_enable := (others=>'0');
                 -- Main State Machine.
                 case cache_state is
                 when cache_state_run=>
                     -- Check for flush.
                     if cache_flush or cache_invalidate then
-                        -- Ensure writing control and block enables are disabled.
-                        cache_out_control_enables <= (others=>'0');  
-                        cache_out_block_enable <= (others=>'0');
                         -- Set flag corresponding to the appropriate cache operation.
                         if cache_flush then
                             cache_flush_enable <= True;
@@ -296,13 +317,11 @@ begin
                         cache_oper_index <= cpu_in_data(glb_address_width-cache_tag_width-1 downto cache_offset_width);
                     -- Check for cache operation.
                     elsif cache_oper then
-                        -- The default value of cache_out_control_enables.
-                        out_control_enables := (others=>'0');
                         -- Check for hit and then check to see which operation is enabled.
                         if cache_hit then
                             -- If flush is enabled, check and see if the 
-                            -- requested tag and index is actually valid in the cache. If
-                            -- they is, flush cache line. 
+                            -- requested tag and index are actually valid in the cache. If
+                            -- they are, flush cache line. 
                             if cache_flush_enable then
                                 cpu_pause_delayed <= True;
                                 cpu_pause_buff <= '1';
@@ -314,25 +333,18 @@ begin
                                 mem_out_address(glb_address_width-1 downto glb_address_width-cache_tag_width-cache_index_width)  <= 
                                     cache_in_tagset(cache_way) & cache_index;
                             -- If invalidation is enabled, check and see if the 
-                            -- requested tag and index is actually valid in the cache. If
-                            -- they is, invalidate cache line. 
+                            -- requested tag and index are actually valid in the cache. If
+                            -- they are, invalidate cache line. 
                             elsif cache_invalidate_enable then
-                                out_control_enables(cache_way_replace) := '1';
+                                out_valid_enable(cache_way_replace) := '1';
                                 cache_out_validset(cache_way_replace) <= '0';
-                                if cache_replace_strat="plru" then
-                                    cache_out_plruset <= cache_in_plruset;
-                                end if;
                             end if;
                         end if;
                         -- Make sure operation is disabled once started.
                         cache_flush_enable <= False;
                         cache_invalidate_enable <= False;
-                        -- Ensure writing control and block enables are disabled.
-                        cache_out_control_enables <= out_control_enables;  
-                        cache_out_block_enable <= (others=>'0');
                     -- Check for cache hit
                     elsif cache_hit then
-                        cache_out_control_enables <= (others=>'0');  
                          -- Set cache control signals and offset.
                         if not cpu_pause_delayed then
                             cpu_pause_delayed <= True;
@@ -342,7 +354,6 @@ begin
                         end if;
                         word_offset := to_integer(unsigned(cache_word_offset));
                         -- Perform the write operation to cache from CPU.
-                        out_block_enable := (others=>'0');
                         for each_byte in 0 to glb_data_width/8-1 loop
                             if (cpu_pause_buff='0' and cpu_strobe(each_byte)='1') or 
                                     (cpu_pause_buff='1' and cache_strobe_replace(each_byte)='1') then
@@ -353,7 +364,6 @@ begin
                                     cpu_in_data(7+each_byte*8 downto each_byte*8);
                             end if;
                         end loop;
-                        cache_out_block_enable <= out_block_enable;
                         -- Perform read operation from cache to CPU.
                         cpu_out_data <= cache_in_blockset(cache_way)(word_offset);
                     -- If miss, begin memory transactions.
@@ -362,8 +372,6 @@ begin
                         cpu_pause_buff <= '1';
                         cache_strobe_replace <= cpu_strobe;
                         cache_state <= cache_state_mem;
-                        cache_out_control_enables <= (others=>'0');  
-                        cache_out_block_enable <= (others=>'0');
                         mem_way_replace <= cache_way_replace;
                         mem_tag_replace <= cache_tag;
                         mem_read_needed <= True;
@@ -399,9 +407,7 @@ begin
                         if mem_in_valid='1' and mem_in_ready_buff='1' then
                             -- Set the corresponding control information.
                             cache_out_address <= cache_index;
-                            out_block_enable := (others=>'0');
                             out_block_enable(mem_way_replace*2**cache_word_offset_width+mem_read_counter) := '1';
-                            cache_out_block_enable <= out_block_enable;
                             -- Store the newly acquired word.
                             cache_out_blockset(mem_way_replace)(mem_read_counter) <= mem_in_data;
                             mem_read_counter <= mem_read_counter+1;
@@ -409,17 +415,15 @@ begin
                             if mem_read_counter=2**cache_word_offset_width-1 then
                                 mem_read_needed <= False;
                                 -- Set tag and valid flag.
-                                cache_out_control_enables(mem_way_replace) <= '1';
-                                cache_out_tag_enable(mem_way_replace) <= '1';
+                                out_valid_enable(mem_way_replace) := '1';
+                                out_tag_enable(mem_way_replace) := '1';
                                 if cache_replace_strat="plru" then
+                                    out_plru_enable := '1';
                                     cache_out_plruset <= cache_plruset_replace;
                                 end if;
                                 cache_out_validset(mem_way_replace) <= '1';
                                 cache_out_tagset(mem_way_replace) <= mem_tag_replace;
                             end if;
-                        -- Enable for block should only remain for single clock cycle.
-                        else
-                            cache_out_block_enable <= (others=>'0');
                         end if;
                         -- If memory write is needed, then write operation should always precede
                         -- the read operation.
@@ -435,14 +439,12 @@ begin
                     if not mem_write_needed and not mem_read_needed then
                         cache_state <= cache_state_run;
                     end if;
-                    -- Once the read operation finishes, ensure all enables
-                    -- are reset.
-                    if not mem_read_needed then
-                        cache_out_control_enables <= (others=>'0');
-                        cache_out_tag_enable <= (others=>'0');
-                        cache_out_block_enable <= (others=>'0');
-                    end if;
                 end case;
+                -- Set enable values.
+                cache_out_valid_enable <= out_valid_enable;
+                cache_out_plru_enable <= out_plru_enable;
+                cache_out_tag_enable <= out_tag_enable;
+                cache_out_block_enable <= out_block_enable;
             end if;
         end if;
     end process;

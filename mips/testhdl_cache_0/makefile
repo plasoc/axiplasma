@@ -2,14 +2,14 @@
 
 CP = cp
 RM = rm -rf 
-BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib/
+BIN_DIR = /opt/cross-compiler-mips/bin/
+LD_DIR = /opt/cross-compiler-mips/lib/
 PLASMA_DIR = ../plasma/
-GCC_MIPS = $(BIN_DIR)mips-none-elf-gcc $(CFLAGS)
-AS_MIPS = $(BIN_DIR)mips-none-elf-as
-LD_MIPS = $(BIN_DIR)mips-none-elf-ld $(LFLAGS)
-DUMP_MIPS = $(BIN_DIR)mips-none-elf-objdump
-CONVERT_BIN = $(BIN_DIR)mips-none-elf-objcopy -I elf32-big -O binary main.axf main.bin 
+GCC_MIPS = $(BIN_DIR)mips-gcc $(CFLAGS)
+AS_MIPS = $(BIN_DIR)mips-as
+LD_MIPS = $(BIN_DIR)mips-ld $(LFLAGS)
+DUMP_MIPS = $(BIN_DIR)mips-objdump
+CONVERT_BIN = $(BIN_DIR)mips-objcopy -I elf32-big -O binary main.axf main.bin 
 
 CFLAGS = -O3 -Wall -c -s
 CFLAGS += -fno-pic -mips1 -mno-abicalls -I$(PLASMA_DIR)
