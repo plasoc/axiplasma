@@ -13,6 +13,7 @@
    .comm InitStack, 512
 
    .text
+   .section	.text.startup
    .align 2
    .global entry
    .ent	entry

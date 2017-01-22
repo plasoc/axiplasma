@@ -1,7 +1,7 @@
 #include "plasmasoc.h"
 #define DATA_SIZE	(16)	
 unsigned data[DATA_SIZE];
-unsigned* noncacheable = (unsigned*)0x1000;
+unsigned* noncacheable = (unsigned*)L1_CACHE_NONCACHEABLE_BASE_ADDRESS;
 
 void memset(void* destination, unsigned char value, unsigned bytes)
 {

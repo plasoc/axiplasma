@@ -7,9 +7,15 @@ data                0x40              main.o
 
 Discarded input sections
 
- .reginfo       0x0000000000000000        0x0 main.o
- .reginfo       0x0000000000000000        0x0 no_os.o
- .reginfo       0x0000000000000000        0x0 plasmasoc.o
+ .reginfo       0x0000000000000000       0x18 main.o
+ .MIPS.abiflags
+                0x0000000000000000       0x18 main.o
+ .reginfo       0x0000000000000000       0x18 no_os.o
+ .MIPS.abiflags
+                0x0000000000000000       0x18 no_os.o
+ .reginfo       0x0000000000000000       0x18 plasmasoc.o
+ .MIPS.abiflags
+                0x0000000000000000       0x18 plasmasoc.o
 
 Memory Configuration
 
@@ -23,21 +29,32 @@ LOAD boot.o
 LOAD main.o
 LOAD no_os.o
 LOAD plasmasoc.o
-                0x0000000000400000                PROVIDE (__executable_start, 0x400000)
-                0x0000000000400094                . = (0x400000 + SIZEOF_HEADERS)
+                [!provide]                        PROVIDE (__executable_start, 0x400000)
+                0x0000000000400000                . = 0x400000
 
 .interp
  *(.interp)
 
-.reginfo        0x0000000000400094       0x18
+.MIPS.abiflags  0x0000000000400000       0x18
+ *(.MIPS.abiflags)
+ .MIPS.abiflags
+                0x0000000000400000       0x18 boot.o
+
+.reginfo        0x0000000000400018       0x18
  *(.reginfo)
- .reginfo       0x0000000000400094       0x18 boot.o
+ .reginfo       0x0000000000400018       0x18 boot.o
+
+.note.gnu.build-id
+ *(.note.gnu.build-id)
 
 .dynamic
  *(.dynamic)
 
 .hash
  *(.hash)
+
+.gnu.hash
+ *(.gnu.hash)
 
 .dynsym
  *(.dynsym)
@@ -79,10 +96,10 @@ LOAD plasmasoc.o
  *(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
 
 .rel.data.rel.ro
- *(.rel.data.rel.ro* .rel.gnu.linkonce.d.rel.ro.*)
+ *(.rel.data.rel.ro .rel.data.rel.ro.* .rel.gnu.linkonce.d.rel.ro.*)
 
 .rela.data.rel.ro
- *(.rela.data.rel.ro* .rela.gnu.linkonce.d.rel.ro.*)
+ *(.rela.data.rel.ro .rela.data.rel.ro.* .rela.gnu.linkonce.d.rel.ro.*)
 
 .rel.data
  *(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
@@ -120,6 +137,9 @@ LOAD plasmasoc.o
 .rela.got
  *(.rela.got)
 
+.rel.dyn
+ *(.rel.dyn)
+
 .rel.sdata
  *(.rel.sdata .rel.sdata.* .rel.gnu.linkonce.s.*)
 
@@ -150,6 +170,16 @@ LOAD plasmasoc.o
 .rela.bss
  *(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
 
+.rel.iplt       0x0000000000400018        0x0
+                [!provide]                        PROVIDE (__rel_iplt_start, .)
+ *(.rel.iplt)
+                [!provide]                        PROVIDE (__rel_iplt_end, .)
+
+.rela.iplt      0x0000000000400018        0x0
+                [!provide]                        PROVIDE (__rela_iplt_start, .)
+ *(.rela.iplt)
+                [!provide]                        PROVIDE (__rela_iplt_end, .)
+
 .rel.plt
  *(.rel.plt)
 
@@ -157,45 +187,53 @@ LOAD plasmasoc.o
  *(.rela.plt)
 
 .init
- *(.init)
+ *(SORT(.init))
 
 .plt
  *(.plt)
 
-.text           0x0000000000000000      0x660
+.iplt
+ *(.iplt)
+
+.text           0x0000000000000000      0x5f8
                 0x0000000000000000                _ftext = .
- *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x0000000000000000      0x200 boot.o
-                0x00000000000001a8                longjmp
+ *(.text.unlikely .text.*_unlikely .text.unlikely.*)
+ *(.text.exit .text.exit.*)
+ *(.text.startup .text.startup.*)
+ .text.startup  0x0000000000000000      0x200 boot.o
                 0x0000000000000000                entry
-                0x0000000000000170                setjmp
-                0x0000000000000134                OS_AsmInterruptInit
-                0x00000000000001e0                OS_AsmMult
                 0x000000000000003c                interrupt_service_routine
-                0x00000000000001f4                OS_Syscall
                 0x0000000000000128                OS_AsmInterruptEnable
- .text          0x0000000000000200      0x250 main.o
-                0x000000000000021c                memset
-                0x0000000000000258                main
- .text          0x0000000000000450      0x1a0 no_os.o
-                0x0000000000000450                putchar
-                0x0000000000000540                puts
-                0x0000000000000478                kbhit
-                0x00000000000005c0                getch
-                0x000000000000048c                OS_InterruptServiceRoutine
-                0x00000000000004b4                print_hex
- .text          0x00000000000005f0       0x70 plasmasoc.o
-                0x00000000000005f0                l1_cache_operate_on_line_range
- *(.text.*personality*)
+                0x0000000000000134                OS_AsmInterruptInit
+                0x0000000000000170                setjmp
+                0x00000000000001a8                longjmp
+                0x00000000000001e0                OS_AsmMult
+                0x00000000000001f4                OS_Syscall
+ .text.startup  0x0000000000000200      0x1c4 main.o
+                0x0000000000000200                main
+ *(.text.hot .text.hot.*)
+ *(.text .stub .text.* .gnu.linkonce.t.*)
+ .text          0x00000000000003c4        0x0 boot.o
+ .text          0x00000000000003c4       0x50 main.o
+                0x00000000000003f8                memset
+ .text          0x0000000000000414      0x170 no_os.o
+                0x0000000000000414                putchar
+                0x0000000000000438                puts
+                0x00000000000004b0                print_hex
+                0x000000000000052c                OS_InterruptServiceRoutine
+                0x0000000000000550                kbhit
+                0x0000000000000560                getch
+ .text          0x0000000000000584       0x74 plasmasoc.o
+                0x0000000000000584                l1_cache_operate_on_line_range
  *(.gnu.warning)
  *(.mips16.fn.*)
  *(.mips16.call.*)
 
 .fini
- *(.fini)
-                0x0000000000000660                PROVIDE (__etext, .)
-                0x0000000000000660                PROVIDE (_etext, .)
-                0x0000000000000660                PROVIDE (etext, .)
+ *(SORT(.fini))
+                [!provide]                        PROVIDE (__etext, .)
+                [!provide]                        PROVIDE (_etext, .)
+                [!provide]                        PROVIDE (etext, .)
 
 .rodata
  *(.rodata .rodata.* .gnu.linkonce.r.*)
@@ -211,19 +249,34 @@ LOAD plasmasoc.o
 
 .eh_frame_hdr
  *(.eh_frame_hdr)
+ *(.eh_frame_entry .eh_frame_entry.*)
 
 .eh_frame
  *(.eh_frame)
+ *(.eh_frame.*)
 
 .gcc_except_table
  *(.gcc_except_table .gcc_except_table.*)
-                0x0000000000000660                . = .
+
+.gnu_extab
+ *(.gnu_extab*)
+
+.exception_ranges
+ *(.exception_ranges .exception_ranges*)
+                0x00000000000005f8                . = .
 
 .eh_frame
  *(.eh_frame)
+ *(.eh_frame.*)
+
+.gnu_extab
+ *(.gnu_extab)
 
 .gcc_except_table
  *(.gcc_except_table .gcc_except_table.*)
+
+.exception_ranges
+ *(.exception_ranges .exception_ranges*)
 
 .tdata
  *(.tdata .tdata.* .gnu.linkonce.td.*)
@@ -232,32 +285,34 @@ LOAD plasmasoc.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x0000000000000660        0x0
-                0x0000000000000660                PROVIDE (__preinit_array_start, .)
+.preinit_array  0x00000000000005f8        0x0
+                [!provide]                        PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
-                0x0000000000000660                PROVIDE (__preinit_array_end, .)
+                [!provide]                        PROVIDE (__preinit_array_end, .)
 
-.init_array     0x0000000000000660        0x0
-                0x0000000000000660                PROVIDE (__init_array_start, .)
- *(SORT(.init_array.*))
- *(.init_array)
-                0x0000000000000660                PROVIDE (__init_array_end, .)
+.init_array     0x00000000000005f8        0x0
+                [!provide]                        PROVIDE (__init_array_start, .)
+ *(SORT(.init_array.*) SORT(.ctors.*))
+ *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
+                [!provide]                        PROVIDE (__init_array_end, .)
 
-.fini_array     0x0000000000000660        0x0
-                0x0000000000000660                PROVIDE (__fini_array_start, .)
- *(.fini_array)
- *(SORT(.fini_array.*))
-                0x0000000000000660                PROVIDE (__fini_array_end, .)
+.fini_array     0x00000000000005f8        0x0
+                [!provide]                        PROVIDE (__fini_array_start, .)
+ *(SORT(.fini_array.*) SORT(.dtors.*))
+ *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
+                [!provide]                        PROVIDE (__fini_array_end, .)
 
 .ctors
- *crtbegin*.o(.ctors)
- *(EXCLUDE_FILE(*crtend*.o) .ctors)
+ *crtbegin.o(.ctors)
+ *crtbegin?.o(.ctors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
  *(SORT(.ctors.*))
  *(.ctors)
 
 .dtors
- *crtbegin*.o(.dtors)
- *(EXCLUDE_FILE(*crtend*.o) .dtors)
+ *crtbegin.o(.dtors)
+ *crtbegin?.o(.dtors)
+ *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
  *(SORT(.dtors.*))
  *(.dtors)
 
@@ -266,62 +321,67 @@ LOAD plasmasoc.o
 
 .data.rel.ro
  *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
- *(.data.rel.ro* .gnu.linkonce.d.rel.ro.*)
+ *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
 
-.data           0x0000000000000660       0x10
-                0x0000000000000660                _fdata = .
+.data           0x00000000000005f8        0x0
+                0x00000000000005f8                _fdata = .
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x0000000000000660        0x0 boot.o
- .data          0x0000000000000660       0x10 main.o
-                0x0000000000000660                noncacheable
- .data          0x0000000000000670        0x0 no_os.o
- .data          0x0000000000000670        0x0 plasmasoc.o
- *(.gnu.linkonce.d.*personality*)
+ .data          0x00000000000005f8        0x0 boot.o
+ .data          0x00000000000005f8        0x0 main.o
+ .data          0x00000000000005f8        0x0 no_os.o
+ .data          0x00000000000005f8        0x0 plasmasoc.o
 
 .data1
  *(.data1)
-                0x0000000000000670                . = .
-                0x0000000000008660                _gp = (ALIGN (0x10) + 0x7ff0)
+
+.got.plt
+ *(.got.plt)
+                0x00000000000005f8                . = .
+                0x00000000000005f8                . = .
+                0x00000000000085f0                _gp = (ALIGN (0x10) + 0x7ff0)
 
 .got
- *(.got.plt)
  *(.got)
 
-.sdata
+.sdata          0x00000000000005f8        0x4
  *(.sdata .sdata.* .gnu.linkonce.s.*)
+ .sdata         0x00000000000005f8        0x4 main.o
+                0x00000000000005f8                noncacheable
 
 .lit8
  *(.lit8)
 
 .lit4
  *(.lit4)
-                0x0000000000000670                _edata = .
-                0x0000000000000670                PROVIDE (edata, .)
-                0x0000000000000670                __bss_start = .
-                0x0000000000000670                _fbss = .
+                0x00000000000005fc                _edata = .
+                [!provide]                        PROVIDE (edata, .)
+                0x00000000000005fc                . = .
+                0x00000000000005fc                __bss_start = .
+                0x00000000000005fc                _fbss = .
 
 .sbss
  *(.dynsbss)
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
  *(.scommon)
 
-.bss            0x0000000000000670      0x240
+.bss            0x0000000000000600      0x240
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x0000000000000670        0x0 boot.o
- .bss           0x0000000000000670        0x0 main.o
- .bss           0x0000000000000670        0x0 no_os.o
- .bss           0x0000000000000670        0x0 plasmasoc.o
+ .bss           0x0000000000000600        0x0 boot.o
+ .bss           0x0000000000000600        0x0 main.o
+ .bss           0x0000000000000600        0x0 no_os.o
+ .bss           0x0000000000000600        0x0 plasmasoc.o
  *(COMMON)
- COMMON         0x0000000000000670      0x200 boot.o
-                0x0000000000000670                InitStack
- COMMON         0x0000000000000870       0x40 main.o
-                0x0000000000000870                data
-                0x00000000000008b0                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x00000000000008b0                . = ALIGN (0x4)
-                0x00000000000008b0                . = ALIGN (0x4)
-                0x00000000000008b0                _end = .
-                0x00000000000008b0                PROVIDE (end, .)
+ COMMON         0x0000000000000600      0x200 boot.o
+                0x0000000000000600                InitStack
+ COMMON         0x0000000000000800       0x40 main.o
+                0x0000000000000800                data
+                0x0000000000000840                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x0000000000000840                . = ALIGN (0x4)
+                0x0000000000000840                . = SEGMENT_START ("ldata-segment", .)
+                0x0000000000000840                . = ALIGN (0x4)
+                0x0000000000000840                _end = .
+                [!provide]                        PROVIDE (end, .)
 
 .stab
  *(.stab)
@@ -341,11 +401,18 @@ LOAD plasmasoc.o
 .stab.indexstr
  *(.stab.indexstr)
 
-.comment        0x0000000000000000       0x36
+.comment        0x0000000000000000       0x11
  *(.comment)
- .comment       0x0000000000000000       0x12 main.o
- .comment       0x0000000000000012       0x12 no_os.o
- .comment       0x0000000000000024       0x12 plasmasoc.o
+ .comment       0x0000000000000000       0x11 main.o
+                                         0x12 (size before relaxing)
+ .comment       0x0000000000000011       0x12 no_os.o
+ .comment       0x0000000000000011       0x12 plasmasoc.o
+
+.pdr            0x0000000000000000      0x260
+ .pdr           0x0000000000000000      0x100 boot.o
+ .pdr           0x0000000000000100       0x80 main.o
+ .pdr           0x0000000000000180       0xc0 no_os.o
+ .pdr           0x0000000000000240       0x20 plasmasoc.o
 
 .debug
  *(.debug)
@@ -372,7 +439,7 @@ LOAD plasmasoc.o
  *(.debug_abbrev)
 
 .debug_line
- *(.debug_line)
+ *(.debug_line .debug_line.* .debug_line_end)
 
 .debug_frame
  *(.debug_frame)
@@ -398,6 +465,27 @@ LOAD plasmasoc.o
 .debug_varnames
  *(.debug_varnames)
 
+.debug_pubtypes
+ *(.debug_pubtypes)
+
+.debug_ranges
+ *(.debug_ranges)
+
+.debug_macro
+ *(.debug_macro)
+
+.gnu.attributes
+                0x0000000000000000       0x10
+ *(.gnu.attributes)
+ .gnu.attributes
+                0x0000000000000000       0x10 boot.o
+ .gnu.attributes
+                0x0000000000000010       0x10 main.o
+ .gnu.attributes
+                0x0000000000000020       0x10 no_os.o
+ .gnu.attributes
+                0x0000000000000030       0x10 plasmasoc.o
+
 .gptab.sdata
  *(.gptab.data)
  *(.gptab.sdata)
@@ -406,11 +494,11 @@ LOAD plasmasoc.o
  *(.gptab.bss)
  *(.gptab.sbss)
 
-.mdebug.abi32   0x0000000000000036        0x0
+.mdebug.abi32   0x0000000000000000        0x0
  *(.mdebug.abi32)
- .mdebug.abi32  0x0000000000000036        0x0 main.o
- .mdebug.abi32  0x0000000000000036        0x0 no_os.o
- .mdebug.abi32  0x0000000000000036        0x0 plasmasoc.o
+ .mdebug.abi32  0x0000000000000000        0x0 main.o
+ .mdebug.abi32  0x0000000000000000        0x0 no_os.o
+ .mdebug.abi32  0x0000000000000000        0x0 plasmasoc.o
 
 .mdebug.abiN32
  *(.mdebug.abiN32)
@@ -435,10 +523,6 @@ LOAD plasmasoc.o
 
 /DISCARD/
  *(.note.GNU-stack)
-OUTPUT(main.axf elf32-tradbigmips)
-
-.pdr            0x0000000000000000      0x260
- .pdr           0x0000000000000000      0x100 boot.o
- .pdr           0x0000000000000100       0x80 main.o
- .pdr           0x0000000000000180       0xc0 no_os.o
- .pdr           0x0000000000000240       0x20 plasmasoc.o
+ *(.gnu_debuglink)
+ *(.gnu.lto_*)
+OUTPUT(main.axf elf32-bigmips)
