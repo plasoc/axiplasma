@@ -29,8 +29,8 @@ entity memplasma is
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
-        -- cpu addresses
-        cache_base_address : std_logic_vector := X"10000000" );
+        cache_base_address : std_logic_vector := X"10000000";
+        cache_enable : boolean := True );
     port(
         -- global signals
         aclk : in std_logic;
@@ -137,7 +137,8 @@ begin
             mem_out_enable => mem_out_enable,
             mem_out_valid => mem_out_valid,
             mem_out_ready => mem_out_ready);
-            
+        
+    -- Cache buffer instantiation.
     l1_cache_buff_inst : 
     l1_cache_buff 
         generic map (

@@ -66,9 +66,11 @@ architecture Behavioral of l1_cache_cntrl is
     function cache_plru_width return integer is
     	variable result : integer := 0;
     begin
-        for each_way in 0 to 2**cache_way_width-1 loop
-            result := result+each_way;
-        end loop; 
+        if cache_way_width/=0 then
+            for each_way in 1 to 2**cache_way_width/2 loop
+                result := result+each_way;
+            end loop; 
+        end if;
         return result;
     end; 
     function is_cacheable( address : in std_logic_vector ) return boolean is
@@ -262,24 +264,22 @@ begin
         end process;
         -- Pseudo Least Recently Used Implementation.
         process (cache_in_plruset)
-            subtype int_type is integer range 0 to 2**(cache_way_width+1);
+            subtype int_type is integer range 0 to cache_plru_width;
             variable plruset : cache_plruset_type;
             variable this_bit : int_type;
             variable left_bit : int_type;
             variable right_bit : int_type;
-            variable next_row_bit : int_type;
             variable row_width : int_type;
+            variable replace_bit : int_type;
         begin
-            if cache_offset_width/=0 then
+            if cache_way_width/=0 then
                 plruset := cache_in_plruset;
                 this_bit := 0;
                 row_width := 0;
-                next_row_bit := 0;
-                for each_row in 0 to 2**cache_way_width-2 loop
+                for each_row in 1 to 2**cache_way_width/2-1 loop
                     row_width := row_width+1;
-                    next_row_bit := next_row_bit+row_width;
-                    left_bit := next_row_bit+this_bit;
-                    right_bit := next_row_bit+this_bit+1;
+                    left_bit := row_width+this_bit;
+                    right_bit := left_bit+1;
                     if plruset(this_bit)='0' then
                         plruset(this_bit) := '1';
                         this_bit := left_bit;
@@ -288,7 +288,17 @@ begin
                         this_bit := right_bit;
                     end if;
                 end loop;
-                cache_way_replace <= this_bit-(2**cache_way_width-1);
+                replace_bit := this_bit-row_width;
+                left_bit := replace_bit*2;
+                right_bit := left_bit+1;
+                if plruset(this_bit)='0' then
+                    plruset(this_bit) := '1';
+                    this_bit := left_bit;
+                else
+                    plruset(this_bit) := '0';
+                    this_bit := right_bit;
+                end if;
+                cache_way_replace <= this_bit;
                 cache_plruset_replace <= plruset;
             else
                 cache_way_replace <= 0;
@@ -479,27 +489,33 @@ begin
                     if mem_read_needed then
                         -- Perform read operation on handshake.
                         if mem_in_valid='1' and mem_in_ready_buff='1' then
+                            -- If the memory access was cacheable, store the data in cache.
                             if not cache_noncacheable then
                                 -- Set the corresponding control information.
                                 cache_out_address <= cache_index;
                                 out_block_enable(mem_way_replace*2**cache_word_offset_width+mem_read_counter) := '1';
                                 -- Store the newly acquired word.
                                 cache_out_blockset(mem_way_replace)(mem_read_counter) <= mem_in_data;
+                            -- If a nonecacheable memory access was performed, write directly to CPU.
                             else
                                 cpu_out_data <= mem_in_data;
                             end if;
                             -- On completion, shut down read operation.
                             if mem_read_counter=2**cache_word_offset_width-1 then
                                 mem_read_needed <= False;
-                                -- Set tag and valid flag.
-                                out_valid_enable(mem_way_replace) := '1';
-                                out_tag_enable(mem_way_replace) := '1';
-                                if cache_replace_strat="plru" then
-                                    out_plru_enable := '1';
-                                    cache_out_plruset <= cache_plruset_replace;
+                                -- If the memory access was cacheable, store the control information.
+                                if not cache_noncacheable then
+                                    -- Set tag and valid flag.
+                                    out_valid_enable(mem_way_replace) := '1';
+                                    out_tag_enable(mem_way_replace) := '1';
+                                    if cache_replace_strat="plru" then
+                                        out_plru_enable := '1';
+                                        cache_out_plruset <= cache_plruset_replace;
+                                    end if;
+                                    cache_out_validset(mem_way_replace) <= '1';
+                                    cache_out_tagset(mem_way_replace) <= mem_tag_replace;
                                 end if;
-                                cache_out_validset(mem_way_replace) <= '1';
-                                cache_out_tagset(mem_way_replace) <= mem_tag_replace;
+                            -- Continue to increment counter until completion.
                             else
                                 mem_read_counter <= mem_read_counter+1;
                             end if;
