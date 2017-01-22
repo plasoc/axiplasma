@@ -419,7 +419,7 @@ Disassembly of section .reginfo:
 Disassembly of section .data:
 
 00000660 <.data>:
- 660:	00000800 	sll	at,zero,0x0
+ 660:	00001000 	sll	v0,zero,0x0
 	...
 Disassembly of section .bss:
 

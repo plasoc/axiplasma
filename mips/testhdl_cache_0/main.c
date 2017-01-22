@@ -1,7 +1,7 @@
 #include "plasmasoc.h"
 #define DATA_SIZE	(16)	
 unsigned data[DATA_SIZE];
-unsigned* noncacheable = (unsigned*)0x800;
+unsigned* noncacheable = (unsigned*)0x1000;
 
 void memset(void* destination, unsigned char value, unsigned bytes)
 {
@@ -16,7 +16,7 @@ int main()
 {
 	int each_word;
 
-	/* Store some arbitraty data directly into memory.*/
+	/* Store some arbitraty data directly into memory. This will force a read first from memory. */
 	for (each_word=0; each_word<DATA_SIZE; each_word++)
 		noncacheable[each_word] += each_word*2;
 

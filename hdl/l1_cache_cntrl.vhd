@@ -355,6 +355,7 @@ begin
                                 mem_way_replace <= cache_way;
                                 mem_write_needed <= True;
                                 mem_write_counter <= 1;
+                                mem_out_strobe <= (others=>'1');
                                 mem_out_data <= cache_in_blockset(cache_way)(0);
                                 mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
                                 mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
@@ -461,10 +462,10 @@ begin
                     if mem_write_needed then
                         -- Point to next word on successful handshake.
                         if mem_out_valid_buff='1' and mem_out_ready='1' then 
-                            if not cache_noncacheable then
-                                mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
-                            end if;
-                            if mem_write_counter/=2**cache_word_offset_width-1 then
+                            if mem_write_counter/=2**cache_word_offset_width then
+                                if not cache_noncacheable then
+                                    mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
+                                end if;
                                 mem_write_counter <= mem_write_counter+1;
                             else
                                 mem_write_needed <= False;
@@ -503,14 +504,6 @@ begin
                                 mem_read_counter <= mem_read_counter+1;
                             end if;
                         end if;
---                        -- If memory write is needed, then write operation should always precede
---                        -- the read operation.
---                        if (not mem_write_needed or mem_write_counter/=mem_read_counter)  
---                                and mem_read_counter/=2**cache_word_offset_width-1 then
---                            mem_in_ready_buff <= '1';
---                        else
---                            mem_in_ready_buff <= '0';
---                        end if;
                         -- The ready signal should be set to low once the read operation is finished.
                         if mem_in_valid='1' and mem_in_ready_buff='1' and mem_read_counter=2**cache_word_offset_width-1 then
                             mem_in_ready_buff <= '0';

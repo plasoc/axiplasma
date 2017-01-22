@@ -24,7 +24,7 @@ entity memplasma is
         cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
         cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
         -- cache constants
-        cache_address_width : integer := 11;
+        cache_address_width : integer := 12;
         cache_way_width : integer := 1; 
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;

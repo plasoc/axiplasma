@@ -215,7 +215,7 @@ $L13:
 	.type	noncacheable, @object
 	.size	noncacheable, 4
 noncacheable:
-	.word	2048
+	.word	4096
 
 	.comm	data,64,4
 	.ident	"GCC: (GNU) 4.1.2"
