@@ -26,6 +26,7 @@ entity testbench_0 is
         cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
         cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
         cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
+        cache_address_width : integer := 12;
         cache_way_width : integer := 1; 
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
@@ -51,6 +52,7 @@ architecture Behavioral of testbench_0 is
     signal mem_in_ready : std_logic;
     signal mem_out_address : word_type;
     signal mem_out_data : word_type;
+    signal mem_out_strobe : std_logic_vector(3 downto 0);
     signal mem_out_enable : std_logic;
     signal mem_out_valid : std_logic;
     signal mem_out_ready : std_logic := '0';
@@ -95,6 +97,7 @@ begin
             cpu_mult_type => cpu_mult_type,
             cpu_shifter_type => cpu_shifter_type,
             cpu_alu_type => cpu_alu_type,
+            cache_address_width => cache_address_width,
             cache_way_width => cache_way_width,
             cache_index_width => cache_index_width,
             cache_offset_width => cache_offset_width,
@@ -110,6 +113,7 @@ begin
             mem_in_ready => mem_in_ready,
             mem_out_address => mem_out_address,
             mem_out_data => mem_out_data,
+            mem_out_strobe => mem_out_strobe,
             mem_out_enable => mem_out_enable,
             mem_out_valid => mem_out_valid,
             mem_out_ready => mem_out_ready,
@@ -182,7 +186,12 @@ begin
             if mem_out_enable='1' then
                 if base_loaded then
                     if mem_out_valid='1' and mem_out_ready='1' then
-                        ram_buffer(base_index+counter) <= mem_out_data;
+                        for each_byte in 0 to cpu_width/8-1 loop
+                            if mem_out_strobe(each_byte)='1' then
+                                ram_buffer(base_index+counter)(7+each_byte*8 downto each_byte*8) <= 
+                                    mem_out_data(7+each_byte*8 downto each_byte*8);
+                            end if;
+                        end loop;
                         counter := counter+1;
                     end if;
                     mem_out_ready <= '1';

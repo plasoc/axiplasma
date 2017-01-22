@@ -26,12 +26,13 @@ package mlitesoc_pack is
             cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
             cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
             -- cache constants
+            cache_address_width : integer := 11;
             cache_way_width : integer := 1; 
             cache_index_width : integer := 4;
             cache_offset_width : integer := 5;
             cache_replace_strat : string := "plru";
             -- cpu addresses
-            cache_base_address : std_logic_vector := X"10000000");
+            cache_base_address : std_logic_vector := X"10000000" );
         port(
             -- global signals
             aclk : in std_logic;
@@ -44,6 +45,7 @@ package mlitesoc_pack is
             mem_in_ready : out std_logic;
             mem_out_address : out std_logic_vector(31 downto 0);
             mem_out_data : out std_logic_vector(31 downto 0);
+            mem_out_strobe : out std_logic_vector(3 downto 0);
             mem_out_enable : out std_logic;
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic;
@@ -53,54 +55,47 @@ package mlitesoc_pack is
             debug_cpu_pause : out std_logic );
     end component;
 
-    component l1_cache_cntrl is
+   component l1_cache_cntrl is
         generic (
-            -- global constants
-            glb_address_width : integer := 16;
-            glb_data_width : integer := 32;
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
             -- cache constants
+            cache_address_width : integer := 10;
             cache_way_width : integer := 1; 
             cache_index_width : integer := 4;
             cache_offset_width : integer := 4;
             cache_replace_strat : string := "plru";
-            cache_base_address : std_logic_vector := X"0000" );
+            cache_base_address : std_logic_vector := X"0000" ); 
         port ( 
             -- global interface.
             clock : in std_logic; 
             resetn : in std_logic;
             -- cpu interface.
-            cpu_address : in std_logic_vector(glb_address_width-1 downto 0); 
-            cpu_in_data : in std_logic_vector(glb_data_width-1 downto 0);
-            cpu_out_data : out std_logic_vector(glb_data_width-1 downto 0) := (others=>'0');
-            cpu_strobe : in std_logic_vector(glb_data_width/8-1 downto 0);
+            cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
+            cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             cpu_pause : out std_logic;
             -- cache interface.
             cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
-            cache_out_data : out std_logic_vector(
-                ((glb_address_width-cache_index_width-cache_offset_width)+
-                8*2**cache_offset_width)
-                *2**cache_way_width
-                -1 downto 0);
+            cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
-            cache_out_block_enable : out std_logic_vector(
-                2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
+            cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0);
             cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);
-            cache_in_data : in std_logic_vector(
-                ((glb_address_width-cache_index_width-cache_offset_width)+
-                8*2**cache_offset_width)
-                *2**cache_way_width
-                -1 downto 0);
+            cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             -- simple mem interface
-            mem_in_address : out std_logic_vector(glb_address_width-1 downto 0) := (others=>'0');
-            mem_in_data : in std_logic_vector(glb_data_width-1 downto 0);
+            mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             mem_in_enable : out std_logic;
             mem_in_valid : in std_logic;
             mem_in_ready : out std_logic;
-            mem_out_address : out std_logic_vector(glb_address_width-1 downto 0) := (others=>'0');
-            mem_out_data : out std_logic_vector(glb_data_width-1 downto 0) := (others=>'0');
+            mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0);
             mem_out_enable : out std_logic;
             mem_out_valid : out std_logic;
-            mem_out_ready : in std_logic);
+            mem_out_ready : in std_logic); 
     end component;
     
     component l1_cache_buff is

@@ -1,12 +1,24 @@
-#include <stdint.h>
-#include <string.h>
 #include "plasmasoc.h"
 #define DATA_SIZE	(16)	
-volatile unsigned data[DATA_SIZE];
+unsigned data[DATA_SIZE];
+unsigned* noncacheable = (unsigned*)L1_CACHE_NONCACHEABLE_BASE_ADDRESS;
+
+void memset(void* destination, unsigned char value, unsigned bytes)
+{
+	/* Very slow way of writing a memset function. */
+	unsigned char* cur = (unsigned char*)destination;
+	unsigned char* end = cur+bytes;
+	for (; cur!=end; cur++)
+		*cur = value;
+}
 
 int main()
 {
 	int each_word;
+
+	/* Store some arbitraty data directly into memory. This will force a read first from memory. */
+	for (each_word=0; each_word<DATA_SIZE; each_word++)
+		noncacheable[each_word] += each_word*2;
 
 	/* Store some arbitrary data into cache. */
 	for (each_word=0; each_word<DATA_SIZE; each_word++)
@@ -25,3 +37,5 @@ int main()
 	l1_cache_flush_range((unsigned)data,sizeof(data));
 	return 0;
 }
+
+
