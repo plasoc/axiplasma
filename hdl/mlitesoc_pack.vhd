@@ -16,6 +16,17 @@ use ieee.numeric_std.all;
 
 package mlitesoc_pack is
 
+    constant default_cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
+    constant default_cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
+    constant default_cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
+    constant default_cache_address_width : integer := 12;
+    constant default_cache_way_width : integer := 2; 
+    constant default_cache_index_width : integer := 4;
+    constant default_cache_offset_width : integer := 5;
+    constant default_cache_replace_strat : string := "plru";
+    constant default_cache_base_address : std_logic_vector := X"10000000";
+    constant default_cache_enable : boolean := True;
+
     function clogb2(bit_depth : in integer ) return integer;
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
 
@@ -27,7 +38,7 @@ package mlitesoc_pack is
             cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
             -- cache constants
             cache_address_width : integer := 11;
-            cache_way_width : integer := 1; 
+            cache_way_width : integer := 2; 
             cache_index_width : integer := 4;
             cache_offset_width : integer := 5;
             cache_replace_strat : string := "plru";
