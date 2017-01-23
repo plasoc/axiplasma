@@ -30,7 +30,7 @@ entity memplasma is
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
         cache_base_address : std_logic_vector := X"10000000";
-        cache_enable : boolean := True );
+        cache_enable : boolean := False );
     port(
         -- global signals
         aclk : in std_logic;
@@ -78,7 +78,6 @@ architecture Behavioral of memplasma is
 begin
     cpu_address_next(1 downto 0) <= "00";
     debug_cpu_pause <= cpu_pause;
-    
     -- CPU instantiation.
     mlite_cpu_inst:  
     mlite_cpu 
@@ -99,20 +98,74 @@ begin
             data_w => cpu_write_data,
             data_r => cpu_read_data,
             mem_pause => cpu_pause );
-            
-    -- Cache controller instantiation.
-    l1_cache_cntrl_inst: 
-    l1_cache_cntrl 
+    -- If cache is enabled, instantiate controller and buffer.
+    gen_cache :
+    if cache_enable=True generate
+        -- Cache controller instantiation.
+        l1_cache_cntrl_inst: 
+        l1_cache_cntrl 
+            generic map (
+                cpu_address_width => cpu_width,
+                cpu_data_width => cpu_width,
+                cache_address_width => cache_address_width,
+                cache_way_width => cache_way_width, 
+                cache_index_width => cache_index_width,
+                cache_offset_width => cache_offset_width,
+                cache_replace_strat => cache_replace_strat,
+                cache_base_address => cache_base_address)
+             port map ( 
+                clock => aclk,
+                resetn => aresetn,
+                cpu_address => cpu_address_next,
+                cpu_in_data => cpu_write_data,
+                cpu_out_data => cpu_read_data,
+                cpu_strobe => cpu_strobe_next,
+                cpu_pause => cpu_pause,
+                cache_out_address => cache_write_index,
+                cache_out_data => cache_write_data,
+                cache_out_tag_enable => cache_write_tag_enable,
+                cache_out_block_enable => cache_write_block_enable,
+                cache_in_address => cache_read_index,
+                cache_in_data => cache_read_data,
+                mem_in_address => mem_in_address,
+                mem_in_data => mem_in_data,
+                mem_in_enable => mem_in_enable,
+                mem_in_valid => mem_in_valid,
+                mem_in_ready => mem_in_ready,
+                mem_out_address => mem_out_address,
+                mem_out_data => mem_out_data,
+                mem_out_strobe => mem_out_strobe,
+                mem_out_enable => mem_out_enable,
+                mem_out_valid => mem_out_valid,
+                mem_out_ready => mem_out_ready);
+        -- Cache buffer instantiation.
+        l1_cache_buff_inst : 
+        l1_cache_buff 
+            generic map (
+                glb_data_width => cpu_width,
+                cache_tag_width => cache_tag_width,
+                cache_index_width => cache_index_width,
+                cache_offset_width => cache_offset_width,
+                cache_way_width => cache_way_width )
+            port map (
+                clock => aclk,
+                cache_in_data => cache_write_data,
+                cache_in_index => cache_write_index,
+                cache_in_tag_enable => cache_write_tag_enable,
+                cache_in_offset_enable => cache_write_block_enable,
+                cache_out_data => cache_read_data,
+                cache_out_index => cache_read_index);
+    end generate;
+    -- If cache is disabled, instantiate memory controller.
+    gen_no_cache :
+    if cache_enable=False generate
+        -- Memory controller instantiation.
+        mem_cntrl_inst :
+        mem_cntrl 
         generic map (
             cpu_address_width => cpu_width,
-            cpu_data_width => cpu_width,
-            cache_address_width => cache_address_width,
-            cache_way_width => cache_way_width, 
-            cache_index_width => cache_index_width,
-            cache_offset_width => cache_offset_width,
-            cache_replace_strat => cache_replace_strat,
-            cache_base_address => cache_base_address)
-         port map ( 
+            cpu_data_width => cpu_width )
+        port map (
             clock => aclk,
             resetn => aresetn,
             cpu_address => cpu_address_next,
@@ -120,12 +173,6 @@ begin
             cpu_out_data => cpu_read_data,
             cpu_strobe => cpu_strobe_next,
             cpu_pause => cpu_pause,
-            cache_out_address => cache_write_index,
-            cache_out_data => cache_write_data,
-            cache_out_tag_enable => cache_write_tag_enable,
-            cache_out_block_enable => cache_write_block_enable,
-            cache_in_address => cache_read_index,
-            cache_in_data => cache_read_data,
             mem_in_address => mem_in_address,
             mem_in_data => mem_in_data,
             mem_in_enable => mem_in_enable,
@@ -137,23 +184,14 @@ begin
             mem_out_enable => mem_out_enable,
             mem_out_valid => mem_out_valid,
             mem_out_ready => mem_out_ready);
-        
-    -- Cache buffer instantiation.
-    l1_cache_buff_inst : 
-    l1_cache_buff 
-        generic map (
-            glb_data_width => cpu_width,
-            cache_tag_width => cache_tag_width,
-            cache_index_width => cache_index_width,
-            cache_offset_width => cache_offset_width,
-            cache_way_width => cache_way_width )
-        port map (
-            clock => aclk,
-            cache_in_data => cache_write_data,
-            cache_in_index => cache_write_index,
-            cache_in_tag_enable => cache_write_tag_enable,
-            cache_in_offset_enable => cache_write_block_enable,
-            cache_out_data => cache_read_data,
-            cache_out_index => cache_read_index);
+    end generate;
 
 end Behavioral;
+
+
+
+
+
+
+
+

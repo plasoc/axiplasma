@@ -31,8 +31,8 @@ package mlitesoc_pack is
             cache_index_width : integer := 4;
             cache_offset_width : integer := 5;
             cache_replace_strat : string := "plru";
-            -- cpu addresses
-            cache_base_address : std_logic_vector := X"10000000" );
+            cache_base_address : std_logic_vector := X"10000000";
+            cache_enable : boolean := True  );
         port(
             -- global signals
             aclk : in std_logic;
@@ -117,6 +117,35 @@ package mlitesoc_pack is
             cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
             cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
+    end component;
+    
+    component mem_cntrl is
+        generic (
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32);
+        port (
+            -- global interface.
+            clock : in std_logic; 
+            resetn : in std_logic;
+            -- cpu interface.
+            cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
+            cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            cpu_pause : out std_logic;
+            -- simple mem interface
+            mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            mem_in_enable : out std_logic;
+            mem_in_valid : in std_logic;
+            mem_in_ready : out std_logic;
+            mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
+            mem_out_enable : out std_logic := '0';
+            mem_out_valid : out std_logic;
+            mem_out_ready : in std_logic);
     end component;
 
 end; --package body
