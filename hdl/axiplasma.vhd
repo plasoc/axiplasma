@@ -17,7 +17,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
-entity memplasma is
+entity axiplasma is
     generic(
         -- cpu constants
         cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
@@ -51,9 +51,9 @@ entity memplasma is
         intr_in      : in std_logic;
         -- debug signals.
         debug_cpu_pause : out std_logic );
-end memplasma;
+end axiplasma;
 
-architecture Behavioral of memplasma is
+architecture Behavioral of axiplasma is
     constant cpu_width : integer := 32;
     constant cpu_memory_type     : string  := "DUAL_PORT_"; 
     constant cpu_pipeline_stages : natural := 3; 
@@ -189,11 +189,3 @@ begin
     end generate;
 
 end Behavioral;
-
-
-
-
-
-
-
-

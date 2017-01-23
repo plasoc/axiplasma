@@ -78,6 +78,7 @@ package mlitesoc_pack is
             cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             cpu_pause : out std_logic;
             -- cache interface.
+            cache_cacheable : out std_logic;
             cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
             cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
@@ -134,6 +135,8 @@ package mlitesoc_pack is
             cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
             cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             cpu_pause : out std_logic;
+            -- "cache" interface.
+            cache_cacheable : out std_logic;
             -- simple mem interface
             mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);

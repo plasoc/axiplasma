@@ -20,6 +20,8 @@ entity mem_cntrl is
         cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
         cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
         cpu_pause : out std_logic;
+        -- "cache" interface.
+        cache_cacheable : out std_logic;
         -- simple mem interface
         mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
@@ -44,6 +46,7 @@ architecture Behavioral of mem_cntrl is
     signal mem_out_valid_buff : std_logic := '0';
 begin
 
+    cache_cacheable <= '0';
     cpu_pause <= '1' when cpu_pause_enable else '0';
     cpu_write_access <= True when or_reduce(cpu_strobe)/='0' else False;
     mem_in_ready <= mem_in_ready_buff;
