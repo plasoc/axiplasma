@@ -195,7 +195,7 @@ LOAD plasmasoc.o
 .iplt
  *(.iplt)
 
-.text           0x0000000000000000      0x5f8
+.text           0x0000000000000000      0x434
                 0x0000000000000000                _ftext = .
  *(.text.unlikely .text.*_unlikely .text.unlikely.*)
  *(.text.exit .text.exit.*)
@@ -209,22 +209,22 @@ LOAD plasmasoc.o
                 0x00000000000001a8                longjmp
                 0x00000000000001e0                OS_AsmMult
                 0x00000000000001f4                OS_Syscall
- .text.startup  0x0000000000000200      0x1c4 main.o
+ .text.startup  0x0000000000000200       0xb0 main.o
                 0x0000000000000200                main
  *(.text.hot .text.hot.*)
  *(.text .stub .text.* .gnu.linkonce.t.*)
- .text          0x00000000000003c4        0x0 boot.o
- .text          0x00000000000003c4       0x50 main.o
-                0x00000000000003f8                memset
- .text          0x0000000000000414      0x170 no_os.o
-                0x0000000000000414                putchar
-                0x0000000000000438                puts
-                0x00000000000004b0                print_hex
-                0x000000000000052c                OS_InterruptServiceRoutine
-                0x0000000000000550                kbhit
-                0x0000000000000560                getch
- .text          0x0000000000000584       0x74 plasmasoc.o
-                0x0000000000000584                l1_cache_operate_on_line_range
+ .text          0x00000000000002b0        0x0 boot.o
+ .text          0x00000000000002b0       0x20 main.o
+                0x00000000000002b0                memset
+ .text          0x00000000000002d0      0x114 no_os.o
+                0x00000000000002d0                putchar
+                0x00000000000002f4                puts
+                0x0000000000000354                print_hex
+                0x00000000000003a8                OS_InterruptServiceRoutine
+                0x00000000000003b0                kbhit
+                0x00000000000003c0                getch
+ .text          0x00000000000003e4       0x50 plasmasoc.o
+                0x00000000000003e4                l1_cache_operate_on_line_range
  *(.gnu.warning)
  *(.mips16.fn.*)
  *(.mips16.call.*)
@@ -263,7 +263,7 @@ LOAD plasmasoc.o
 
 .exception_ranges
  *(.exception_ranges .exception_ranges*)
-                0x00000000000005f8                . = .
+                0x0000000000000434                . = .
 
 .eh_frame
  *(.eh_frame)
@@ -285,18 +285,18 @@ LOAD plasmasoc.o
  *(.tbss .tbss.* .gnu.linkonce.tb.*)
  *(.tcommon)
 
-.preinit_array  0x00000000000005f8        0x0
+.preinit_array  0x0000000000000434        0x0
                 [!provide]                        PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
                 [!provide]                        PROVIDE (__preinit_array_end, .)
 
-.init_array     0x00000000000005f8        0x0
+.init_array     0x0000000000000434        0x0
                 [!provide]                        PROVIDE (__init_array_start, .)
  *(SORT(.init_array.*) SORT(.ctors.*))
  *(.init_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .ctors)
                 [!provide]                        PROVIDE (__init_array_end, .)
 
-.fini_array     0x00000000000005f8        0x0
+.fini_array     0x0000000000000434        0x0
                 [!provide]                        PROVIDE (__fini_array_start, .)
  *(SORT(.fini_array.*) SORT(.dtors.*))
  *(.fini_array EXCLUDE_FILE(*crtend?.o *crtend.o *crtbegin?.o *crtbegin.o) .dtors)
@@ -323,64 +323,64 @@ LOAD plasmasoc.o
  *(.data.rel.ro.local* .gnu.linkonce.d.rel.ro.local.*)
  *(.data.rel.ro .data.rel.ro.* .gnu.linkonce.d.rel.ro.*)
 
-.data           0x00000000000005f8        0x0
-                0x00000000000005f8                _fdata = .
+.data           0x0000000000000434        0x0
+                0x0000000000000434                _fdata = .
  *(.data .data.* .gnu.linkonce.d.*)
- .data          0x00000000000005f8        0x0 boot.o
- .data          0x00000000000005f8        0x0 main.o
- .data          0x00000000000005f8        0x0 no_os.o
- .data          0x00000000000005f8        0x0 plasmasoc.o
+ .data          0x0000000000000434        0x0 boot.o
+ .data          0x0000000000000434        0x0 main.o
+ .data          0x0000000000000434        0x0 no_os.o
+ .data          0x0000000000000434        0x0 plasmasoc.o
 
 .data1
  *(.data1)
 
 .got.plt
  *(.got.plt)
-                0x00000000000005f8                . = .
-                0x00000000000005f8                . = .
-                0x00000000000085f0                _gp = (ALIGN (0x10) + 0x7ff0)
+                0x0000000000000434                . = .
+                0x0000000000000434                . = .
+                0x0000000000008430                _gp = (ALIGN (0x10) + 0x7ff0)
 
 .got
  *(.got)
 
-.sdata          0x00000000000005f8        0x4
+.sdata          0x0000000000000434        0x4
  *(.sdata .sdata.* .gnu.linkonce.s.*)
- .sdata         0x00000000000005f8        0x4 main.o
-                0x00000000000005f8                noncacheable
+ .sdata         0x0000000000000434        0x4 main.o
+                0x0000000000000434                noncacheable
 
 .lit8
  *(.lit8)
 
 .lit4
  *(.lit4)
-                0x00000000000005fc                _edata = .
+                0x0000000000000438                _edata = .
                 [!provide]                        PROVIDE (edata, .)
-                0x00000000000005fc                . = .
-                0x00000000000005fc                __bss_start = .
-                0x00000000000005fc                _fbss = .
+                0x0000000000000438                . = .
+                0x0000000000000438                __bss_start = .
+                0x0000000000000438                _fbss = .
 
 .sbss
  *(.dynsbss)
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
  *(.scommon)
 
-.bss            0x0000000000000600      0x240
+.bss            0x0000000000000440      0x240
  *(.dynbss)
  *(.bss .bss.* .gnu.linkonce.b.*)
- .bss           0x0000000000000600        0x0 boot.o
- .bss           0x0000000000000600        0x0 main.o
- .bss           0x0000000000000600        0x0 no_os.o
- .bss           0x0000000000000600        0x0 plasmasoc.o
+ .bss           0x0000000000000440        0x0 boot.o
+ .bss           0x0000000000000440        0x0 main.o
+ .bss           0x0000000000000440        0x0 no_os.o
+ .bss           0x0000000000000440        0x0 plasmasoc.o
  *(COMMON)
- COMMON         0x0000000000000600      0x200 boot.o
-                0x0000000000000600                InitStack
- COMMON         0x0000000000000800       0x40 main.o
-                0x0000000000000800                data
-                0x0000000000000840                . = ALIGN ((. != 0x0)?0x4:0x1)
-                0x0000000000000840                . = ALIGN (0x4)
-                0x0000000000000840                . = SEGMENT_START ("ldata-segment", .)
-                0x0000000000000840                . = ALIGN (0x4)
-                0x0000000000000840                _end = .
+ COMMON         0x0000000000000440      0x200 boot.o
+                0x0000000000000440                InitStack
+ COMMON         0x0000000000000640       0x40 main.o
+                0x0000000000000640                data
+                0x0000000000000680                . = ALIGN ((. != 0x0)?0x4:0x1)
+                0x0000000000000680                . = ALIGN (0x4)
+                0x0000000000000680                . = SEGMENT_START ("ldata-segment", .)
+                0x0000000000000680                . = ALIGN (0x4)
+                0x0000000000000680                _end = .
                 [!provide]                        PROVIDE (end, .)
 
 .stab
@@ -408,11 +408,11 @@ LOAD plasmasoc.o
  .comment       0x0000000000000011       0x12 no_os.o
  .comment       0x0000000000000011       0x12 plasmasoc.o
 
-.pdr            0x0000000000000000      0x260
+.pdr            0x0000000000000000      0x220
  .pdr           0x0000000000000000      0x100 boot.o
- .pdr           0x0000000000000100       0x80 main.o
- .pdr           0x0000000000000180       0xc0 no_os.o
- .pdr           0x0000000000000240       0x20 plasmasoc.o
+ .pdr           0x0000000000000100       0x40 main.o
+ .pdr           0x0000000000000140       0xc0 no_os.o
+ .pdr           0x0000000000000200       0x20 plasmasoc.o
 
 .debug
  *(.debug)

@@ -12,50 +12,51 @@
 	.ent	l1_cache_operate_on_line_range
 	.type	l1_cache_operate_on_line_range, @function
 l1_cache_operate_on_line_range:
-	.frame	$sp,32,$31		# vars= 0, regs= 4/0, args= 16, gp= 0
-	.mask	0x80070000,-4
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
+	.mask	0x00000000,0
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	beq	$6,$0,$L12
-	nop
-
-	addiu	$sp,$sp,-32
-	sw	$17,20($sp)
-	sw	$16,16($sp)
-	addu	$17,$6,$5
-	li	$16,-32			# 0xffffffffffffffe0
-	and	$2,$17,$16
-	sltu	$17,$2,$17
-	sll	$17,$17,5
-	addiu	$2,$2,32
-	and	$16,$5,$16
-	addu	$17,$2,$17
-	sw	$18,24($sp)
-	sw	$31,28($sp)
-	beq	$16,$17,$L1
-	move	$18,$4
-
-	move	$4,$16
-$L14:
-	jalr	$18
-	addiu	$16,$16,32
-
-	bne	$16,$17,$L14
-	move	$4,$16
-
-$L1:
-	lw	$31,28($sp)
-	lw	$18,24($sp)
-	lw	$17,20($sp)
-	lw	$16,16($sp)
-	addiu	$sp,$sp,32
-$L12:
-	jr	$31
-	nop
-
+	beq	$6,$0,$L8
+	addu	$6,$6,$5
 	.set	macro
 	.set	reorder
+
+	li	$2,-32			# 0xffffffffffffffe0
+	and	$3,$6,$2
+	sltu	$6,$3,$6
+	and	$5,$5,$2
+	sll	$6,$6,5
+	addiu	$2,$3,32
+	addu	$6,$2,$6
+	li	$2,268435456			# 0x10000000
+	addu	$4,$4,$2
+	li	$2,-32			# 0xffffffffffffffe0
+$L4:
+	.set	noreorder
+	.set	nomacro
+	bne	$6,$5,$L5
+	and	$3,$5,$2
+	.set	macro
+	.set	reorder
+
+$L8:
+	jr	$31
+$L5:
+ #APP
+ # 31 "../plasma/plasmasoc.h" 1
+	sw $3, 0($4)
+sw $0, 0($3)
+
+ # 0 "" 2
+ #NO_APP
+	.set	noreorder
+	.set	nomacro
+	b	$L4
+	addiu	$5,$5,32
+	.set	macro
+	.set	reorder
+
 	.end	l1_cache_operate_on_line_range
 	.size	l1_cache_operate_on_line_range, .-l1_cache_operate_on_line_range
 	.ident	"GCC: (GNU) 6.3.0"

@@ -25,12 +25,12 @@ entity memplasma is
         cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
         -- cache constants
         cache_address_width : integer := 12;
-        cache_way_width : integer := 1; 
+        cache_way_width : integer := 2; 
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
         cache_base_address : std_logic_vector := X"10000000";
-        cache_enable : boolean := False );
+        cache_enable : boolean := True );
     port(
         -- global signals
         aclk : in std_logic;

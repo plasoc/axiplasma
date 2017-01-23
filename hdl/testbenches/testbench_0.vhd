@@ -32,7 +32,7 @@ entity testbench_0 is
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
         cache_base_address : std_logic_vector := X"10000000";
-        cache_enable : boolean := False   );
+        cache_enable : boolean := True   );
 end testbench_0;
 
 architecture Behavioral of testbench_0 is
