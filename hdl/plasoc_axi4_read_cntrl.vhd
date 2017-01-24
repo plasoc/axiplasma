@@ -56,86 +56,116 @@ architecture Behavioral of plasoc_axi4_read_cntrl is
     constant cache_words_per_line : integer := 2**cache_offset_width/(cpu_data_width/8);
     constant axi_burst_len_noncacheable : integer := 1;
     constant axi_burst_len_cacheable : integer := cache_words_per_line+1;
-    type state_type is (state_wait,state_read);
-    signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
+    signal axi_arid_buff : std_logic_vector(axi_id_width-1 downto 0);
     signal axi_arvalid_buff : std_logic;
     signal axi_rready_buff : std_logic;
     signal mem_read_valid_buff : std_logic;
 begin
-
+    axi_arid <= axi_arid_buff;
     axi_arvalid <= axi_arvalid_buff;
     axi_rready <= axi_rready_buff;
     mem_read_valid <= mem_read_valid_buff;
     
+    -- axi address read process.
     process (clock)
         variable burst_len : integer range 0 to 2**axi_arlen'length-1;
-        variable axi_handshake : boolean;
-        variable mem_handshake : boolean;
     begin
         if rising_edge(clock) then
             if nreset='0' then
-                state <= state_wait;
             else
-                case state is
-                -- WAIT mode.
-                when state_wait =>
-                    -- Wait until the memory read interface requests data.
-                    if mem_read_enable='1' then
-                        -- Set control information. 
-                        axi_araddr <= mem_read_address;
-                        -- The burst length will change according to whether the memory access is cacheable or not.
-                        if cache_cacheable='1' then
-                            burst_len := axi_burst_len_cacheable;
-                        else
-                            burst_len := axi_burst_len_noncacheable;
-                        end if;
-                        axi_arlen <= std_logic_vector(to_unsigned(burst_len,axi_arlen'length));
-                        -- Set counter to keep track the number of words read from the burst.
-                        counter <= 0;
-                        -- Wait until handshake before reading data.
-                        if axi_arvalid_buff='1' and axi_arready='1' then
-                            axi_arvalid_buff <= '0';
-                            state <= state_read;
-                        else
-                            axi_arvalid_buff <= '1';
-                        end if;
-                    end if;
-                -- READ mode.
-                when state_read=>
-                    -- Determine when handshakes occur.
-                    axi_handshake := axi_rvalid='1' and axi_rready_buff='1';
-                    mem_handshake := mem_read_valid_buff='1' and mem_read_ready='1';
-                    -- If the read 
-                    if mem_read_enable='0' then
-                        mem_read_valid_buff <= '0';
-                    -- On handshake with the axi4 read interface, sample the word and
-                    -- let the memory interface know the data is valid.
-                    elsif axi_handshake then
-                        mem_read_data <= axi_rdata;
-                        counter <= counter+1;
-                        mem_read_valid_buff <= '1';
-                    -- Once the memory interface samples the data, the data becomes invalid.
-                    elsif mem_handshake then
-                        mem_read_valid_buff <= '0';
-                    end if;
-                    
-                    if mem_read_enable='0' then
-                        axi_rready_buff <= '0';
-                    -- Only permit a read if the memory interface is ready to accept.
-                    elsif mem_read_ready='1' then
-                        axi_rready_buff <= '1';
+                -- Wait until the memory read interface requests data.
+                if mem_read_enable='1' then
+                    -- Set control information. 
+                    axi_araddr <= mem_read_address;
+                    -- The burst length will change according to whether the memory access is cacheable or not.
+                    if cache_cacheable='1' then
+                        burst_len := axi_burst_len_cacheable;
                     else
-                        axi_rready_buff <= '0';
+                        burst_len := axi_burst_len_noncacheable;
                     end if;
-                    -- The read operation should finish when the memory interface
-                    -- is disabled.
-                    if mem_read_enable='0' then
-                        state <= state_wait;
+                    axi_arlen <= std_logic_vector(to_unsigned(burst_len,axi_arlen'length));
+                    -- Set counter to keep track the number of words read from the burst.
+                    counter <= 0;
+                    -- Wait until handshake before enab.
+                    if axi_arvalid_buff='1' and axi_arready='1' then
+                        axi_arvalid_buff <= '0';
+                    else
+                        axi_arvalid_buff <= '1';
                     end if;
-                end case;
+                end if;
             end if;
         end if;
     end process;
+    
+--    process (clock)
+--        variable burst_len : integer range 0 to 2**axi_arlen'length-1;
+--        variable axi_handshake : boolean;
+--        variable mem_handshake : boolean;
+--    begin
+--        if rising_edge(clock) then
+--            if nreset='0' then
+--                state <= state_wait;
+--            else
+--                case state is
+--                -- WAIT mode.
+--                when state_wait =>
+--                    -- Wait until the memory read interface requests data.
+--                    if mem_read_enable='1' then
+--                        -- Set control information. 
+--                        axi_araddr <= mem_read_address;
+--                        -- The burst length will change according to whether the memory access is cacheable or not.
+--                        if cache_cacheable='1' then
+--                            burst_len := axi_burst_len_cacheable;
+--                        else
+--                            burst_len := axi_burst_len_noncacheable;
+--                        end if;
+--                        axi_arlen <= std_logic_vector(to_unsigned(burst_len,axi_arlen'length));
+--                        -- Set counter to keep track the number of words read from the burst.
+--                        counter <= 0;
+--                        -- Wait until handshake before reading data.
+--                        if axi_arvalid_buff='1' and axi_arready='1' then
+--                            axi_arvalid_buff <= '0';
+--                            state <= state_read;
+--                        else
+--                            axi_arvalid_buff <= '1';
+--                        end if;
+--                    end if;
+--                -- READ mode.
+--                when state_read=>
+--                    -- Determine when handshakes occur.
+--                    axi_handshake := axi_rvalid='1' and axi_rready_buff='1';
+--                    mem_handshake := mem_read_valid_buff='1' and mem_read_ready='1';
+--                    -- If the read 
+--                    if mem_read_enable='0' then
+--                        mem_read_valid_buff <= '0';
+--                    -- On handshake with the axi4 read interface, sample the word and
+--                    -- let the memory interface know the data is valid.
+--                    elsif axi_handshake then
+--                        mem_read_data <= axi_rdata;
+--                        counter <= counter+1;
+--                        mem_read_valid_buff <= '1';
+--                    -- Once the memory interface samples the data, the data becomes invalid.
+--                    elsif mem_handshake then
+--                        mem_read_valid_buff <= '0';
+--                    end if;
+                    
+--                    if mem_read_enable='0' then
+--                        axi_rready_buff <= '0';
+--                    -- Only permit a read if the memory interface is ready to accept.
+--                    elsif mem_read_ready='1' then
+--                        axi_rready_buff <= '1';
+--                    else
+--                        axi_rready_buff <= '0';
+--                    end if;
+--                    -- The read operation should finish when the memory interface
+--                    -- is disabled.
+--                    if mem_read_enable='0' then
+--                        state <= state_wait;
+--                    end if;
+--                end case;
+--            end if;
+--        end if;
+--    end process;
 
 end Behavioral;
