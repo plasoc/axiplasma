@@ -22,7 +22,6 @@ use work.mlite_pack.all;
 use work.mlitesoc_pack.all;
 
 entity testbench_1 is
-    generic (indelay : time := 2 ns);
 end testbench_1;
 
 architecture Behavioral of testbench_1 is
@@ -97,7 +96,7 @@ architecture Behavioral of testbench_1 is
     end;
 begin
     clock <= not clock after 50 ns;
-    resetn <= '1' after 500ns + indelay;
+    resetn <= '1' after 500 ns;
     cpu0_pause <= debug_cpu_pause;
     
     -- CPU
@@ -143,7 +142,7 @@ begin
     process (clock)
         -- Variables for reading operation.
         variable counter : integer range 0 to 2**default_cache_offset_width-1 := 0;
-        variable base_index : integer;
+        variable base_index : integer range 0 to 2**ram_size-1;
         variable base_loaded : boolean := False;
     begin
         -- Perform operation on rising edge.
@@ -155,21 +154,21 @@ begin
                     -- Upon handshake, immediately load more data to be read.
                     -- The counter is incremented to point to the next address.
                     if mem_in_valid='1' and mem_in_ready='1' then
-                        mem_in_data <= ram_buffer(base_index+counter) after indelay;
+                        mem_in_data <= ram_buffer(base_index+counter);
                         counter := counter+1;
                     end if;
                     -- The reading interface always has valid data.
-                    mem_in_valid <= '1'  after indelay;
+                    mem_in_valid <= '1';
                 -- Acquire base address, load first word, and reset counter if block is needed.
                 else
                     base_index := to_integer(unsigned(mem_in_address))/bytes_per_word;
                     base_loaded := True;
-                    mem_in_data <= ram_buffer(base_index) after indelay;
+                    mem_in_data <= ram_buffer(base_index);
                     counter := 1;
                 end if;
             -- If writing interface is disabled, ensure control signals are left in reset.
             else
-                mem_in_valid <= '0' after indelay;
+                mem_in_valid <= '0';
                 base_loaded := False;
             end if;
         end if;     
@@ -215,7 +214,7 @@ begin
                         counter := counter+1;
                     end if;
                     -- The writing interface is always ready.
-                    mem_out_ready <= '1' after indelay;
+                    mem_out_ready <= '1';
                 -- Acquire base address and reset counter if block is needed.
                 else
                     base_index := to_integer(unsigned(mem_out_address))/bytes_per_word;
@@ -224,7 +223,7 @@ begin
                 end if;
             -- If writing interface is disabled, ensure control signals are left in reset.
             else
-                mem_out_ready <= '0' after indelay;
+                mem_out_ready <= '0';
                 base_loaded := False;
             end if;
         end if;

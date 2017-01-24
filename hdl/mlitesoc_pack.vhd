@@ -33,17 +33,17 @@ package mlitesoc_pack is
     component memplasma is
         generic(
             -- cpu constants
-            cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
+            cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
+            cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
+            cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
             -- cache constants
-            cache_address_width : integer := default_cache_address_width;
-            cache_way_width : integer := default_cache_way_width; 
-            cache_index_width : integer := default_cache_index_width;
-            cache_offset_width : integer := default_cache_offset_width;
-            cache_replace_strat : string := default_cache_replace_strat;
-            cache_base_address : std_logic_vector := default_cache_base_address;
-            cache_enable : boolean := default_cache_enable );
+            cache_address_width : integer := 11;
+            cache_way_width : integer := 2; 
+            cache_index_width : integer := 4;
+            cache_offset_width : integer := 5;
+            cache_replace_strat : string := "plru";
+            cache_base_address : std_logic_vector := X"10000000";
+            cache_enable : boolean := True  );
         port(
             -- global signals
             aclk : in std_logic;
