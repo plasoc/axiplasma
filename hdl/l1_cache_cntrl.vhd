@@ -53,14 +53,12 @@ entity l1_cache_cntrl is
         mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
         mem_in_enable : out std_logic;
-        mem_in_busy : in std_logic;
         mem_in_valid : in std_logic;
         mem_in_ready : out std_logic;
         mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
         mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
         mem_out_enable : out std_logic;
-        mem_out_busy : in std_logic;
         mem_out_valid : out std_logic;
         mem_out_ready : in std_logic); 
 end l1_cache_cntrl;
@@ -119,7 +117,6 @@ architecture Behavioral of l1_cache_cntrl is
     signal cpu_pause_buff_0 : std_logic := '0';
     signal cpu_pause_delayed : boolean;
     signal cpu_access_write : boolean;
-    signal cpu_access_write_buff : boolean := False;
     signal cache_noncacheable : boolean;
     signal cache_tag : cache_tag_type;
     signal cache_index : cache_index_type;
@@ -360,28 +357,22 @@ begin
                     elsif cache_oper then
                         -- Check for hit and then check to see which operation is enabled.
                         if cache_hit then
-                            -- Stall the CPU to make sure no new memory accesses are issued.
-                            cpu_pause_delayed <= True;
-                            cpu_pause_buff <= '1';
                             -- If flush is enabled, check and see if the 
                             -- requested tag and index are actually valid in the cache. If
                             -- they are, flush cache line. 
                             if cache_flush_enable then
-                                -- Only begin the stall if the memory out interface is available.
-                                if mem_out_busy='0' then
-                                    cache_state <= cache_state_mem;
-                                    mem_write_needed <= True;
-                                end if;
-                                -- Set the control signals for the memory out interface.
-                                mem_write_counter <= 1;
+                                cpu_pause_delayed <= True;
+                                cpu_pause_buff <= '1';
+                                cache_state <= cache_state_mem;
                                 mem_way_replace <= cache_way;
+                                mem_write_needed <= True;
+                                mem_write_counter <= 1;
                                 mem_out_strobe <= (others=>'1');
+                                mem_out_data <= cache_in_blockset(cache_way)(0);
                                 mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
                                 mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
                                     cache_in_tagset(cache_way) & cache_index;
                                 mem_out_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                                -- Write the first word in preparation.
-                                mem_out_data <= cache_in_blockset(cache_way)(0);
                             -- If invalidation is enabled, check and see if the 
                             -- requested tag and index are actually valid in the cache. If
                             -- they are, invalidate cache line. 
@@ -400,36 +391,23 @@ begin
                         if cpu_pause_buff='0' then
                             -- Immediately stall the CPU.
                             cpu_pause_buff <= '1';
+                            -- Switch the cache into memory access mode.
+                            cache_state <= cache_state_mem;
                             -- Check to see if the cpu is requesting a write or read operation.
                             -- If write, perform the following operations.
-                            if cpu_access_write or cpu_access_write_buff then
-                                -- Only enable the memory out interface if it's available.
-                                if mem_out_busy='0' then
-                                    mem_write_needed <= True;
-                                    cpu_access_write_buff <= False;
-                                    cache_state <= cache_state_mem;
-                                -- Since the memory write access flag can be lost, it must be bufferred.
-                                elsif cpu_pause_buff='0' then
-                                    cpu_access_write_buff <= cpu_access_write;
-                                end if;
-                                -- Set memory out control information. Only a single word needs to be
-                                -- written. Since the strobe can possibly be lost after a clock cycle, 
-                                -- only store it once.
+                            if cpu_access_write then
+                                -- Enable the memory write interface for only a single word.
+                                mem_write_needed <= True;
                                 mem_write_counter <= 2**cache_word_offset_width-1;
-                                if cpu_pause_buff='0' then
-                                    mem_out_strobe <= cpu_strobe;
-                                end if;
+                                -- Set memory out control information.
+                                mem_out_strobe <= cpu_strobe;
                                 mem_out_address <= cpu_address;
                                 -- Set memory out data.
                                 mem_out_data <= cpu_in_data;
                             -- If read, perform the following operations.
                             else
-                                -- If the memory in interface is available,
-                                -- enable the memory read interface for only a single word.
-                                if mem_in_busy='0' then
-                                    mem_read_needed <= True;
-                                    cache_state <= cache_state_mem;
-                                end if;
+                                -- Enable the memory read interface for only a single word.
+                                mem_read_needed <= True;
                                 mem_read_counter <= 2**cache_word_offset_width-1;
                                 -- Set memory out control information.
                                 mem_in_address <= cpu_address;
@@ -479,19 +457,14 @@ begin
                         -- Stall the CPU until cache line retrieval is completed.
                         cpu_pause_buff <= '1';
                         -- Store the strobe since it's needed for after the line retrieval operation is completed.
-                        -- In case the cache controller needs to continuously stall the CPU due to busy memory
-                        -- interfaces, the strobe is only stored during the first cycle of the cache miss.
-                        if cpu_pause_buff='0' then
-                            cache_strobe_replace <= cpu_strobe;
-                        end if;
+                        cache_strobe_replace <= cpu_strobe;
+                        -- Switch the mode of the cache to memory access.
+                        cache_state <= cache_state_mem;
                         -- Store which line and tag needs to be replaced at the current index of the cache.
                         mem_way_replace <= cache_way_replace;
                         mem_tag_replace <= cache_tag;
-                        -- Only try and enable the memory read interface if it's not busy.
-                        if mem_in_busy='0' then
-                            mem_read_needed <= True;
-                        end if;
                         -- Set memory read operation control signals for line retrieval operation.
+                        mem_read_needed <= True;
                         mem_read_counter <= 0;
                         mem_in_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
                         mem_in_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width) 
@@ -500,11 +473,8 @@ begin
                         -- If a valid line already exists at the chosen replacement line, the contents must be written back
                         -- to main memory.
                         if cache_in_validset(cache_way_replace)='1' then
-                            -- Only try and enable the memory write interface if it's not busy.
-                            if mem_out_busy='0' then
-                                mem_write_needed <= True;
-                            end if;
                             -- Set memory write operation control signals for line retrieval operation.
+                            mem_write_needed <= True;
                             mem_write_counter <= 1;
                             mem_out_strobe <= (others=>'1');
                             mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
@@ -514,30 +484,21 @@ begin
                             -- Ensure the first word is ready to be written, immediately.
                             mem_out_data <= cache_in_blockset(cache_way_replace)(0);
                         end if;
-                        -- Switch to memory access mode if the memory interfaces are not busy.
-                        if mem_in_busy='0' and (cache_in_validset(cache_way_replace)='0' or mem_out_busy='0') then
-                            cache_state <= cache_state_mem;
-                        end if;
                     end if;
                 when cache_state_mem=>
                     -- Memory write block.
                     if mem_write_needed then
-                        -- Perform write operation on handshake.
+                        -- Point to next word on successful handshake.
                         if mem_out_valid_buff='1' and mem_out_ready='1' then 
-                            -- Check and see if write operation is complete.
                             if mem_write_counter/=2**cache_word_offset_width then
-                                -- Only write new data if a cacheable access is needed.
                                 if not cache_noncacheable then
                                     mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
                                 end if;
-                                -- Increment counter to point to the next word in the cache.
                                 mem_write_counter <= mem_write_counter+1;
-                            -- On completion of the write operation, disable the write interface.
                             else
                                 mem_write_needed <= False;
                                 mem_out_valid_buff <= '0';
                             end if;
-                        -- Indicate data is valid.
                         else
                             mem_out_valid_buff <= '1';
                         end if;
@@ -557,24 +518,20 @@ begin
                             else
                                 cpu_out_data <= mem_in_data;
                             end if;
-                            -- Once the counter reaches the last possible word offset value, the ending
-                            -- is reached.
+                            -- On completion, shut down read operation.
                             if mem_read_counter=2**cache_word_offset_width-1 then
-                                -- On completion, shut down read operation.
                                 mem_read_needed <= False;
                                 -- If the memory access was cacheable, store the control information.
                                 if not cache_noncacheable then
-                                    -- Update the valid of the corresponding line.
+                                    -- Set tag and valid flag.
                                     out_valid_enable(mem_way_replace) := '1';
-                                    cache_out_validset(mem_way_replace) <= '1';
-                                    -- Update the tag of the corresponding line.
                                     out_tag_enable(mem_way_replace) := '1';
-                                    cache_out_tagset(mem_way_replace) <= mem_tag_replace;
-                                    -- Update the PLRU bits of the corresponding lineset.
                                     if cache_replace_strat="plru" then
                                         out_plru_enable := '1';
                                         cache_out_plruset <= cache_plruset_replace;
                                     end if;
+                                    cache_out_validset(mem_way_replace) <= '1';
+                                    cache_out_tagset(mem_way_replace) <= mem_tag_replace;
                                 end if;
                             -- Continue to increment counter until completion.
                             else

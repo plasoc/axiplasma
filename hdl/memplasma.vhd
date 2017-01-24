@@ -39,14 +39,12 @@ entity memplasma is
         mem_in_address : out std_logic_vector(31 downto 0);
         mem_in_data : in std_logic_vector(31 downto 0);
         mem_in_enable : out std_logic;
-        mem_in_busy : in std_logic;
         mem_in_valid : in std_logic;
         mem_in_ready : out std_logic;
         mem_out_address : out std_logic_vector(31 downto 0);
         mem_out_data : out std_logic_vector(31 downto 0);
         mem_out_strobe : out std_logic_vector(3 downto 0);
         mem_out_enable : out std_logic;
-        mem_out_busy : in std_logic;
         mem_out_valid : out std_logic;
         mem_out_ready : in std_logic;
         -- cpu signals
@@ -133,14 +131,12 @@ begin
                 mem_in_address => mem_in_address,
                 mem_in_data => mem_in_data,
                 mem_in_enable => mem_in_enable,
-                mem_in_busy => mem_in_busy,
                 mem_in_valid => mem_in_valid,
                 mem_in_ready => mem_in_ready,
                 mem_out_address => mem_out_address,
                 mem_out_data => mem_out_data,
                 mem_out_strobe => mem_out_strobe,
                 mem_out_enable => mem_out_enable,
-                mem_out_busy => mem_out_busy,
                 mem_out_valid => mem_out_valid,
                 mem_out_ready => mem_out_ready);
         -- Cache buffer instantiation.
@@ -182,14 +178,12 @@ begin
             mem_in_address => mem_in_address,
             mem_in_data => mem_in_data,
             mem_in_enable => mem_in_enable,
-            mem_in_busy => mem_in_busy,
             mem_in_valid => mem_in_valid,
             mem_in_ready => mem_in_ready,
             mem_out_address => mem_out_address,
             mem_out_data => mem_out_data,
             mem_out_strobe => mem_out_strobe,
             mem_out_enable => mem_out_enable,
-            mem_out_busy => mem_out_busy,
             mem_out_valid => mem_out_valid,
             mem_out_ready => mem_out_ready);
     end generate;
