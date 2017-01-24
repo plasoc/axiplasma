@@ -42,6 +42,7 @@ entity l1_cache_cntrl is
         cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
         cpu_pause : out std_logic;
         -- cache interface.
+        cache_cacheable : out std_logic;
         cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
         cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
         cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
@@ -66,9 +67,11 @@ architecture Behavioral of l1_cache_cntrl is
     function cache_plru_width return integer is
     	variable result : integer := 0;
     begin
-        for each_way in 0 to 2**cache_way_width-1 loop
-            result := result+each_way;
-        end loop; 
+        if cache_way_width/=0 then
+            for each_way in 1 to 2**cache_way_width/2 loop
+                result := result+each_way;
+            end loop; 
+        end if;
         return result;
     end; 
     function is_cacheable( address : in std_logic_vector ) return boolean is
@@ -169,6 +172,7 @@ begin
     cache_oper <= True when (cache_oper_tag=cache_tag and cache_oper_index=cache_index) and (cache_flush_enable or cache_invalidate_enable) else False;
     -- Determine whether or not the memory access is cacheable.
     cache_noncacheable <= not is_cacheable(cpu_address);
+    cache_cacheable <= '1' when is_cacheable(cpu_address) else '0';
     -- Determine whether or not the memory access from the CPU is write or read.
     cpu_access_write <= True when or_reduce(cpu_strobe)='1' else False;
     -- Set main memory access control signals.
@@ -262,24 +266,22 @@ begin
         end process;
         -- Pseudo Least Recently Used Implementation.
         process (cache_in_plruset)
-            subtype int_type is integer range 0 to 2**(cache_way_width+1);
+            subtype int_type is integer range 0 to cache_plru_width;
             variable plruset : cache_plruset_type;
             variable this_bit : int_type;
             variable left_bit : int_type;
             variable right_bit : int_type;
-            variable next_row_bit : int_type;
             variable row_width : int_type;
+            variable replace_bit : int_type;
         begin
-            if cache_offset_width/=0 then
+            if cache_way_width/=0 then
                 plruset := cache_in_plruset;
                 this_bit := 0;
                 row_width := 0;
-                next_row_bit := 0;
-                for each_row in 0 to 2**cache_way_width-2 loop
+                for each_row in 1 to 2**cache_way_width/2-1 loop
                     row_width := row_width+1;
-                    next_row_bit := next_row_bit+row_width;
-                    left_bit := next_row_bit+this_bit;
-                    right_bit := next_row_bit+this_bit+1;
+                    left_bit := row_width+this_bit;
+                    right_bit := left_bit+1;
                     if plruset(this_bit)='0' then
                         plruset(this_bit) := '1';
                         this_bit := left_bit;
@@ -288,7 +290,17 @@ begin
                         this_bit := right_bit;
                     end if;
                 end loop;
-                cache_way_replace <= this_bit-(2**cache_way_width-1);
+                replace_bit := this_bit-row_width;
+                left_bit := replace_bit*2;
+                right_bit := left_bit+1;
+                if plruset(this_bit)='0' then
+                    plruset(this_bit) := '1';
+                    this_bit := left_bit;
+                else
+                    plruset(this_bit) := '0';
+                    this_bit := right_bit;
+                end if;
+                cache_way_replace <= this_bit;
                 cache_plruset_replace <= plruset;
             else
                 cache_way_replace <= 0;
@@ -411,15 +423,21 @@ begin
                         end if;
                     -- Check for cache hit
                     elsif cache_hit then
-                         -- Set cache control signals and offset.
+                         -- A delay before resuming CPU is needed
+                         -- for when data needs to be transferred to
+                         -- the CPU.
                         if not cpu_pause_delayed then
                             cpu_pause_delayed <= True;
+                        -- Once the delay passes, resume the CPU and ensure the
+                        -- buffer for the strobe is set to zero to prevent accidental reads.
                         else
                             cpu_pause_buff <= '0';
                             cache_strobe_replace <= (others=>'0');
                         end if;
+                        -- Acquire word offset.
                         word_offset := to_integer(unsigned(cache_word_offset));
-                        -- Perform the write operation to cache from CPU.
+                        -- Perform the write operation to cache from CPU. Only the specified bytes
+                        -- of the word are written into the cache.
                         for each_byte in 0 to cpu_data_width/8-1 loop
                             if (cpu_pause_buff='0' and cpu_strobe(each_byte)='1') or 
                                     (cpu_pause_buff='1' and cache_strobe_replace(each_byte)='1') then
@@ -432,21 +450,30 @@ begin
                         end loop;
                         -- Perform read operation from cache to CPU.
                         cpu_out_data <= cache_in_blockset(cache_way)(word_offset);
-                    -- If miss, begin memory transactions.
+                    -- If miss, begin line retrieval operation.
                     else
+                        -- A delay is needed once the cache line retrieval operation is finished.
                         cpu_pause_delayed <= False;
+                        -- Stall the CPU until cache line retrieval is completed.
                         cpu_pause_buff <= '1';
+                        -- Store the strobe since it's needed for after the line retrieval operation is completed.
                         cache_strobe_replace <= cpu_strobe;
+                        -- Switch the mode of the cache to memory access.
                         cache_state <= cache_state_mem;
+                        -- Store which line and tag needs to be replaced at the current index of the cache.
                         mem_way_replace <= cache_way_replace;
                         mem_tag_replace <= cache_tag;
+                        -- Set memory read operation control signals for line retrieval operation.
                         mem_read_needed <= True;
                         mem_read_counter <= 0;
                         mem_in_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
                         mem_in_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width) 
                             <= cache_tag & cache_index;
                         mem_in_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                        -- If a valid line already exists at the chosen replacement line, the contents must be written back
+                        -- to main memory.
                         if cache_in_validset(cache_way_replace)='1' then
+                            -- Set memory write operation control signals for line retrieval operation.
                             mem_write_needed <= True;
                             mem_write_counter <= 1;
                             mem_out_strobe <= (others=>'1');
@@ -454,6 +481,7 @@ begin
                             mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
                                 cache_in_tagset(cache_way_replace) & cache_index;
                             mem_out_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                            -- Ensure the first word is ready to be written, immediately.
                             mem_out_data <= cache_in_blockset(cache_way_replace)(0);
                         end if;
                     end if;
@@ -479,27 +507,33 @@ begin
                     if mem_read_needed then
                         -- Perform read operation on handshake.
                         if mem_in_valid='1' and mem_in_ready_buff='1' then
+                            -- If the memory access was cacheable, store the data in cache.
                             if not cache_noncacheable then
                                 -- Set the corresponding control information.
                                 cache_out_address <= cache_index;
                                 out_block_enable(mem_way_replace*2**cache_word_offset_width+mem_read_counter) := '1';
                                 -- Store the newly acquired word.
                                 cache_out_blockset(mem_way_replace)(mem_read_counter) <= mem_in_data;
+                            -- If a nonecacheable memory access was performed, write directly to CPU.
                             else
                                 cpu_out_data <= mem_in_data;
                             end if;
                             -- On completion, shut down read operation.
                             if mem_read_counter=2**cache_word_offset_width-1 then
                                 mem_read_needed <= False;
-                                -- Set tag and valid flag.
-                                out_valid_enable(mem_way_replace) := '1';
-                                out_tag_enable(mem_way_replace) := '1';
-                                if cache_replace_strat="plru" then
-                                    out_plru_enable := '1';
-                                    cache_out_plruset <= cache_plruset_replace;
+                                -- If the memory access was cacheable, store the control information.
+                                if not cache_noncacheable then
+                                    -- Set tag and valid flag.
+                                    out_valid_enable(mem_way_replace) := '1';
+                                    out_tag_enable(mem_way_replace) := '1';
+                                    if cache_replace_strat="plru" then
+                                        out_plru_enable := '1';
+                                        cache_out_plruset <= cache_plruset_replace;
+                                    end if;
+                                    cache_out_validset(mem_way_replace) <= '1';
+                                    cache_out_tagset(mem_way_replace) <= mem_tag_replace;
                                 end if;
-                                cache_out_validset(mem_way_replace) <= '1';
-                                cache_out_tagset(mem_way_replace) <= mem_tag_replace;
+                            -- Continue to increment counter until completion.
                             else
                                 mem_read_counter <= mem_read_counter+1;
                             end if;

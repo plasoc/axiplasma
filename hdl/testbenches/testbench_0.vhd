@@ -27,11 +27,12 @@ entity testbench_0 is
         cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
         cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
         cache_address_width : integer := 12;
-        cache_way_width : integer := 1; 
+        cache_way_width : integer := 2; 
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
         cache_replace_strat : string := "plru";
-        cache_base_address : std_logic_vector := X"10000000" );
+        cache_base_address : std_logic_vector := X"10000000";
+        cache_enable : boolean := True   );
 end testbench_0;
 
 architecture Behavioral of testbench_0 is
@@ -102,7 +103,8 @@ begin
             cache_index_width => cache_index_width,
             cache_offset_width => cache_offset_width,
             cache_replace_strat => cache_replace_strat,
-            cache_base_address=>cache_base_address)
+            cache_base_address => cache_base_address,
+            cache_enable => cache_enable)
         port map(
             aclk => clock,
             aresetn => resetn,
@@ -142,24 +144,33 @@ begin
     
     -- Drive read memory interface
     process (clock)
+        -- Variables for reading operation.
         variable counter : integer range 0 to 2**cache_offset_width-1 := 0;
         variable base_index : integer range 0 to 2**ram_size-1;
         variable base_loaded : boolean := False;
     begin
+        -- Perform operation on rising edge.
         if rising_edge(clock) then
+            -- Check to see if the reading interface is enabled.
             if mem_in_enable='1' then
+                -- Perform read operation from memory when the base address is acquired.
                 if base_loaded then
+                    -- Upon handshake, immediately load more data to be read.
+                    -- The counter is incremented to point to the next address.
                     if mem_in_valid='1' and mem_in_ready='1' then
                         mem_in_data <= ram_buffer(base_index+counter);
                         counter := counter+1;
                     end if;
+                    -- The reading interface always has valid data.
                     mem_in_valid <= '1';
+                -- Acquire base address, load first word, and reset counter if block is needed.
                 else
                     base_index := to_integer(unsigned(mem_in_address))/bytes_per_word;
                     base_loaded := True;
                     mem_in_data <= ram_buffer(base_index);
                     counter := 1;
                 end if;
+            -- If writing interface is disabled, ensure control signals are left in reset.
             else
                 mem_in_valid <= '0';
                 base_loaded := False;
@@ -169,11 +180,14 @@ begin
     
     -- Drive write memory interface
     process (clock)
+        -- Cache addresses to ignore.
+        constant cache_address_0 : integer := to_integer(unsigned(cache_base_address))/bytes_per_word;
+        constant cache_address_1 : integer := cache_address_0+1;
         -- Variables for loading operation.
         variable ram_loaded : boolean := False;
         -- Variables for writing operation.
         variable counter : integer range 0 to 2**cache_offset_width-1 := 0;
-        variable base_index : integer range 0 to 2**ram_size-1;
+        variable base_index : integer;
         variable base_loaded : boolean := False;
     begin
         --Load in the ram executable image
@@ -181,25 +195,37 @@ begin
             ram_loaded := True;
             ram_buffer <= load_binary(binary_name);
         end if;
-        -- Writing interface.
+        -- Perform operation on rising edge.
         if rising_edge(clock) then
+            -- Check to see if the writing interface is enabled.
             if mem_out_enable='1' then
+                -- Perform write operation into memory when the base address is acquired.
                 if base_loaded then
+                    -- Upon handshake, sample data into main memory.
                     if mem_out_valid='1' and mem_out_ready='1' then
-                        for each_byte in 0 to cpu_width/8-1 loop
-                            if mem_out_strobe(each_byte)='1' then
-                                ram_buffer(base_index+counter)(7+each_byte*8 downto each_byte*8) <= 
-                                    mem_out_data(7+each_byte*8 downto each_byte*8);
-                            end if;
-                        end loop;
+                        -- In case cache is disabled, only sample data if the base address
+                        -- doesn't refer to the cache.
+                        if base_index/=cache_address_0 and base_index/=cache_address_1 then
+                            -- Sample data according to which bytes are enabled.
+                            for each_byte in 0 to cpu_width/8-1 loop
+                                if mem_out_strobe(each_byte)='1' then
+                                    ram_buffer(base_index+counter)(7+each_byte*8 downto each_byte*8) <= 
+                                        mem_out_data(7+each_byte*8 downto each_byte*8);
+                                end if;
+                            end loop;
+                        end if;
+                        -- Increment counter to point to the next address.
                         counter := counter+1;
                     end if;
+                    -- The writing interface is always ready.
                     mem_out_ready <= '1';
+                -- Acquire base address and reset counter if block is needed.
                 else
                     base_index := to_integer(unsigned(mem_out_address))/bytes_per_word;
                     base_loaded := True;
                     counter := 0;
                 end if;
+            -- If writing interface is disabled, ensure control signals are left in reset.
             else
                 mem_out_ready <= '0';
                 base_loaded := False;
