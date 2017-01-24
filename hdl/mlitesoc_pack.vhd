@@ -52,12 +52,14 @@ package mlitesoc_pack is
             mem_in_address : out std_logic_vector(31 downto 0);
             mem_in_data : in std_logic_vector(31 downto 0);
             mem_in_enable : out std_logic;
+            mem_in_busy : in std_logic;
             mem_in_valid : in std_logic;
             mem_in_ready : out std_logic;
             mem_out_address : out std_logic_vector(31 downto 0);
             mem_out_data : out std_logic_vector(31 downto 0);
             mem_out_strobe : out std_logic_vector(3 downto 0);
             mem_out_enable : out std_logic;
+            mem_out_busy : in std_logic;
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic;
             -- cpu signals
@@ -100,12 +102,14 @@ package mlitesoc_pack is
             mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             mem_in_enable : out std_logic;
+            mem_in_busy : in std_logic;
             mem_in_valid : in std_logic;
             mem_in_ready : out std_logic;
             mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0);
+            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
             mem_out_enable : out std_logic;
+            mem_out_busy : in std_logic;
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic); 
     end component;
@@ -151,13 +155,15 @@ package mlitesoc_pack is
             -- simple mem interface
             mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
-            mem_in_enable : out std_logic;
+            mem_in_enable : out std_logic := '0';
+            mem_in_busy : in std_logic;
             mem_in_valid : in std_logic;
             mem_in_ready : out std_logic;
             mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
             mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
             mem_out_enable : out std_logic := '0';
+            mem_out_busy : in std_logic;
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic);
     end component;
