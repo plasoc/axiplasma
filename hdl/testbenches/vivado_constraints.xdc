@@ -18,6 +18,9 @@ set_output_delay -clock [get_clocks clock] 2.000 [get_ports mem_out_enable]
 set_output_delay -clock [get_clocks clock] 2.000 [get_ports mem_out_valid]
 <<<<<<< HEAD
 set_output_delay -clock [get_clocks clock] 2.000 [get_ports debug_cpu_pause]
+<<<<<<< HEAD
 =======
 set_output_delay -clock [get_clocks clock] 2.000 [get_ports debug_cpu_pause]
+>>>>>>> 6b8ec634fb9492872fe1f5f97c852e961bf9c361
+=======
 >>>>>>> 6b8ec634fb9492872fe1f5f97c852e961bf9c361
