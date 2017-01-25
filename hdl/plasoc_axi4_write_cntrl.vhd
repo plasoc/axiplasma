@@ -54,7 +54,7 @@ entity plasoc_axi4_write_cntrl is
         axi_bvalid : in std_logic;
         axi_bready : out std_logic;
         -- error interface.
-        error_data : out std_logic_vector(3 downto 0) := (others=>'0'));
+        error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
 end plasoc_axi4_write_cntrl;
 
 architecture Behavioral of plasoc_axi4_write_cntrl is
@@ -72,11 +72,20 @@ architecture Behavioral of plasoc_axi4_write_cntrl is
     signal mem_write_ready_buff : std_logic;
     signal axi_bready_buff : std_logic;
 begin
+
+    axi_awid <= (others=>'0');
     axi_awlen <= axi_awlen_buff;
+    axi_awsize <= std_logic_vector(to_unsigned(clogb2(cpu_bytes_per_word),axi_awsize'length));
+    axi_awburst <= axi_burst_incr;
+    axi_awcache <= axi_cache_device_nonbufferable;
+    axi_awprot <= axi_prot_instr & not axi_prot_sec & not axi_prot_priv;
+    axi_awqos <= (others=>'0');
+    axi_awuser <= (others=>'0');
     axi_awvalid <= axi_awvalid_buff;
     axi_wvalid <= axi_wvalid_buff;
     mem_write_ready <= mem_write_ready_buff;
     axi_bready <= axi_bready_buff;
+    axi_wuser <= (others=>'0');
 
     process (clock)
         variable burst_len : integer range 0 to 2**axi_awlen'length-1;
@@ -151,6 +160,7 @@ begin
             when state_response=>
                 -- Wait until handshake before reading the response.
                 if axi_bvalid='1' and axi_bready_buff='1' then
+                    -- The response channel should no longer be ready once the response has been acquired.
                     axi_bready_buff <= '0';
                     -- Check if an error occurred.
                     if axi_bresp/=axi_resp_okay then
@@ -168,9 +178,11 @@ begin
                         -- If an error didn't occur, begin waiting for the next memory write request.
                         state <= state_wait;
                     end if;
+                -- Let the slave axi write interface know the master is ready for the response.
                 else
                     axi_bready_buff <= '1';
                 end if;
+            -- ERROR mode.
             when state_error=> 
             end case;
         end if;

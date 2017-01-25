@@ -177,6 +177,102 @@ package mlitesoc_pack is
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic);
     end component;
+    
+    component plasoc_axi4_read_cntrl is
+        generic (
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
+            -- cache constants
+            cache_offset_width : integer := 5;
+            -- axi read constants
+            axi_aruser_width : integer := 0;
+            axi_ruser_width : integer := 0);
+        port(
+            -- global interfaces.
+            clock : in std_logic;
+            nreset : in std_logic;
+            -- mem read interface.
+            mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);
+            mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+            mem_read_enable : in std_logic;
+            mem_read_valid : out std_logic;
+            mem_read_ready : in std_logic;
+            -- cache interface.
+            cache_cacheable : in std_logic;
+            -- axi read interface.
+            axi_arid : out std_logic_vector(0 downto 0);
+            axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0);
+            axi_arlen : out std_logic_vector(7 downto 0);
+            axi_arsize : out std_logic_vector(2 downto 0);
+            axi_arburst : out std_logic_vector(1 downto 0);
+            axi_arcache : out std_logic_vector(3 downto 0);
+            axi_arprot : out std_logic_vector(2 downto 0);
+            axi_arqos : out std_logic_vector(3 downto 0);
+            axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
+            axi_arvalid : out std_logic;
+            axi_arready : in std_logic;
+            axi_rid : in std_logic_vector(0 downto 0);
+            axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);
+            axi_rresp : in std_logic_vector(1 downto 0);
+            axi_rlast : in std_logic;
+            axi_ruser : in std_logic_vector(axi_ruser_width-1 downto 0);
+            axi_rvalid : in std_logic;
+            axi_rready : out std_logic;
+            -- error interface.
+            error_data : out std_logic_vector(3 downto 0) := (others=>'0') );
+    end component;
+    
+    component plasoc_axi4_write_cntrl is
+        generic(
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
+            -- cache constants
+            cache_offset_width : integer := 5;
+            -- axi read constants
+            axi_awuser_width : integer := 0;
+            axi_wuser_width : integer := 0;
+            axi_buser_width : integer := 0);
+        port(
+            -- global interfaces.
+            clock : in std_logic;
+            nreset : in std_logic;
+            -- mem write interface.
+            mem_write_address : in std_logic_vector(cpu_address_width-1 downto 0);
+            mem_write_data : in std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_write_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            mem_write_enable : in std_logic;
+            mem_write_valid : in std_logic;
+            mem_write_ready  : out std_logic;
+            -- cache interface.
+            cache_cacheable : in std_logic;
+            -- axi write interface.
+            axi_awid : out std_logic_vector(0 downto 0);
+            axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0);
+            axi_awlen : out std_logic_vector(7 downto 0);
+            axi_awsize : out std_logic_vector(2 downto 0);
+            axi_awburst : out std_logic_vector(1 downto 0);
+            axi_awcache : out std_logic_vector(3 downto 0);
+            axi_awprot : out std_logic_vector(2 downto 0);
+            axi_awqos : out std_logic_vector(3 downto 0);
+            axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);
+            axi_awvalid : out std_logic;
+            axi_awready : in std_logic;
+            axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0);
+            axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0);
+            axi_wlast : out std_logic;
+            axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);
+            axi_wvalid : out std_logic;
+            axi_wready : in std_logic;
+            axi_bid : in std_logic_vector(0 downto 0);
+            axi_bresp : in  std_logic_vector(1 downto 0);
+            axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
+            axi_bvalid : in std_logic;
+            axi_bready : out std_logic;
+            -- error interface.
+            error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
+    end component;
 
 end; --package body
 
