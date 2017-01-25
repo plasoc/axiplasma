@@ -52,12 +52,31 @@ entity plasoc_axi4_write_cntrl is
         axi_bresp : in  std_logic_vector(1 downto 0);
         axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
         axi_bvalid : in std_logic;
-        axi_bready : out std_logic);
+        axi_bready : out std_logic;
+        -- error interface.
+        error_data : out std_logic_vector(3 downto 0) := (others=>'0'));
 end plasoc_axi4_write_cntrl;
 
 architecture Behavioral of plasoc_axi4_write_cntrl is
-
+    type state_type is (state_wait,state_write,state_error);
+    signal state : state_type := state_wait;
 begin
 
+    process (clock)
+    begin
+        if nreset='0' then
+        else
+            case state is
+            -- WAIT mode.
+            when state_wait=>
+                -- Wait until the memory write interface issues a write memory access.
+                if mem_write_enable='1' then
+                    -- Set control information.
+                end if;
+            when state_write=>
+            when state_error=> 
+            end case;
+        end if;
+    end process;
 
 end Behavioral;
