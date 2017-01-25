@@ -82,7 +82,6 @@ begin
     process (clock)
         variable burst_len : integer range 0 to 2**axi_arlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
-        variable transfer_complete : boolean;
         variable handshake : boolean;
     begin
         if rising_edge(clock) then
@@ -122,7 +121,7 @@ begin
                     end if;
                 -- READ mode.
                 when state_read=>
-                    -- Check for handshake;
+                    -- Check for axi handshake;
                     handshake := axi_rvalid='1' and axi_rready_buff='1';
                     -- On handshake with the axi4 read interface, sample the word and
                     -- let the memory interface know the data is valid.
@@ -167,9 +166,9 @@ begin
                             axi_finished <= True;
                         end if;
                     end if;
-                    -- Start waiting again if both the transaction is finished and the read 
-                    -- interface is disabled.
-                    if axi_finished and mem_read_enable='0' then
+                    -- Start waiting again if both the transaction is finished and the 
+                    -- last word is read from the memory read interface.
+                    if axi_finished and mem_read_ready='0' then
                         state <= state_wait;
                     end if;
                 -- block in ERROR mode.
