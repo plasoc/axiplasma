@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
--- TITLE: Plasma-SoC Baseline Processor with Mem Interface
+-- TITLE: Plasma-SoC Baseline Processor with AXI4-Full Interface.
 -- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
 -- DATE CREATED: 1/07/2017
 -- FILENAME: mlitesoc_pack.vhd
@@ -269,5 +269,42 @@ begin
             axi_buser => (others=>'0'),
             axi_bvalid => axi_bvalid,
             axi_bready => axi_bready,
+            error_data => open);
+    -- axi read controller.
+    plasoc_axi4_read_cntrl_inst :
+    plasoc_axi4_read_cntrl 
+        generic map (
+            cpu_address_width => cpu_width,
+            cpu_data_width => cpu_width,
+            cache_offset_width => cache_offset_width,
+            axi_aruser_width => axi_user_width,
+            axi_ruser_width => axi_user_width)
+        port map (
+            clock => aclk,
+            nreset => aresetn,
+            mem_read_address => mem_in_address,
+            mem_read_data => mem_in_data,
+            mem_read_enable => mem_in_enable,
+            mem_read_valid => mem_in_valid,
+            mem_read_ready => mem_in_ready,
+            cache_cacheable => cache_cacheable,
+            axi_arid => axi_arid,
+            axi_araddr => axi_araddr,
+            axi_arlen => axi_arlen,
+            axi_arsize => axi_arsize,
+            axi_arburst => axi_arburst,
+            axi_arcache => axi_arcache,
+            axi_arprot => axi_arprot,
+            axi_arqos => axi_arqos,
+            axi_aruser => open,
+            axi_arvalid => axi_arvalid,
+            axi_arready => axi_arready,
+            axi_rid => axi_rid,
+            axi_rdata => axi_rdata,
+            axi_rresp => axi_rresp,
+            axi_rlast => axi_rlast,
+            axi_ruser => (others=>'0'),
+            axi_rvalid => axi_rvalid,
+            axi_rready => axi_rready,
             error_data => open);
 end Behavioral;
