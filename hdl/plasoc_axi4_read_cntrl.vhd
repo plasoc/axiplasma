@@ -52,7 +52,6 @@ entity plasoc_axi4_read_cntrl is
 end plasoc_axi4_read_cntrl;
 
 architecture Behavioral of plasoc_axi4_read_cntrl is
-    
     subtype error_data_type is std_logic_vector(error_data'high downto error_data'low);
     constant cpu_bytes_per_word : integer := cpu_data_width/8;
     constant cache_words_per_line : integer := 2**cache_offset_width/cpu_bytes_per_word;
@@ -61,6 +60,7 @@ architecture Behavioral of plasoc_axi4_read_cntrl is
     type state_type is (state_wait,state_read,state_error);
     signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
+    signal axi_finished : boolean := False;
     signal axi_arlen_buff : std_logic_vector(7 downto 0);
     signal axi_arvalid_buff : std_logic;
     signal axi_rready_buff : std_logic;
@@ -82,6 +82,8 @@ begin
     process (clock)
         variable burst_len : integer range 0 to 2**axi_arlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
+        variable transfer_complete : boolean;
+        variable handshake : boolean;
     begin
         if rising_edge(clock) then
             if nreset='0' then
@@ -108,6 +110,8 @@ begin
                         axi_arlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_arlen'length));
                         -- Set counter to keep track the number of words read from the burst.
                         counter <= 0;
+                        -- Reset finish indicator.
+                        axi_finished <= False;
                         -- Wait until handshake before reading data.
                         if axi_arvalid_buff='1' and axi_arready='1' then
                             axi_arvalid_buff <= '0';
@@ -118,12 +122,11 @@ begin
                     end if;
                 -- READ mode.
                 when state_read=>
-                    -- If the read 
-                    if mem_read_enable='0' then
-                        mem_read_valid_buff <= '0';
+                    -- Check for handshake;
+                    handshake := axi_rvalid='1' and axi_rready_buff='1';
                     -- On handshake with the axi4 read interface, sample the word and
                     -- let the memory interface know the data is valid.
-                    elsif axi_rvalid='1' and axi_rready_buff='1' then
+                    if handshake then
                         mem_read_data <= axi_rdata;
                         counter <= counter+1;
                         mem_read_valid_buff <= '1';
@@ -131,17 +134,14 @@ begin
                     elsif mem_read_valid_buff='1' and mem_read_ready='1' then
                         mem_read_valid_buff <= '0';
                     end if;
-                    
-                    if mem_read_enable='0' then
-                        axi_rready_buff <= '0';
                     -- Only permit a read if the memory interface is ready to accept.
-                    elsif mem_read_ready='1' then
+                    if mem_read_ready='1' then
                         axi_rready_buff <= '1';
                     else
                         axi_rready_buff <= '0';
                     end if;
-                    -- Check if the enough words have been received.
-                    if counter=axi_arlen_buff then
+                    -- Check if enough words have been received.
+                    if counter=axi_arlen_buff and handshake then
                         -- Check if an error occurred.
                         if axi_rlast='0' or axi_rresp/=axi_resp_okay then
                             -- Assert on last flag
@@ -162,12 +162,17 @@ begin
                             error_data <= error_data_buff;
                             -- Block on error state.
                             state <= state_error;
+                        -- Upon successful completion, signal that the transaction is finished.
+                        else
+                            axi_finished <= True;
                         end if;
-                    -- Upon successful completion, starting wait for another request.
-                    else
+                    end if;
+                    -- Start waiting again if both the transaction is finished and the read 
+                    -- interface is disabled.
+                    if axi_finished and mem_read_enable='0' then
                         state <= state_wait;
                     end if;
-                -- ERROR mode.
+                -- block in ERROR mode.
                 when state_error=>
                 end case;
             end if;
