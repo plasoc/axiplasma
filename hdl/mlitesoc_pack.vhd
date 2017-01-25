@@ -26,6 +26,22 @@ package mlitesoc_pack is
     constant default_cache_replace_strat : string := "plru";
     constant default_cache_base_address : std_logic_vector := X"10000000";
     constant default_cache_enable : boolean := True;
+    
+    constant error_axi_read_exokay : integer := 0;
+    constant error_axi_read_slverr : integer := 1;
+    constant error_axi_read_decerr : integer := 2;
+    constant error_axi_read_rlast : integer := 3;
+    
+    subtype axi_rresp_type is std_logic_vector(1 downto 0);
+    constant axi_burst_incr : std_logic_vector(1 downto 0) := "01";
+    constant axi_resp_okay : axi_rresp_type := "00";
+    constant axi_resp_exokay : axi_rresp_type := "01";
+    constant axi_resp_slverr : axi_rresp_type := "10";
+    constant axi_resp_decerr : axi_rresp_type := "11";
+    constant axi_cache_device_nonbufferable : std_logic_vector(3 downto 0) := "0000"; 
+    constant axi_prot_priv : std_logic := '1';
+    constant axi_prot_sec : std_logic := '0';
+    constant axi_prot_instr : std_logic := '1';
 
     function clogb2(bit_depth : in integer ) return integer;
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
