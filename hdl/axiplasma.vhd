@@ -20,17 +20,17 @@ use ieee.numeric_std.all;
 entity axiplasma is
     generic(
         -- cpu constants
-        cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
-        cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
-        cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
+        cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
+        cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
+        cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
         -- cache constants
-        cache_address_width : integer := 12;
-        cache_way_width : integer := 2; 
-        cache_index_width : integer := 4;
-        cache_offset_width : integer := 5;
-        cache_replace_strat : string := "plru";
-        cache_base_address : std_logic_vector := X"10000000";
-        cache_enable : boolean := True );
+        cache_address_width : integer := default_cache_address_width;
+        cache_way_width : integer := default_cache_way_width; 
+        cache_index_width : integer := default_cache_index_width;
+        cache_offset_width : integer := default_cache_offset_width;
+        cache_replace_strat : string := default_cache_replace_strat;
+        cache_base_address : std_logic_vector := default_cache_base_address;
+        cache_enable : boolean := default_cache_enable );
     port(
         -- global signals
         aclk : in std_logic;
@@ -41,6 +41,7 @@ entity axiplasma is
         axi_awlen : out std_logic_vector(7 downto 0);
         axi_awsize : out std_logic_vector(2 downto 0);
         axi_awburst : out std_logic_vector(1 downto 0);
+        axi_awlock : out std_logic;
         axi_awcache : out std_logic_vector(3 downto 0);
         axi_awprot : out std_logic_vector(2 downto 0);
         axi_awqos : out std_logic_vector(3 downto 0);
@@ -61,6 +62,7 @@ entity axiplasma is
         axi_arlen : out std_logic_vector(7 downto 0);
         axi_arsize : out std_logic_vector(2 downto 0);
         axi_arburst : out std_logic_vector(1 downto 0);
+        axi_arlock : out std_logic;
         axi_arcache : out std_logic_vector(3 downto 0);
         axi_arprot : out std_logic_vector(2 downto 0);
         axi_arqos : out std_logic_vector(3 downto 0);

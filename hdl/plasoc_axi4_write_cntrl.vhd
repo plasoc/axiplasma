@@ -36,6 +36,7 @@ entity plasoc_axi4_write_cntrl is
         axi_awlen : out std_logic_vector(7 downto 0);
         axi_awsize : out std_logic_vector(2 downto 0);
         axi_awburst : out std_logic_vector(1 downto 0);
+        axi_awlock : out std_logic;
         axi_awcache : out std_logic_vector(3 downto 0);
         axi_awprot : out std_logic_vector(2 downto 0);
         axi_awqos : out std_logic_vector(3 downto 0);
@@ -77,6 +78,7 @@ begin
     axi_awlen <= axi_awlen_buff;
     axi_awsize <= std_logic_vector(to_unsigned(clogb2(cpu_bytes_per_word),axi_awsize'length));
     axi_awburst <= axi_burst_incr;
+    axi_awlock <= axi_lock_normal_access;
     axi_awcache <= axi_cache_device_nonbufferable;
     axi_awprot <= axi_prot_instr & not axi_prot_sec & not axi_prot_priv;
     axi_awqos <= (others=>'0');

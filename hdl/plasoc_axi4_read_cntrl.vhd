@@ -34,6 +34,7 @@ entity plasoc_axi4_read_cntrl is
         axi_arlen : out std_logic_vector(7 downto 0);
         axi_arsize : out std_logic_vector(2 downto 0);
         axi_arburst : out std_logic_vector(1 downto 0);
+        axi_arlock : out std_logic;
         axi_arcache : out std_logic_vector(3 downto 0);
         axi_arprot : out std_logic_vector(2 downto 0);
         axi_arqos : out std_logic_vector(3 downto 0);
@@ -71,6 +72,7 @@ begin
     axi_arlen <= axi_arlen_buff;
     axi_arsize <= std_logic_vector(to_unsigned(clogb2(cpu_bytes_per_word),axi_arsize'length));
     axi_arburst <= axi_burst_incr;
+    axi_arlock <= axi_lock_normal_access;
     axi_arcache <= axi_cache_device_nonbufferable;
     axi_arprot <= axi_prot_instr & not axi_prot_sec & not axi_prot_priv;
     axi_arqos <= (others=>'0');
