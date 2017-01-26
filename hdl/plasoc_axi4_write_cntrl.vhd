@@ -95,98 +95,100 @@ begin
         variable handshake : boolean;
         variable finished : boolean;
     begin
-        if nreset='0' then
-            error_data <= (others=>'0');
-            state <= state_wait;
-        else
-            case state is
-            -- WAIT mode.
-            when state_wait=>
-                -- Wait until the memory write interface issues a write memory access.
-                if mem_write_enable='1' then
-                    -- Set control information.
-                    axi_awaddr <= mem_write_address;
-                    -- The burst length will change according to whether the memory access is cacheable or not.
-                    if cache_cacheable='1' then
-                        burst_len := axi_burst_len_cacheable;
-                    else
-                        burst_len := axi_burst_len_noncacheable;
-                    end if;
-                    axi_awlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_awlen'length));
-                    -- Set counter to keep track the number of words written to the axi write interface.
-                    counter <= 0;
-                    -- Wait until handshake before writing data.
-                    if axi_awvalid_buff='1' and axi_awready='1' then
-                        axi_awvalid_buff <= '0';
-                        state <= state_write;
-                    else
-                        axi_awvalid_buff <= '1';
-                    end if;
-                end if;
-            -- WRITE mode.
-            when state_write=>
-                -- Check for mem handshake;
-                handshake := mem_write_valid='1' and mem_write_ready_buff='1';
-                -- Check to see if transaction is finished.
-                finished := counter=axi_awlen_buff and handshake;
-                -- On handshake with the mem interface, sample the word and
-                -- let the axi write interface know that data is valid.
-                if handshake then
-                    axi_wdata <= mem_write_data;
-                    axi_wstrb <= mem_write_strobe;
-                    counter <= counter+1;
-                    axi_wvalid_buff <= '1';
-                    -- Set the last signal on the last word in the burst.
-                    if counter=axi_awlen_buff then
-                        axi_wlast <= '1';
-                    end if;
-                -- Once the axi write interface samples the data, the data becomes invalid.
-                elsif axi_wvalid_buff='1' and axi_wready='1' then
-                    axi_wvalid_buff <= '0';
-                    axi_wlast <= '0';
-                end if;
-                -- On completition, it no longer valid for the memory write interface to 
-                -- continue to write more words. Also, it is time to acknlowedge the write response
-                -- from the axi write interface.
-                if finished then
-                    mem_write_ready_buff <= '0';
-                    state <= state_response;
-                -- Only permit the memory write interface to write data if the axi write interface
-                -- is ready for more words.
-                elsif axi_wready='1' then
-                    mem_write_ready_buff <= '1';
-                else
-                    mem_write_ready_buff <= '0';
-                end if;
-            -- RESPONSE mode.
-            when state_response=>
-                -- Wait until handshake before reading the response.
-                if axi_bvalid='1' and axi_bready_buff='1' then
-                    -- The response channel should no longer be ready once the response has been acquired.
-                    axi_bready_buff <= '0';
-                    -- Check if an error occurred.
-                    if axi_bresp/=axi_resp_okay then
-                        -- Block on error.
-                        state <= state_error;
-                        -- Determine error code.
-                        if axi_bresp=axi_resp_exokay then
-                            error_data(error_axi_read_exokay) <= '1';
-                        elsif axi_bresp=axi_resp_slverr then
-                            error_data(error_axi_read_slverr) <= '1';
-                        elsif axi_bresp=axi_resp_decerr then
-                            error_data(error_axi_read_decerr) <= '1';
+        if rising_edge(clock) then
+            if nreset='0' then
+                error_data <= (others=>'0');
+                state <= state_wait;
+            else
+                case state is
+                -- WAIT mode.
+                when state_wait=>
+                    -- Wait until the memory write interface issues a write memory access.
+                    if mem_write_enable='1' then
+                        -- Set control information.
+                        axi_awaddr <= mem_write_address;
+                        -- The burst length will change according to whether the memory access is cacheable or not.
+                        if cache_cacheable='1' then
+                            burst_len := axi_burst_len_cacheable;
+                        else
+                            burst_len := axi_burst_len_noncacheable;
                         end if;
-                    else
-                        -- If an error didn't occur, begin waiting for the next memory write request.
-                        state <= state_wait;
+                        axi_awlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_awlen'length));
+                        -- Set counter to keep track the number of words written to the axi write interface.
+                        counter <= 0;
+                        -- Wait until handshake before writing data.
+                        if axi_awvalid_buff='1' and axi_awready='1' then
+                            axi_awvalid_buff <= '0';
+                            state <= state_write;
+                        else
+                            axi_awvalid_buff <= '1';
+                        end if;
                     end if;
-                -- Let the slave axi write interface know the master is ready for the response.
-                else
-                    axi_bready_buff <= '1';
-                end if;
-            -- ERROR mode.
-            when state_error=> 
-            end case;
+                -- WRITE mode.
+                when state_write=>
+                    -- Check for mem handshake;
+                    handshake := mem_write_valid='1' and mem_write_ready_buff='1';
+                    -- Check to see if transaction is finished.
+                    finished := counter=axi_awlen_buff and handshake;
+                    -- On handshake with the mem interface, sample the word and
+                    -- let the axi write interface know that data is valid.
+                    if handshake then
+                        axi_wdata <= mem_write_data;
+                        axi_wstrb <= mem_write_strobe;
+                        counter <= counter+1;
+                        axi_wvalid_buff <= '1';
+                        -- Set the last signal on the last word in the burst.
+                        if counter=axi_awlen_buff then
+                            axi_wlast <= '1';
+                        end if;
+                    -- Once the axi write interface samples the data, the data becomes invalid.
+                    elsif axi_wvalid_buff='1' and axi_wready='1' then
+                        axi_wvalid_buff <= '0';
+                        axi_wlast <= '0';
+                    end if;
+                    -- On completition, it no longer valid for the memory write interface to 
+                    -- continue to write more words. Also, it is time to acknlowedge the write response
+                    -- from the axi write interface.
+                    if finished then
+                        mem_write_ready_buff <= '0';
+                        state <= state_response;
+                    -- Only permit the memory write interface to write data if the axi write interface
+                    -- is ready for more words.
+                    elsif axi_wready='1' then
+                        mem_write_ready_buff <= '1';
+                    else
+                        mem_write_ready_buff <= '0';
+                    end if;
+                -- RESPONSE mode.
+                when state_response=>
+                    -- Wait until handshake before reading the response.
+                    if axi_bvalid='1' and axi_bready_buff='1' then
+                        -- The response channel should no longer be ready once the response has been acquired.
+                        axi_bready_buff <= '0';
+                        -- Check if an error occurred.
+                        if axi_bresp/=axi_resp_okay then
+                            -- Block on error.
+                            state <= state_error;
+                            -- Determine error code.
+                            if axi_bresp=axi_resp_exokay then
+                                error_data(error_axi_read_exokay) <= '1';
+                            elsif axi_bresp=axi_resp_slverr then
+                                error_data(error_axi_read_slverr) <= '1';
+                            elsif axi_bresp=axi_resp_decerr then
+                                error_data(error_axi_read_decerr) <= '1';
+                            end if;
+                        else
+                            -- If an error didn't occur, begin waiting for the next memory write request.
+                            state <= state_wait;
+                        end if;
+                    -- Let the slave axi write interface know the master is ready for the response.
+                    else
+                        axi_bready_buff <= '1';
+                    end if;
+                -- ERROR mode.
+                when state_error=> 
+                end case;
+            end if;
         end if;
     end process;
 
