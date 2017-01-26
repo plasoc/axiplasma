@@ -9,7 +9,7 @@ use work.mlite_pack.all;
 use work.mlitesoc_pack.all;
 
 entity testbench_vivado_0 is
-    generic (indelay : time := 0 ns);
+    generic (indelay : time := 2 ns);
 end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
