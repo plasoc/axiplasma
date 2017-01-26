@@ -32,7 +32,7 @@ entity plasoc_axi4_write_cntrl is
         cache_cacheable : in std_logic;
         -- axi write interface.
         axi_awid : out std_logic_vector(0 downto 0);
-        axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0);
+        axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         axi_awlen : out std_logic_vector(7 downto 0);
         axi_awsize : out std_logic_vector(2 downto 0);
         axi_awburst : out std_logic_vector(1 downto 0);
@@ -43,9 +43,9 @@ entity plasoc_axi4_write_cntrl is
         axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);
         axi_awvalid : out std_logic;
         axi_awready : in std_logic;
-        axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0);
-        axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0);
-        axi_wlast : out std_logic;
+        axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+        axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
+        axi_wlast : out std_logic := '0';
         axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);
         axi_wvalid : out std_logic;
         axi_wready : in std_logic;
@@ -67,11 +67,11 @@ architecture Behavioral of plasoc_axi4_write_cntrl is
     type state_type is (state_wait,state_write,state_response,state_error);
     signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
-    signal axi_awlen_buff : std_logic_vector(7 downto 0);
-    signal axi_awvalid_buff : std_logic;
-    signal axi_wvalid_buff : std_logic;
-    signal mem_write_ready_buff : std_logic;
-    signal axi_bready_buff : std_logic;
+    signal axi_awlen_buff : std_logic_vector(7 downto 0) := (others=>'0');
+    signal axi_awvalid_buff : std_logic := '0';
+    signal axi_wvalid_buff : std_logic := '0';
+    signal mem_write_ready_buff : std_logic := '0';
+    signal axi_bready_buff : std_logic := '0';
 begin
 
     axi_awid <= (others=>'0');

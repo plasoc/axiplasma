@@ -97,7 +97,7 @@ architecture Behavioral of testbench_1 is
     end;
 begin
     clock <= not clock after 50 ns;
-    resetn <= '1' after 500ns + indelay;
+    resetn <= '1' after 1000ns + indelay;
     cpu0_pause <= debug_cpu_pause;
     
     -- CPU

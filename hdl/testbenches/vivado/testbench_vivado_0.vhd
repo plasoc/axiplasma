@@ -34,8 +34,8 @@ architecture Behavioral of testbench_vivado_0 is
     subtype word_type is std_logic_vector(cpu_width-1 downto 0);
     type ram_type is array(0 to ram_size-1) of word_type;
     -- Signal declarations.
-    signal aclk : std_logic;
-    signal aresetn : std_logic;
+    signal aclk : std_logic := '1';
+    signal aresetn : std_logic := '0';
     signal debug_cpu_pause : std_logic;
     signal bram_rst_a : STD_LOGIC;
     signal bram_clk_a : STD_LOGIC;
@@ -112,7 +112,6 @@ begin
             mem_pause => debug_cpu_pause );
     -- Drive ram interface for axiplasma. The ram is implemented with a combination of the Xilinx
     -- axi bram controller and an array into which the binary is uplosed.
-    bram_rddata_a <= axiplasma_ram_buffer(to_integer(unsigned(bram_addr_a))/bytes_per_word) after indelay;
     process (bram_clk_a) 
         variable base_index : integer;
         variable ram_loaded : boolean := False;
@@ -142,13 +141,14 @@ begin
                                 bram_wrdata_a(each_byte*8+7 downto each_byte*8);
                         end if;
                     end loop;
+                    -- Write word to BRAM read interface, as well.
+                    bram_rddata_a <= axiplasma_ram_buffer(base_index) after indelay;
                 end if;
             end if;
         end if;
     end process;
     -- Driver ram interface for mlite, the original CPU.
     mlite_address_next(1 downto 0) <= "00";
-    mlite_data_r <= axiplasma_ram_buffer(to_integer(unsigned(mlite_address_next))/bytes_per_word);
     process (aclk)
         variable base_index : integer;
         variable ram_loaded : boolean := False;
@@ -176,10 +176,12 @@ begin
                             mlite_data_w(each_byte*8+7 downto each_byte*8);
                     end if;
                 end loop;
+                -- Write word to CPU read interface, as well.
+                mlite_data_r <= axiplasma_ram_buffer(base_index);
             end if;
         end if;
     end process;
     -- Drive clock and reset.
     aclk <= not aclk after 50 ns;
-    aresetn <= '1' after 500ns + indelay;
+    aresetn <= '1' after 1000ns + indelay;
 end Behavioral;

@@ -22,7 +22,7 @@ entity plasoc_axi4_read_cntrl is
         nreset : in std_logic;
         -- mem read interface.
         mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);
-        mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+        mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
         mem_read_enable : in std_logic;
         mem_read_valid : out std_logic;
         mem_read_ready : in std_logic;
@@ -30,7 +30,7 @@ entity plasoc_axi4_read_cntrl is
         cache_cacheable : in std_logic;
         -- axi read interface.
         axi_arid : out std_logic_vector(0 downto 0);
-        axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0);
+        axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         axi_arlen : out std_logic_vector(7 downto 0);
         axi_arsize : out std_logic_vector(2 downto 0);
         axi_arburst : out std_logic_vector(1 downto 0);
@@ -62,10 +62,10 @@ architecture Behavioral of plasoc_axi4_read_cntrl is
     signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
     signal axi_finished : boolean := False;
-    signal axi_arlen_buff : std_logic_vector(7 downto 0);
-    signal axi_arvalid_buff : std_logic;
-    signal axi_rready_buff : std_logic;
-    signal mem_read_valid_buff : std_logic;
+    signal axi_arlen_buff : std_logic_vector(7 downto 0) := (others=>'0');
+    signal axi_arvalid_buff : std_logic := '0';
+    signal axi_rready_buff : std_logic  := '0';
+    signal mem_read_valid_buff : std_logic  := '0';
 begin
 
     axi_arid <= (others=>'0');
