@@ -31,6 +31,8 @@ architecture Behavioral of testbench_vivado_0 is
     constant bytes_per_word : integer := (cpu_width/8);
     constant ram_address_width : integer := 16;
     constant ram_size : integer := 2**ram_address_width/bytes_per_word;
+    constant cache_address_0 : integer := to_integer(unsigned(default_cache_base_address))/bytes_per_word;
+    constant cache_address_1 : integer := cache_address_0+1;
     subtype word_type is std_logic_vector(cpu_width-1 downto 0);
     type ram_type is array(0 to ram_size-1) of word_type;
     -- Signal declarations.
@@ -47,7 +49,7 @@ architecture Behavioral of testbench_vivado_0 is
     signal mlite_address_next : std_logic_vector(31 downto 0);
     signal mlite_strobe_next : std_logic_vector(3 downto 0);
     signal mlite_data_w : std_logic_vector(31 downto 0);
-    signal mlite_data_r: std_logic_vector(31 downto 0);
+    signal mlite_data_r: std_logic_vector(31 downto 0) := (others=>'0');
     signal mlite_ram_buffer : ram_type;
     signal axiplasma_ram_buffer : ram_type;
     -- function declarations.
@@ -75,7 +77,23 @@ architecture Behavioral of testbench_vivado_0 is
         end loop;
         return ram_buffer;
     end;
+    -- debug
+    constant addres_to_check : std_logic_vector(ram_address_width-1 downto 0) := X"0624";
+    signal mlite_address_checked : boolean;
+    signal bram_address_checked : boolean;
+    signal axiplasma_check_memory : word_type;
+    signal mlite_check_memory : word_type;
 begin
+    -- debug
+    bram_address_checked <= True when addres_to_check=bram_addr_a else False;
+    mlite_address_checked <= True when addres_to_check=mlite_address_next else False;
+    process (aclk)
+    begin
+        if rising_edge(aclk) then
+            axiplasma_check_memory <= axiplasma_ram_buffer(to_integer(unsigned(addres_to_check)));
+            mlite_check_memory <= mlite_ram_buffer(to_integer(unsigned(addres_to_check)));
+        end if;
+    end process;
     -- axiplasma/axibram instantiation.
     axiplasma_wrapper_inst : 
     axiplasma_wrapper 
@@ -134,15 +152,21 @@ begin
                     -- Acquire index into array. Every memory access should be aligned,
                     -- so this shouldn't cause any problems.
                     base_index := to_integer(unsigned(bram_addr_a))/bytes_per_word;
-                    -- Write data according to which bytes are enabled.
-                    for each_byte in bram_we_a'low to bram_we_a'high loop
-                        if bram_we_a(each_byte)='1' then
-                            axiplasma_ram_buffer(base_index)(each_byte*8+7 downto each_byte*8) <= 
-                                bram_wrdata_a(each_byte*8+7 downto each_byte*8);
-                        end if;
-                    end loop;
-                    -- Write word to BRAM read interface, as well.
-                    bram_rddata_a <= axiplasma_ram_buffer(base_index) after indelay;
+                    -- Make sure cache addresses are ignored.
+                    if base_index/=cache_address_0 and base_index/=cache_address_1 then
+                        -- Write data according to which bytes are enabled.
+                        for each_byte in 0 to bytes_per_word-1 loop
+                            if bram_we_a(each_byte)='1' then
+                                axiplasma_ram_buffer(base_index)(each_byte*8+7 downto each_byte*8) <= 
+                                    bram_wrdata_a(each_byte*8+7 downto each_byte*8);
+                            end if;
+                        end loop;
+                        -- Write word to BRAM read interface, as well.
+                        bram_rddata_a <= axiplasma_ram_buffer(base_index) after indelay;
+                    else
+                        -- Default value of bram read interface.
+                        bram_rddata_a <= (others=>'0');
+                    end if;
                 end if;
             end if;
         end if;
@@ -169,15 +193,21 @@ begin
                 -- Acquire index into array. Every memory access should be aligned,
                 -- so this shouldn't cause any problems.
                 base_index := to_integer(unsigned(mlite_address_next))/bytes_per_word;
-                -- Write data according to which bytes are enabled.
-                for each_byte in bram_we_a'low to bram_we_a'high loop
-                    if mlite_strobe_next(each_byte)='1' then
-                        mlite_ram_buffer(base_index)(each_byte*8+7 downto each_byte*8) <= 
-                            mlite_data_w(each_byte*8+7 downto each_byte*8);
-                    end if;
-                end loop;
-                -- Write word to CPU read interface, as well.
-                mlite_data_r <= axiplasma_ram_buffer(base_index);
+                -- Make sure cache addresses are ignored.
+                if base_index/=cache_address_0 and base_index/=cache_address_1 then
+                    -- Write data according to which bytes are enabled.
+                    for each_byte in 0 to bytes_per_word-1 loop
+                        if mlite_strobe_next(each_byte)='1' then
+                            mlite_ram_buffer(base_index)(each_byte*8+7 downto each_byte*8) <= 
+                                mlite_data_w(each_byte*8+7 downto each_byte*8);
+                        end if;
+                    end loop;
+                    -- Write word to CPU read interface, as well.
+                    mlite_data_r <= mlite_ram_buffer(base_index);
+                else
+                    -- Default value of bmlite read interface.
+                    mlite_data_r <= (others=>'0');
+                end if;
             end if;
         end if;
     end process;

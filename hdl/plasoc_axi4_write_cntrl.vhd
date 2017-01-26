@@ -92,7 +92,8 @@ begin
     process (clock)
         variable burst_len : integer range 0 to 2**axi_awlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
-        variable handshake : boolean;
+        variable mem_handshake : boolean;
+        variable axi_handshake : boolean;
         variable finished : boolean;
     begin
         if rising_edge(clock) then
@@ -126,13 +127,12 @@ begin
                     end if;
                 -- WRITE mode.
                 when state_write=>
-                    -- Check for mem handshake;
-                    handshake := mem_write_valid='1' and mem_write_ready_buff='1';
-                    -- Check to see if transaction is finished.
-                    finished := counter=axi_awlen_buff and handshake;
+                    -- Check for handshakes;
+                    mem_handshake := mem_write_valid='1' and mem_write_ready_buff='1';
+                    axi_handshake := axi_wvalid_buff='1' and axi_wready='1';
                     -- On handshake with the mem interface, sample the word and
                     -- let the axi write interface know that data is valid.
-                    if handshake then
+                    if mem_handshake then
                         axi_wdata <= mem_write_data;
                         axi_wstrb <= mem_write_strobe;
                         counter <= counter+1;
@@ -142,14 +142,14 @@ begin
                             axi_wlast <= '1';
                         end if;
                     -- Once the axi write interface samples the data, the data becomes invalid.
-                    elsif axi_wvalid_buff='1' and axi_wready='1' then
+                    elsif axi_handshake then
                         axi_wvalid_buff <= '0';
                         axi_wlast <= '0';
                     end if;
                     -- On completition, it no longer valid for the memory write interface to 
                     -- continue to write more words. Also, it is time to acknlowedge the write response
                     -- from the axi write interface.
-                    if finished then
+                    if counter=axi_awlen_buff+1 and axi_handshake then
                         mem_write_ready_buff <= '0';
                         state <= state_response;
                     -- Only permit the memory write interface to write data if the axi write interface
