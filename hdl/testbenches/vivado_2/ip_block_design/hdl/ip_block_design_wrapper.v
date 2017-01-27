@@ -1,7 +1,7 @@
 //Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 //--------------------------------------------------------------------------------
 //Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
-//Date        : Thu Jan 26 22:06:11 2017
+//Date        : Fri Jan 27 14:00:17 2017
 //Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 //Command     : generate_target ip_block_design_wrapper.bd
 //Design      : ip_block_design_wrapper
@@ -67,10 +67,10 @@ module ip_block_design_wrapper
   input [0:0]axi_arlock;
   input [2:0]axi_arprot;
   input [3:0]axi_arqos;
-  output [0:0]axi_arready;
+  output axi_arready;
   input [3:0]axi_arregion;
   input [2:0]axi_arsize;
-  input [0:0]axi_arvalid;
+  input axi_arvalid;
   input [31:0]axi_awaddr;
   input [1:0]axi_awburst;
   input [3:0]axi_awcache;
@@ -78,23 +78,23 @@ module ip_block_design_wrapper
   input [0:0]axi_awlock;
   input [2:0]axi_awprot;
   input [3:0]axi_awqos;
-  output [0:0]axi_awready;
+  output axi_awready;
   input [3:0]axi_awregion;
   input [2:0]axi_awsize;
-  input [0:0]axi_awvalid;
-  input [0:0]axi_bready;
+  input axi_awvalid;
+  input axi_bready;
   output [1:0]axi_bresp;
-  output [0:0]axi_bvalid;
+  output axi_bvalid;
   output [31:0]axi_rdata;
-  output [0:0]axi_rlast;
-  input [0:0]axi_rready;
+  output axi_rlast;
+  input axi_rready;
   output [1:0]axi_rresp;
-  output [0:0]axi_rvalid;
+  output axi_rvalid;
   input [31:0]axi_wdata;
-  input [0:0]axi_wlast;
-  output [0:0]axi_wready;
+  input axi_wlast;
+  output axi_wready;
   input [3:0]axi_wstrb;
-  input [0:0]axi_wvalid;
+  input axi_wvalid;
   input [7:0]gpio_input;
   output [7:0]gpio_output;
   output [15:0]ram_addr;
@@ -116,10 +116,10 @@ module ip_block_design_wrapper
   wire [0:0]axi_arlock;
   wire [2:0]axi_arprot;
   wire [3:0]axi_arqos;
-  wire [0:0]axi_arready;
+  wire axi_arready;
   wire [3:0]axi_arregion;
   wire [2:0]axi_arsize;
-  wire [0:0]axi_arvalid;
+  wire axi_arvalid;
   wire [31:0]axi_awaddr;
   wire [1:0]axi_awburst;
   wire [3:0]axi_awcache;
@@ -127,23 +127,23 @@ module ip_block_design_wrapper
   wire [0:0]axi_awlock;
   wire [2:0]axi_awprot;
   wire [3:0]axi_awqos;
-  wire [0:0]axi_awready;
+  wire axi_awready;
   wire [3:0]axi_awregion;
   wire [2:0]axi_awsize;
-  wire [0:0]axi_awvalid;
-  wire [0:0]axi_bready;
+  wire axi_awvalid;
+  wire axi_bready;
   wire [1:0]axi_bresp;
-  wire [0:0]axi_bvalid;
+  wire axi_bvalid;
   wire [31:0]axi_rdata;
-  wire [0:0]axi_rlast;
-  wire [0:0]axi_rready;
+  wire axi_rlast;
+  wire axi_rready;
   wire [1:0]axi_rresp;
-  wire [0:0]axi_rvalid;
+  wire axi_rvalid;
   wire [31:0]axi_wdata;
-  wire [0:0]axi_wlast;
-  wire [0:0]axi_wready;
+  wire axi_wlast;
+  wire axi_wready;
   wire [3:0]axi_wstrb;
-  wire [0:0]axi_wvalid;
+  wire axi_wvalid;
   wire [7:0]gpio_input;
   wire [7:0]gpio_output;
   wire [15:0]ram_addr;

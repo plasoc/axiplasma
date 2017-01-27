@@ -55,7 +55,7 @@ set design_name ip_block_design
 
 set run_remote_bd_flow 1
 if { $run_remote_bd_flow == 1 } {
-  set str_bd_folder /opt/Xilinx/Projects/koc/axiplasma/hdl/testbenches/vivado_2
+  set str_bd_folder C:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/testbenches/vivado_2
   set str_bd_filepath ${str_bd_folder}/${design_name}/${design_name}.bd
 
   # Check if remote design exists on disk

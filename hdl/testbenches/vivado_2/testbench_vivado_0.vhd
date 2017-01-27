@@ -35,7 +35,7 @@ architecture Behavioral of testbench_vivado_0 is
             gpio_input : in std_logic_vector(7 downto 0));
     end component;
     constant clock_period : time := 10 ns;
-    constant time_out_threshold : integer := 512;
+    constant time_out_threshold : integer := 2**10;
     subtype gpio_type is std_logic_vector(7 downto 0);
     signal raw_clock : std_logic := '1';
     signal raw_nreset : std_logic := '0';
@@ -89,7 +89,7 @@ begin
         -- Let's wait for the reset to be disabled before starting anything.
         wait until raw_nreset='1';
         -- Let's wait a WHOLE BUNCH of clock cycles until the boot loader finishes its thang.
-        wait for 2**13*clock_period;
+        wait for 2**16*clock_period;
         -- Perform the following operation for all bits in gpio input.
         for each_bit in gpio_input'low to gpio_input'high loop
             set_gpio_input(each_bit);
