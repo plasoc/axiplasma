@@ -8,7 +8,8 @@
 #define PLASMA_SOC_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C" 
+{
 #endif
 
 	/* L1 cache definitions. */
