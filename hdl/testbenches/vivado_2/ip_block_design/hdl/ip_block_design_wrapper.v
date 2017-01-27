@@ -1,7 +1,7 @@
 //Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 //--------------------------------------------------------------------------------
 //Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
-//Date        : Thu Jan 26 19:15:17 2017
+//Date        : Thu Jan 26 22:06:11 2017
 //Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 //Command     : generate_target ip_block_design_wrapper.bd
 //Design      : ip_block_design_wrapper
@@ -20,6 +20,7 @@ module ip_block_design_wrapper
     axi_arprot,
     axi_arqos,
     axi_arready,
+    axi_arregion,
     axi_arsize,
     axi_arvalid,
     axi_awaddr,
@@ -30,6 +31,7 @@ module ip_block_design_wrapper
     axi_awprot,
     axi_awqos,
     axi_awready,
+    axi_awregion,
     axi_awsize,
     axi_awvalid,
     axi_bready,
@@ -66,6 +68,7 @@ module ip_block_design_wrapper
   input [2:0]axi_arprot;
   input [3:0]axi_arqos;
   output [0:0]axi_arready;
+  input [3:0]axi_arregion;
   input [2:0]axi_arsize;
   input [0:0]axi_arvalid;
   input [31:0]axi_awaddr;
@@ -76,6 +79,7 @@ module ip_block_design_wrapper
   input [2:0]axi_awprot;
   input [3:0]axi_awqos;
   output [0:0]axi_awready;
+  input [3:0]axi_awregion;
   input [2:0]axi_awsize;
   input [0:0]axi_awvalid;
   input [0:0]axi_bready;
@@ -113,6 +117,7 @@ module ip_block_design_wrapper
   wire [2:0]axi_arprot;
   wire [3:0]axi_arqos;
   wire [0:0]axi_arready;
+  wire [3:0]axi_arregion;
   wire [2:0]axi_arsize;
   wire [0:0]axi_arvalid;
   wire [31:0]axi_awaddr;
@@ -123,6 +128,7 @@ module ip_block_design_wrapper
   wire [2:0]axi_awprot;
   wire [3:0]axi_awqos;
   wire [0:0]axi_awready;
+  wire [3:0]axi_awregion;
   wire [2:0]axi_awsize;
   wire [0:0]axi_awvalid;
   wire [0:0]axi_bready;
@@ -161,6 +167,7 @@ module ip_block_design_wrapper
         .axi_arprot(axi_arprot),
         .axi_arqos(axi_arqos),
         .axi_arready(axi_arready),
+        .axi_arregion(axi_arregion),
         .axi_arsize(axi_arsize),
         .axi_arvalid(axi_arvalid),
         .axi_awaddr(axi_awaddr),
@@ -171,6 +178,7 @@ module ip_block_design_wrapper
         .axi_awprot(axi_awprot),
         .axi_awqos(axi_awqos),
         .axi_awready(axi_awready),
+        .axi_awregion(axi_awregion),
         .axi_awsize(axi_awsize),
         .axi_awvalid(axi_awvalid),
         .axi_bready(axi_bready),

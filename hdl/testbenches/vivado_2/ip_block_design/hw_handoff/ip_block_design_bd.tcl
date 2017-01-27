@@ -55,7 +55,7 @@ set design_name ip_block_design
 
 set run_remote_bd_flow 1
 if { $run_remote_bd_flow == 1 } {
-  set str_bd_folder /opt/Xilinx/Projects/koc/axiplasma/hdl/testbenches/vivado_2
+  set str_bd_folder C:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/testbenches/vivado_2
   set str_bd_filepath ${str_bd_folder}/${design_name}/${design_name}.bd
 
   # Check if remote design exists on disk
@@ -176,6 +176,7 @@ CONFIG.MASTER_TYPE {BRAM_CTRL} \
   set aclk [ create_bd_port -dir O -type clk aclk ]
   set_property -dict [ list \
 CONFIG.ASSOCIATED_BUSIF {axi} \
+CONFIG.ASSOCIATED_RESET {aresetn} \
  ] $aclk
   set aresetn [ create_bd_port -dir O -from 0 -to 0 -type rst aresetn ]
   set gpio_input [ create_bd_port -dir I -from 7 -to 0 gpio_input ]
@@ -207,32 +208,44 @@ CONFIG.C_GPIO_WIDTH {8} \
   # Create instance: axi_interconnect_0, and set properties
   set axi_interconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_interconnect_0 ]
   set_property -dict [ list \
+CONFIG.M00_HAS_REGSLICE {4} \
+CONFIG.M01_HAS_REGSLICE {4} \
+CONFIG.M02_HAS_REGSLICE {4} \
 CONFIG.NUM_MI {3} \
+CONFIG.S00_HAS_DATA_FIFO {2} \
+CONFIG.STRATEGY {2} \
  ] $axi_interconnect_0
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 clk_wiz_0 ]
   set_property -dict [ list \
+CONFIG.CLKOUT1_DRIVES {BUFG} \
 CONFIG.CLKOUT1_JITTER {151.636} \
 CONFIG.CLKOUT1_PHASE_ERROR {98.575} \
 CONFIG.CLKOUT1_REQUESTED_OUT_FREQ {50.00} \
+CONFIG.CLKOUT2_DRIVES {BUFG} \
+CONFIG.CLKOUT3_DRIVES {BUFG} \
+CONFIG.CLKOUT4_DRIVES {BUFG} \
+CONFIG.CLKOUT5_DRIVES {BUFG} \
+CONFIG.CLKOUT6_DRIVES {BUFG} \
+CONFIG.CLKOUT7_DRIVES {BUFG} \
+CONFIG.FEEDBACK_SOURCE {FDBK_AUTO} \
 CONFIG.MMCM_CLKFBOUT_MULT_F {10.000} \
 CONFIG.MMCM_CLKIN1_PERIOD {10.0} \
 CONFIG.MMCM_CLKIN2_PERIOD {10.0} \
 CONFIG.MMCM_CLKOUT0_DIVIDE_F {20.000} \
 CONFIG.MMCM_COMPENSATION {ZHOLD} \
 CONFIG.MMCM_DIVCLK_DIVIDE {1} \
+CONFIG.PRIMITIVE {MMCM} \
+CONFIG.PRIM_IN_FREQ {100.000} \
 CONFIG.RESET_PORT {resetn} \
 CONFIG.RESET_TYPE {ACTIVE_LOW} \
  ] $clk_wiz_0
 
   # Need to retain value_src of defaults
   set_property -dict [ list \
-CONFIG.CLKOUT1_PHASE_ERROR.VALUE_SRC {DEFAULT} \
-CONFIG.MMCM_CLKFBOUT_MULT_F.VALUE_SRC {DEFAULT} \
 CONFIG.MMCM_CLKIN1_PERIOD.VALUE_SRC {DEFAULT} \
 CONFIG.MMCM_CLKIN2_PERIOD.VALUE_SRC {DEFAULT} \
-CONFIG.MMCM_COMPENSATION.VALUE_SRC {DEFAULT} \
  ] $clk_wiz_0
 
   # Create instance: proc_sys_reset_0, and set properties
