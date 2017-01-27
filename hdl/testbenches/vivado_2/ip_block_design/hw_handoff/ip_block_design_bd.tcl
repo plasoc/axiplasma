@@ -269,7 +269,7 @@ CONFIG.MMCM_CLKIN2_PERIOD.VALUE_SRC {DEFAULT} \
   connect_bd_net -net resetn_1 [get_bd_ports raw_nreset] [get_bd_pins clk_wiz_0/resetn] [get_bd_pins proc_sys_reset_0/ext_reset_in]
 
   # Create address segments
-  create_bd_addr_seg -range 0x00010000 -offset 0xC0000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] SEG_axi_bram_ctrl_0_Mem0
+  create_bd_addr_seg -range 0x00010000 -offset 0x00000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] SEG_axi_bram_ctrl_0_Mem0
   create_bd_addr_seg -range 0x00010000 -offset 0x40000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_input/S_AXI/Reg] SEG_axi_gpio_input_Reg
   create_bd_addr_seg -range 0x00010000 -offset 0x40010000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_output/S_AXI/Reg] SEG_axi_gpio_output_Reg
 

@@ -17,6 +17,9 @@ if __name__ == '__main__':
     parser.add_argument('--swap_bytes',dest='swap_bytes',action='store_const',
                     const=True,default=False,
                     help='Swaps the bytes in each word')
+    parser.add_argument('--plain_hex',dest='plain_hex',action='store_const',
+                    const=True,default=False,
+                    help='Swaps the bytes in each word')
     parser.add_argument('--word_count',metavar='word_count',type=int,nargs=1,
                     help='Numbers of words to store in coef from the binary.')
     
@@ -25,6 +28,7 @@ if __name__ == '__main__':
     binary_name = args.binary_name[0]
     coe_name = args.coe_name[0]
     swap_bytes_flag = args.swap_bytes
+    plain_hex_flag = args.plain_hex
     try: word_count_value = args.word_count[0]
     except TypeError: word_count_value = -1
     
@@ -39,9 +43,10 @@ if __name__ == '__main__':
     radix = 16
     # First open binary for reading and the coe file for writing.
     with open(binary_name,mode='rb') as binary_file, open(coe_name,mode='w') as coe_file:
-        # Insert the necessary headers into the coe files.
-        coe_file.write('memory_initialization_radix='+repr(radix)+';\n')
-        coe_file.write('memory_initialization_vector=\n')
+        # If plain hex is disabled, then insert the necessary headers into the coe files.
+        if not plain_hex_flag:
+            coe_file.write('memory_initialization_radix='+repr(radix)+';\n')
+            coe_file.write('memory_initialization_vector=\n')
         # Acquire the binary file and determine the number of words in the file.
         binary_content = binary_file.read()
         words_in_binary = len(binary_content)/bytes_per_word
@@ -62,5 +67,8 @@ if __name__ == '__main__':
             word_hex = "%0.8X" % word_int
             # Write the word to the coe file.
             coe_file.write(word_hex)
-            if each_word != words_in_binary-1: coe_file.write(',\n')
-            else: coe_file.write(';\n')
+            # If plain hex is disabled, insert necessary syntax for coe.
+            if not plain_hex_flag:
+                if each_word != words_in_binary-1: coe_file.write(',')
+                else: coe_file.write(';')
+            coe_file.write('\n')

@@ -337,7 +337,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>CLK_DOMAIN</spirit:name>
-            <spirit:value>ip_block_design_clk_in1</spirit:value>
+            <spirit:value>ip_block_design_raw_clock</spirit:value>
             <spirit:vendorExtensions>
               <bd:configElementInfos>
                 <bd:configElementInfo bd:valueSource="default"/>
@@ -536,12 +536,6 @@
         <spirit:width>32</spirit:width>
         <spirit:segments>
           <spirit:segment>
-            <spirit:name>SEG_axi_bram_ctrl_0_Mem0</spirit:name>
-            <spirit:displayName>/axi_bram_ctrl_0/S_AXI/Mem0</spirit:displayName>
-            <spirit:addressOffset>0xC0000000</spirit:addressOffset>
-            <spirit:range>64K</spirit:range>
-          </spirit:segment>
-          <spirit:segment>
             <spirit:name>SEG_axi_gpio_input_Reg</spirit:name>
             <spirit:displayName>/axi_gpio_input/S_AXI/Reg</spirit:displayName>
             <spirit:addressOffset>0x40000000</spirit:addressOffset>
@@ -551,6 +545,12 @@
             <spirit:name>SEG_axi_gpio_output_Reg</spirit:name>
             <spirit:displayName>/axi_gpio_output/S_AXI/Reg</spirit:displayName>
             <spirit:addressOffset>0x40010000</spirit:addressOffset>
+            <spirit:range>64K</spirit:range>
+          </spirit:segment>
+          <spirit:segment>
+            <spirit:name>SEG_axi_bram_ctrl_0_Mem0</spirit:name>
+            <spirit:displayName>/axi_bram_ctrl_0/S_AXI/Mem0</spirit:displayName>
+            <spirit:addressOffset>0x00000000</spirit:addressOffset>
             <spirit:range>64K</spirit:range>
           </spirit:segment>
         </spirit:segments>

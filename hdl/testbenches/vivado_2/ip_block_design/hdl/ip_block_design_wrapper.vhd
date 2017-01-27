@@ -1,7 +1,7 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2016.2 (lin64) Build 1577090 Thu Jun  2 16:32:35 MDT 2016
---Date        : Thu Jan 26 23:12:03 2017
+--Date        : Fri Jan 27 11:32:12 2017
 --Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 --Command     : generate_target ip_block_design_wrapper.bd
 --Design      : ip_block_design_wrapper

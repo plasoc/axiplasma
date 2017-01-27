@@ -11,7 +11,7 @@ AS_MIPS = $(BIN_DIR)mips-none-elf-as
 LD_MIPS = $(BIN_DIR)mips-none-elf-ld $(LFLAGS)
 DUMP_MIPS = $(BIN_DIR)mips-none-elf-objdump
 CONVERT_BIN = $(BIN_DIR)mips-none-elf-objcopy -I elf32-big -O binary main.axf main.bin 
-BIN2COE = python $(MISC_DIR)bin2coe.py main.bin main.coe --swap --word_count 16384
+BIN2COE = python $(MISC_DIR)bin2coe.py main.bin main.hex --swap_bytes --plain_hex --word_count 16384
 
 CFLAGS = -Os -Wall -c -s
 CFLAGS += -fno-pic -mips1 -mno-abicalls -I$(PLASMA_DIR)

@@ -24,9 +24,10 @@ architecture Behavioral of axiplasma_wrapper is
         axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
         axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
         axi_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-        axi_arready : out STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_arready : out STD_LOGIC;
+        axi_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
         axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-        axi_arvalid : in STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_arvalid : in STD_LOGIC;
         axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
         axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
         axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
@@ -34,22 +35,23 @@ architecture Behavioral of axiplasma_wrapper is
         axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
         axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
         axi_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-        axi_awready : out STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_awready : out STD_LOGIC;
+        axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
         axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-        axi_awvalid : in STD_LOGIC_VECTOR ( 0 to 0 );
-        axi_bready : in STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_awvalid : in STD_LOGIC;
+        axi_bready : in STD_LOGIC;
         axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-        axi_bvalid : out STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_bvalid : out STD_LOGIC;
         axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-        axi_rlast : out STD_LOGIC_VECTOR ( 0 to 0 );
-        axi_rready : in STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_rlast : out STD_LOGIC;
+        axi_rready : in STD_LOGIC;
         axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-        axi_rvalid : out STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_rvalid : out STD_LOGIC;
         axi_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-        axi_wlast : in STD_LOGIC_VECTOR ( 0 to 0 );
-        axi_wready : out STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_wlast : in STD_LOGIC;
+        axi_wready : out STD_LOGIC;
         axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
-        axi_wvalid : in STD_LOGIC_VECTOR ( 0 to 0 );
+        axi_wvalid : in STD_LOGIC;
         gpio_input : in STD_LOGIC_VECTOR ( 7 downto 0 );
         gpio_output : out STD_LOGIC_VECTOR ( 7 downto 0 );
         ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
@@ -86,17 +88,17 @@ architecture Behavioral of axiplasma_wrapper is
     signal axi_awcache : std_logic_vector(3 downto 0);
     signal axi_awprot : std_logic_vector(2 downto 0);
     signal axi_awqos : std_logic_vector(3 downto 0);
-    signal axi_awvalid : std_logic_vector(0 downto 0);
-    signal axi_awready : std_logic_vector(0 downto 0);
+    signal axi_awvalid : std_logic;
+    signal axi_awready : std_logic;
     signal axi_wdata : std_logic_vector(31 downto 0);
     signal axi_wstrb : std_logic_vector(3 downto 0);
-    signal axi_wlast : std_logic_vector(0 downto 0);
-    signal axi_wvalid : std_logic_vector(0 downto 0);
-    signal axi_wready : std_logic_vector(0 downto 0);
+    signal axi_wlast : std_logic;
+    signal axi_wvalid : std_logic;
+    signal axi_wready : std_logic;
     signal axi_bid : std_logic_vector(0 downto 0);
     signal axi_bresp :  std_logic_vector(1 downto 0);
-    signal axi_bvalid : std_logic_vector(0 downto 0);
-    signal axi_bready : std_logic_vector(0 downto 0);
+    signal axi_bvalid : std_logic;
+    signal axi_bready : std_logic;
     signal axi_arid : std_logic_vector(0 downto 0);
     signal axi_araddr : std_logic_vector(31 downto 0);
     signal axi_arlen : std_logic_vector(7 downto 0);
@@ -106,14 +108,14 @@ architecture Behavioral of axiplasma_wrapper is
     signal axi_arcache : std_logic_vector(3 downto 0);
     signal axi_arprot : std_logic_vector(2 downto 0);
     signal axi_arqos : std_logic_vector(3 downto 0);
-    signal axi_arvalid : std_logic_vector(0 downto 0);
-    signal axi_arready : std_logic_vector(0 downto 0);
+    signal axi_arvalid : std_logic;
+    signal axi_arready : std_logic;
     signal axi_rid : std_logic_vector(0 downto 0);
     signal axi_rdata : std_logic_vector(31 downto 0);
     signal axi_rresp : std_logic_vector(1 downto 0);
-    signal axi_rlast : std_logic_vector(0 downto 0);
-    signal axi_rvalid : std_logic_vector(0 downto 0);
-    signal axi_rready : std_logic_vector(0 downto 0);
+    signal axi_rlast : std_logic;
+    signal axi_rvalid : std_logic;
+    signal axi_rready : std_logic;
     -- bram interface between axi bram controller and bram. The bram emulates rams.
     signal bram_rst_a : std_logic;
     signal bram_clk_a : std_logic;
@@ -138,6 +140,7 @@ begin
         axi_arprot => axi_arprot,
         axi_arqos => axi_arqos,
         axi_arready => axi_arready,
+        axi_arregion => X"0",
         axi_arsize => axi_arsize,
         axi_arvalid => axi_arvalid,
         axi_awaddr => axi_awaddr,
@@ -150,6 +153,7 @@ begin
         axi_awready => axi_awready,
         axi_awsize => axi_awsize,
         axi_awvalid => axi_awvalid,
+        axi_awregion => X"0",
         axi_bready => axi_bready,
         axi_bresp => axi_bresp,
         axi_bvalid => axi_bvalid,
@@ -200,18 +204,18 @@ begin
             axi_awcache => axi_awcache,
             axi_awprot => axi_awprot,
             axi_awqos => axi_awqos,
-            axi_awvalid => axi_awvalid(0),
-            axi_awready => axi_awready(0),
+            axi_awvalid => axi_awvalid,
+            axi_awready => axi_awready,
             axi_wdata => axi_wdata,
             axi_wstrb => axi_wstrb,
-            axi_wlast => axi_wlast(0),
-            axi_wvalid => axi_wvalid(0),
-            axi_wready => axi_wready(0),
+            axi_wlast => axi_wlast,
+            axi_wvalid => axi_wvalid,
+            axi_wready => axi_wready,
             axi_bid => (others=>'0'),
             axi_bresp => axi_bresp,
-            axi_bvalid => axi_bvalid(0),
-            axi_bready => axi_bready(0),
-            axi_arid => axi_arid,
+            axi_bvalid => axi_bvalid,
+            axi_bready => axi_bready,
+            axi_arid => open,
             axi_araddr => axi_araddr,
             axi_arlen => axi_arlen,
             axi_arsize => axi_arsize,
@@ -220,14 +224,14 @@ begin
             axi_arcache => axi_arcache,
             axi_arprot => axi_arprot,
             axi_arqos => axi_arqos,
-            axi_arvalid => axi_arvalid(0),
-            axi_arready => axi_arready(0),
+            axi_arvalid => axi_arvalid,
+            axi_arready => axi_arready,
             axi_rid => (others=>'0'),
             axi_rdata => axi_rdata,
             axi_rresp => axi_rresp,
-            axi_rlast => axi_rlast(0),
-            axi_rvalid => axi_rvalid(0),
-            axi_rready => axi_rready(0),
+            axi_rlast => axi_rlast,
+            axi_rvalid => axi_rvalid,
+            axi_rready => axi_rready,
             intr_in  => '0',
             debug_cpu_pause => open );
     -- ram instantiation. Recall, the ram is actually emulated by bram for this test program.
