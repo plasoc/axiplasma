@@ -53,17 +53,17 @@ end plasoc_int_axi4_write_cntrl;
 architecture Behavioral of plasoc_int_axi4_write_cntrl is
     type state_type is (state_wait,state_write,state_response);
     signal state : state_type := state_wait;
-    signal axi_awready_buff : std_logic;
+    signal axi_awready_buff : std_logic := '0';
     signal axi_awaddr_buff : std_logic_vector(axi_address_width-1 downto 0);
-    signal axi_wready_buff : std_logic;
-    signal axi_bvalid_buff : std_logic;
+    signal axi_wready_buff : std_logic := '0';
+    signal axi_bvalid_buff : std_logic := '0';
 begin
     axi_awready <= axi_awready_buff;
     axi_wready <= axi_wready_buff;
     axi_bvalid <= axi_bvalid_buff;
     axi_bresp <= axi_resp_okay;
     
-    -- Drive the axi read interface.
+    -- Drive the axi write interface.
     process (aclk)
     begin
         -- Perform operations on the clock's positive edge.
@@ -72,6 +72,7 @@ begin
                 axi_awready_buff <= '0';
                 axi_wready_buff <= '0';
                 axi_bvalid_buff <= '0';
+                state <= state_wait;
             else
                 -- Drive state machine.
                 case state is
