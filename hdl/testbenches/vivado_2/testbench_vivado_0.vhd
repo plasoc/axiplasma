@@ -23,7 +23,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity testbench_vivado_0 is
-    generic ( input_delay : time := 0 ns );
+    generic ( gpio_width : integer := 16; input_delay : time := 0 ns );
 end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
@@ -31,12 +31,12 @@ architecture Behavioral of testbench_vivado_0 is
         port( 
             raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
             raw_nreset : in std_logic;
-            gpio_output : out std_logic_vector(7 downto 0);
-            gpio_input : in std_logic_vector(7 downto 0));
+            gpio_output : out std_logic_vector(gpio_width-1 downto 0);
+            gpio_input : in std_logic_vector(gpio_width-1 downto 0));
     end component;
     constant clock_period : time := 10 ns;
     constant time_out_threshold : integer := 2**10;
-    subtype gpio_type is std_logic_vector(7 downto 0);
+    subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
     signal raw_clock : std_logic := '1';
     signal raw_nreset : std_logic := '0';
     signal gpio_output : gpio_type;

@@ -1,7 +1,7 @@
 -- Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2016.2 (lin64) Build 1577090 Thu Jun  2 16:32:35 MDT 2016
--- Date        : Sat Jan 28 20:13:27 2017
+-- Date        : Sun Jan 29 11:16:40 2017
 -- Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 -- Command     : write_vhdl -force -mode funcsim
 --               /opt/Xilinx/Projects/koc/axiplasma/hdl/testbenches/vivado_2/ip_block_design/ip/ip_block_design_clk_wiz_0_0/ip_block_design_clk_wiz_0_0_sim_netlist.vhdl

@@ -519,6 +519,26 @@
           <spirit:name>BOARD.ASSOCIATED_PARAM</spirit:name>
           <spirit:value spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.BOARD.ASSOCIATED_PARAM">CLK_IN1_BOARD_INTERFACE</spirit:value>
         </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>FREQ_HZ</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.FREQ_HZ">100000000</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>PHASE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.PHASE">0.000</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>CLK_DOMAIN</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.CLK_DOMAIN"/>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_BUSIF</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.ASSOCIATED_BUSIF"/>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_RESET</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_IN1.ASSOCIATED_RESET"/>
+        </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
     <spirit:busInterface>
@@ -536,6 +556,28 @@
           </spirit:physicalPort>
         </spirit:portMap>
       </spirit:portMaps>
+      <spirit:parameters>
+        <spirit:parameter>
+          <spirit:name>FREQ_HZ</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_OUT1.FREQ_HZ">100000000</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>PHASE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_OUT1.PHASE">0.000</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>CLK_DOMAIN</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_OUT1.CLK_DOMAIN">ip_block_design_clk_wiz_0_0_clk_out1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_BUSIF</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_OUT1.ASSOCIATED_BUSIF"/>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>ASSOCIATED_RESET</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.CLOCK_CLK_OUT1.ASSOCIATED_RESET"/>
+        </spirit:parameter>
+      </spirit:parameters>
     </spirit:busInterface>
   </spirit:busInterfaces>
   <spirit:model>
@@ -723,11 +765,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Sun Jan 29 01:13:27 UTC 2017</spirit:value>
+            <spirit:value>Sun Jan 29 16:16:40 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>49961878</spirit:value>
+            <spirit:value>a8755543</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
