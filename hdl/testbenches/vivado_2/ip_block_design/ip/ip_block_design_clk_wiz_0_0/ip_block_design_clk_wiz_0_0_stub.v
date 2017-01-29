@@ -1,7 +1,7 @@
 // Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2016.2 (lin64) Build 1577090 Thu Jun  2 16:32:35 MDT 2016
-// Date        : Thu Jan 26 23:12:58 2017
+// Date        : Sat Jan 28 20:13:26 2017
 // Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 // Command     : write_verilog -force -mode synth_stub
 //               /opt/Xilinx/Projects/koc/axiplasma/hdl/testbenches/vivado_2/ip_block_design/ip/ip_block_design_clk_wiz_0_0/ip_block_design_clk_wiz_0_0_stub.v

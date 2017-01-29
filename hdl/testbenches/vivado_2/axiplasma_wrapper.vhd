@@ -7,8 +7,8 @@ entity axiplasma_wrapper is
     port( 
         raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
         raw_nreset : in std_logic;
-        gpio_output : out std_logic_vector(7 downto 0);
-        gpio_input : in std_logic_vector(7 downto 0));
+        gpio_output : out std_logic_vector(15 downto 0);
+        gpio_input : in std_logic_vector(15 downto 0));
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
@@ -52,8 +52,30 @@ architecture Behavioral of axiplasma_wrapper is
         axi_wready : out STD_LOGIC;
         axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
         axi_wvalid : in STD_LOGIC;
-        gpio_input : in STD_LOGIC_VECTOR ( 7 downto 0 );
-        gpio_output : out STD_LOGIC_VECTOR ( 7 downto 0 );
+        gpio_input_0 : in STD_LOGIC_VECTOR ( 7 downto 0 );
+        gpio_input_1 : in STD_LOGIC_VECTOR ( 7 downto 0 );
+        gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
+        int_0 : out STD_LOGIC;
+        int_1 : out STD_LOGIC;
+        int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+        int_axi_arready : in STD_LOGIC;
+        int_axi_arvalid : out STD_LOGIC;
+        int_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        int_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+        int_axi_awready : in STD_LOGIC;
+        int_axi_awvalid : out STD_LOGIC;
+        int_axi_bready : out STD_LOGIC;
+        int_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+        int_axi_bvalid : in STD_LOGIC;
+        int_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+        int_axi_rready : out STD_LOGIC;
+        int_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+        int_axi_rvalid : in STD_LOGIC;
+        int_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        int_axi_wready : in STD_LOGIC;
+        int_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+        int_axi_wvalid : out STD_LOGIC;
         ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
         ram_clk : out STD_LOGIC;
         ram_din : out STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -124,7 +146,39 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_addr_a : std_logic_vector(15 downto 0);
     signal bram_wrdata_a : std_logic_vector(31 downto 0);
     signal bram_rddata_a : std_logic_vector(31 downto 0);
+    -- gpio interface.
+    signal gpio_input_0 : STD_LOGIC_VECTOR ( 7 downto 0 );
+    signal gpio_input_1 : STD_LOGIC_VECTOR ( 7 downto 0 );
+    signal gpio_int_0 : STD_LOGIC;
+    signal gpio_int_1 : STD_LOGIC;
+    -- interrupt controller interface;
+    signal int_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal int_axi_arready : STD_LOGIC;
+    signal int_axi_arvalid : STD_LOGIC;
+    signal int_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal int_axi_awready : STD_LOGIC;
+    signal int_axi_awvalid : STD_LOGIC;
+    signal int_axi_bready : STD_LOGIC;
+    signal int_axi_bresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal int_axi_bvalid : STD_LOGIC;
+    signal int_axi_rdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_rready : STD_LOGIC;
+    signal int_axi_rresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal int_axi_rvalid : STD_LOGIC;
+    signal int_axi_wdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_wready : STD_LOGIC;
+    signal int_axi_wstrb : STD_LOGIC_VECTOR ( 3 downto 0 );
+    signal int_axi_wvalid : STD_LOGIC;
+    signal cpu_int : std_logic;
+    signal dev_ints : std_logic_vector(default_interrupt_total-1 downto 0);
 begin
+    gpio_input_0 <= gpio_input(7 downto 0);
+    gpio_input_1 <= gpio_input(15 downto 8);
+    dev_ints(1 downto 0) <= gpio_int_1 & gpio_int_0;
+    dev_ints(default_interrupt_total-1 downto 2) <= (others=>'0');
+     
     -- The IP block design contains all of the xilinx ip needed 
     -- to complete this verification application.
     ip_block_design_wrapper_inst : 
@@ -167,8 +221,30 @@ begin
         axi_wready => axi_wready,
         axi_wstrb => axi_wstrb,
         axi_wvalid => axi_wvalid,
-        gpio_input => gpio_input,
+        gpio_input_0 => gpio_input_0,
+        gpio_input_1 => gpio_input_1,
         gpio_output => gpio_output,
+        int_0 => gpio_int_0,
+        int_1 => gpio_int_1,
+        int_axi_araddr => int_axi_araddr,
+        int_axi_arprot => int_axi_arprot,
+        int_axi_arready => int_axi_arready,
+        int_axi_arvalid => int_axi_arvalid,
+        int_axi_awaddr => int_axi_awaddr,
+        int_axi_awprot => int_axi_awprot,
+        int_axi_awready => int_axi_awready,
+        int_axi_awvalid => int_axi_awvalid,
+        int_axi_bready => int_axi_bready,
+        int_axi_bresp => int_axi_bresp,
+        int_axi_bvalid => int_axi_bvalid,
+        int_axi_rdata => int_axi_rdata,
+        int_axi_rready => int_axi_rready,
+        int_axi_rresp => int_axi_rresp,
+        int_axi_rvalid => int_axi_rvalid,
+        int_axi_wdata => int_axi_wdata,
+        int_axi_wready => int_axi_wready,
+        int_axi_wstrb => int_axi_wstrb,
+        int_axi_wvalid => int_axi_wvalid,
         ram_addr => bram_addr_a,
         ram_clk => bram_clk_a,
         ram_din => bram_wrdata_a,
@@ -232,7 +308,7 @@ begin
             axi_rlast => axi_rlast,
             axi_rvalid => axi_rvalid,
             axi_rready => axi_rready,
-            intr_in  => '0',
+            intr_in  => cpu_int,
             debug_cpu_pause => open );
     -- ram instantiation. Recall, the ram is actually emulated by bram for this test program.
     ram_inst : 
@@ -245,4 +321,38 @@ begin
             bram_addr_a => bram_addr_a,
             bram_wrdata_a => bram_wrdata_a,
             bram_rddata_a => bram_rddata_a);
+    -- interrupt controller instantiation.
+    plasoc_int_inst :
+    plasoc_int 
+        generic map (
+            axi_address_width => 32,
+            axi_data_width => 32,
+            interrupt_total => default_interrupt_total,
+            int_id_address => default_int_id_offset,
+            int_enables_address => default_int_enables_offset )
+        port map (
+            aclk => aclk,
+            aresetn => aresetn(0),
+            axi_awaddr => int_axi_awaddr,
+            axi_awprot => int_axi_awprot,
+            axi_awvalid => int_axi_awvalid,
+            axi_awready => int_axi_awready,
+            axi_wvalid => int_axi_wvalid,
+            axi_wready => int_axi_wready,
+            axi_wdata => int_axi_wdata,
+            axi_wstrb => int_axi_wstrb,
+            axi_bvalid => int_axi_bvalid,
+            axi_bready => int_axi_bready,
+            axi_bresp => int_axi_bresp,
+            axi_araddr => int_axi_araddr,
+            axi_arprot => int_axi_arprot,
+            axi_arvalid => int_axi_arvalid,
+            axi_arready => int_axi_arready,
+            axi_rdata => int_axi_rdata,
+            axi_rvalid => int_axi_rvalid,
+            axi_rready => int_axi_rready,
+            axi_rresp => int_axi_rresp,
+            cpu_int => cpu_int,
+            dev_ints => dev_ints);
+        
 end Behavioral;

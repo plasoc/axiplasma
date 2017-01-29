@@ -55,7 +55,7 @@ set design_name ip_block_design
 
 set run_remote_bd_flow 1
 if { $run_remote_bd_flow == 1 } {
-  set str_bd_folder C:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/testbenches/vivado_2
+  set str_bd_folder /opt/Xilinx/Projects/koc/axiplasma/hdl/testbenches/vivado_2
   set str_bd_filepath ${str_bd_folder}/${design_name}/${design_name}.bd
 
   # Check if remote design exists on disk
@@ -167,6 +167,17 @@ CONFIG.RUSER_WIDTH {0} \
 CONFIG.SUPPORTS_NARROW_BURST {1} \
 CONFIG.WUSER_WIDTH {0} \
  ] $axi
+  set int_axi [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:aximm_rtl:1.0 int_axi ]
+  set_property -dict [ list \
+CONFIG.ADDR_WIDTH {32} \
+CONFIG.DATA_WIDTH {32} \
+CONFIG.HAS_BURST {0} \
+CONFIG.HAS_CACHE {0} \
+CONFIG.HAS_LOCK {0} \
+CONFIG.HAS_QOS {0} \
+CONFIG.HAS_REGION {0} \
+CONFIG.PROTOCOL {AXI4LITE} \
+ ] $int_axi
   set ram [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 ram ]
   set_property -dict [ list \
 CONFIG.MASTER_TYPE {BRAM_CTRL} \
@@ -175,12 +186,15 @@ CONFIG.MASTER_TYPE {BRAM_CTRL} \
   # Create ports
   set aclk [ create_bd_port -dir O -type clk aclk ]
   set_property -dict [ list \
-CONFIG.ASSOCIATED_BUSIF {axi} \
+CONFIG.ASSOCIATED_BUSIF {axi:int_axi} \
 CONFIG.ASSOCIATED_RESET {aresetn} \
  ] $aclk
   set aresetn [ create_bd_port -dir O -from 0 -to 0 -type rst aresetn ]
-  set gpio_input [ create_bd_port -dir I -from 7 -to 0 gpio_input ]
-  set gpio_output [ create_bd_port -dir O -from 7 -to 0 gpio_output ]
+  set gpio_input_0 [ create_bd_port -dir I -from 7 -to 0 gpio_input_0 ]
+  set gpio_input_1 [ create_bd_port -dir I -from 7 -to 0 gpio_input_1 ]
+  set gpio_output [ create_bd_port -dir O -from 15 -to 0 gpio_output ]
+  set int_0 [ create_bd_port -dir O -type intr int_0 ]
+  set int_1 [ create_bd_port -dir O -type intr int_1 ]
   set raw_clock [ create_bd_port -dir I -type clk raw_clock ]
   set raw_nreset [ create_bd_port -dir I -type rst raw_nreset ]
 
@@ -190,19 +204,29 @@ CONFIG.ASSOCIATED_RESET {aresetn} \
 CONFIG.SINGLE_PORT_BRAM {1} \
  ] $axi_bram_ctrl_0
 
-  # Create instance: axi_gpio_input, and set properties
-  set axi_gpio_input [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_input ]
+  # Create instance: axi_gpio_input_0, and set properties
+  set axi_gpio_input_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_input_0 ]
   set_property -dict [ list \
 CONFIG.C_ALL_INPUTS {1} \
 CONFIG.C_ALL_OUTPUTS {0} \
 CONFIG.C_GPIO_WIDTH {8} \
- ] $axi_gpio_input
+CONFIG.C_INTERRUPT_PRESENT {1} \
+ ] $axi_gpio_input_0
+
+  # Create instance: axi_gpio_input_1, and set properties
+  set axi_gpio_input_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_input_1 ]
+  set_property -dict [ list \
+CONFIG.C_ALL_INPUTS {1} \
+CONFIG.C_ALL_OUTPUTS {0} \
+CONFIG.C_GPIO_WIDTH {8} \
+CONFIG.C_INTERRUPT_PRESENT {1} \
+ ] $axi_gpio_input_1
 
   # Create instance: axi_gpio_output, and set properties
   set axi_gpio_output [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_gpio:2.0 axi_gpio_output ]
   set_property -dict [ list \
 CONFIG.C_ALL_OUTPUTS {1} \
-CONFIG.C_GPIO_WIDTH {8} \
+CONFIG.C_GPIO_WIDTH {16} \
  ] $axi_gpio_output
 
   # Create instance: axi_interconnect_0, and set properties
@@ -211,10 +235,19 @@ CONFIG.C_GPIO_WIDTH {8} \
 CONFIG.M00_HAS_REGSLICE {4} \
 CONFIG.M01_HAS_REGSLICE {4} \
 CONFIG.M02_HAS_REGSLICE {4} \
-CONFIG.NUM_MI {3} \
+CONFIG.M03_HAS_REGSLICE {0} \
+CONFIG.NUM_MI {5} \
 CONFIG.S00_HAS_DATA_FIFO {2} \
 CONFIG.STRATEGY {2} \
  ] $axi_interconnect_0
+
+  # Create instance: axi_register_slice_0, and set properties
+  set axi_register_slice_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_register_slice:2.1 axi_register_slice_0 ]
+  set_property -dict [ list \
+CONFIG.PROTOCOL {AXI4LITE} \
+CONFIG.REG_R {7} \
+CONFIG.REG_W {7} \
+ ] $axi_register_slice_0
 
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:5.3 clk_wiz_0 ]
@@ -256,22 +289,30 @@ CONFIG.MMCM_CLKIN2_PERIOD.VALUE_SRC {DEFAULT} \
   connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_ports ram] [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA]
   connect_bd_intf_net -intf_net axi_interconnect_0_M00_AXI [get_bd_intf_pins axi_bram_ctrl_0/S_AXI] [get_bd_intf_pins axi_interconnect_0/M00_AXI]
   connect_bd_intf_net -intf_net axi_interconnect_0_M01_AXI [get_bd_intf_pins axi_gpio_output/S_AXI] [get_bd_intf_pins axi_interconnect_0/M01_AXI]
-  connect_bd_intf_net -intf_net axi_interconnect_0_M02_AXI [get_bd_intf_pins axi_gpio_input/S_AXI] [get_bd_intf_pins axi_interconnect_0/M02_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M02_AXI [get_bd_intf_pins axi_gpio_input_0/S_AXI] [get_bd_intf_pins axi_interconnect_0/M02_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M03_AXI [get_bd_intf_pins axi_gpio_input_1/S_AXI] [get_bd_intf_pins axi_interconnect_0/M03_AXI]
+  connect_bd_intf_net -intf_net axi_interconnect_0_M04_AXI [get_bd_intf_pins axi_interconnect_0/M04_AXI] [get_bd_intf_pins axi_register_slice_0/S_AXI]
+  connect_bd_intf_net -intf_net axi_register_slice_0_M_AXI [get_bd_intf_ports int_axi] [get_bd_intf_pins axi_register_slice_0/M_AXI]
 
   # Create port connections
+  connect_bd_net -net axi_gpio_input_0_ip2intc_irpt [get_bd_ports int_0] [get_bd_pins axi_gpio_input_0/ip2intc_irpt]
+  connect_bd_net -net axi_gpio_input_1_ip2intc_irpt [get_bd_ports int_1] [get_bd_pins axi_gpio_input_1/ip2intc_irpt]
   connect_bd_net -net axi_gpio_output_gpio_io_o [get_bd_ports gpio_output] [get_bd_pins axi_gpio_output/gpio_io_o]
   connect_bd_net -net clk_in1_1 [get_bd_ports raw_clock] [get_bd_pins clk_wiz_0/clk_in1]
-  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports aclk] [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins axi_gpio_input/s_axi_aclk] [get_bd_pins axi_gpio_output/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+  connect_bd_net -net clk_wiz_0_clk_out1 [get_bd_ports aclk] [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] [get_bd_pins axi_gpio_input_0/s_axi_aclk] [get_bd_pins axi_gpio_input_1/s_axi_aclk] [get_bd_pins axi_gpio_output/s_axi_aclk] [get_bd_pins axi_interconnect_0/ACLK] [get_bd_pins axi_interconnect_0/M00_ACLK] [get_bd_pins axi_interconnect_0/M01_ACLK] [get_bd_pins axi_interconnect_0/M02_ACLK] [get_bd_pins axi_interconnect_0/M03_ACLK] [get_bd_pins axi_interconnect_0/M04_ACLK] [get_bd_pins axi_interconnect_0/S00_ACLK] [get_bd_pins axi_register_slice_0/aclk] [get_bd_pins clk_wiz_0/clk_out1] [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
   connect_bd_net -net clk_wiz_0_locked [get_bd_pins clk_wiz_0/locked] [get_bd_pins proc_sys_reset_0/dcm_locked]
-  connect_bd_net -net gpio_io_i_1 [get_bd_ports gpio_input] [get_bd_pins axi_gpio_input/gpio_io_i]
+  connect_bd_net -net gpio_io_i_1 [get_bd_ports gpio_input_0] [get_bd_pins axi_gpio_input_0/gpio_io_i]
+  connect_bd_net -net gpio_io_i_2 [get_bd_ports gpio_input_1] [get_bd_pins axi_gpio_input_1/gpio_io_i]
   connect_bd_net -net proc_sys_reset_0_interconnect_aresetn [get_bd_pins axi_interconnect_0/ARESETN] [get_bd_pins proc_sys_reset_0/interconnect_aresetn]
-  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_ports aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_gpio_input/s_axi_aresetn] [get_bd_pins axi_gpio_output/s_axi_aresetn] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/M01_ARESETN] [get_bd_pins axi_interconnect_0/M02_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn [get_bd_ports aresetn] [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] [get_bd_pins axi_gpio_input_0/s_axi_aresetn] [get_bd_pins axi_gpio_input_1/s_axi_aresetn] [get_bd_pins axi_gpio_output/s_axi_aresetn] [get_bd_pins axi_interconnect_0/M00_ARESETN] [get_bd_pins axi_interconnect_0/M01_ARESETN] [get_bd_pins axi_interconnect_0/M02_ARESETN] [get_bd_pins axi_interconnect_0/M03_ARESETN] [get_bd_pins axi_interconnect_0/M04_ARESETN] [get_bd_pins axi_interconnect_0/S00_ARESETN] [get_bd_pins axi_register_slice_0/aresetn] [get_bd_pins proc_sys_reset_0/peripheral_aresetn]
   connect_bd_net -net resetn_1 [get_bd_ports raw_nreset] [get_bd_pins clk_wiz_0/resetn] [get_bd_pins proc_sys_reset_0/ext_reset_in]
 
   # Create address segments
   create_bd_addr_seg -range 0x00010000 -offset 0x00000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] SEG_axi_bram_ctrl_0_Mem0
-  create_bd_addr_seg -range 0x00010000 -offset 0x40000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_input/S_AXI/Reg] SEG_axi_gpio_input_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0x40020000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_input_1/S_AXI/Reg] SEG_axi_gpio_input_1_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0x40000000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_input_0/S_AXI/Reg] SEG_axi_gpio_input_Reg
   create_bd_addr_seg -range 0x00010000 -offset 0x40010000 [get_bd_addr_spaces axi] [get_bd_addr_segs axi_gpio_output/S_AXI/Reg] SEG_axi_gpio_output_Reg
+  create_bd_addr_seg -range 0x00010000 -offset 0x44A00000 [get_bd_addr_spaces axi] [get_bd_addr_segs int_axi/Reg] SEG_int_axi_Reg
 
   # Perform GUI Layout
   regenerate_bd_layout -layout_string {
@@ -279,32 +320,44 @@ CONFIG.MMCM_CLKIN2_PERIOD.VALUE_SRC {DEFAULT} \
 #  -string -flagsOSRD
 preplace port raw_nreset -pg 1 -y -190 -defaultsOSRD
 preplace port ram -pg 1 -y -560 -defaultsOSRD
+preplace port int_0 -pg 1 -y -220 -defaultsOSRD
+preplace port int_axi -pg 1 -y -100 -defaultsOSRD
 preplace port axi -pg 1 -y -470 -defaultsOSRD
+preplace port int_1 -pg 1 -y 110 -defaultsOSRD
 preplace port aclk -pg 1 -y -190 -defaultsOSRD
 preplace port raw_clock -pg 1 -y -170 -defaultsOSRD
-preplace portBus gpio_input -pg 1 -y -230 -defaultsOSRD
+preplace portBus gpio_input_0 -pg 1 -y -230 -defaultsOSRD
+preplace portBus gpio_input_1 -pg 1 -y 90 -defaultsOSRD
 preplace portBus gpio_output -pg 1 -y -380 -defaultsOSRD
 preplace portBus aresetn -pg 1 -y -30 -defaultsOSRD
-preplace inst axi_gpio_input -pg 1 -lvl 3 -y -240 -defaultsOSRD
 preplace inst axi_gpio_output -pg 1 -lvl 3 -y -390 -defaultsOSRD
-preplace inst proc_sys_reset_0 -pg 1 -lvl 2 -y -70 -defaultsOSRD
-preplace inst axi_interconnect_0 -pg 1 -lvl 2 -y -320 -defaultsOSRD
+preplace inst axi_register_slice_0 -pg 1 -lvl 3 -y -100 -defaultsOSRD
+preplace inst axi_gpio_input_0 -pg 1 -lvl 3 -y -240 -defaultsOSRD
+preplace inst proc_sys_reset_0 -pg 1 -lvl 2 -y 42 -defaultsOSRD
+preplace inst axi_gpio_input_1 -pg 1 -lvl 3 -y 90 -defaultsOSRD
+preplace inst axi_interconnect_0 -pg 1 -lvl 2 -y -248 -defaultsOSRD
 preplace inst clk_wiz_0 -pg 1 -lvl 1 -y -180 -defaultsOSRD
-preplace inst axi_bram_ctrl_0 -pg 1 -lvl 2 -y -530 -defaultsOSRD
-preplace netloc clk_wiz_0_locked 1 1 1 430
+preplace inst axi_bram_ctrl_0 -pg 1 -lvl 2 -y -538 -defaultsOSRD
+preplace netloc axi_register_slice_0_M_AXI 1 3 1 N
+preplace netloc axi_gpio_input_0_ip2intc_irpt 1 3 1 N
+preplace netloc clk_wiz_0_locked 1 1 1 440
 preplace netloc axi_bram_ctrl_0_BRAM_PORTA 1 2 2 NJ -560 N
 preplace netloc axi_gpio_output_gpio_io_o 1 3 1 N
 preplace netloc clk_in1_1 1 0 1 N
-preplace netloc axi_interconnect_0_M02_AXI 1 2 1 870
-preplace netloc gpio_io_i_1 1 0 4 NJ -240 NJ -160 NJ -160 1170
-preplace netloc proc_sys_reset_0_interconnect_aresetn 1 1 2 490 30 860
-preplace netloc resetn_1 1 0 2 -70 -260 450
+preplace netloc axi_interconnect_0_M02_AXI 1 2 1 950
+preplace netloc gpio_io_i_1 1 0 4 NJ -50 NJ -50 NJ -170 1260
+preplace netloc gpio_io_i_2 1 0 4 NJ 90 NJ 140 NJ 20 1260
+preplace netloc proc_sys_reset_0_interconnect_aresetn 1 1 2 470 -450 920
+preplace netloc axi_interconnect_0_M04_AXI 1 2 1 930
+preplace netloc axi_gpio_input_1_ip2intc_irpt 1 3 1 N
+preplace netloc resetn_1 1 0 2 -60 -120 430
 preplace netloc S00_AXI_1 1 0 2 NJ -470 NJ
-preplace netloc clk_wiz_0_clk_out1 1 1 3 460 20 880 -170 NJ
-preplace netloc axi_interconnect_0_M00_AXI 1 1 2 480 -600 860
-preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 3 480 40 890 -30 NJ
-preplace netloc axi_interconnect_0_M01_AXI 1 2 1 870
-levelinfo -pg 1 -90 350 690 1040 1200 -top -610 -bot 50
+preplace netloc clk_wiz_0_clk_out1 1 1 3 450 -460 970 -30 NJ
+preplace netloc axi_interconnect_0_M00_AXI 1 1 2 470 -610 930
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 3 460 150 960 -20 NJ
+preplace netloc axi_interconnect_0_M01_AXI 1 2 1 940
+preplace netloc axi_interconnect_0_M03_AXI 1 2 1 940
+levelinfo -pg 1 -90 350 750 1120 1300 -top -630 -bot 160
 ",
 }
 
