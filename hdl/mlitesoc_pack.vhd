@@ -51,6 +51,7 @@ package mlitesoc_pack is
 
     function clogb2(bit_depth : in integer ) return integer;
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
+    function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
 
     component axiplasma is
         generic(
@@ -156,6 +157,7 @@ package mlitesoc_pack is
             -- axi parameters.
             axi_address_width : integer := 32;
             axi_data_width : integer := 32;
+            axi_base_address : std_logic_vector := X"0000";
             -- interrupt controller parameters.
             interrupt_total : integer := default_interrupt_total;
             int_id_address : std_logic_vector := default_int_id_offset;
@@ -211,6 +213,15 @@ package body mlitesoc_pack is
         variable result : std_logic_vector(base_address'length-1 downto 0);
     begin
         result := std_logic_vector(to_unsigned(to_integer(unsigned(base_address))+offset,base_address'length));
+        return result;
+    end;
+    
+    function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector is
+        variable result : std_logic_vector(base_address'length-1 downto 0);
+        variable address_0 : integer :=  to_integer(unsigned(address));
+        variable base_address_0 : integer :=  to_integer(unsigned(base_address));
+    begin
+        result := std_logic_vector(to_unsigned(address_0-base_address_0,base_address'length));
         return result;
     end;
 

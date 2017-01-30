@@ -2,8 +2,8 @@
 
 CP = cp
 RM = rm -rf 
-BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-#BIN_DIR = C:/mips-none-elf-newlib/bin/
+#BIN_DIR = /opt/mips_cross_compiler/mips/bin/
+BIN_DIR = C:/mips-none-elf-newlib/bin/
 LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib/
 PLASMA_DIR = ../plasma/
 MISC_DIR = ../../misc/

@@ -97,6 +97,8 @@ architecture Behavioral of axiplasma_wrapper is
             bram_wrdata_a : in STD_LOGIC_VECTOR(31 DOWNTO 0);
             bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
     end component;
+    -- base addresses.
+    constant int_axi_base_address : std_logic_vector := X"44A00000";
     -- global interface.
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -327,6 +329,7 @@ begin
         generic map (
             axi_address_width => 32,
             axi_data_width => 32,
+            axi_base_address => int_axi_base_address,
             interrupt_total => default_interrupt_total,
             int_id_address => default_int_id_offset,
             int_enables_address => default_int_enables_offset,

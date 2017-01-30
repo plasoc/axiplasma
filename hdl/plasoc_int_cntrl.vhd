@@ -14,7 +14,7 @@ entity plasoc_int_cntrl is
         nreset : in std_logic;
         -- cpu interface.
         cpu_int : out std_logic := '0';
-        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0) := (others=>'0');
+        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0);
         cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);
         cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);
         -- device interface.
@@ -23,7 +23,7 @@ end plasoc_int_cntrl;
 
 architecture Behavioral of plasoc_int_cntrl is
     signal cpu_int_active_buff : std_logic_vector(interrupt_total-1 downto 0);
-    signal dev_triggered_int : std_logic_vector(clogb2(interrupt_total) downto 0);
+    signal cpu_int_id_buff : std_logic_vector(clogb2(interrupt_total) downto 0);
     signal dev_int_occurred : boolean;
 begin
     -- Look for the active enabled interrupts.
@@ -34,16 +34,16 @@ begin
     -- Generate interrupt id for devices, for which the
     -- lower the id the higher the priority.
     process (cpu_int_active_buff)
-        variable triggerred_int : integer range 0 to interrupt_total-1;
+        variable triggerred_int : integer range 0 to interrupt_total;
     begin
-        triggerred_int := -1;
+        triggerred_int := interrupt_total;
         for each_int in cpu_int_active_buff'low to cpu_int_active_buff'high loop
             if cpu_int_active_buff(each_int)='1' then
                 triggerred_int := each_int;
                 exit;
             end if;
         end loop;
-        dev_triggered_int <= std_logic_vector(to_unsigned(triggerred_int,dev_triggered_int'length));
+        cpu_int_id_buff <= std_logic_vector(to_unsigned(triggerred_int,cpu_int_id_buff'length));
     end process;
     -- This process block generates the interrupt for the CPU and also
     -- sets which interrupt is occurring.
@@ -60,12 +60,12 @@ begin
                     -- Interrupt the process of the CPU, and let it know
                     -- which interrupt occurred with priority on the lowest interrupt.
                     cpu_int <= '1';
-                    cpu_int_id <= dev_triggered_int;
                 -- If no enabled interrupts are occurring, no need to
                 -- let the CPU anything is happening.
                 else
                     cpu_int <= '0';
                 end if;
+                cpu_int_id <= cpu_int_id_buff;
             end if;
         end if;
     end process;

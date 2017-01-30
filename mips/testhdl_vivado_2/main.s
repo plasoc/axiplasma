@@ -97,23 +97,26 @@ $L3:
 	.ent	main
 	.type	main, @function
 main:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
+	.frame	$sp,24,$31		# vars= 0, regs= 2/0, args= 16, gp= 0
+	.mask	0x80010000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	li	$4,1073741824			# 0x40000000
-	sw	$4,%gp_rel(xgpio_input_obj)($28)
-	lui	$3,%hi(int_obj)
-	li	$4,1151336448			# 0x44a00000
-	sw	$4,%lo(int_obj)($3)
+	addiu	$sp,$sp,-24
+	li	$3,1073741824			# 0x40000000
+	sw	$3,%gp_rel(xgpio_input_obj)($28)
+	sw	$16,16($sp)
+	li	$3,1151336448			# 0x44a00000
+	lui	$16,%hi(int_obj)
+	sw	$3,%lo(int_obj)($16)
 	li	$2,1073807360			# 0x40010000
-	lui	$4,%hi(int_obj+4)
+	lui	$3,%hi(int_obj+4)
+	sw	$31,20($sp)
 	sw	$2,%gp_rel(xgpio_output_obj)($28)
 	sw	$0,4($2)
-	addiu	$2,$4,%lo(int_obj+4)
-	sw	$0,%lo(int_obj+4)($4)
-	li	$5,983040			# 0xf0000
+	addiu	$2,$3,%lo(int_obj+4)
+	sw	$0,%lo(int_obj+4)($3)
+	li	$4,983040			# 0xf0000
 	sw	$0,4($2)
 	sw	$0,8($2)
 	sw	$0,12($2)
@@ -122,66 +125,72 @@ main:
 	sw	$0,24($2)
 	sw	$0,28($2)
 	lw	$2,%gp_rel(xgpio_input_obj)($28)
-	ori	$5,$5,0xffff
-	li	$6,1073872896			# 0x40020000
-	sw	$6,%gp_rel(xgpio_input_obj+4)($28)
-	sw	$5,4($2)
-	lw	$2,%gp_rel(xgpio_input_obj)($28)
-	li	$6,-2147483648			# 0xffffffff80000000
-	sw	$6,284($2)
-	lw	$7,%gp_rel(xgpio_input_obj)($28)
-	addiu	$2,$3,%lo(int_obj)
-	lw	$4,296($7)
-	nop
-	ori	$4,$4,0x1
-	sw	$4,296($7)
-	lw	$4,%gp_rel(xgpio_input_obj)($28)
-	nop
-	lw	$7,0($4)
-	lui	$4,%hi(input_gpio_isr)
-	sw	$7,%gp_rel(input_values)($28)
-	lw	$7,%gp_rel(xgpio_input_obj+4)($28)
-	addiu	$4,$4,%lo(input_gpio_isr)
+	ori	$4,$4,0xffff
+	li	$5,1073872896			# 0x40020000
+	sw	$5,%gp_rel(xgpio_input_obj+4)($28)
 	sw	$4,4($2)
+	lw	$2,%gp_rel(xgpio_input_obj)($28)
+	li	$5,-2147483648			# 0xffffffff80000000
+	sw	$5,284($2)
+	lw	$6,%gp_rel(xgpio_input_obj)($28)
+	addiu	$2,$16,%lo(int_obj)
+	lw	$3,296($6)
+	nop
+	ori	$3,$3,0x1
+	sw	$3,296($6)
+	lw	$3,%gp_rel(xgpio_input_obj)($28)
+	nop
+	lw	$6,0($3)
+	lui	$3,%hi(input_gpio_isr)
+	sw	$6,%gp_rel(input_values)($28)
+	lw	$6,%gp_rel(xgpio_input_obj+4)($28)
+	addiu	$3,$3,%lo(input_gpio_isr)
+	sw	$3,4($2)
 	sw	$0,36($2)
-	sw	$5,4($7)
+	sw	$4,4($6)
+	lw	$4,%gp_rel(xgpio_input_obj+4)($28)
+	nop
+	sw	$5,284($4)
 	lw	$5,%gp_rel(xgpio_input_obj+4)($28)
 	nop
-	sw	$6,284($5)
-	lw	$7,%gp_rel(xgpio_input_obj+4)($28)
-	li	$5,255			# 0xff
-	lw	$6,296($7)
+	lw	$4,296($5)
 	nop
-	ori	$6,$6,0x1
-	sw	$6,296($7)
-	sw	$4,8($2)
-	lw	$6,%gp_rel(xgpio_input_obj+4)($28)
-	lw	$4,%lo(int_obj)($3)
-	lw	$6,0($6)
-	li	$7,1			# 0x1
-	sw	$7,40($2)
-	li	$2,255			# 0xff
-	sw	$6,%gp_rel(input_values+4)($28)
-	sw	$2,0($4)
+	ori	$4,$4,0x1
+	sw	$4,296($5)
+	sw	$3,8($2)
+	li	$3,1			# 0x1
+	sw	$3,40($2)
+	lw	$2,%gp_rel(xgpio_input_obj+4)($28)
+	nop
+	lw	$2,0($2)
+	nop
+	sw	$2,%gp_rel(input_values+4)($28)
+	jal	OS_AsmInterruptEnable
+	nop
+
+	lw	$2,%lo(int_obj)($16)
+	li	$3,255			# 0xff
+	sw	$3,0($2)
+	li	$4,255			# 0xff
 $L8:
 	lw	$2,%gp_rel(update_flag)($28)
 	nop
 	beq	$2,$0,$L8
 	nop
 
-	lw	$2,%lo(int_obj)($3)
+	lw	$2,%lo(int_obj)($16)
 	nop
 	sw	$0,0($2)
-	lw	$2,%lo(int_obj)($3)
+	lw	$2,%lo(int_obj)($16)
 	sw	$0,%gp_rel(update_flag)($28)
-	sw	$5,0($2)
+	sw	$4,0($2)
 	lw	$2,%gp_rel(input_values+4)($28)
-	lw	$4,%gp_rel(input_values)($28)
+	lw	$3,%gp_rel(input_values)($28)
 	sll	$2,$2,8
-	or	$2,$2,$4
-	lw	$4,%gp_rel(xgpio_output_obj)($28)
+	or	$2,$2,$3
+	lw	$3,%gp_rel(xgpio_output_obj)($28)
 	nop
-	sw	$2,0($4)
+	sw	$2,0($3)
 	b	$L8
 	nop
 

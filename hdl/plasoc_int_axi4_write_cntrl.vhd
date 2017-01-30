@@ -47,7 +47,7 @@ entity plasoc_int_axi4_write_cntrl is
         axi_bready : in std_logic;
         axi_bresp : out std_logic_vector(1 downto 0);
         -- interrupt controller interface.
-        int_enables : out std_logic_vector(axi_data_width-1 downto 0));
+        int_enables : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0'));
 end plasoc_int_axi4_write_cntrl;
 
 architecture Behavioral of plasoc_int_axi4_write_cntrl is
@@ -72,6 +72,7 @@ begin
                 axi_awready_buff <= '0';
                 axi_wready_buff <= '0';
                 axi_bvalid_buff <= '0';
+                int_enables <= (others=>'0');
                 state <= state_wait;
             else
                 -- Drive state machine.

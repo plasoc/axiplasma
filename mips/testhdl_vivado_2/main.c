@@ -6,7 +6,7 @@
 #define XGPIO_OUTPUT_BASE_ADDRESS		(0x40010000)
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 
-#define XGPIO_INPUT_TOTAL			(2)
+#define XGPIO_INPUT_TOTAL				(2)
 #define XGPIO_SWITCHES_PER_INPUT		(8)
 
 plasoc_int int_obj;
@@ -15,9 +15,14 @@ xgpio xgpio_output_obj;
 volatile unsigned input_values[2];
 volatile unsigned update_flag = 1;
 
+/* The following functions are defined in the boot loader assembly.
+ They are necessary to initialize the interrupt of the CPU. */
+extern void OS_AsmInterruptInitModified();
+extern void OS_AsmInterruptEnable();
+
 /* Define the CPU's service routine such that it calls the
  interrupt controller's service method. */
-void OS_InterruptServiceRoutine(unsigned status)
+extern void OS_InterruptServiceRoutine()
 {
 	plasoc_int_service_interrupts(&int_obj);
 }
@@ -68,6 +73,10 @@ int main()
 			input_values[each_gpio] = xgpio_get_data(ptr);
 		}
 	}
+	
+	/* Configure the interrupts of the CPU. */
+	//OS_AsmInterruptInitModified();
+	OS_AsmInterruptEnable();
 
 	/* Enable all interrupts in the interrupt controller. */
 	plasoc_int_enable_all(&int_obj);

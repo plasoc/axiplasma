@@ -176,10 +176,8 @@ begin
     -- Determine whether or not the memory access from the CPU is write or read.
     cpu_access_write <= True when or_reduce(cpu_strobe)='1' else False;
     -- Set main memory access control signals.
-    --mem_in_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
     mem_in_enable <= '1' when mem_read_needed else '0';
     mem_in_ready <= mem_in_ready_buff;
-    --mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
     mem_out_enable <= '1' when mem_write_needed else '0';
     mem_out_valid <= mem_out_valid_buff;
     -- Validset storage.

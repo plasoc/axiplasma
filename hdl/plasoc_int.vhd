@@ -28,6 +28,7 @@ entity plasoc_int is
         -- axi parameters.
         axi_address_width : integer := 16;
         axi_data_width : integer := 32;
+        axi_base_address : std_logic_vector := X"0000";
         -- interrupt controller parameters.
         interrupt_total : integer := 8;
         int_id_address : std_logic_vector := X"0004";
@@ -133,11 +134,16 @@ architecture Behavioral of plasoc_int is
             -- interrupt controller interface.
             int_enables : out std_logic_vector(axi_data_width-1 downto 0));
     end component;
+    signal axi_awaddr_base : std_logic_vector(axi_address_width-1 downto 0);
+    signal axi_araddr_base : std_logic_vector(axi_address_width-1 downto 0);
     signal int_id : std_logic_vector(axi_data_width-1 downto 0);
     signal int_enables : std_logic_vector(axi_data_width-1 downto 0);
     signal int_active : std_logic_vector(axi_data_width-1 downto 0);
 begin
+    axi_awaddr_base <= remove_baseFaddress(address=>axi_awaddr,base_address=>axi_base_address);
+    axi_araddr_base <= remove_baseFaddress(address=>axi_araddr,base_address=>axi_base_address);
     int_id(axi_data_width-1 downto clogb2(interrupt_total)+1) <= (others=>'0');
+    int_active(axi_data_width-1 downto interrupt_total) <= (others=>'0');
     
     plasoc_int_cntrl_inst :
     plasoc_int_cntrl 
@@ -163,7 +169,7 @@ begin
         port map ( 
             aclk => aclk,
             aresetn => aresetn,
-            axi_araddr => axi_araddr,
+            axi_araddr => axi_araddr_base,
             axi_arprot => axi_arprot,
             axi_arvalid => axi_arvalid,
             axi_arready => axi_arready,
@@ -184,7 +190,7 @@ begin
         port map (
             aclk => aclk,
             aresetn => aresetn,
-            axi_awaddr => axi_awaddr,
+            axi_awaddr => axi_awaddr_base,
             axi_awprot => axi_awprot,
             axi_awvalid => axi_awvalid,
             axi_awready => axi_awready,
