@@ -31,7 +31,8 @@ entity plasoc_int is
         -- interrupt controller parameters.
         interrupt_total : integer := 8;
         int_id_address : std_logic_vector := X"0004";
-        int_enables_address : std_logic_vector := X"0000" );
+        int_enables_address : std_logic_vector := X"0000";
+        int_active_address : std_logic_vector := X"0008" );
     port(
         -- global interface.
         aclk : in std_logic;
@@ -73,8 +74,9 @@ architecture Behavioral of plasoc_int is
             nreset : in std_logic;
             -- cpu interface.
             cpu_int : out std_logic := '0';
-            cpu_int_id : out std_logic_vector(clogb2(interrupt_total)-1 downto 0) := (others=>'0');
+            cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0) := (others=>'0');
             cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);
+            cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);
             -- device interface.
             dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
     end component;
@@ -85,7 +87,8 @@ architecture Behavioral of plasoc_int is
             axi_data_width : integer := 32;
             -- interrupt controller parameters.
             int_id_address : std_logic_vector := X"0004";
-            int_enables_address : std_logic_vector := X"0000");
+            int_enables_address : std_logic_vector := X"0000";
+            int_active_address : std_logic_vector := X"0008");
         port ( 
             -- global interface.
             aclk : in std_logic;
@@ -101,7 +104,8 @@ architecture Behavioral of plasoc_int is
             axi_rresp : out std_logic_vector(1 downto 0);
             -- interrupt controller interface.
             int_id : in std_logic_vector(axi_data_width-1 downto 0);
-            int_enables : in std_logic_vector(axi_data_width-1 downto 0));
+            int_enables : in std_logic_vector(axi_data_width-1 downto 0);
+            int_active : in std_logic_vector(axi_data_width-1 downto 0));
     end component;
     component plasoc_int_axi4_write_cntrl is
         generic (
@@ -131,8 +135,9 @@ architecture Behavioral of plasoc_int is
     end component;
     signal int_id : std_logic_vector(axi_data_width-1 downto 0);
     signal int_enables : std_logic_vector(axi_data_width-1 downto 0);
+    signal int_active : std_logic_vector(axi_data_width-1 downto 0);
 begin
-    int_id(axi_data_width-1 downto clogb2(interrupt_total)) <= (others=>'0');
+    int_id(axi_data_width-1 downto clogb2(interrupt_total)+1) <= (others=>'0');
     
     plasoc_int_cntrl_inst :
     plasoc_int_cntrl 
@@ -142,8 +147,9 @@ begin
             clock => aclk,
             nreset => aresetn,
             cpu_int => cpu_int,
-            cpu_int_id => int_id(clogb2(interrupt_total)-1 downto 0),
+            cpu_int_id => int_id(clogb2(interrupt_total) downto 0),
             cpu_int_enables => int_enables(interrupt_total-1 downto 0),
+            cpu_int_active => int_active(interrupt_total-1 downto 0),
             dev_ints => dev_ints);
             
     plasoc_int_axi4_read_cntrl_inst :
@@ -152,7 +158,8 @@ begin
             axi_address_width => axi_address_width,
             axi_data_width => axi_data_width,
             int_id_address => int_id_address,
-            int_enables_address => int_enables_address)
+            int_enables_address => int_enables_address,
+            int_active_address => int_active_address )
         port map ( 
             aclk => aclk,
             aresetn => aresetn,
@@ -165,7 +172,8 @@ begin
             axi_rready => axi_rready,
             axi_rresp => axi_rresp,
             int_id => int_id,
-            int_enables => int_enables);
+            int_enables => int_enables,
+            int_active => int_active);
             
     plasoc_int_axi4_write_cntrl_inst :
     plasoc_int_axi4_write_cntrl 

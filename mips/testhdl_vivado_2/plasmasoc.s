@@ -17,46 +17,45 @@ l1_cache_operate_on_line_range:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	beq	$6,$0,$L8
-	addu	$6,$6,$5
+	beq	$6,$0,$L10
+	addu	$3,$6,$5
 	.set	macro
 	.set	reorder
 
-	li	$2,-32			# 0xffffffffffffffe0
-	and	$3,$6,$2
-	sltu	$6,$3,$6
-	and	$5,$5,$2
-	sll	$6,$6,5
-	addiu	$2,$3,32
-	addu	$6,$2,$6
-	li	$2,268435456			# 0x10000000
-	addu	$4,$4,$2
-	li	$2,-32			# 0xffffffffffffffe0
-$L4:
+	li	$6,-32			# 0xffffffffffffffe0
+	and	$2,$3,$6
+	sltu	$3,$2,$3
+	sll	$3,$3,5
+	addiu	$2,$2,32
+	and	$5,$5,$6
+	addu	$3,$2,$3
 	.set	noreorder
 	.set	nomacro
-	bne	$6,$5,$L5
-	and	$3,$5,$2
+	beq	$5,$3,$L10
+	li	$2,268435456			# 0x10000000
 	.set	macro
 	.set	reorder
 
-$L8:
-	jr	$31
-$L5:
+	addu	$4,$4,$2
+	and	$2,$5,$6
+$L9:
  #APP
  # 32 "../plasma/plasmasoc.h" 1
-	sw $3, 0($4)
-sw $0, 0($3)
+	sw $2, 0($4)
+sw $0, 0($2)
 
  # 0 "" 2
  #NO_APP
+	addiu	$5,$5,32
 	.set	noreorder
 	.set	nomacro
-	b	$L4
-	addiu	$5,$5,32
+	bne	$5,$3,$L9
+	and	$2,$5,$6
 	.set	macro
 	.set	reorder
 
+$L10:
+	jr	$31
 	.end	l1_cache_operate_on_line_range
 	.size	l1_cache_operate_on_line_range, .-l1_cache_operate_on_line_range
 	.ident	"GCC: (GNU) 6.3.0"

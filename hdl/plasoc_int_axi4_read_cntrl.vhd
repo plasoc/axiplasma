@@ -30,7 +30,8 @@ entity plasoc_int_axi4_read_cntrl is
         axi_data_width : integer := 32;
         -- interrupt controller parameters.
         int_id_address : std_logic_vector := X"0004";
-        int_enables_address : std_logic_vector := X"0000");
+        int_enables_address : std_logic_vector := X"0000";
+        int_active_address : std_logic_vector := X"0008");
     port ( 
         -- global interface.
         aclk : in std_logic;
@@ -46,7 +47,8 @@ entity plasoc_int_axi4_read_cntrl is
         axi_rresp : out std_logic_vector(1 downto 0);
         -- interrupt controller interface.
         int_id : in std_logic_vector(axi_data_width-1 downto 0);
-        int_enables : in std_logic_vector(axi_data_width-1 downto 0));
+        int_enables : in std_logic_vector(axi_data_width-1 downto 0);
+        int_active : in std_logic_vector(axi_data_width-1 downto 0));
 end plasoc_int_axi4_read_cntrl;
 
 architecture Behavioral of plasoc_int_axi4_read_cntrl is
@@ -99,6 +101,8 @@ begin
                             axi_rdata <= int_id;
                         elsif axi_araddr_buff=int_enables_address then
                             axi_rdata <= int_enables;
+                        elsif axi_araddr_buff=int_active_address then
+                            axi_rdata <= int_active;
                         else
                             axi_rdata <= (others=>'0');
                         end if;

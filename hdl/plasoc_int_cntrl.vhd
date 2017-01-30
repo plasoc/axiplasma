@@ -14,29 +14,31 @@ entity plasoc_int_cntrl is
         nreset : in std_logic;
         -- cpu interface.
         cpu_int : out std_logic := '0';
-        cpu_int_id : out std_logic_vector(clogb2(interrupt_total)-1 downto 0) := (others=>'0');
+        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0) := (others=>'0');
         cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);
+        cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);
         -- device interface.
         dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
 end plasoc_int_cntrl;
 
 architecture Behavioral of plasoc_int_cntrl is
-    signal dev_enabled_ints : std_logic_vector(interrupt_total-1 downto 0);
-    signal dev_triggered_int : std_logic_vector(clogb2(interrupt_total)-1 downto 0);
+    signal cpu_int_active_buff : std_logic_vector(interrupt_total-1 downto 0);
+    signal dev_triggered_int : std_logic_vector(clogb2(interrupt_total) downto 0);
     signal dev_int_occurred : boolean;
 begin
-    -- Look for the triggered enabled interrupts.
-    dev_enabled_ints <= dev_ints and cpu_int_enables;
+    -- Look for the active enabled interrupts.
+    cpu_int_active_buff <= dev_ints and cpu_int_enables;
+    cpu_int_active <= cpu_int_active_buff;
     -- Determine whether or not an interrupt occurred.
-    dev_int_occurred <= True when or_reduce(dev_enabled_ints)='1' else False;
+    dev_int_occurred <= True when or_reduce(cpu_int_active_buff)='1' else False;
     -- Generate interrupt id for devices, for which the
     -- lower the id the higher the priority.
-    process (dev_enabled_ints)
+    process (cpu_int_active_buff)
         variable triggerred_int : integer range 0 to interrupt_total-1;
     begin
-        triggerred_int := 0;
-        for each_int in dev_enabled_ints'low to dev_enabled_ints'high loop
-            if dev_enabled_ints(each_int)='1' then
+        triggerred_int := -1;
+        for each_int in cpu_int_active_buff'low to cpu_int_active_buff'high loop
+            if cpu_int_active_buff(each_int)='1' then
                 triggerred_int := each_int;
                 exit;
             end if;

@@ -30,6 +30,7 @@ package mlitesoc_pack is
     constant default_interrupt_total : integer := 8;
     constant default_int_id_offset : std_logic_vector := X"00000004";
     constant default_int_enables_offset : std_logic_vector := X"00000000"; 
+    constant default_int_active_address : std_logic_vector := X"00000008";
     
     constant error_axi_read_exokay : integer := 0;
     constant error_axi_read_slverr : integer := 1;
@@ -158,7 +159,8 @@ package mlitesoc_pack is
             -- interrupt controller parameters.
             interrupt_total : integer := default_interrupt_total;
             int_id_address : std_logic_vector := default_int_id_offset;
-            int_enables_address : std_logic_vector := default_int_enables_offset );
+            int_enables_address : std_logic_vector := default_int_enables_offset;
+            int_active_address : std_logic_vector := default_int_active_address );
         port(
             -- global interface.
             aclk : in std_logic;
