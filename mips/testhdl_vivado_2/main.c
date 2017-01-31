@@ -75,7 +75,6 @@ int main()
 	}
 	
 	/* Configure the interrupts of the CPU. */
-	//OS_AsmInterruptInitModified();
 	OS_AsmInterruptEnable();
 
 	/* Enable all interrupts in the interrupt controller. */
