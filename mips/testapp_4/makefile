@@ -1,55 +1,68 @@
-# The CC_X86 is for compiling tools on your PC.
-# The GCC_MIPS is for compiling code on the target.
-# Convert_bin changes test.axf into code.txt which is used by the VHDL.
-# Convert_bin == "objcopy -I elf32-big -O binary test.axf test.bin"
+# GCC MIPS cross compiler for Linux/Msys2 is assumed.
+
+BIN_DIR = 
+LD_DIR = 
+PLASMA_DIR = ../plasma
+CFLAGS = -Os -Wall -s -I$(PLASMA_DIR)
+LDFLAGS = -L$(LD_DIR) -static
+
+# Following are REQUIRED variables, but can be editted
+INSTALL_DIR = 
+PREFIX = $(BIN_DIR)mips-none-elf-
+SUFFIX =
+C_SOURCES = $(PLASMA_DIR)/no_os.c
+ASM_SOURCES = $(PLASMA_DIR)/boot.asm main.asm
+
+# No user editing or variables below this line
+
+CFLAGS += -c -fno-pic -mips1 -mno-abicalls
+
+RM = rm -rf
+
+EXEC_NAME = $(shell basename $$(pwd))
+GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
+AS_MIPS = $(PREFIX)as$(SUFFIX)
+LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
+DUMP_MIPS = $(PREFIX)objdump$(SUFFIX)
+OBJCOPY_MIPS = $(PREFIX)objcopy$(SUFFIX)
+
+ASM_OBJECTS = $(ASM_SOURCES:.asm=)
+C_OBJECTS = $(C_SOURCES:.c=)
+SOURCES = $(ASM_SOURCES) $(C_SOURCES)
+OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 
 
-ifeq ($(LANG),)
-
-# Customize for Windows
-# The MIPS gcc compiler must use the cygwin1.dll that came with the compiler.
-CC_X86 = cl /O1 /nologo
-CP = copy
-RM = del
-DWIN32 = -DWIN32
-BIN_MIPS = ..\gccmips_elf
-VHDL_DIR = ..\vhdl
-LINUX_PWD =
-GCC_MIPS  = $(BIN_MIPS)\gcc $(CFLAGS)
-AS_MIPS   = $(BIN_MIPS)\as
-LD_MIPS   = $(BIN_MIPS)\ld
-DUMP_MIPS = $(BIN_MIPS)\objdump
-CONVERT_BIN = $(LINUX_PWD)convert_bin.exe
-
+all: $(OBJECTS)
+ifdef DEBUG_MAKE
+	$(LD_MIPS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
+		$(notdir $(OBJECTS:=.o)) -lc
+	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
 else
+	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
+		$(notdir $(OBJECTS:=.o)) -lc
+endif
+	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
 
-# Customized for Linux
-CC_X86 = gcc -Wall -O -g
-CP = cp
-RM = rm -rf 
-DWIN32 =
-BIN_MIPS = /opt/cross-compiler-mips/bin/
-PLASMA_DIR = ../plasma/
-GCC_MIPS = $(BIN_MIPS)mips-gcc $(CFLAGS)
-AS_MIPS = $(BIN_MIPS)mips-as 
-LD_MIPS = $(BIN_MIPS)mips-ld
-DUMP_MIPS = $(BIN_MIPS)mips-objdump
-CONVERT_BIN = $(BIN_MIPS)mips-objcopy -I elf32-big -O binary main.axf main.bin 
 
+$(C_OBJECTS):%:%.c
+	$(GCC_MIPS) -o $(notdir $@).o $@.c
+ifdef DEBUG_MAKE
+	$(GCC_MIPS) -o $(notdir $@).asm -S $@.c
+endif
+	
+$(ASM_OBJECTS):%:%.asm
+	$(AS_MIPS) -o $(notdir $@).o $@.asm
+
+
+install:
+ifneq ($(INSTALL_DIR),)
+	install -d $(INSTALL_DIR)
+	install -c $(EXEC_NAME).bin $(INSTALL_DIR)
+else
+	@echo Not installing, no installation directory selected
 endif
 
-CFLAGS = -O0 -Wall -c -s
-CFLAGS += -fno-pic -mips1 -mno-abicalls -I$(PLASMA_DIR)
-
-all:
-	$(AS_MIPS) -o boot.o $(PLASMA_DIR)boot.asm 
-	$(AS_MIPS) -o main.o main.asm
-	$(GCC_MIPS) $(PLASMA_DIR)no_os.c 
-	$(LD_MIPS) -Ttext 0 -e entry -Map main.map -s -N -o main.axf \
-		boot.o main.o no_os.o 
-	-$(DUMP_MIPS) --disassemble-all main.axf > main.lst
-	$(CONVERT_BIN)
 
 clean:
-	-$(RM) *.o *.obj *.map *.lst *.hex *.txt *.exe *.axf 
+	$(RM) $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
 
