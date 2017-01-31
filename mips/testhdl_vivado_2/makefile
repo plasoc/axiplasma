@@ -2,6 +2,7 @@
 
 BIN_DIR = 
 LD_DIR = 
+MISC_DIR = ../../misc
 PLASMA_DIR = ../plasma
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR)
 LDFLAGS = -L$(LD_DIR) -static
@@ -12,6 +13,7 @@ PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASMA_DIR)/plasmasoc.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
+BIN2COE = python $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
 # No user editing or variables below this line
 
@@ -42,6 +44,7 @@ else
 		$(notdir $(OBJECTS:=.o)) -lc
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
+	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).hex
 
 
 $(C_OBJECTS):%:%.c
@@ -57,12 +60,12 @@ $(ASM_OBJECTS):%:%.asm
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
-	install -c $(EXEC_NAME).bin $(INSTALL_DIR)
+	install -c $(EXEC_NAME).hex $(INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
 
 
 clean:
-	$(RM) $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
+	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
 
