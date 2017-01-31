@@ -23,7 +23,6 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
-use work.mlitesoc_pack.all;
 
 entity plasoc_timer_cntrl is
     generic (
@@ -39,7 +38,6 @@ entity plasoc_timer_cntrl is
         -- time data interface.
         trig_value : in std_logic_vector(timer_width-1 downto 0);
         tick_value : out std_logic_vector(timer_width-1 downto 0));
---  Port ( );
 end plasoc_timer_cntrl;
 
 architecture Behavioral of plasoc_timer_cntrl is
@@ -51,6 +49,7 @@ begin
     -- Output the current tick value.
     tick_value <= std_logic_vector(to_unsigned(tick_counter,timer_width));
 
+    -- Drive the operation of the simple timer.
     process (clock)
     begin
         -- Perform operations in synch with the rising edge of the clock.
