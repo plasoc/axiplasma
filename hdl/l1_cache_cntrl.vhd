@@ -176,10 +176,8 @@ begin
     -- Determine whether or not the memory access from the CPU is write or read.
     cpu_access_write <= True when or_reduce(cpu_strobe)='1' else False;
     -- Set main memory access control signals.
-    --mem_in_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
     mem_in_enable <= '1' when mem_read_needed else '0';
     mem_in_ready <= mem_in_ready_buff;
-    --mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
     mem_out_enable <= '1' when mem_write_needed else '0';
     mem_out_valid <= mem_out_valid_buff;
     -- Validset storage.
@@ -357,12 +355,13 @@ begin
                     elsif cache_oper then
                         -- Check for hit and then check to see which operation is enabled.
                         if cache_hit then
+                            -- Make sure the CPU is installed if the operation is started.
+                            cpu_pause_delayed <= True;
+                            cpu_pause_buff <= '1';
                             -- If flush is enabled, check and see if the 
                             -- requested tag and index are actually valid in the cache. If
                             -- they are, flush cache line. 
                             if cache_flush_enable then
-                                cpu_pause_delayed <= True;
-                                cpu_pause_buff <= '1';
                                 cache_state <= cache_state_mem;
                                 mem_way_replace <= cache_way;
                                 mem_write_needed <= True;
@@ -398,7 +397,7 @@ begin
                             if cpu_access_write then
                                 -- Enable the memory write interface for only a single word.
                                 mem_write_needed <= True;
-                                mem_write_counter <= 2**cache_word_offset_width-1;
+                                mem_write_counter <= 2**cache_word_offset_width;
                                 -- Set memory out control information.
                                 mem_out_strobe <= cpu_strobe;
                                 mem_out_address <= cpu_address;

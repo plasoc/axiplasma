@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
--- TITLE: Plasma-SoC Baseline Processor with Mem Interface
+-- TITLE: Plasma-SoC Baseline Processor with AXI4-Full Interface.
 -- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
 -- DATE CREATED: 1/07/2017
 -- FILENAME: mlitesoc_pack.vhd
@@ -20,33 +20,60 @@ use ieee.numeric_std.all;
 entity axiplasma is
     generic(
         -- cpu constants
-        cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
-        cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
-        cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
+        cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
+        cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
+        cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
         -- cache constants
-        cache_address_width : integer := 12;
-        cache_way_width : integer := 2; 
-        cache_index_width : integer := 4;
-        cache_offset_width : integer := 5;
-        cache_replace_strat : string := "plru";
-        cache_base_address : std_logic_vector := X"10000000";
-        cache_enable : boolean := True );
+        cache_address_width : integer := default_cache_address_width;
+        cache_way_width : integer := default_cache_way_width; 
+        cache_index_width : integer := default_cache_index_width;
+        cache_offset_width : integer := default_cache_offset_width;
+        cache_replace_strat : string := default_cache_replace_strat;
+        cache_base_address : std_logic_vector := default_cache_base_address;
+        cache_enable : boolean := default_cache_enable );
     port(
         -- global signals
         aclk : in std_logic;
         aresetn     : in std_logic;
-        -- mem signals
-        mem_in_address : out std_logic_vector(31 downto 0);
-        mem_in_data : in std_logic_vector(31 downto 0);
-        mem_in_enable : out std_logic;
-        mem_in_valid : in std_logic;
-        mem_in_ready : out std_logic;
-        mem_out_address : out std_logic_vector(31 downto 0);
-        mem_out_data : out std_logic_vector(31 downto 0);
-        mem_out_strobe : out std_logic_vector(3 downto 0);
-        mem_out_enable : out std_logic;
-        mem_out_valid : out std_logic;
-        mem_out_ready : in std_logic;
+        -- axi write interface.
+        axi_awid : out std_logic_vector(0 downto 0);
+        axi_awaddr : out std_logic_vector(31 downto 0);
+        axi_awlen : out std_logic_vector(7 downto 0);
+        axi_awsize : out std_logic_vector(2 downto 0);
+        axi_awburst : out std_logic_vector(1 downto 0);
+        axi_awlock : out std_logic;
+        axi_awcache : out std_logic_vector(3 downto 0);
+        axi_awprot : out std_logic_vector(2 downto 0);
+        axi_awqos : out std_logic_vector(3 downto 0);
+        axi_awvalid : out std_logic;
+        axi_awready : in std_logic;
+        axi_wdata : out std_logic_vector(31 downto 0);
+        axi_wstrb : out std_logic_vector(3 downto 0);
+        axi_wlast : out std_logic;
+        axi_wvalid : out std_logic;
+        axi_wready : in std_logic;
+        axi_bid : in std_logic_vector(0 downto 0);
+        axi_bresp : in  std_logic_vector(1 downto 0);
+        axi_bvalid : in std_logic;
+        axi_bready : out std_logic;
+        -- axi read interface.
+        axi_arid : out std_logic_vector(0 downto 0);
+        axi_araddr : out std_logic_vector(31 downto 0);
+        axi_arlen : out std_logic_vector(7 downto 0);
+        axi_arsize : out std_logic_vector(2 downto 0);
+        axi_arburst : out std_logic_vector(1 downto 0);
+        axi_arlock : out std_logic;
+        axi_arcache : out std_logic_vector(3 downto 0);
+        axi_arprot : out std_logic_vector(2 downto 0);
+        axi_arqos : out std_logic_vector(3 downto 0);
+        axi_arvalid : out std_logic;
+        axi_arready : in std_logic;
+        axi_rid : in std_logic_vector(0 downto 0);
+        axi_rdata : in std_logic_vector(31 downto 0);
+        axi_rresp : in std_logic_vector(1 downto 0);
+        axi_rlast : in std_logic;
+        axi_rvalid : in std_logic;
+        axi_rready : out std_logic;
         -- cpu signals
         intr_in      : in std_logic;
         -- debug signals.
@@ -54,27 +81,233 @@ entity axiplasma is
 end axiplasma;
 
 architecture Behavioral of axiplasma is
+    -- Component declarations.
+    component l1_cache_cntrl is
+        generic (
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
+            -- cache constants
+            cache_address_width : integer := 10;
+            cache_way_width : integer := 1; 
+            cache_index_width : integer := 4;
+            cache_offset_width : integer := 4;
+            cache_replace_strat : string := "plru";
+            cache_base_address : std_logic_vector := X"0000" ); 
+        port ( 
+            -- global interface.
+            clock : in std_logic; 
+            resetn : in std_logic;
+            -- cpu interface.
+            cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
+            cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            cpu_pause : out std_logic;
+            -- cache interface.
+            cache_cacheable : out std_logic;
+            cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
+            cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
+            cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0);
+            cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);
+            cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            -- simple mem interface
+            mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            mem_in_enable : out std_logic;
+            mem_in_valid : in std_logic;
+            mem_in_ready : out std_logic;
+            mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0);
+            mem_out_enable : out std_logic;
+            mem_out_valid : out std_logic;
+            mem_out_ready : in std_logic); 
+    end component;
+    component l1_cache_buff is
+        generic (
+            -- Global parameters.
+            glb_data_width : integer := 32;
+            -- Cache related parameters.
+            cache_tag_width : integer := 22;
+            cache_index_width : integer := 5;
+            cache_offset_width : integer := 4;
+            cache_way_width : integer := 2 );
+        port(
+            -- Global interface.
+            clock : in std_logic;
+            -- Cache controller interface.
+            cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            cache_in_index : in std_logic_vector(cache_index_width-1 downto 0);
+            cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0);
+            cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
+            cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
+            cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
+    end component;
+    component mem_cntrl is
+        generic (
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32);
+        port (
+            -- global interface.
+            clock : in std_logic; 
+            resetn : in std_logic;
+            -- cpu interface.
+            cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
+            cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            cpu_pause : out std_logic;
+            -- "cache" interface.
+            cache_cacheable : out std_logic;
+            -- simple mem interface
+            mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            mem_in_enable : out std_logic;
+            mem_in_valid : in std_logic;
+            mem_in_ready : out std_logic;
+            mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+            mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
+            mem_out_enable : out std_logic := '0';
+            mem_out_valid : out std_logic;
+            mem_out_ready : in std_logic);
+    end component;
+    component plasoc_axi4_read_cntrl is
+        generic (
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
+            -- cache constants
+            cache_offset_width : integer := 5;
+            -- axi read constants
+            axi_aruser_width : integer := 0;
+            axi_ruser_width : integer := 0);
+        port(
+            -- global interfaces.
+            clock : in std_logic;
+            nreset : in std_logic;
+            -- mem read interface.
+            mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);
+            mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+            mem_read_enable : in std_logic;
+            mem_read_valid : out std_logic;
+            mem_read_ready : in std_logic;
+            -- cache interface.
+            cache_cacheable : in std_logic;
+            -- axi read interface.
+            axi_arid : out std_logic_vector(0 downto 0);
+            axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0);
+            axi_arlen : out std_logic_vector(7 downto 0);
+            axi_arsize : out std_logic_vector(2 downto 0);
+            axi_arburst : out std_logic_vector(1 downto 0);
+            axi_arlock : out std_logic;
+            axi_arcache : out std_logic_vector(3 downto 0);
+            axi_arprot : out std_logic_vector(2 downto 0);
+            axi_arqos : out std_logic_vector(3 downto 0);
+            axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
+            axi_arvalid : out std_logic;
+            axi_arready : in std_logic;
+            axi_rid : in std_logic_vector(0 downto 0);
+            axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);
+            axi_rresp : in std_logic_vector(1 downto 0);
+            axi_rlast : in std_logic;
+            axi_ruser : in std_logic_vector(axi_ruser_width-1 downto 0);
+            axi_rvalid : in std_logic;
+            axi_rready : out std_logic;
+            -- error interface.
+            error_data : out std_logic_vector(3 downto 0) := (others=>'0') );
+    end component;
+    component plasoc_axi4_write_cntrl is
+        generic(
+            -- cpu constants
+            cpu_address_width : integer := 16;
+            cpu_data_width : integer := 32;
+            -- cache constants
+            cache_offset_width : integer := 5;
+            -- axi read constants
+            axi_awuser_width : integer := 0;
+            axi_wuser_width : integer := 0;
+            axi_buser_width : integer := 0);
+        port(
+            -- global interfaces.
+            clock : in std_logic;
+            nreset : in std_logic;
+            -- mem write interface.
+            mem_write_address : in std_logic_vector(cpu_address_width-1 downto 0);
+            mem_write_data : in std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+            mem_write_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            mem_write_enable : in std_logic;
+            mem_write_valid : in std_logic;
+            mem_write_ready  : out std_logic;
+            -- cache interface.
+            cache_cacheable : in std_logic;
+            -- axi write interface.
+            axi_awid : out std_logic_vector(0 downto 0);
+            axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0);
+            axi_awlen : out std_logic_vector(7 downto 0);
+            axi_awsize : out std_logic_vector(2 downto 0);
+            axi_awburst : out std_logic_vector(1 downto 0);
+            axi_awlock : out std_logic;
+            axi_awcache : out std_logic_vector(3 downto 0);
+            axi_awprot : out std_logic_vector(2 downto 0);
+            axi_awqos : out std_logic_vector(3 downto 0);
+            axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);
+            axi_awvalid : out std_logic;
+            axi_awready : in std_logic;
+            axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0);
+            axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0);
+            axi_wlast : out std_logic;
+            axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);
+            axi_wvalid : out std_logic;
+            axi_wready : in std_logic;
+            axi_bid : in std_logic_vector(0 downto 0);
+            axi_bresp : in  std_logic_vector(1 downto 0);
+            axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
+            axi_bvalid : in std_logic;
+            axi_bready : out std_logic;
+            -- error interface.
+            error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
+    end component;
+    -- Constants and type definitions.
     constant cpu_width : integer := 32;
     constant cpu_memory_type     : string  := "DUAL_PORT_"; 
     constant cpu_pipeline_stages : natural := 3; 
     constant cache_tag_width : integer := cache_address_width-cache_index_width-cache_offset_width;
     constant cache_word_offset_width : integer := cache_offset_width-clogb2(cpu_width/8);
     constant cache_line_width : integer := (cache_tag_width+8*2**cache_offset_width);
+    constant axi_user_width : integer := 1;
     subtype cache_index_type is std_logic_vector(cache_index_width-1 downto 0);
     subtype cache_data_type is std_logic_vector(cache_line_width*2**cache_way_width-1 downto 0);
     subtype cache_write_block_enable_type is std_logic_vector(2**(cache_way_width+cache_word_offset_width)-1 downto 0);
-    signal reset_in : std_logic;
+    -- CPU interface signals.
     signal cpu_write_data : std_logic_vector(cpu_width-1 downto 0);
     signal cpu_read_data : std_logic_vector(cpu_width-1 downto 0);
     signal cpu_address_next : std_logic_vector(cpu_width-1 downto 0);
     signal cpu_strobe_next : std_logic_vector(cpu_width/8-1 downto 0); 
     signal cpu_pause    : std_logic;
+    -- Cache interface signals.
     signal cache_write_index : cache_index_type;
     signal cache_write_data : cache_data_type := (others=>'0');
     signal cache_write_tag_enable : std_logic_vector(2**cache_way_width-1 downto 0);
     signal cache_write_block_enable : cache_write_block_enable_type;
     signal cache_read_index : cache_index_type;
     signal cache_read_data :cache_data_type := (others=>'0');
+    signal cache_cacheable : std_logic;
+    -- Memory interface signals
+    signal mem_in_address : std_logic_vector(cpu_width-1 downto 0);
+    signal mem_in_data : std_logic_vector(cpu_width-1 downto 0);
+    signal mem_in_enable : std_logic;
+    signal mem_in_valid : std_logic;
+    signal mem_in_ready : std_logic;
+    signal mem_out_address : std_logic_vector(cpu_width-1 downto 0);
+    signal mem_out_data : std_logic_vector(cpu_width-1 downto 0);
+    signal mem_out_strobe : std_logic_vector(cpu_width/8-1 downto 0);
+    signal mem_out_enable : std_logic;
+    signal mem_out_valid : std_logic;
+    signal mem_out_ready : std_logic;
 begin
     cpu_address_next(1 downto 0) <= "00";
     debug_cpu_pause <= cpu_pause;
@@ -121,7 +354,7 @@ begin
                 cpu_out_data => cpu_read_data,
                 cpu_strobe => cpu_strobe_next,
                 cpu_pause => cpu_pause,
-                cache_cacheable => open,
+                cache_cacheable => cache_cacheable,
                 cache_out_address => cache_write_index,
                 cache_out_data => cache_write_data,
                 cache_out_tag_enable => cache_write_tag_enable,
@@ -163,29 +396,110 @@ begin
         -- Memory controller instantiation.
         mem_cntrl_inst :
         mem_cntrl 
+            generic map (
+                cpu_address_width => cpu_width,
+                cpu_data_width => cpu_width )
+            port map (
+                clock => aclk,
+                resetn => aresetn,
+                cpu_address => cpu_address_next,
+                cpu_in_data => cpu_write_data,
+                cpu_out_data => cpu_read_data,
+                cpu_strobe => cpu_strobe_next,
+                cpu_pause => cpu_pause,
+                cache_cacheable => cache_cacheable,
+                mem_in_address => mem_in_address,
+                mem_in_data => mem_in_data,
+                mem_in_enable => mem_in_enable,
+                mem_in_valid => mem_in_valid,
+                mem_in_ready => mem_in_ready,
+                mem_out_address => mem_out_address,
+                mem_out_data => mem_out_data,
+                mem_out_strobe => mem_out_strobe,
+                mem_out_enable => mem_out_enable,
+                mem_out_valid => mem_out_valid,
+                mem_out_ready => mem_out_ready);
+    end generate;
+    -- axi write controller.
+    plasoc_axi4_write_cntrl_inst : 
+    plasoc_axi4_write_cntrl 
         generic map (
             cpu_address_width => cpu_width,
-            cpu_data_width => cpu_width )
+            cpu_data_width => cpu_width,
+            cache_offset_width => cache_offset_width,
+            axi_awuser_width => axi_user_width,
+            axi_wuser_width => axi_user_width,
+            axi_buser_width => axi_user_width)
         port map (
             clock => aclk,
-            resetn => aresetn,
-            cpu_address => cpu_address_next,
-            cpu_in_data => cpu_write_data,
-            cpu_out_data => cpu_read_data,
-            cpu_strobe => cpu_strobe_next,
-            cpu_pause => cpu_pause,
-            cache_cacheable => open,
-            mem_in_address => mem_in_address,
-            mem_in_data => mem_in_data,
-            mem_in_enable => mem_in_enable,
-            mem_in_valid => mem_in_valid,
-            mem_in_ready => mem_in_ready,
-            mem_out_address => mem_out_address,
-            mem_out_data => mem_out_data,
-            mem_out_strobe => mem_out_strobe,
-            mem_out_enable => mem_out_enable,
-            mem_out_valid => mem_out_valid,
-            mem_out_ready => mem_out_ready);
-    end generate;
-
+            nreset => aresetn,
+            mem_write_address => mem_out_address,
+            mem_write_data => mem_out_data,
+            mem_write_strobe => mem_out_strobe,
+            mem_write_enable => mem_out_enable,
+            mem_write_valid => mem_out_valid,
+            mem_write_ready => mem_out_ready,
+            cache_cacheable => cache_cacheable,
+            axi_awid => axi_awid,
+            axi_awaddr => axi_awaddr,
+            axi_awlen => axi_awlen,
+            axi_awsize => axi_awsize,
+            axi_awburst => axi_awburst,
+            axi_awlock => axi_awlock,
+            axi_awcache => axi_awcache,
+            axi_awprot => axi_awprot,
+            axi_awqos => axi_awqos,
+            axi_awuser => open,
+            axi_awvalid => axi_awvalid,
+            axi_awready => axi_awready,
+            axi_wdata => axi_wdata,
+            axi_wstrb => axi_wstrb,
+            axi_wlast => axi_wlast,
+            axi_wuser => open,
+            axi_wvalid => axi_wvalid,
+            axi_wready => axi_wready,
+            axi_bid => axi_bid,
+            axi_bresp => axi_bresp,
+            axi_buser => (others=>'0'),
+            axi_bvalid => axi_bvalid,
+            axi_bready => axi_bready,
+            error_data => open);
+    -- axi read controller.
+    plasoc_axi4_read_cntrl_inst :
+    plasoc_axi4_read_cntrl 
+        generic map (
+            cpu_address_width => cpu_width,
+            cpu_data_width => cpu_width,
+            cache_offset_width => cache_offset_width,
+            axi_aruser_width => axi_user_width,
+            axi_ruser_width => axi_user_width)
+        port map (
+            clock => aclk,
+            nreset => aresetn,
+            mem_read_address => mem_in_address,
+            mem_read_data => mem_in_data,
+            mem_read_enable => mem_in_enable,
+            mem_read_valid => mem_in_valid,
+            mem_read_ready => mem_in_ready,
+            cache_cacheable => cache_cacheable,
+            axi_arid => axi_arid,
+            axi_araddr => axi_araddr,
+            axi_arlen => axi_arlen,
+            axi_arsize => axi_arsize,
+            axi_arburst => axi_arburst,
+            axi_arlock => axi_arlock,
+            axi_arcache => axi_arcache,
+            axi_arprot => axi_arprot,
+            axi_arqos => axi_arqos,
+            axi_aruser => open,
+            axi_arvalid => axi_arvalid,
+            axi_arready => axi_arready,
+            axi_rid => axi_rid,
+            axi_rdata => axi_rdata,
+            axi_rresp => axi_rresp,
+            axi_rlast => axi_rlast,
+            axi_ruser => (others=>'0'),
+            axi_rvalid => axi_rvalid,
+            axi_rready => axi_rready,
+            error_data => open);
 end Behavioral;
