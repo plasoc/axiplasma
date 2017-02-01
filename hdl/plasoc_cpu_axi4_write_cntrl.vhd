@@ -6,7 +6,7 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.mlitesoc_pack.all;
 
-entity plasoc_axi4_write_cntrl is
+entity plasoc_cpu_axi4_write_cntrl is
     generic(
         -- cpu constants
         cpu_address_width : integer := 16;
@@ -56,9 +56,9 @@ entity plasoc_axi4_write_cntrl is
         axi_bready : out std_logic;
         -- error interface.
         error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
-end plasoc_axi4_write_cntrl;
+end plasoc_cpu_axi4_write_cntrl;
 
-architecture Behavioral of plasoc_axi4_write_cntrl is
+architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     subtype error_data_type is std_logic_vector(error_data'high downto error_data'low);
     constant cpu_bytes_per_word : integer := cpu_data_width/8;
     constant cache_words_per_line : integer := 2**cache_offset_width/cpu_bytes_per_word;

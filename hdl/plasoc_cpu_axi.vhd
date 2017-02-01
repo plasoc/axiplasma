@@ -17,7 +17,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
-entity axiplasma is
+entity plasoc_cpu_axi is
     generic(
         -- cpu constants
         cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
@@ -78,11 +78,11 @@ entity axiplasma is
         intr_in      : in std_logic;
         -- debug signals.
         debug_cpu_pause : out std_logic );
-end axiplasma;
+end plasoc_cpu_axi;
 
-architecture Behavioral of axiplasma is
+architecture Behavioral of plasoc_cpu_axi is
     -- Component declarations.
-    component l1_cache_cntrl is
+    component plasoc_cpu_l1_cache_cntrl is
         generic (
             -- cpu constants
             cpu_address_width : integer := 16;
@@ -125,7 +125,7 @@ architecture Behavioral of axiplasma is
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic); 
     end component;
-    component l1_cache_buff is
+    component plasoc_cpu_l1_cache_buff is
         generic (
             -- Global parameters.
             glb_data_width : integer := 32;
@@ -145,7 +145,7 @@ architecture Behavioral of axiplasma is
             cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
     end component;
-    component mem_cntrl is
+    component plasoc_cpu_mem_cntrl is
         generic (
             -- cpu constants
             cpu_address_width : integer := 16;
@@ -175,7 +175,7 @@ architecture Behavioral of axiplasma is
             mem_out_valid : out std_logic;
             mem_out_ready : in std_logic);
     end component;
-    component plasoc_axi4_read_cntrl is
+    component plasoc_cpu_axi4_read_cntrl is
         generic (
             -- cpu constants
             cpu_address_width : integer := 16;
@@ -220,7 +220,7 @@ architecture Behavioral of axiplasma is
             -- error interface.
             error_data : out std_logic_vector(3 downto 0) := (others=>'0') );
     end component;
-    component plasoc_axi4_write_cntrl is
+    component plasoc_cpu_axi4_write_cntrl is
         generic(
             -- cpu constants
             cpu_address_width : integer := 16;
@@ -308,6 +308,13 @@ architecture Behavioral of axiplasma is
     signal mem_out_enable : std_logic;
     signal mem_out_valid : std_logic;
     signal mem_out_ready : std_logic;
+    -- Attributes.
+    attribute keep : boolean;
+    attribute keep of cpu_write_data : signal is true;
+    attribute keep of cpu_read_data : signal is true;
+    attribute keep of cpu_address_next : signal is true;
+    attribute keep of cpu_strobe_next : signal is true;
+    attribute keep of cpu_pause : signal is true;
 begin
     cpu_address_next(1 downto 0) <= "00";
     debug_cpu_pause <= cpu_pause;
@@ -335,8 +342,8 @@ begin
     gen_cache :
     if cache_enable=True generate
         -- Cache controller instantiation.
-        l1_cache_cntrl_inst: 
-        l1_cache_cntrl 
+        plasoc_cpu_l1_cache_cntrl_inst: 
+        plasoc_cpu_l1_cache_cntrl 
             generic map (
                 cpu_address_width => cpu_width,
                 cpu_data_width => cpu_width,
@@ -373,8 +380,8 @@ begin
                 mem_out_valid => mem_out_valid,
                 mem_out_ready => mem_out_ready);
         -- Cache buffer instantiation.
-        l1_cache_buff_inst : 
-        l1_cache_buff 
+        plasoc_cpu_l1_cache_buff_inst : 
+        plasoc_cpu_l1_cache_buff 
             generic map (
                 glb_data_width => cpu_width,
                 cache_tag_width => cache_tag_width,
@@ -394,8 +401,8 @@ begin
     gen_no_cache :
     if cache_enable=False generate
         -- Memory controller instantiation.
-        mem_cntrl_inst :
-        mem_cntrl 
+        plasoc_cpu_mem_cntrl_inst :
+        plasoc_cpu_mem_cntrl 
             generic map (
                 cpu_address_width => cpu_width,
                 cpu_data_width => cpu_width )
@@ -421,8 +428,8 @@ begin
                 mem_out_ready => mem_out_ready);
     end generate;
     -- axi write controller.
-    plasoc_axi4_write_cntrl_inst : 
-    plasoc_axi4_write_cntrl 
+    plasoc_cpu_axi4_write_cntrl_inst : 
+    plasoc_cpu_axi4_write_cntrl 
         generic map (
             cpu_address_width => cpu_width,
             cpu_data_width => cpu_width,
@@ -465,8 +472,8 @@ begin
             axi_bready => axi_bready,
             error_data => open);
     -- axi read controller.
-    plasoc_axi4_read_cntrl_inst :
-    plasoc_axi4_read_cntrl 
+    plasoc_cpu_axi4_read_cntrl_inst :
+    plasoc_cpu_axi4_read_cntrl 
         generic map (
             cpu_address_width => cpu_width,
             cpu_data_width => cpu_width,

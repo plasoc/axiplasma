@@ -5,7 +5,7 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.mlitesoc_pack.all;
 
-entity mem_cntrl is
+entity plasoc_cpu_mem_cntrl is
     generic (
         -- cpu constants
         cpu_address_width : integer := 16;
@@ -34,9 +34,9 @@ entity mem_cntrl is
         mem_out_enable : out std_logic := '0';
         mem_out_valid : out std_logic;
         mem_out_ready : in std_logic);
-end mem_cntrl;
+end plasoc_cpu_mem_cntrl;
 
-architecture Behavioral of mem_cntrl is
+architecture Behavioral of plasoc_cpu_mem_cntrl is
     subtype address_type is std_logic_vector(cpu_address_width-1 downto 0);
     subtype strobe_type is std_logic_vector(cpu_data_width/8-1 downto 0);
     subtype flag_type is std_logic;

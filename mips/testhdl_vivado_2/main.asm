@@ -151,16 +151,15 @@ main:
 	lw	$2,%gp_rel(xgpio_input_obj)($28)
 	li	$3,-2147483648			# 0xffffffff80000000
 	sw	$3,284($2)
-	lw	$3,%gp_rel(xgpio_input_obj)($28)
-	li	$4,1151401984			# 0x44a10000
-	lw	$2,296($3)
+	lw	$4,%gp_rel(xgpio_input_obj)($28)
+	li	$3,1151401984			# 0x44a10000
+	lw	$2,296($4)
 	#nop
 	ori	$2,$2,0x1
-	sw	$2,296($3)
-	li	$3,24969216			# 0x17d0000
-	addiu	$3,$3,30784
-	sw	$4,%gp_rel(timer_obj)($28)
-	sw	$3,4($4)
+	sw	$2,296($4)
+	li	$4,512			# 0x200
+	sw	$3,%gp_rel(timer_obj)($28)
+	sw	$4,4($3)
 	lui	$3,%hi(input_gpio_isr)
 	addiu	$2,$16,%lo(int_obj)
 	addiu	$3,$3,%lo(input_gpio_isr)

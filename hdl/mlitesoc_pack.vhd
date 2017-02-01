@@ -62,7 +62,7 @@ package mlitesoc_pack is
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
     function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
 
-    component axiplasma is
+    component plasoc_cpu_axi is
         generic(
             -- cpu constants
             cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED

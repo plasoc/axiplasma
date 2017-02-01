@@ -308,8 +308,8 @@ begin
         timer_axi_wstrb => timer_axi_wstrb,
         timer_axi_wvalid => timer_axi_wvalid);
     -- axiplasma instantiation.
-    axiplasma_inst :
-    axiplasma 
+    plasoc_cpu_axi_inst :
+    plasoc_cpu_axi 
         generic map (
             cpu_mult_type => default_cpu_mult_type,
             cpu_shifter_type => default_cpu_shifter_type,

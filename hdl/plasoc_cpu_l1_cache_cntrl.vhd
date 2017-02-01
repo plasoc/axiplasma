@@ -19,7 +19,7 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.mlitesoc_pack.all;
 
-entity l1_cache_cntrl is
+entity plasoc_cpu_l1_cache_cntrl is
     generic (
         -- cpu constants
         cpu_address_width : integer := 16;
@@ -61,9 +61,9 @@ entity l1_cache_cntrl is
         mem_out_enable : out std_logic;
         mem_out_valid : out std_logic;
         mem_out_ready : in std_logic); 
-end l1_cache_cntrl;
+end plasoc_cpu_l1_cache_cntrl;
 
-architecture Behavioral of l1_cache_cntrl is
+architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     function cache_plru_width return integer is
     	variable result : integer := 0;
     begin

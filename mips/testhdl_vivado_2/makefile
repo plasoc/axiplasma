@@ -35,23 +35,23 @@ OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 
 
 all: $(OBJECTS)
-#ifdef DEBUG_MAKE
+ifdef DEBUG_MAKE
 	$(LD_MIPS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
 		$(notdir $(OBJECTS:=.o)) -lc
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
-#else
-#	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
-#		$(notdir $(OBJECTS:=.o)) -lc
-#endif
+else
+	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
+		$(notdir $(OBJECTS:=.o)) -lc
+endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
 	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).hex
 
 
 $(C_OBJECTS):%:%.c
 	$(GCC_MIPS) -o $(notdir $@).o $@.c
-#ifdef DEBUG_MAKE
+ifdef DEBUG_MAKE
 	$(GCC_MIPS) -o $(notdir $@).asm -S $@.c
-#endif
+endif
 	
 $(ASM_OBJECTS):%:%.asm
 	$(AS_MIPS) -o $(notdir $@).o $@.asm

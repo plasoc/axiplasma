@@ -19,7 +19,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use work.mlitesoc_pack.all;
 
-entity l1_cache_buff is
+entity plasoc_cpu_l1_cache_buff is
     generic (
         -- Global parameters.
         glb_data_width : integer := 32;
@@ -38,9 +38,9 @@ entity l1_cache_buff is
         cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
         cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
         cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
-end entity l1_cache_buff;
+end entity plasoc_cpu_l1_cache_buff;
 
-architecture Behavioral of l1_cache_buff is
+architecture Behavioral of plasoc_cpu_l1_cache_buff is
     constant cache_word_offset_width : integer := cache_offset_width-clogb2(glb_data_width/8);
     constant cache_line_width : integer := (cache_tag_width+8*2**cache_offset_width);
     subtype cache_address_type is std_logic_vector(cache_index_width-1 downto 0);
