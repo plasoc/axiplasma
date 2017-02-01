@@ -26,7 +26,7 @@ use work.mlitesoc_pack.all;
 entity plasoc_timer is
     generic (
         -- timer parameters.
-        timer_width : integer := 16;
+        timer_width : integer := 32;
         -- axi parameters.
         axi_address_width : integer := 16;
         axi_data_width : integer := 32;

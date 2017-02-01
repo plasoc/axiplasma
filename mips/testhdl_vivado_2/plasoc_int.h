@@ -40,6 +40,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_set_enables(plasoc_int* obj,unsigned mask)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = mask;
 	}
 
@@ -64,24 +65,28 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_enable_all(plasoc_int* obj)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = PLASOC_INT_INTERRUPT_MASK;
 	}
 
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_disable_all(plasoc_int* obj)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = 0;
 	}
 
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_enable(plasoc_int* obj,unsigned id)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) |= (1<<id);
 	}
 
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_disable(plasoc_int* obj,unsigned id)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) &= ~(1<<id);
 	}
 

@@ -1,7 +1,7 @@
 //Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 //--------------------------------------------------------------------------------
 //Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
-//Date        : Fri Jan 27 14:00:17 2017
+//Date        : Tue Jan 31 17:39:59 2017
 //Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 //Command     : generate_target ip_block_design_wrapper.bd
 //Design      : ip_block_design_wrapper
@@ -47,8 +47,28 @@ module ip_block_design_wrapper
     axi_wready,
     axi_wstrb,
     axi_wvalid,
-    gpio_input,
+    gpio_input_0,
     gpio_output,
+    int_axi_araddr,
+    int_axi_arprot,
+    int_axi_arready,
+    int_axi_arvalid,
+    int_axi_awaddr,
+    int_axi_awprot,
+    int_axi_awready,
+    int_axi_awvalid,
+    int_axi_bready,
+    int_axi_bresp,
+    int_axi_bvalid,
+    int_axi_rdata,
+    int_axi_rready,
+    int_axi_rresp,
+    int_axi_rvalid,
+    int_axi_wdata,
+    int_axi_wready,
+    int_axi_wstrb,
+    int_axi_wvalid,
+    int_gpio_input,
     ram_addr,
     ram_clk,
     ram_din,
@@ -57,7 +77,26 @@ module ip_block_design_wrapper
     ram_rst,
     ram_we,
     raw_clock,
-    raw_nreset);
+    raw_nreset,
+    timer_axi_araddr,
+    timer_axi_arprot,
+    timer_axi_arready,
+    timer_axi_arvalid,
+    timer_axi_awaddr,
+    timer_axi_awprot,
+    timer_axi_awready,
+    timer_axi_awvalid,
+    timer_axi_bready,
+    timer_axi_bresp,
+    timer_axi_bvalid,
+    timer_axi_rdata,
+    timer_axi_rready,
+    timer_axi_rresp,
+    timer_axi_rvalid,
+    timer_axi_wdata,
+    timer_axi_wready,
+    timer_axi_wstrb,
+    timer_axi_wvalid);
   output aclk;
   output [0:0]aresetn;
   input [31:0]axi_araddr;
@@ -95,8 +134,28 @@ module ip_block_design_wrapper
   output axi_wready;
   input [3:0]axi_wstrb;
   input axi_wvalid;
-  input [7:0]gpio_input;
-  output [7:0]gpio_output;
+  input [7:0]gpio_input_0;
+  output [15:0]gpio_output;
+  output [31:0]int_axi_araddr;
+  output [2:0]int_axi_arprot;
+  input int_axi_arready;
+  output int_axi_arvalid;
+  output [31:0]int_axi_awaddr;
+  output [2:0]int_axi_awprot;
+  input int_axi_awready;
+  output int_axi_awvalid;
+  output int_axi_bready;
+  input [1:0]int_axi_bresp;
+  input int_axi_bvalid;
+  input [31:0]int_axi_rdata;
+  output int_axi_rready;
+  input [1:0]int_axi_rresp;
+  input int_axi_rvalid;
+  output [31:0]int_axi_wdata;
+  input int_axi_wready;
+  output [3:0]int_axi_wstrb;
+  output int_axi_wvalid;
+  output int_gpio_input;
   output [15:0]ram_addr;
   output ram_clk;
   output [31:0]ram_din;
@@ -106,6 +165,25 @@ module ip_block_design_wrapper
   output [3:0]ram_we;
   input raw_clock;
   input raw_nreset;
+  output [31:0]timer_axi_araddr;
+  output [2:0]timer_axi_arprot;
+  input timer_axi_arready;
+  output timer_axi_arvalid;
+  output [31:0]timer_axi_awaddr;
+  output [2:0]timer_axi_awprot;
+  input timer_axi_awready;
+  output timer_axi_awvalid;
+  output timer_axi_bready;
+  input [1:0]timer_axi_bresp;
+  input timer_axi_bvalid;
+  input [31:0]timer_axi_rdata;
+  output timer_axi_rready;
+  input [1:0]timer_axi_rresp;
+  input timer_axi_rvalid;
+  output [31:0]timer_axi_wdata;
+  input timer_axi_wready;
+  output [3:0]timer_axi_wstrb;
+  output timer_axi_wvalid;
 
   wire aclk;
   wire [0:0]aresetn;
@@ -144,8 +222,28 @@ module ip_block_design_wrapper
   wire axi_wready;
   wire [3:0]axi_wstrb;
   wire axi_wvalid;
-  wire [7:0]gpio_input;
-  wire [7:0]gpio_output;
+  wire [7:0]gpio_input_0;
+  wire [15:0]gpio_output;
+  wire [31:0]int_axi_araddr;
+  wire [2:0]int_axi_arprot;
+  wire int_axi_arready;
+  wire int_axi_arvalid;
+  wire [31:0]int_axi_awaddr;
+  wire [2:0]int_axi_awprot;
+  wire int_axi_awready;
+  wire int_axi_awvalid;
+  wire int_axi_bready;
+  wire [1:0]int_axi_bresp;
+  wire int_axi_bvalid;
+  wire [31:0]int_axi_rdata;
+  wire int_axi_rready;
+  wire [1:0]int_axi_rresp;
+  wire int_axi_rvalid;
+  wire [31:0]int_axi_wdata;
+  wire int_axi_wready;
+  wire [3:0]int_axi_wstrb;
+  wire int_axi_wvalid;
+  wire int_gpio_input;
   wire [15:0]ram_addr;
   wire ram_clk;
   wire [31:0]ram_din;
@@ -155,6 +253,25 @@ module ip_block_design_wrapper
   wire [3:0]ram_we;
   wire raw_clock;
   wire raw_nreset;
+  wire [31:0]timer_axi_araddr;
+  wire [2:0]timer_axi_arprot;
+  wire timer_axi_arready;
+  wire timer_axi_arvalid;
+  wire [31:0]timer_axi_awaddr;
+  wire [2:0]timer_axi_awprot;
+  wire timer_axi_awready;
+  wire timer_axi_awvalid;
+  wire timer_axi_bready;
+  wire [1:0]timer_axi_bresp;
+  wire timer_axi_bvalid;
+  wire [31:0]timer_axi_rdata;
+  wire timer_axi_rready;
+  wire [1:0]timer_axi_rresp;
+  wire timer_axi_rvalid;
+  wire [31:0]timer_axi_wdata;
+  wire timer_axi_wready;
+  wire [3:0]timer_axi_wstrb;
+  wire timer_axi_wvalid;
 
   ip_block_design ip_block_design_i
        (.aclk(aclk),
@@ -194,8 +311,28 @@ module ip_block_design_wrapper
         .axi_wready(axi_wready),
         .axi_wstrb(axi_wstrb),
         .axi_wvalid(axi_wvalid),
-        .gpio_input(gpio_input),
+        .gpio_input_0(gpio_input_0),
         .gpio_output(gpio_output),
+        .int_axi_araddr(int_axi_araddr),
+        .int_axi_arprot(int_axi_arprot),
+        .int_axi_arready(int_axi_arready),
+        .int_axi_arvalid(int_axi_arvalid),
+        .int_axi_awaddr(int_axi_awaddr),
+        .int_axi_awprot(int_axi_awprot),
+        .int_axi_awready(int_axi_awready),
+        .int_axi_awvalid(int_axi_awvalid),
+        .int_axi_bready(int_axi_bready),
+        .int_axi_bresp(int_axi_bresp),
+        .int_axi_bvalid(int_axi_bvalid),
+        .int_axi_rdata(int_axi_rdata),
+        .int_axi_rready(int_axi_rready),
+        .int_axi_rresp(int_axi_rresp),
+        .int_axi_rvalid(int_axi_rvalid),
+        .int_axi_wdata(int_axi_wdata),
+        .int_axi_wready(int_axi_wready),
+        .int_axi_wstrb(int_axi_wstrb),
+        .int_axi_wvalid(int_axi_wvalid),
+        .int_gpio_input(int_gpio_input),
         .ram_addr(ram_addr),
         .ram_clk(ram_clk),
         .ram_din(ram_din),
@@ -204,5 +341,24 @@ module ip_block_design_wrapper
         .ram_rst(ram_rst),
         .ram_we(ram_we),
         .raw_clock(raw_clock),
-        .raw_nreset(raw_nreset));
+        .raw_nreset(raw_nreset),
+        .timer_axi_araddr(timer_axi_araddr),
+        .timer_axi_arprot(timer_axi_arprot),
+        .timer_axi_arready(timer_axi_arready),
+        .timer_axi_arvalid(timer_axi_arvalid),
+        .timer_axi_awaddr(timer_axi_awaddr),
+        .timer_axi_awprot(timer_axi_awprot),
+        .timer_axi_awready(timer_axi_awready),
+        .timer_axi_awvalid(timer_axi_awvalid),
+        .timer_axi_bready(timer_axi_bready),
+        .timer_axi_bresp(timer_axi_bresp),
+        .timer_axi_bvalid(timer_axi_bvalid),
+        .timer_axi_rdata(timer_axi_rdata),
+        .timer_axi_rready(timer_axi_rready),
+        .timer_axi_rresp(timer_axi_rresp),
+        .timer_axi_rvalid(timer_axi_rvalid),
+        .timer_axi_wdata(timer_axi_wdata),
+        .timer_axi_wready(timer_axi_wready),
+        .timer_axi_wstrb(timer_axi_wstrb),
+        .timer_axi_wvalid(timer_axi_wvalid));
 endmodule

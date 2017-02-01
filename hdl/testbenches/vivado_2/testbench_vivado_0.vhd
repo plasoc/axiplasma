@@ -35,7 +35,7 @@ architecture Behavioral of testbench_vivado_0 is
             gpio_input : in std_logic_vector(gpio_width-1 downto 0));
     end component;
     constant clock_period : time := 10 ns;
-    constant time_out_threshold : integer := 2**11;
+    constant time_out_threshold : integer := 2**13;
     subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
     signal raw_clock : std_logic := '1';
     signal raw_nreset : std_logic := '0';

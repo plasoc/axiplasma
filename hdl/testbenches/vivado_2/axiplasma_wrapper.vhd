@@ -52,11 +52,8 @@ architecture Behavioral of axiplasma_wrapper is
         axi_wready : out STD_LOGIC;
         axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
         axi_wvalid : in STD_LOGIC;
-        gpio_input_0 : in STD_LOGIC_VECTOR ( 7 downto 0 );
-        gpio_input_1 : in STD_LOGIC_VECTOR ( 7 downto 0 );
+        gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
         gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
-        int_0 : out STD_LOGIC;
-        int_1 : out STD_LOGIC;
         int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
         int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
         int_axi_arready : in STD_LOGIC;
@@ -76,6 +73,7 @@ architecture Behavioral of axiplasma_wrapper is
         int_axi_wready : in STD_LOGIC;
         int_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
         int_axi_wvalid : out STD_LOGIC;
+        int_gpio_input : out STD_LOGIC;
         ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
         ram_clk : out STD_LOGIC;
         ram_din : out STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -84,11 +82,29 @@ architecture Behavioral of axiplasma_wrapper is
         ram_rst : out STD_LOGIC;
         ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
         raw_clock : in STD_LOGIC;
-        raw_nreset : in STD_LOGIC
+        raw_nreset : in STD_LOGIC;
+        timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+        timer_axi_arready : in STD_LOGIC;
+        timer_axi_arvalid : out STD_LOGIC;
+        timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+        timer_axi_awready : in STD_LOGIC;
+        timer_axi_awvalid : out STD_LOGIC;
+        timer_axi_bready : out STD_LOGIC;
+        timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+        timer_axi_bvalid : in STD_LOGIC;
+        timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+        timer_axi_rready : out STD_LOGIC;
+        timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+        timer_axi_rvalid : in STD_LOGIC;
+        timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+        timer_axi_wready : in STD_LOGIC;
+        timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+        timer_axi_wvalid : out STD_LOGIC
       );
     end component;
-    component ram is
-        port(
+    component ram is      port(
             bram_rst_a : in STD_LOGIC;
             bram_clk_a : in STD_LOGIC;
             bram_en_a : in STD_LOGIC;
@@ -98,7 +114,9 @@ architecture Behavioral of axiplasma_wrapper is
             bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
     end component;
     -- base addresses.
+    constant word_width : integer := 32;
     constant int_axi_base_address : std_logic_vector := X"44A00000";
+    constant timer_axi_base_address : std_logic_vector := X"44A10000";
     -- global interface.
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -149,10 +167,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_wrdata_a : std_logic_vector(31 downto 0);
     signal bram_rddata_a : std_logic_vector(31 downto 0);
     -- gpio interface.
-    signal gpio_input_0 : STD_LOGIC_VECTOR ( 7 downto 0 );
-    signal gpio_input_1 : STD_LOGIC_VECTOR ( 7 downto 0 );
-    signal gpio_int_0 : STD_LOGIC;
-    signal gpio_int_1 : STD_LOGIC;
+    signal int_gpio_input : STD_LOGIC;
     -- interrupt controller interface;
     signal int_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
     signal int_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -175,10 +190,29 @@ architecture Behavioral of axiplasma_wrapper is
     signal int_axi_wvalid : STD_LOGIC;
     signal cpu_int : std_logic;
     signal dev_ints : std_logic_vector(default_interrupt_total-1 downto 0);
+    -- timer core interface.
+    signal timer_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal timer_axi_arready : STD_LOGIC;
+    signal timer_axi_arvalid : STD_LOGIC;
+    signal timer_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal timer_axi_awready : STD_LOGIC;
+    signal timer_axi_awvalid : STD_LOGIC;
+    signal timer_axi_bready : STD_LOGIC;
+    signal timer_axi_bresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal timer_axi_bvalid : STD_LOGIC;
+    signal timer_axi_rdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_rready : STD_LOGIC;
+    signal timer_axi_rresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal timer_axi_rvalid : STD_LOGIC;
+    signal timer_axi_wdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_wready : STD_LOGIC;
+    signal timer_axi_wstrb : STD_LOGIC_VECTOR ( 3 downto 0 );
+    signal timer_axi_wvalid : STD_LOGIC;
+    signal timer_done : std_logic;
 begin
-    gpio_input_0 <= gpio_input(7 downto 0);
-    gpio_input_1 <= gpio_input(15 downto 8);
-    dev_ints(1 downto 0) <= gpio_int_1 & gpio_int_0;
+    dev_ints(1 downto 0) <= timer_done & int_gpio_input;
     dev_ints(default_interrupt_total-1 downto 2) <= (others=>'0');
      
     -- The IP block design contains all of the xilinx ip needed 
@@ -223,11 +257,8 @@ begin
         axi_wready => axi_wready,
         axi_wstrb => axi_wstrb,
         axi_wvalid => axi_wvalid,
-        gpio_input_0 => gpio_input_0,
-        gpio_input_1 => gpio_input_1,
+        gpio_input => gpio_input,
         gpio_output => gpio_output,
-        int_0 => gpio_int_0,
-        int_1 => gpio_int_1,
         int_axi_araddr => int_axi_araddr,
         int_axi_arprot => int_axi_arprot,
         int_axi_arready => int_axi_arready,
@@ -247,6 +278,7 @@ begin
         int_axi_wready => int_axi_wready,
         int_axi_wstrb => int_axi_wstrb,
         int_axi_wvalid => int_axi_wvalid,
+        int_gpio_input => int_gpio_input,
         ram_addr => bram_addr_a,
         ram_clk => bram_clk_a,
         ram_din => bram_wrdata_a,
@@ -255,7 +287,26 @@ begin
         ram_rst => bram_rst_a,
         ram_we => bram_we_a,
         raw_clock => raw_clock,
-        raw_nreset => raw_nreset);
+        raw_nreset => raw_nreset,
+        timer_axi_araddr => timer_axi_araddr,
+        timer_axi_arprot => timer_axi_arprot,
+        timer_axi_arready => timer_axi_arready,
+        timer_axi_arvalid => timer_axi_arvalid,
+        timer_axi_awaddr => timer_axi_awaddr,
+        timer_axi_awprot => timer_axi_awprot,
+        timer_axi_awready => timer_axi_awready,
+        timer_axi_awvalid => timer_axi_awvalid,
+        timer_axi_bready => timer_axi_bready,
+        timer_axi_bresp => timer_axi_bresp,
+        timer_axi_bvalid => timer_axi_bvalid,
+        timer_axi_rdata => timer_axi_rdata,
+        timer_axi_rready => timer_axi_rready,
+        timer_axi_rresp => timer_axi_rresp,
+        timer_axi_rvalid => timer_axi_rvalid,
+        timer_axi_wdata => timer_axi_wdata,
+        timer_axi_wready => timer_axi_wready,
+        timer_axi_wstrb => timer_axi_wstrb,
+        timer_axi_wvalid => timer_axi_wvalid);
     -- axiplasma instantiation.
     axiplasma_inst :
     axiplasma 
@@ -327,8 +378,8 @@ begin
     plasoc_int_inst :
     plasoc_int 
         generic map (
-            axi_address_width => 32,
-            axi_data_width => 32,
+            axi_address_width => word_width,
+            axi_data_width => word_width,
             axi_base_address => int_axi_base_address,
             interrupt_total => default_interrupt_total,
             int_id_address => default_int_id_offset,
@@ -358,5 +409,43 @@ begin
             axi_rresp => int_axi_rresp,
             cpu_int => cpu_int,
             dev_ints => dev_ints);
+    -- timer core instantiation.
+    plasoc_timer_inst : 
+    plasoc_timer
+        generic map (
+            timer_width => default_timer_width,
+            axi_address_width =>  word_width,
+            axi_data_width => word_width,
+            axi_base_address => timer_axi_base_address,
+            axi_control_offset => default_timer_axi_control_offset,
+            axi_control_start_bit_loc => default_timer_axi_control_start_bit_loc,
+            axi_control_reload_bit_loc => default_timer_axi_control_reload_bit_loc,
+            axi_control_ack_bit_loc => default_timer_axi_control_ack_bit_loc,
+            axi_control_done_bit_loc => default_timer_axi_control_done_bit_loc,
+            axi_trig_value_offset => default_timer_axi_trig_value_offset,
+            axi_tick_value_offset => default_timer_axi_tick_value_offset)
+        port map (
+            aclk => aclk,
+            aresetn => aresetn(0),
+            axi_awaddr => timer_axi_awaddr,
+            axi_awprot => timer_axi_awprot,
+            axi_awvalid => timer_axi_awvalid,
+            axi_awready => timer_axi_awready,
+            axi_wvalid => timer_axi_wvalid,
+            axi_wready => timer_axi_wready,
+            axi_wdata => timer_axi_wdata,
+            axi_wstrb => timer_axi_wstrb,
+            axi_bvalid => timer_axi_bvalid,
+            axi_bready => timer_axi_bready,
+            axi_bresp => timer_axi_bresp,
+            axi_araddr => timer_axi_araddr,
+            axi_arprot => timer_axi_arprot,
+            axi_arvalid => timer_axi_arvalid,
+            axi_arready => timer_axi_arready,
+            axi_rdata => timer_axi_rdata,
+            axi_rvalid => timer_axi_rvalid,
+            axi_rready => timer_axi_rready,
+            axi_rresp => timer_axi_rresp,
+            done => timer_done);
         
 end Behavioral;

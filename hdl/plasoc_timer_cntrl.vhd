@@ -26,7 +26,7 @@ use ieee.numeric_std.all;
 
 entity plasoc_timer_cntrl is
     generic (
-        timer_width : integer := 16 );
+        timer_width : integer := 32 );
     port (
         -- global interface.
         clock : in std_logic;
@@ -41,9 +41,8 @@ entity plasoc_timer_cntrl is
 end plasoc_timer_cntrl;
 
 architecture Behavioral of plasoc_timer_cntrl is
-    signal reload_buff : boolean := False;
-    signal trig_value_buff : integer range 0 to 2**timer_width-1 := 0;
-    signal tick_counter : integer range 0 to 2**timer_width-1 := 0;
+    signal trig_value_buff : integer;
+    signal tick_counter : integer;
 begin
 
     -- Output the current tick value.
@@ -59,10 +58,15 @@ begin
             if start='1' then
                 -- Check to if the counter has reached the trigger value.
                 if tick_counter=trig_value_buff then
-                    if reload_buff then
+                    -- Have the timer automatically reset if the reload flag is high.
+                    if reload='1' then
                         tick_counter <= 0;
                     end if;
-                    done <= '1';
+                    -- When the trigger value is reached, set the done signal unless
+                    -- the timer is already being acknowledged.
+                    if ack='0' then
+                        done <= '1';
+                    end if;
                 -- Increment the counter until the trigger value is reached.
                 else
                     -- Reset the done control signal if it is acknowledged.
@@ -75,7 +79,6 @@ begin
             -- If the start signal is low, the operation is immediately disabled. Instead, control 
             -- information, such as the reload and trigger values, can be bufferred into the core.
             else
-                reload_buff <= reload='1';
                 trig_value_buff <= to_integer(unsigned(trig_value));
                 tick_counter <= 0;
                 done <= '0';
