@@ -11,9 +11,6 @@
 ##################################################################
    #Reserve 512 bytes for stack
    .comm InitStack, 512
-   
-   #Define region for OS vector table
-   .comm os_vector_table, 256
 
    .text
    .section	.text.startup

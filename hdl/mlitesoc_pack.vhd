@@ -32,6 +32,15 @@ package mlitesoc_pack is
     constant default_int_enables_offset : std_logic_vector := X"00000000"; 
     constant default_int_active_address : std_logic_vector := X"00000008";
     
+    constant default_timer_width : integer := 32;
+    constant default_timer_axi_control_offset : std_logic_vector := X"00000000"; 
+    constant default_timer_axi_control_start_bit_loc : integer := 0;
+    constant default_timer_axi_control_reload_bit_loc : integer := 1;
+    constant default_timer_axi_control_ack_bit_loc : integer := 2;
+    constant default_timer_axi_control_done_bit_loc : integer := 3;
+    constant default_timer_axi_trig_value_offset : std_logic_vector := X"00000004";
+    constant default_timer_axi_tick_value_offset : std_logic_vector := X"00000008";
+    
     constant error_axi_read_exokay : integer := 0;
     constant error_axi_read_slverr : integer := 1;
     constant error_axi_read_decerr : integer := 2;
@@ -193,6 +202,50 @@ package mlitesoc_pack is
             -- dev interface.
             dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
         end component;
+        
+    component plasoc_timer is
+        generic (
+            -- timer parameters.
+            timer_width : integer := default_timer_width;
+            -- axi parameters.
+            axi_address_width : integer := 16;
+            axi_data_width : integer := 32;
+            axi_base_address : std_logic_vector := X"0000";
+            axi_control_offset : std_logic_vector := default_timer_axi_control_offset;
+            axi_control_start_bit_loc : integer := default_timer_axi_control_start_bit_loc;
+            axi_control_reload_bit_loc : integer := default_timer_axi_control_reload_bit_loc;
+            axi_control_ack_bit_loc : integer := default_timer_axi_control_ack_bit_loc;
+            axi_control_done_bit_loc : integer := default_timer_axi_control_done_bit_loc;
+            axi_trig_value_offset : std_logic_vector := default_timer_axi_trig_value_offset;
+            axi_tick_value_offset : std_logic_vector := default_timer_axi_tick_value_offset);
+        port (
+            -- global interface.
+            aclk : in std_logic;
+            aresetn : in std_logic;
+            -- axi write interface.
+            axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
+            axi_awprot : in std_logic_vector(2 downto 0);
+            axi_awvalid : in std_logic;
+            axi_awready : out std_logic;
+            axi_wvalid : in std_logic;
+            axi_wready : out std_logic;
+            axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);
+            axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);
+            axi_bvalid : out std_logic;
+            axi_bready : in std_logic;
+            axi_bresp : out std_logic_vector(1 downto 0);
+            -- axi read interface.
+            axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
+            axi_arprot : in std_logic_vector(2 downto 0);
+            axi_arvalid : in std_logic;
+            axi_arready : out std_logic;
+            axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
+            axi_rvalid : out std_logic;
+            axi_rready : in std_logic;
+            axi_rresp : out std_logic_vector(1 downto 0);
+            -- timer controller interface.
+            done : out std_logic);
+    end component;
 
 end; --package body
 

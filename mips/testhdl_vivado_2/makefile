@@ -1,19 +1,18 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-
-BIN_DIR = 
-LD_DIR = 
+BIN_DIR = C:/mips-none-elf-newlib/bin/
+LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib/
 MISC_DIR = ../../misc
 PLASMA_DIR = ../plasma
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR)
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR)
 LDFLAGS = -L$(LD_DIR) -static
 
 # Following are REQUIRED variables, but can be editted
-INSTALL_DIR = 
+INSTALL_DIR = ../../hdl/testbenches/vivado_2/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASMA_DIR)/plasmasoc.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
 # No user editing or variables below this line
 
@@ -21,7 +20,8 @@ CFLAGS += -c -fno-pic -mips1 -mno-abicalls
 
 RM = rm -rf
 
-EXEC_NAME = $(shell basename $$(pwd))
+EXEC_NAME = main
+#EXEC_NAME = $(shell basename $$(pwd))
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
 LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
@@ -35,23 +35,23 @@ OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 
 
 all: $(OBJECTS)
-ifdef DEBUG_MAKE
+#ifdef DEBUG_MAKE
 	$(LD_MIPS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
 		$(notdir $(OBJECTS:=.o)) -lc
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
-else
-	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
-		$(notdir $(OBJECTS:=.o)) -lc
-endif
+#else
+#	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
+#		$(notdir $(OBJECTS:=.o)) -lc
+#endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
 	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).hex
 
 
 $(C_OBJECTS):%:%.c
 	$(GCC_MIPS) -o $(notdir $@).o $@.c
-ifdef DEBUG_MAKE
+#ifdef DEBUG_MAKE
 	$(GCC_MIPS) -o $(notdir $@).asm -S $@.c
-endif
+#endif
 	
 $(ASM_OBJECTS):%:%.asm
 	$(AS_MIPS) -o $(notdir $@).o $@.asm
