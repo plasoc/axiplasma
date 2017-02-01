@@ -131,11 +131,9 @@ typedef portUBASE_TYPE UBaseType_t;
 	// enable interrupts
 
 #define portENTER_CRITICAL() \
-	portDISABLE_INTERRUPTS(); \
-	// memory barrier? 
+	portDISABLE_INTERRUPTS();
 
-	#define portEXIT_CRITICAL() \
-	\ // memory barrier?
+#define portEXIT_CRITICAL() \
 	portENABLE_INTERRUPTS();
 	
 #define portYIELD() \

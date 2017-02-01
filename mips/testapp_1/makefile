@@ -3,7 +3,11 @@
 BIN_DIR = 
 LD_DIR = 
 PLASMA_DIR = ../plasma
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR)
+
+
+INCLUDE_DIRS = $(PLASMA_DIR)
+WARNINGS = -Wall
+CFLAGS = -Os -s
 LDFLAGS = -L$(LD_DIR) -static
 
 # Following are REQUIRED variables, but can be editted
@@ -15,7 +19,7 @@ ASM_SOURCES = $(PLASMA_DIR)/boot.asm
 
 # No user editing or variables below this line
 
-CFLAGS += -c -fno-pic -mips1 -mno-abicalls
+CFLAGS += -c -fno-pic -mips1 -mno-abicalls $(patsubst %,-I%,$(INCLUDE_DIRS)) $(WARNINGS)
 
 RM = rm -rf
 
