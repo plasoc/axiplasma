@@ -5,7 +5,7 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 
 entity ram is
     port(

@@ -13,11 +13,10 @@
 ---------------------------------------------------------------------
 
 library ieee;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-use work.mlitesoc_pack.all;
 
 entity plasoc_cpu_l1_cache_buff is
     generic (

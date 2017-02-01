@@ -21,7 +21,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;                           
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 
 entity plasoc_int_axi4_write_cntrl is
     generic (

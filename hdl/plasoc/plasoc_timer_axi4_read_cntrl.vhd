@@ -1,7 +1,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 
 entity plasoc_timer_axi4_read_cntrl is
     generic (

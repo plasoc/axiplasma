@@ -14,7 +14,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
-package mlitesoc_pack is
+package plasoc_pack is
 
     constant default_cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
     constant default_cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
@@ -62,7 +62,7 @@ package mlitesoc_pack is
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
     function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
 
-    component plasoc_cpu_axi is
+    component plasoc_cpu is
         generic(
             -- cpu constants
             cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
@@ -119,42 +119,6 @@ package mlitesoc_pack is
             axi_rlast : in std_logic;
             axi_rvalid : in std_logic;
             axi_rready : out std_logic;
-            -- cpu signals
-            intr_in      : in std_logic;
-            -- debug signals.
-            debug_cpu_pause : out std_logic );
-    end component;
-
-    component memplasma is
-        generic(
-            -- cpu constants
-            cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
-            -- cache constants
-            cache_address_width : integer := default_cache_address_width;
-            cache_way_width : integer := default_cache_way_width; 
-            cache_index_width : integer := default_cache_index_width;
-            cache_offset_width : integer := default_cache_offset_width;
-            cache_replace_strat : string := default_cache_replace_strat;
-            cache_base_address : std_logic_vector := default_cache_base_address;
-            cache_enable : boolean := default_cache_enable );
-        port(
-            -- global signals
-            aclk : in std_logic;
-            aresetn     : in std_logic;
-            -- mem signals
-            mem_in_address : out std_logic_vector(31 downto 0);
-            mem_in_data : in std_logic_vector(31 downto 0);
-            mem_in_enable : out std_logic;
-            mem_in_valid : in std_logic;
-            mem_in_ready : out std_logic;
-            mem_out_address : out std_logic_vector(31 downto 0);
-            mem_out_data : out std_logic_vector(31 downto 0);
-            mem_out_strobe : out std_logic_vector(3 downto 0);
-            mem_out_enable : out std_logic;
-            mem_out_valid : out std_logic;
-            mem_out_ready : in std_logic;
             -- cpu signals
             intr_in      : in std_logic;
             -- debug signals.
@@ -249,7 +213,7 @@ package mlitesoc_pack is
 
 end; --package body
 
-package body mlitesoc_pack is
+package body plasoc_pack is
 
 	function clogb2(bit_depth : in natural ) return integer is
 		variable result : integer := 0;

@@ -12,12 +12,12 @@
 
 library ieee;
 use work.mlite_pack.all;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
-entity plasoc_cpu_axi is
+entity plasoc_cpu is
     generic(
         -- cpu constants
         cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
@@ -78,9 +78,9 @@ entity plasoc_cpu_axi is
         intr_in      : in std_logic;
         -- debug signals.
         debug_cpu_pause : out std_logic );
-end plasoc_cpu_axi;
+end plasoc_cpu;
 
-architecture Behavioral of plasoc_cpu_axi is
+architecture Behavioral of plasoc_cpu is
     -- Component declarations.
     component plasoc_cpu_l1_cache_cntrl is
         generic (

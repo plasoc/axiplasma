@@ -1,6 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 
 
 entity axiplasma_wrapper is
@@ -308,8 +308,8 @@ begin
         timer_axi_wstrb => timer_axi_wstrb,
         timer_axi_wvalid => timer_axi_wvalid);
     -- axiplasma instantiation.
-    plasoc_cpu_axi_inst :
-    plasoc_cpu_axi 
+    plasoc_cpu_inst :
+    plasoc_cpu 
         generic map (
             cpu_mult_type => default_cpu_mult_type,
             cpu_shifter_type => default_cpu_shifter_type,

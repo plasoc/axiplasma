@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
-use work.mlitesoc_pack.all;
+use work.plasoc_pack.all;
 
 entity plasoc_cpu_axi4_write_cntrl is
     generic(
