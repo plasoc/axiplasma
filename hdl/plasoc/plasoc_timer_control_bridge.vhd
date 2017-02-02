@@ -1,48 +1,42 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/31/2017 01:35:29 PM
--- Design Name: 
--- Module Name: plasoc_timer_control_bridge - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 31, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's Timer Control Register Bridge.
+-------------------------------------------------------
 
+library ieee;
+use ieee.std_logic_1164.all;
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
-
+--! The Timer Control Register Bridge entity acts as a register
+--! stage between the AXI4-Lite Controllers and the Timer Core's
+--! Controller. This is only needed to ensure the acknowledgement
+--! can only be set high for a single clock cycle, as required by
+--! the Controller.
 entity plasoc_timer_control_bridge is
     generic (
-        axi_data_width : integer := 32;
-        timer_width : integer := 16;
-        start_bit_loc : integer := 0;
-        reload_bit_loc : integer := 1;
-        ack_bit_loc : integer := 2;
-        done_bit_loc : integer := 3); 
+		-- Slave AXI4-Lite parameters.
+        axi_data_width : integer := 32;		--! Defines the AXI4-Lite Data Width.
+        timer_width : integer := 16;		--! Defines the width of the Trigger and Tick Value registers.
+        start_bit_loc : integer := 0;		--! For the Start bit, defines the bit location in the Control register.
+        reload_bit_loc : integer := 1;		--! For the Reload bit, defines the bit location in the Control register.
+        ack_bit_loc : integer := 2;			--! For the Acknowledge bit, defines the bit location in the Control register.
+        done_bit_loc : integer := 3			--! For the Done bit, defines the bit location in the Control register.
+	); 
     port (
-        -- global interface.
-        clock : in std_logic;
-        nreset : in std_logic;
-        -- timer interface.
-        start : out std_logic := '0';
-        reload : out std_logic := '0';
-        ack : out std_logic := '0';
-        done : in std_logic;
-        -- register interface.
-        reg_in_valid : in std_logic;
-        reg_in_control : in std_logic_vector(axi_data_width-1 downto 0);
-        reg_out_control : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0'));
+        -- Global interface.
+        clock : in std_logic;				--! Defines the AXI4-Lite Address Width.
+        nreset : in std_logic;				--! Reset on low.
+        -- Controller interface.
+        start : out std_logic := '0';		--! Starts the operation when high. 
+        reload : out std_logic := '0';		--! Enables reloading when high.
+        ack : out std_logic := '0';			--! Sets Done low if the core is running with Reload.
+        done : in std_logic;				--! If Start is high and Tick Value equals Trigger Value, Done is set high.
+        -- Register interface.
+        reg_in_valid : in std_logic;														--! When high, enables writing of the Control register.
+        reg_in_control : in std_logic_vector(axi_data_width-1 downto 0);					--! New data for the Control register.
+        reg_out_control : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0')	--! Current data for the Control register.
+	);
 end plasoc_timer_control_bridge;
 
 architecture Behavioral of plasoc_timer_control_bridge is

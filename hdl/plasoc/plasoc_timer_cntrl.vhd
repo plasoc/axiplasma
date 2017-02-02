@@ -21,12 +21,12 @@ entity plasoc_timer_cntrl is
     port (
         -- Global interface.
         clock : in std_logic;										--! Clock. Tested with 50 MHz.
-        -- Timer Core Control interface.
+        -- Controller Control interface.
         start : in std_logic;										--! Starts the operation when high. 
         reload : in std_logic;										--! Enables reloading when high.
         ack : in std_logic;											--! Sets Done low if the core is running with Reload.
         done : out std_logic := '0';								--! If Start is high and Tick Value equals Trigger Value, Done is set high.
-        -- Timer Core Data interface.
+        -- Controller Data interface.
         trig_value : in std_logic_vector(timer_width-1 downto 0);	--! The value Tick Value needs to equal in order for Done to be set high.
         tick_value : out std_logic_vector(timer_width-1 downto 0)	--! Increments every clock cycle when the core is in operation.
 	);
