@@ -28,7 +28,7 @@ use work.plasoc_pack.all;
 --! If the Reload bit is set high, the Tick Value will reset itself back to zero
 --! on the clock cycle after reaching the Trigger Value. The Reload bit is found in
 --! the Control register. Both the Done bit and the Tick Value register will remain
---! zero if the Start bit is zero.
+--! zero if the Start bit is low.
 --!
 --! Information specific to the AXI4-Full
 --! protocol is excluded from this documentation since the information can

@@ -25,12 +25,13 @@ entity plasoc_int_cntrl is
         clock : in std_logic;													--! Clock. Tested with 50 MHz.
         nreset : in std_logic;													--! Reset on low.
         -- CPU interface.
-        cpu_int : out std_logic := '0';											--! CPU interrupt.	
-        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0);	--! Interrupt Identifier.
-        cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Enables.
-        cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Active
+        cpu_int : out std_logic := '0';											--! CPU interrupt. This signal is set high when there is an active interrupt.
+        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0);	--! Interrupt Identifier. This signal is set to the the identifier of the lowest identifier of the active interrupt, otherwise it is set to interrupt_total.  
+        cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Enables. Each bit enables the corresponding device interrupt.
+        cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Active. Each bit refers to an active interrupt.
         -- Device interface.
-        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));			--! Device interrupts.
+        dev_ints : in std_logic_vector(interrupt_total-1 downto 0)				--! Device interrupts. The devices must set their corresponding device interrupt high to signal an interrupt.
+	);			
 end plasoc_int_cntrl;
 
 architecture Behavioral of plasoc_int_cntrl is

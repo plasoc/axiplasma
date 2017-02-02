@@ -1,22 +1,9 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/31/2017 11:09:01 AM
--- Design Name: 
--- Module Name: plasoc_timer_cntrl - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 31, 2017
+--! @brief Contains the entity and architecture of the 
+--! Timer Core's Controller.
+-------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -24,20 +11,25 @@ use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 
+--! The functionality of the Timer Core is defined in this entity and respective
+--! architecture. For more information on how the Timer Core operates as a whole, 
+--! please see the hardware description of the top entity plasoc_timer.
 entity plasoc_timer_cntrl is
     generic (
-        timer_width : integer := 32 );
+        timer_width : integer := 32		--! Defines the width of the Trigger and Tick Value registers. 
+	);
     port (
-        -- global interface.
-        clock : in std_logic;
-        -- timer control interface.
-        start : in std_logic;
-        reload : in std_logic;
-        ack : in std_logic;
-        done : out std_logic := '0';
-        -- time data interface.
-        trig_value : in std_logic_vector(timer_width-1 downto 0);
-        tick_value : out std_logic_vector(timer_width-1 downto 0));
+        -- Global interface.
+        clock : in std_logic;										--! Clock. Tested with 50 MHz.
+        -- Timer Core Control interface.
+        start : in std_logic;										--! Starts the operation when high. 
+        reload : in std_logic;										--! Enables reloading when high.
+        ack : in std_logic;											--! Sets Done low if the core is running with Reload.
+        done : out std_logic := '0';								--! If Start is high and Tick Value equals Trigger Value, Done is set high.
+        -- Timer Core Data interface.
+        trig_value : in std_logic_vector(timer_width-1 downto 0);	--! The value Tick Value needs to equal in order for Done to be set high.
+        tick_value : out std_logic_vector(timer_width-1 downto 0)	--! Increments every clock cycle when the core is in operation.
+	);
 end plasoc_timer_cntrl;
 
 architecture Behavioral of plasoc_timer_cntrl is
@@ -53,7 +45,7 @@ begin
     begin
         -- Perform operations in synch with the rising edge of the clock.
         if rising_edge(clock) then
-            -- The start control signal behaves as core's enable. The core begins
+            -- The start control signal behaves as the core's enable. The core begins
             -- its operation when the start is set high.
             if start='1' then
                 -- Check to if the counter has reached the trigger value.
@@ -77,7 +69,7 @@ begin
                     tick_counter <= tick_counter+1;
                 end if;
             -- If the start signal is low, the operation is immediately disabled. Instead, control 
-            -- information, such as the reload and trigger values, can be bufferred into the core.
+            -- information can be bufferred into the core.
             else
                 trig_value_buff <= to_integer(unsigned(trig_value));
                 tick_counter <= 0;
