@@ -19,7 +19,9 @@ use work.plasoc_pack.all;
 --!
 --! In a later revision on this documentation, more information will be
 --! added to describe the features implemented in the AXI4-Full interface
---! and the capabilities of the cache. 
+--! and the capabilities of the cache. Information specific to the AXI4-Full
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_cpu is
     generic(
         -- CPU parameters.
@@ -39,7 +41,7 @@ entity plasoc_cpu is
         -- Global interface.
         aclk : in std_logic;													--! Clock. Tested with 50 MHz.
         aresetn     : in std_logic;												--! Reset on low.
-        -- AXI write interface.
+        -- Master AXI4-Full Write interface.
         axi_awid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Write signal.
         axi_awaddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Write signal.
         axi_awlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Write signal.
@@ -61,7 +63,7 @@ entity plasoc_cpu is
         axi_bresp : in  std_logic_vector(1 downto 0);							--! AXI4-Full Write Response signal.
         axi_bvalid : in std_logic;												--! AXI4-Full Write Response signal.
         axi_bready : out std_logic;												--! AXI4-Full Write Response signal.
-        -- AXI read interface.
+        -- Master AXI4-Full Read interface.
         axi_arid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Read signal.
         axi_araddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Read signal.
         axi_arlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Read signal.
