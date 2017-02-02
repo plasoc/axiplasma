@@ -1,6 +1,6 @@
 -------------------------------------------------------
 --! @author Andrew Powell
---! @date January 1, 2017
+--! @date January 17, 2017
 --! @brief Contains the entity and architecture of the 
 --! CPU's Write-Back Cache Controller. 
 -------------------------------------------------------
@@ -39,12 +39,12 @@ entity plasoc_cpu_l1_cache_cntrl is
         resetn : in std_logic;																--! Reset on low.	
         -- CPU interface.
         cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 					--! The requested address of the next word to either be written to or read from memory.
-        cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The next word that is written to the CPU.
-        cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The next word that the CPU is writing.
-        cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);						--! Determines whether a the CPU is writing or reading a word. Each bit that is high enables writing for the corresponding byte in cpu_in_data.
+        cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The word that the CPU is writing.
+        cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The word that is written to the CPU.
+        cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);						--! Determines whether a the CPU is writing or reading a word. Each bit that is high enables writing for the corresponding byte in cpu_out_data.
         cpu_pause : out std_logic;															--! Stalls the CPU.
         -- Cache interface.
-        cache_cacheable : out std_logic;													--! Indicates whether the requested address of the CPU is cacheable or noncachebale.
+        cache_cacheable : out std_logic;													--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);				--! The requested cache index when writing to the cache buffer. 
         cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when writing to the cache buffer.
         cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);			--! Enables the writing of a new tag for a specified way. Each bit refers to a corresponding way.

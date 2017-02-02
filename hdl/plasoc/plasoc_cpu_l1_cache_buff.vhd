@@ -1,16 +1,9 @@
----------------------------------------------------------------------
--- TITLE: L1 Cache Buffer of Plasma-SoC Baseline Processor 
--- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
--- DATE CREATED: 1/17/2017
--- FILENAME: l1_cache_buff.vhd
--- PROJECT: Plasma-SoC core (extension of the Plasma CPU project)
--- COPYRIGHT: Software placed into the public domain by the author.
---    Software 'as is' without warranty.  Author liable for nothing.
--- DESCRIPTION:
---    Defines the buffer to the L1 Write-Back Cache. In future versions
---    of this description, I may move some of the combinatorial logic
---    from the cache controller to the buffer description.
----------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 17, 2017
+--! @brief Contains the entity and architecture of the 
+--! CPU's Cache Buffer.
+-------------------------------------------------------
 
 library ieee;
 use work.plasoc_pack.all;
@@ -18,25 +11,35 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
+--! The cache buffer is implemented separately from the
+--! cache controller in order to ensure that the synthesizer
+--! infers BRAM. 
+--!
+--! Most likely due to the complexity of the enables
+--! needed for the writing new tags and words, the synthesizer 
+--! (for at least Xilinx Vivado 2016.2) implements the cache buffer
+--! as distributed RAM. Investigation in the future will be done to
+--! see if there any advantages or disadvantages. 
 entity plasoc_cpu_l1_cache_buff is
     generic (
         -- Global parameters.
-        glb_data_width : integer := 32;
-        -- Cache related parameters.
-        cache_tag_width : integer := 22;
-        cache_index_width : integer := 5;
-        cache_offset_width : integer := 4;
-        cache_way_width : integer := 2 );
+        glb_data_width : integer := 32;			--! Defines the data width of the CPU. This should normally be equal to the CPU's width.	
+        -- Cache parameters.
+        cache_tag_width : integer := 22;		--! CPU (address) width = cache_tag_width+cache_index_width+cache_offset_width.
+        cache_index_width : integer := 5;		--! Cache Size (rows) = 2^cache_index_width.
+        cache_offset_width : integer := 4;		--! Line Size (bytes) = 2^cache_offset_width.
+        cache_way_width : integer := 2 			--! Associativity = 2^cache_way_width.
+	);
     port(
         -- Global interface.
-        clock : in std_logic;
+        clock : in std_logic;					--! Clock. Tested with 50 MHz.
         -- Cache controller interface.
-        cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-        cache_in_index : in std_logic_vector(cache_index_width-1 downto 0);
-        cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0);
-        cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
-        cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-        cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
+        cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when the cache controller is writing to the cache buffer.
+        cache_in_index : in std_logic_vector(cache_index_width-1 downto 0); --! The requested cache index when the cache controller is writing to the cache buffer. 
+        cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0); --! Enables the writing of a new tag for a specified way. Each bit refers to a corresponding way.
+        cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0); --! Enables the writing of a word for a specifided way and offset. Each bit refers a corresponding way and offset.
+        cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when the cache controller is reading from the cache buffer.
+        cache_out_index : in std_logic_vector(cache_index_width-1 downto 0)); --! The requested cache index when reading from the cache buffer. 
 end entity plasoc_cpu_l1_cache_buff;
 
 architecture Behavioral of plasoc_cpu_l1_cache_buff is

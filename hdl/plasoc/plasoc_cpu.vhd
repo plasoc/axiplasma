@@ -1,6 +1,6 @@
 -------------------------------------------------------
 --! @author Andrew Powell
---! @date January 1, 2017
+--! @date January 17, 2017
 --! @brief Contains the entity and architecture of the 
 --! Plasma-SoC's CPU.
 -------------------------------------------------------
