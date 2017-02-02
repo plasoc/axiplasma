@@ -1,3 +1,9 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 17, 2017
+--! @brief Contains the entity and architecture of the 
+--! CPU's Master AXI4-Full Read Memory Controller.
+-------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -6,51 +12,65 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.plasoc_pack.all;
 
+--! The Read Memory Controller implements a Master AXI4-Full Read 
+--! interface in order to allow the CPU to perform reads from
+--! main memory and other devices external to the CPU. Much optimization
+--! of the Write and Read Memory Controllers is needed for future revisions,
+--! considering the current revision is implemented in a sequential, blocking
+--! manner. Specifically, for the sake simplicity, the AXI4-Full Read Address,
+--! and Read Data are implemented as a state machine, rather than as separate 
+--! processes that can permit concurrent execution.
+--!
+--! Information specific to the AXI4-Full
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_cpu_axi4_read_cntrl is
     generic (
-        -- cpu constants
-        cpu_address_width : integer := 16;
-        cpu_data_width : integer := 32;
-        -- cache constants
-        cache_offset_width : integer := 5;
+        -- CPU parameters.
+        cpu_address_width : integer := 16;		--! Defines the address width of the CPU. This should normally be equal to the CPU's width.	
+        cpu_data_width : integer := 32;			--! Defines the data width of the CPU. This should normally be equal to the CPU's width.
+        -- Cache parameters.
+        cache_offset_width : integer := 5;		--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         -- axi read constants
-        axi_aruser_width : integer := 0;
-        axi_ruser_width : integer := 0);
+        axi_aruser_width : integer := 0;		--! Width of user-define AXI4-Full Address Read signal.
+        axi_ruser_width : integer := 0			--! Width of user-define AXI4-Full Read Data signal.
+	);
     port(
-        -- global interfaces.
-        clock : in std_logic;
-        nreset : in std_logic;
-        -- mem read interface.
-        mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);
-        mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-        mem_read_enable : in std_logic;
-        mem_read_valid : out std_logic;
-        mem_read_ready : in std_logic;
-        -- cache interface.
-        cache_cacheable : in std_logic;
-        -- axi read interface.
-        axi_arid : out std_logic_vector(0 downto 0);
-        axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-        axi_arlen : out std_logic_vector(7 downto 0);
-        axi_arsize : out std_logic_vector(2 downto 0);
-        axi_arburst : out std_logic_vector(1 downto 0);
-        axi_arlock : out std_logic;
-        axi_arcache : out std_logic_vector(3 downto 0);
-        axi_arprot : out std_logic_vector(2 downto 0);
-        axi_arqos : out std_logic_vector(3 downto 0);
-        axi_arregion : out std_logic_vector(3 downto 0);
-        axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
-        axi_arvalid : out std_logic;
-        axi_arready : in std_logic;
-        axi_rid : in std_logic_vector(0 downto 0);
-        axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);
-        axi_rresp : in std_logic_vector(1 downto 0);
-        axi_rlast : in std_logic;
-        axi_ruser : in std_logic_vector(axi_ruser_width-1 downto 0);
-        axi_rvalid : in std_logic;
-        axi_rready : out std_logic;
-        -- error interface.
-        error_data : out std_logic_vector(3 downto 0) := (others=>'0') );
+        -- Global interfaces.
+        clock : in std_logic;																--! Clock. Tested with 50 MHz.
+        nreset : in std_logic;																--! Reset on low.
+        -- Memory interface.
+        mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);				--! The requested address sent to the read memory controller.
+        mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The word read from the read memory controller.
+        mem_read_enable : in std_logic;														--! Enables the operation of the read memory controller.
+        mem_read_valid : out std_logic;														--! Indicates the read memory controller has a valid word on mem_read_data.
+        mem_read_ready : in std_logic;														--! Indicates the cache is ready to sample a word from mem_read_data.
+        -- Cache interface.
+        cache_cacheable : in std_logic;														--! Indicates whether the requested address of the CPU is cacheable or noncacheable.	
+        -- Master AXI4-Full Read interface.
+        axi_arid : out std_logic_vector(0 downto 0);										--! AXI4-Full Address Read signal.
+        axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');	--! AXI4-Full Address Read signal.
+        axi_arlen : out std_logic_vector(7 downto 0);										--! AXI4-Full Address Read signal.	
+        axi_arsize : out std_logic_vector(2 downto 0);										--! AXI4-Full Address Read signal.
+        axi_arburst : out std_logic_vector(1 downto 0);										--! AXI4-Full Address Read signal.
+        axi_arlock : out std_logic;															--! AXI4-Full Address Read signal.	
+        axi_arcache : out std_logic_vector(3 downto 0);										--! AXI4-Full Address Read signal.	
+        axi_arprot : out std_logic_vector(2 downto 0);										--! AXI4-Full Address Read signal.	
+        axi_arqos : out std_logic_vector(3 downto 0);										--! AXI4-Full Address Read signal.		
+        axi_arregion : out std_logic_vector(3 downto 0);									--! AXI4-Full Address Read signal.	
+        axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);						--! AXI4-Full Address Read signal.		
+        axi_arvalid : out std_logic;														--! AXI4-Full Address Read signal.	
+        axi_arready : in std_logic;															--! AXI4-Full Address Read signal.	
+        axi_rid : in std_logic_vector(0 downto 0);											--! AXI4-Full Read Data signal.
+        axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);							--! AXI4-Full Read Data signal.
+        axi_rresp : in std_logic_vector(1 downto 0);										--! AXI4-Full Read Data signal.
+        axi_rlast : in std_logic;															--! AXI4-Full Read Data signal.
+        axi_ruser : in std_logic_vector(axi_ruser_width-1 downto 0);						--! AXI4-Full Read Data signal.
+        axi_rvalid : in std_logic;															--! AXI4-Full Read Data signal.
+        axi_rready : out std_logic;															--! AXI4-Full Read Data signal.
+        -- Error interface.
+        error_data : out std_logic_vector(3 downto 0) := (others=>'0') 						--! Returns value signifying error in the transaction.
+	);
 end plasoc_cpu_axi4_read_cntrl;
 
 architecture Behavioral of plasoc_cpu_axi4_read_cntrl is
