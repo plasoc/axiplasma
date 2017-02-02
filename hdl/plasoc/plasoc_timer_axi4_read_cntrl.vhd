@@ -1,34 +1,48 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 31, 2017
+--! @brief Contains the entity and architecture of the 
+--! Timer Core's Slave AXI4-Lite Read Controller.
+-------------------------------------------------------
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;  
 use work.plasoc_pack.all;
 
+--! The Read Controller implements a Slave AXI4-Lite Read 
+--! interface in order to allow a Master interface to read from
+--! the registers of the core.
+--!
+--! Information specific to the AXI4-Lite
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_timer_axi4_read_cntrl is
     generic (
-        -- axi parameters.
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        -- register interface.
-        reg_control_offset : std_logic_vector := X"0000";
-        reg_trig_value_offset : std_logic_vector := X"0004";
-        reg_tick_value_offset : std_logic_vector := X"0008");
+        -- AXI4-Lite parameters.
+        axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.	
+        -- Register interface.
+        reg_control_offset : std_logic_vector := X"0000";		--! Defines the offset for the Control register.
+        reg_trig_value_offset : std_logic_vector := X"0004";	--! Defines the offset for the Trigger Value.
+        reg_tick_value_offset : std_logic_vector := X"0008"		--! Defines the offset for the Tick Value.
+	);
     port ( 
-        -- global interface.
-        aclk : in std_logic;
-        aresetn : in std_logic;
-        -- axi read interface.
-        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_arprot : in std_logic_vector(2 downto 0);
-        axi_arvalid : in std_logic;
-        axi_arready : out std_logic;
-        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-        axi_rvalid : out std_logic;
-        axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0);
-        -- interrupt controller interface.
-        reg_control : in std_logic_vector(axi_data_width-1 downto 0);
-        reg_trig_value : in std_logic_vector(axi_data_width-1 downto 0);
-        reg_tick_value : in std_logic_vector(axi_data_width-1 downto 0));
+        -- Global interface.
+        aclk : in std_logic;															--! Clock. Tested with 50 MHz.
+        aresetn : in std_logic;															--! Reset on low.
+        -- Slave AXI4-Lite Read interface.
+        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Read signal.
+        axi_arprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Read signal.
+        axi_arvalid : in std_logic;														--! AXI4-Lite Address Read signal.
+        axi_arready : out std_logic;													--! AXI4-Lite Address Read signal.
+        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');	--! AXI4-Lite Read Data signal.
+        axi_rvalid : out std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rready : in std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Read Data signal.	
+        -- Register interface.
+        reg_control : in std_logic_vector(axi_data_width-1 downto 0);					--! Control regster.
+        reg_trig_value : in std_logic_vector(axi_data_width-1 downto 0);				--! Trigger Value register.
+        reg_tick_value : in std_logic_vector(axi_data_width-1 downto 0));				--! Tick Value register.
 end plasoc_timer_axi4_read_cntrl;
 
 architecture Behavioral of plasoc_timer_axi4_read_cntrl is

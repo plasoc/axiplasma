@@ -2,8 +2,7 @@
 --! @author Andrew Powell
 --! @date January 31, 2017
 --! @brief Contains the entity and architecture of the 
---! Timer Core's Slave AXI4-Lite Write 
---! Controller.
+--! Timer Core's Slave AXI4-Lite Write Controller.
 -------------------------------------------------------
 
 library ieee;
