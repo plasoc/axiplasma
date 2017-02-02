@@ -73,9 +73,9 @@ entity plasoc_int is
         axi_rready : in std_logic;														--! AXI4-Lite Read Data signal.
         axi_rresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Read Data signal.
         -- CPU interface.
-        cpu_int : out std_logic;														-- CPU interrupt.
+        cpu_int : out std_logic;														--! CPU interrupt.
         -- Device interface.
-        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));					-- Device interrupts.	
+        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));					--! Device interrupts.	
 end plasoc_int;
 
 architecture Behavioral of plasoc_int is

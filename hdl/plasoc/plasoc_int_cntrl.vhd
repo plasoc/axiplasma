@@ -1,3 +1,10 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 28, 2017
+--! @brief Contains the entity and architecture of the 
+--! Interrupt Controller's main functionality.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
@@ -5,20 +12,25 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.plasoc_pack.all;
 
+--! The functionality of the Interrupt Controller is defined
+--! in this entity. For more information on how the Interrupt Controller
+--! operates as a whole, please see the hardware description of the top entity 
+--! plasoc_int. 
 entity plasoc_int_cntrl is
     generic (
-        interrupt_total : integer := 8 );
+        interrupt_total : integer := 8 		--! Defines the number of available device interrupts.
+	);
     port (
-        -- global interface.
-        clock : in std_logic;
-        nreset : in std_logic;
-        -- cpu interface.
-        cpu_int : out std_logic := '0';
-        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0);
-        cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);
-        cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);
-        -- device interface.
-        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
+        -- Global interface.
+        clock : in std_logic;													--! Clock. Tested with 50 MHz.
+        nreset : in std_logic;													--! Reset on low.
+        -- CPU interface.
+        cpu_int : out std_logic := '0';											--! CPU interrupt.	
+        cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0);	--! Interrupt Identifier.
+        cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Enables.
+        cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);		--! Interrupt Active
+        -- Device interface.
+        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));			--! Device interrupts.
 end plasoc_int_cntrl;
 
 architecture Behavioral of plasoc_int_cntrl is
