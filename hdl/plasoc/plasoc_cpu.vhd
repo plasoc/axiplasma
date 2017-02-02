@@ -1,93 +1,96 @@
----------------------------------------------------------------------
--- TITLE: Plasma-SoC Baseline Processor with AXI4-Full Interface.
--- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
--- DATE CREATED: 1/07/2017
--- FILENAME: mlitesoc_pack.vhd
--- PROJECT: Plasma-SoC core (extension of the Plasma CPU project)
--- COPYRIGHT: Software placed into the public domain by the author.
---    Software 'as is' without warranty.  Author liable for nothing.
--- DESCRIPTION:
---    The top model of this version of the Plasma-SoC Baseline Processor.
----------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 1, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's CPU.
+-------------------------------------------------------
 
 library ieee;
-use work.mlite_pack.all;
-use work.plasoc_pack.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+use work.mlite_pack.all;
+use work.plasoc_pack.all;
 
+--! The 32-bit CPU of the Plasma-SoC comprises only the original 
+--! Plasma Mlite CPU developed by Steve Rhoads, configurable cache,
+--! and AXI controllers to implement the AXI4-Full interface needed to
+--! communicate with peripherals in the Plasma-SoC and those external. 
+--!
+--! In a later revision on this documentation, more information will be
+--! added to describe the features implemented in the AXI4-Full interface
+--! and the capabilities of the cache. 
 entity plasoc_cpu is
     generic(
-        -- cpu constants
-        cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
-        cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
-        cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
-        -- cache constants
-        cache_address_width : integer := default_cache_address_width;
-        cache_way_width : integer := default_cache_way_width; 
-        cache_index_width : integer := default_cache_index_width;
-        cache_offset_width : integer := default_cache_offset_width;
-        cache_replace_strat : string := default_cache_replace_strat;
-        cache_base_address : std_logic_vector := default_cache_base_address;
-        cache_enable : boolean := default_cache_enable );
+        -- CPU parameters.
+        cpu_mult_type       : string  := default_cpu_mult_type;					--! Defines the Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        cpu_shifter_type    : string  := default_cpu_shifter_type;				--! Defines the Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        cpu_alu_type        : string  := default_cpu_alu_type;					--! Defines the Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        -- Cache parameters.
+        cache_address_width : integer := default_cache_address_width;			--! Defines the address width of the cacheable addresses.
+        cache_way_width : integer := default_cache_way_width;					--! Associativity = 2^cache_way_width.
+        cache_index_width : integer := default_cache_index_width;				--! Cache Size (rows) = 2^cache_index_width.
+        cache_offset_width : integer := default_cache_offset_width;				--! Line Size (bytes) = 2^cache_offset_width.
+        cache_replace_strat : string := default_cache_replace_strat;			--! Defines the replacement strategy in case of miss. Only "plru" is available.
+        cache_base_address : std_logic_vector := default_cache_base_address;	--! Defines the base address of the cache controller registers.
+        cache_enable : boolean := default_cache_enable							--! Defines whether or not the cache is enabled. 
+	);
     port(
-        -- global signals
-        aclk : in std_logic;
-        aresetn     : in std_logic;
-        -- axi write interface.
-        axi_awid : out std_logic_vector(0 downto 0);
-        axi_awaddr : out std_logic_vector(31 downto 0);
-        axi_awlen : out std_logic_vector(7 downto 0);
-        axi_awsize : out std_logic_vector(2 downto 0);
-        axi_awburst : out std_logic_vector(1 downto 0);
-        axi_awlock : out std_logic;
-        axi_awcache : out std_logic_vector(3 downto 0);
-        axi_awprot : out std_logic_vector(2 downto 0);
-        axi_awqos : out std_logic_vector(3 downto 0);
-        axi_awvalid : out std_logic;
-        axi_awready : in std_logic;
-        axi_wdata : out std_logic_vector(31 downto 0);
-        axi_wstrb : out std_logic_vector(3 downto 0);
-        axi_wlast : out std_logic;
-        axi_wvalid : out std_logic;
-        axi_wready : in std_logic;
-        axi_bid : in std_logic_vector(0 downto 0);
-        axi_bresp : in  std_logic_vector(1 downto 0);
-        axi_bvalid : in std_logic;
-        axi_bready : out std_logic;
-        -- axi read interface.
-        axi_arid : out std_logic_vector(0 downto 0);
-        axi_araddr : out std_logic_vector(31 downto 0);
-        axi_arlen : out std_logic_vector(7 downto 0);
-        axi_arsize : out std_logic_vector(2 downto 0);
-        axi_arburst : out std_logic_vector(1 downto 0);
-        axi_arlock : out std_logic;
-        axi_arcache : out std_logic_vector(3 downto 0);
-        axi_arprot : out std_logic_vector(2 downto 0);
-        axi_arqos : out std_logic_vector(3 downto 0);
-        axi_arvalid : out std_logic;
-        axi_arready : in std_logic;
-        axi_rid : in std_logic_vector(0 downto 0);
-        axi_rdata : in std_logic_vector(31 downto 0);
-        axi_rresp : in std_logic_vector(1 downto 0);
-        axi_rlast : in std_logic;
-        axi_rvalid : in std_logic;
-        axi_rready : out std_logic;
-        -- cpu signals
-        intr_in      : in std_logic;
-        -- debug signals.
-        debug_cpu_pause : out std_logic );
+        -- Global interface.
+        aclk : in std_logic;													--! Clock. Tested with 50 MHz.
+        aresetn     : in std_logic;												--! Reset on low.
+        -- AXI write interface.
+        axi_awid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awaddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awburst : out std_logic_vector(1 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awlock : out std_logic;												--! AXI4-Full Address Write signal.	
+        axi_awcache : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awprot : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awqos : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Write signal.	
+        axi_awregion : out std_logic_vector(3 downto 0);						--! AXI4-Full Address Write signal.					
+        axi_awvalid : out std_logic;											--! AXI4-Full Address Write signal.
+        axi_awready : in std_logic;												--! AXI4-Full Address Write signal.	
+        axi_wdata : out std_logic_vector(31 downto 0);							--! AXI4-Full Write Data signal.
+        axi_wstrb : out std_logic_vector(3 downto 0);							--! AXI4-Full Write Data signal.
+        axi_wlast : out std_logic;												--! AXI4-Full Write Data signal.
+        axi_wvalid : out std_logic;												--! AXI4-Full Write Data signal.
+        axi_wready : in std_logic;												--! AXI4-Full Write Data signal.
+        axi_bid : in std_logic_vector(0 downto 0);								--! AXI4-Full Write Response signal.
+        axi_bresp : in  std_logic_vector(1 downto 0);							--! AXI4-Full Write Response signal.
+        axi_bvalid : in std_logic;												--! AXI4-Full Write Response signal.
+        axi_bready : out std_logic;												--! AXI4-Full Write Response signal.
+        -- AXI read interface.
+        axi_arid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Read signal.
+        axi_araddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Read signal.	
+        axi_arburst : out std_logic_vector(1 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arlock : out std_logic;												--! AXI4-Full Address Read signal.		
+        axi_arcache : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arprot : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Read signal.	
+        axi_arqos : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arregion : out std_logic_vector(3 downto 0);						--! AXI4-Full Address Write signal.		
+        axi_arvalid : out std_logic;											--! AXI4-Full Address Read signal.
+        axi_arready : in std_logic;												--! AXI4-Full Address Read signal.
+        axi_rid : in std_logic_vector(0 downto 0);								--! AXI4-Full Read Data signal.
+        axi_rdata : in std_logic_vector(31 downto 0);							--! AXI4-Full Read Data signal.
+        axi_rresp : in std_logic_vector(1 downto 0);							--! AXI4-Full Read Data signal.	
+        axi_rlast : in std_logic;												--! AXI4-Full Read Data signal.
+        axi_rvalid : in std_logic;												--! AXI4-Full Read Data signal.
+        axi_rready : out std_logic;												--! AXI4-Full Read Data signal.
+        -- CPU signals.
+        intr_in      : in std_logic											    --! External interrupt.
+    );
 end plasoc_cpu;
 
 architecture Behavioral of plasoc_cpu is
     -- Component declarations.
     component plasoc_cpu_l1_cache_cntrl is
         generic (
-            -- cpu constants
             cpu_address_width : integer := 16;
             cpu_data_width : integer := 32;
-            -- cache constants
             cache_address_width : integer := 10;
             cache_way_width : integer := 1; 
             cache_index_width : integer := 4;
@@ -95,16 +98,13 @@ architecture Behavioral of plasoc_cpu is
             cache_replace_strat : string := "plru";
             cache_base_address : std_logic_vector := X"0000" ); 
         port ( 
-            -- global interface.
             clock : in std_logic; 
             resetn : in std_logic;
-            -- cpu interface.
             cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
             cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
             cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             cpu_pause : out std_logic;
-            -- cache interface.
             cache_cacheable : out std_logic;
             cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
             cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
@@ -112,7 +112,6 @@ architecture Behavioral of plasoc_cpu is
             cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0);
             cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);
             cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-            -- simple mem interface
             mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             mem_in_enable : out std_logic;
@@ -127,17 +126,13 @@ architecture Behavioral of plasoc_cpu is
     end component;
     component plasoc_cpu_l1_cache_buff is
         generic (
-            -- Global parameters.
             glb_data_width : integer := 32;
-            -- Cache related parameters.
             cache_tag_width : integer := 22;
             cache_index_width : integer := 5;
             cache_offset_width : integer := 4;
             cache_way_width : integer := 2 );
         port(
-            -- Global interface.
             clock : in std_logic;
-            -- Cache controller interface.
             cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
             cache_in_index : in std_logic_vector(cache_index_width-1 downto 0);
             cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0);
@@ -147,22 +142,17 @@ architecture Behavioral of plasoc_cpu is
     end component;
     component plasoc_cpu_mem_cntrl is
         generic (
-            -- cpu constants
             cpu_address_width : integer := 16;
             cpu_data_width : integer := 32);
         port (
-            -- global interface.
             clock : in std_logic; 
             resetn : in std_logic;
-            -- cpu interface.
             cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
             cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
             cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             cpu_pause : out std_logic;
-            -- "cache" interface.
             cache_cacheable : out std_logic;
-            -- simple mem interface
             mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
             mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
             mem_in_enable : out std_logic;
@@ -177,27 +167,20 @@ architecture Behavioral of plasoc_cpu is
     end component;
     component plasoc_cpu_axi4_read_cntrl is
         generic (
-            -- cpu constants
             cpu_address_width : integer := 16;
             cpu_data_width : integer := 32;
-            -- cache constants
             cache_offset_width : integer := 5;
-            -- axi read constants
             axi_aruser_width : integer := 0;
             axi_ruser_width : integer := 0);
         port(
-            -- global interfaces.
             clock : in std_logic;
             nreset : in std_logic;
-            -- mem read interface.
             mem_read_address : in std_logic_vector(cpu_address_width-1 downto 0);
             mem_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
             mem_read_enable : in std_logic;
             mem_read_valid : out std_logic;
             mem_read_ready : in std_logic;
-            -- cache interface.
             cache_cacheable : in std_logic;
-            -- axi read interface.
             axi_arid : out std_logic_vector(0 downto 0);
             axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0);
             axi_arlen : out std_logic_vector(7 downto 0);
@@ -207,6 +190,7 @@ architecture Behavioral of plasoc_cpu is
             axi_arcache : out std_logic_vector(3 downto 0);
             axi_arprot : out std_logic_vector(2 downto 0);
             axi_arqos : out std_logic_vector(3 downto 0);
+            axi_arregion : out std_logic_vector(3 downto 0);
             axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
             axi_arvalid : out std_logic;
             axi_arready : in std_logic;
@@ -217,34 +201,26 @@ architecture Behavioral of plasoc_cpu is
             axi_ruser : in std_logic_vector(axi_ruser_width-1 downto 0);
             axi_rvalid : in std_logic;
             axi_rready : out std_logic;
-            -- error interface.
             error_data : out std_logic_vector(3 downto 0) := (others=>'0') );
     end component;
     component plasoc_cpu_axi4_write_cntrl is
         generic(
-            -- cpu constants
             cpu_address_width : integer := 16;
             cpu_data_width : integer := 32;
-            -- cache constants
             cache_offset_width : integer := 5;
-            -- axi read constants
             axi_awuser_width : integer := 0;
             axi_wuser_width : integer := 0;
             axi_buser_width : integer := 0);
         port(
-            -- global interfaces.
             clock : in std_logic;
             nreset : in std_logic;
-            -- mem write interface.
             mem_write_address : in std_logic_vector(cpu_address_width-1 downto 0);
             mem_write_data : in std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
             mem_write_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
             mem_write_enable : in std_logic;
             mem_write_valid : in std_logic;
             mem_write_ready  : out std_logic;
-            -- cache interface.
             cache_cacheable : in std_logic;
-            -- axi write interface.
             axi_awid : out std_logic_vector(0 downto 0);
             axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0);
             axi_awlen : out std_logic_vector(7 downto 0);
@@ -254,6 +230,7 @@ architecture Behavioral of plasoc_cpu is
             axi_awcache : out std_logic_vector(3 downto 0);
             axi_awprot : out std_logic_vector(2 downto 0);
             axi_awqos : out std_logic_vector(3 downto 0);
+            axi_awregion : out std_logic_vector(3 downto 0);
             axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);
             axi_awvalid : out std_logic;
             axi_awready : in std_logic;
@@ -268,7 +245,6 @@ architecture Behavioral of plasoc_cpu is
             axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
             axi_bvalid : in std_logic;
             axi_bready : out std_logic;
-            -- error interface.
             error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
     end component;
     -- Constants and type definitions.
@@ -317,7 +293,6 @@ architecture Behavioral of plasoc_cpu is
     attribute keep of cpu_pause : signal is true;
 begin
     cpu_address_next(1 downto 0) <= "00";
-    debug_cpu_pause <= cpu_pause;
     -- CPU instantiation.
     mlite_cpu_inst:  
     mlite_cpu 
@@ -456,6 +431,7 @@ begin
             axi_awcache => axi_awcache,
             axi_awprot => axi_awprot,
             axi_awqos => axi_awqos,
+            axi_awregion => axi_awregion,
             axi_awuser => open,
             axi_awvalid => axi_awvalid,
             axi_awready => axi_awready,
@@ -498,6 +474,7 @@ begin
             axi_arcache => axi_arcache,
             axi_arprot => axi_arprot,
             axi_arqos => axi_arqos,
+            axi_arregion => axi_arregion,
             axi_aruser => open,
             axi_arvalid => axi_arvalid,
             axi_arready => axi_arready,

@@ -130,6 +130,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal axi_awcache : std_logic_vector(3 downto 0);
     signal axi_awprot : std_logic_vector(2 downto 0);
     signal axi_awqos : std_logic_vector(3 downto 0);
+    signal axi_awregion : std_logic_vector(3 downto 0);
     signal axi_awvalid : std_logic;
     signal axi_awready : std_logic;
     signal axi_wdata : std_logic_vector(31 downto 0);
@@ -150,6 +151,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal axi_arcache : std_logic_vector(3 downto 0);
     signal axi_arprot : std_logic_vector(2 downto 0);
     signal axi_arqos : std_logic_vector(3 downto 0);
+    signal axi_arregion : std_logic_vector(3 downto 0);
     signal axi_arvalid : std_logic;
     signal axi_arready : std_logic;
     signal axi_rid : std_logic_vector(0 downto 0);
@@ -230,7 +232,7 @@ begin
         axi_arprot => axi_arprot,
         axi_arqos => axi_arqos,
         axi_arready => axi_arready,
-        axi_arregion => X"0",
+        axi_arregion => axi_arregion,
         axi_arsize => axi_arsize,
         axi_arvalid => axi_arvalid,
         axi_awaddr => axi_awaddr,
@@ -243,7 +245,7 @@ begin
         axi_awready => axi_awready,
         axi_awsize => axi_awsize,
         axi_awvalid => axi_awvalid,
-        axi_awregion => X"0",
+        axi_awregion => axi_awregion,
         axi_bready => axi_bready,
         axi_bresp => axi_bresp,
         axi_bvalid => axi_bvalid,
@@ -333,6 +335,7 @@ begin
             axi_awcache => axi_awcache,
             axi_awprot => axi_awprot,
             axi_awqos => axi_awqos,
+            axi_awregion => axi_awregion,
             axi_awvalid => axi_awvalid,
             axi_awready => axi_awready,
             axi_wdata => axi_wdata,
@@ -353,6 +356,7 @@ begin
             axi_arcache => axi_arcache,
             axi_arprot => axi_arprot,
             axi_arqos => axi_arqos,
+            axi_arregion => axi_arregion,
             axi_arvalid => axi_arvalid,
             axi_arready => axi_arready,
             axi_rid => (others=>'0'),
@@ -361,8 +365,7 @@ begin
             axi_rlast => axi_rlast,
             axi_rvalid => axi_rvalid,
             axi_rready => axi_rready,
-            intr_in  => cpu_int,
-            debug_cpu_pause => open );
+            intr_in  => cpu_int );
     -- ram instantiation. Recall, the ram is actually emulated by bram for this test program.
     ram_inst : 
     ram 

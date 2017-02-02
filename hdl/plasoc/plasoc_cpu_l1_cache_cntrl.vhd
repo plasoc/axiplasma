@@ -1,16 +1,9 @@
----------------------------------------------------------------------
--- TITLE: L1 Cache Controller of Plasma-SoC Baseline Processor 
--- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
--- DATE CREATED: 1/07/2017
--- FILENAME: l1_cache_cntrl.vhd
--- PROJECT: Plasma-SoC core (extension of the Plasma CPU project)
--- COPYRIGHT: Software placed into the public domain by the author.
---    Software 'as is' without warranty.  Author liable for nothing.
--- DESCRIPTION:
---    Defines the L1 Write-Back Cache Controller. So far, the only
---    replacement policy implemented is pseudo least recently used,
---    so far there is no way to directly invalidate the cache.
----------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 1, 2017
+--! @brief Contains the entity and architecture of the 
+--! CPU's Write-Back Cache Controller. 
+-------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -19,48 +12,58 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.plasoc_pack.all;
 
+--! The cache controller is designed to implement the write-back
+--! caching technique, however other parameters such as assocaivity 
+--! and size are configurable so long as there are no inconsistencies. It 
+--! should be noted that the CPU naturally processes an instruction per 
+--! rising edge of the global clock, unless intentionally stalled.
+--!
+--! In future revisions on this documentation, more information on the 
+--! replacement policies will be included. 
 entity plasoc_cpu_l1_cache_cntrl is
     generic (
-        -- cpu constants
-        cpu_address_width : integer := 16;
-        cpu_data_width : integer := 32;
-        -- cache constants
-        cache_address_width : integer := 10;
-        cache_way_width : integer := 1; 
-        cache_index_width : integer := 4;
-        cache_offset_width : integer := 4;
-        cache_replace_strat : string := "plru";
-        cache_base_address : std_logic_vector := X"0000" ); 
+        -- CPU parameters.
+        cpu_address_width : integer := 16;						--! Defines the address width of the CPU. This should normally be equal to the CPU's width.			
+        cpu_data_width : integer := 32;							--! Defines the data width of the CPU. This should normally be equal to the CPU's width.	
+        -- Cache parameters.
+        cache_address_width : integer := 10;					--! Defines the cacheable address width, starting from the base address of 0. 
+        cache_way_width : integer := 1; 						--! Associativity = 2^cache_way_width.
+        cache_index_width : integer := 4;						--! Cache Size (rows) = 2^cache_index_width.
+        cache_offset_width : integer := 4;						--! Line Size (bytes) = 2^cache_offset_width.
+        cache_replace_strat : string := "plru";					--! Defines the replacement strategy in case of miss. Only "plru" is available.
+        cache_base_address : std_logic_vector := X"0000" 		--! Defines the base address of the cache controller registers.
+	); 
     port ( 
-        -- global interface.
-        clock : in std_logic; 
-        resetn : in std_logic;
-        -- cpu interface.
-        cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
-        cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
-        cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-        cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
-        cpu_pause : out std_logic;
-        -- cache interface.
-        cache_cacheable : out std_logic;
-        cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
-        cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-        cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
-        cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0);
-        cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);
-        cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-        -- simple mem interface
-        mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-        mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
-        mem_in_enable : out std_logic;
-        mem_in_valid : in std_logic;
-        mem_in_ready : out std_logic;
-        mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-        mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-        mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
-        mem_out_enable : out std_logic;
-        mem_out_valid : out std_logic;
-        mem_out_ready : in std_logic); 
+        -- Global interface.
+        clock : in std_logic; 																--! Clock. Tested with 50 MHz.
+        resetn : in std_logic;																--! Reset on low.	
+        -- CPU interface.
+        cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 					--! The requested address of the next word to either be written to or read from memory.
+        cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The next word that is written to the CPU.
+        cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The next word that the CPU is writing.
+        cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);						--! Determines whether a the CPU is writing or reading a word. Each bit that is high enables writing for the corresponding byte in cpu_in_data.
+        cpu_pause : out std_logic;															--! Stalls the CPU.
+        -- Cache interface.
+        cache_cacheable : out std_logic;													--! Indicates whether the requested address of the CPU is cacheable or noncachebale.
+        cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);				--! The requested cache index when writing to the cache buffer. 
+        cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when writing to the cache buffer.
+        cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);			--! Enables the writing of a new tag for a specified way. Each bit refers to a corresponding way.
+        cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0); --! Enables the writing of a word for a specifided way and offset. Each bit refers a corresponding way and offset.
+        cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);				--! The requested cache index when reading from the cache buffer. 
+        cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when reading from the cache buffer.
+        -- Memory interface.
+        mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0'); --! The requested address sent to the read memory controller.
+        mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The word read from the read memory controller.
+        mem_in_enable : out std_logic;														--! Enables the operation of the read memory controller.
+        mem_in_valid : in std_logic;														--! Indicates the read memory controller has a valid word on mem_in_data.
+        mem_in_ready : out std_logic;														--! Indicates the cache is ready to sample a word from mem_in_data. 
+        mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0'); --! The requested address sent to the write memory controller.
+        mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The word written to the write memory controller.
+        mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');--! Each bit that is high enables writing for the corresponding byte in mem_out_data.
+        mem_out_enable : out std_logic;														--! Enables the operation of the write memory controller.						
+        mem_out_valid : out std_logic;														--! Indicates the cache has a valid word on mem_out_data.
+        mem_out_ready : in std_logic														--! Indicates the read memory controller is ready to sample a word from mem_out_data.
+	); 
 end plasoc_cpu_l1_cache_cntrl;
 
 architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
@@ -154,9 +157,6 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal mem_read_counter : integer range 0 to 2**cache_offset_width;
     signal mem_way_replace : cache_way_type;
     signal mem_tag_replace : cache_tag_type;
---    attribute keep : string;
---    attribute keep of cache_way_replace : signal is "true";
---    attribute keep of cache_plruset_replace : signal is "true";
 begin
     -- Set CPU pause signal to stall CPU when necessary.
     cpu_pause <= cpu_pause_buff;

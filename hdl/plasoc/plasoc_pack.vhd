@@ -90,6 +90,7 @@ package plasoc_pack is
             axi_awcache : out std_logic_vector(3 downto 0);
             axi_awprot : out std_logic_vector(2 downto 0);
             axi_awqos : out std_logic_vector(3 downto 0);
+            axi_awregion : out std_logic_vector(3 downto 0);
             axi_awvalid : out std_logic;
             axi_awready : in std_logic;
             axi_wdata : out std_logic_vector(31 downto 0);
@@ -111,6 +112,7 @@ package plasoc_pack is
             axi_arcache : out std_logic_vector(3 downto 0);
             axi_arprot : out std_logic_vector(2 downto 0);
             axi_arqos : out std_logic_vector(3 downto 0);
+            axi_arregion : out std_logic_vector(3 downto 0);
             axi_arvalid : out std_logic;
             axi_arready : in std_logic;
             axi_rid : in std_logic_vector(0 downto 0);
@@ -120,9 +122,7 @@ package plasoc_pack is
             axi_rvalid : in std_logic;
             axi_rready : out std_logic;
             -- cpu signals
-            intr_in      : in std_logic;
-            -- debug signals.
-            debug_cpu_pause : out std_logic );
+            intr_in      : in std_logic);
     end component;
     
     component plasoc_int is

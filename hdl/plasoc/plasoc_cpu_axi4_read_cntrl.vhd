@@ -38,6 +38,7 @@ entity plasoc_cpu_axi4_read_cntrl is
         axi_arcache : out std_logic_vector(3 downto 0);
         axi_arprot : out std_logic_vector(2 downto 0);
         axi_arqos : out std_logic_vector(3 downto 0);
+        axi_arregion : out std_logic_vector(3 downto 0);
         axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
         axi_arvalid : out std_logic;
         axi_arready : in std_logic;
@@ -76,6 +77,7 @@ begin
     axi_arcache <= axi_cache_device_nonbufferable;
     axi_arprot <= axi_prot_instr & not axi_prot_sec & not axi_prot_priv;
     axi_arqos <= (others=>'0');
+    axi_arregion <= (others=>'0');
     axi_aruser <= (others=>'0');
     axi_arvalid <= axi_arvalid_buff;
     axi_rready <= axi_rready_buff;

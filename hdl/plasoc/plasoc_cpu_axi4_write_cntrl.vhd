@@ -40,6 +40,7 @@ entity plasoc_cpu_axi4_write_cntrl is
         axi_awcache : out std_logic_vector(3 downto 0);
         axi_awprot : out std_logic_vector(2 downto 0);
         axi_awqos : out std_logic_vector(3 downto 0);
+        axi_awregion : out std_logic_vector(3 downto 0);
         axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);
         axi_awvalid : out std_logic;
         axi_awready : in std_logic;
@@ -82,6 +83,7 @@ begin
     axi_awcache <= axi_cache_device_nonbufferable;
     axi_awprot <= axi_prot_instr & not axi_prot_sec & not axi_prot_priv;
     axi_awqos <= (others=>'0');
+    axi_awregion <= (others=>'0');
     axi_awuser <= (others=>'0');
     axi_awvalid <= axi_awvalid_buff;
     axi_wvalid <= axi_wvalid_buff;
