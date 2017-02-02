@@ -1,85 +1,95 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/31/2017 02:38:24 PM
--- Design Name: 
--- Module Name: plasoc_timer - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 31, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's Timer Core.
+-------------------------------------------------------
 
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 use work.plasoc_pack.all;
 
+--! The Timer Core is developed so that the Plasma-SoC can
+--! perform operations reactively to deterministic periods of time. This
+--! operation is especially critical in order to run an operating
+--! system preemptively. The only goals behind the development of the 
+--! Timer Core are simplicity and having a Slave AXI4-Lite interface.
+--!
+--! The operation of the Timer Core is as follows. The address space of the 
+--! Timer Core defines the registers Control, Trigger Value, and Tick Value. 
+--! Before starting the Timer Core's operation, the value written to the 
+--! Trigger Value sets the value at which the Tick Value must reach. Setting the
+--! Start bit in the Control register starts the operation of the Timer Core, 
+--! during which the Tick Value increments every clock cycle until it reaches the Trigger Value.
+--! Once the Tick Value equals the Trigger Value, the Done bit and signal is set 
+--! high until either the Acknowledge bit is set high or the Start bit is set low.
+--! The Acknowledge bit is found in the Control register.
+--!
+--! If the Reload bit is set high, the Tick Value will reset itself back to zero
+--! on the clock cycle after reaching the Trigger Value. The Reload bit is found in
+--! the Control register. Both the Done bit and the Tick Value register will remain
+--! zero if the Start bit is zero.
+--!
+--! Information specific to the AXI4-Full
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_timer is
     generic (
-        -- timer parameters.
-        timer_width : integer := 32;
-        -- axi parameters.
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        axi_base_address : std_logic_vector := X"0000";
-        axi_control_offset : std_logic_vector := X"0000";
-        axi_control_start_bit_loc : integer := 0;
-        axi_control_reload_bit_loc : integer := 1;
-        axi_control_ack_bit_loc : integer := 2;
-        axi_control_done_bit_loc : integer := 3;
-        axi_trig_value_offset : std_logic_vector := X"0004";
-        axi_tick_value_offset : std_logic_vector := X"0008");
+        -- Timer Core's parameters.
+        timer_width : integer := 32;							--! Defines the width of the Trigger and Tick Value registers.
+        -- Slave AXI4-Lite parameters.
+        axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.	
+        axi_base_address : std_logic_vector := X"0000";			--! Defines the AXI4-Lite base address.
+        axi_control_offset : std_logic_vector := X"0000";		--! For the Control register, defines the offset from axi_base_address.
+        axi_control_start_bit_loc : integer := 0;				--! For the Start bit, defines the bit location in the Control register.
+        axi_control_reload_bit_loc : integer := 1;				--! For the Reload bit, defines the bit location in the Control register.
+        axi_control_ack_bit_loc : integer := 2;					--! For the Acknowledge bit, defines the bit location in the Control register.
+        axi_control_done_bit_loc : integer := 3;				--! For the Done bit, defines the bit location in the Control register.
+        axi_trig_value_offset : std_logic_vector := X"0004";	--! For the Trigger Value register, defines the offset from axi_base_address.
+        axi_tick_value_offset : std_logic_vector := X"0008"		--! For the Tick Value register, defines the offset from axi_base_address.
+	);
     port (
-        -- global interface.
-        aclk : in std_logic;
-        aresetn : in std_logic;
-        -- axi write interface.
-        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_awprot : in std_logic_vector(2 downto 0);
-        axi_awvalid : in std_logic;
-        axi_awready : out std_logic;
-        axi_wvalid : in std_logic;
-        axi_wready : out std_logic;
-        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);
-        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);
-        axi_bvalid : out std_logic;
-        axi_bready : in std_logic;
-        axi_bresp : out std_logic_vector(1 downto 0);
-        -- axi read interface.
-        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_arprot : in std_logic_vector(2 downto 0);
-        axi_arvalid : in std_logic;
-        axi_arready : out std_logic;
-        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-        axi_rvalid : out std_logic;
-        axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0);
-        -- timer controller interface.
-        done : out std_logic);
+        -- Global interface.
+        aclk : in std_logic;															--! Defines the AXI4-Lite Address Width.
+        aresetn : in std_logic;															--! Reset on low.
+        -- Slave AXI4-Lite Write interface.
+        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Write signal.
+        axi_awprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Write signal.
+        axi_awvalid : in std_logic;														--! AXI4-Lite Address Write signal.
+        axi_awready : out std_logic;													--! AXI4-Lite Address Write signal.
+        axi_wvalid : in std_logic;														--! AXI4-Lite Write Data signal.
+        axi_wready : out std_logic;														--! AXI4-Lite Write Data signal.
+        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);						--! AXI4-Lite Write Data signal.	
+        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);					--! AXI4-Lite Write Data signal.
+        axi_bvalid : out std_logic;														--! AXI4-Lite Write Response signal.
+        axi_bready : in std_logic;														--! AXI4-Lite Write Response signal.
+        axi_bresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Write Response signal.
+        -- Slave AXI4-Lite Read interface.
+        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Read signal.
+        axi_arprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Read signal.
+        axi_arvalid : in std_logic;														--! AXI4-Lite Address Read signal.
+        axi_arready : out std_logic;													--! AXI4-Lite Address Read signal.
+        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');	--! AXI4-Lite Read Data signal.
+        axi_rvalid : out std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rready : in std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Read Data signal.
+        -- Timer Core interface.
+        done : out std_logic															--! Done signal.
+	);
 end plasoc_timer;
 
 architecture Behavioral of plasoc_timer is
+	-- Component declaration.
     component plasoc_timer_cntrl is
         generic (
             timer_width : integer := 16 );
         port (
-            -- global interface.
             clock : in std_logic;
-            -- timer control interface.
             start : in std_logic;
             reload : in std_logic;
             ack : in std_logic;
             done : out std_logic := '0';
-            -- time data interface.
             trig_value : in std_logic_vector(timer_width-1 downto 0);
             tick_value : out std_logic_vector(timer_width-1 downto 0));
     end component;
@@ -92,32 +102,25 @@ architecture Behavioral of plasoc_timer is
             ack_bit_loc : integer := 2;
             done_bit_loc : integer := 3); 
         port (
-            -- global interface.
             clock : in std_logic;
             nreset : in std_logic;
-            -- timer interface.
             start : out std_logic := '0';
             reload : out std_logic := '0';
             ack : out std_logic := '0';
             done : in std_logic;
-            -- register interface.
             reg_in_valid : in std_logic;
             reg_in_control : in std_logic_vector(axi_data_width-1 downto 0);
             reg_out_control : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0'));
     end component;
     component plasoc_timer_axi4_write_cntrl is
         generic (
-            -- axi parameters.
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
-            -- register interface.
             reg_control_offset : std_logic_vector := X"0000";
             reg_trig_value_offset : std_logic_vector := X"0004");
         port (
-            -- global interface.
             aclk : in std_logic;
             aresetn : in std_logic;
-            -- axi write interface.
             axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_awprot : in std_logic_vector(2 downto 0);
             axi_awvalid : in std_logic;
@@ -129,25 +132,20 @@ architecture Behavioral of plasoc_timer is
             axi_bvalid : out std_logic;
             axi_bready : in std_logic;
             axi_bresp : out std_logic_vector(1 downto 0);
-            -- register interface.
             reg_control : out std_logic_vector(axi_data_width-1 downto 0);
             reg_trig_value : out std_logic_vector(axi_data_width-1 downto 0);
             reg_valid : out std_logic := '0');
     end component;
     component plasoc_timer_axi4_read_cntrl is
         generic (
-            -- axi parameters.
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
-            -- register interface.
             reg_control_offset : std_logic_vector := X"0000";
             reg_trig_value_offset : std_logic_vector := X"0004";
             reg_tick_value_offset : std_logic_vector := X"0008");
         port ( 
-            -- global interface.
             aclk : in std_logic;
             aresetn : in std_logic;
-            -- axi read interface.
             axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_arprot : in std_logic_vector(2 downto 0);
             axi_arvalid : in std_logic;
@@ -156,7 +154,6 @@ architecture Behavioral of plasoc_timer is
             axi_rvalid : out std_logic;
             axi_rready : in std_logic;
             axi_rresp : out std_logic_vector(1 downto 0);
-            -- interrupt controller interface.
             reg_control : in std_logic_vector(axi_data_width-1 downto 0);
             reg_trig_value : in std_logic_vector(axi_data_width-1 downto 0);
             reg_tick_value : in std_logic_vector(axi_data_width-1 downto 0));

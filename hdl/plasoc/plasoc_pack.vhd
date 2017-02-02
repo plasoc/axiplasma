@@ -20,7 +20,7 @@ package plasoc_pack is
 
 	-- Default CPU parameters. These values are modifiable. At this current time, 
 	-- though, some parameter combinations are incompatible. If these parameters are 
-	-- modified, modifications will also be necessary for corresponding header file 
+	-- modified, though, modifications will also be necessary for the corresponding header file 
 	-- for the CPU. 
     constant default_cpu_mult_type       : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
@@ -33,12 +33,15 @@ package plasoc_pack is
     constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
     constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
     
-	-- Default Interrupt Controller parameters. These values are modifiable.
-    constant default_interrupt_total : integer := 8;
-    constant default_int_id_offset : std_logic_vector := X"00000004";
-    constant default_int_enables_offset : std_logic_vector := X"00000000"; 
-    constant default_int_active_address : std_logic_vector := X"00000008";
+	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
+	-- modified, though, modifications will also be necessary for the corresponding header file 
+	-- for the CPU. 
+    constant default_interrupt_total : integer := 8;									--! Defines the default number of available device interrupts.
+    constant default_int_id_offset : std_logic_vector := X"00000004";					--! For the Interrupt Identifier register, defines the default offset from the Interrupt Controller's axi_base_address.				
+    constant default_int_enables_offset : std_logic_vector := X"00000000"; 				--! For the Interrupt Enables register, defines the default offset from the Interrupt Controller's axi_base_address.
+    constant default_int_active_address : std_logic_vector := X"00000008";				--! For the Interrupt Active register, defines the default offset from the Interrupt Controller's axi_base_address.
     
+	-- 
     constant default_timer_width : integer := 32;
     constant default_timer_axi_control_offset : std_logic_vector := X"00000000"; 
     constant default_timer_axi_control_start_bit_loc : integer := 0;

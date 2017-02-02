@@ -6,8 +6,8 @@
 --! Controller.
 -------------------------------------------------------
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 use work.plasoc_pack.all;
 
 --! The Read Controller implements a Slave AXI4-Lite Read 
