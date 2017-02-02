@@ -1,54 +1,50 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/28/2017 04:46:42 PM
--- Design Name: 
--- Module Name: plasoc_int_axi4_read_cntrl - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 28, 2017
+--! @brief Contains the entity and architecture of the 
+--! Interrupt Controller's Slave AXI4-Lite Read 
+--! Controller.
+-------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.plasoc_pack.all;
 
+--! The Read Controller implements a Slave AXI4-Lite Read 
+--! interface in order to allow a Master interface to read from
+--! the registers of the core.
+--!
+--! Information specific to the AXI4-Lite
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_int_axi4_read_cntrl is
     generic (
-        -- axi parameters.
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        -- interrupt controller parameters.
-        int_id_address : std_logic_vector := X"0004";
-        int_enables_address : std_logic_vector := X"0000";
-        int_active_address : std_logic_vector := X"0008");
+        -- AXI4-Lite parameters.
+        axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.	
+        -- Interrupt Controller parameters.
+        int_id_address : std_logic_vector := X"0004";			--! Defines the offset for the Interrupt Identifier register.
+        int_enables_address : std_logic_vector := X"0000";		--! Defines the offset for the Interrupt Enables register.
+        int_active_address : std_logic_vector := X"0008"		--! Defines the offset for the Interrupt Active register.	
+	);
     port ( 
-        -- global interface.
-        aclk : in std_logic;
-        aresetn : in std_logic;
-        -- axi read interface.
-        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_arprot : in std_logic_vector(2 downto 0);
-        axi_arvalid : in std_logic;
-        axi_arready : out std_logic;
-        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-        axi_rvalid : out std_logic;
-        axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0);
-        -- interrupt controller interface.
-        int_id : in std_logic_vector(axi_data_width-1 downto 0);
-        int_enables : in std_logic_vector(axi_data_width-1 downto 0);
-        int_active : in std_logic_vector(axi_data_width-1 downto 0));
+        -- Global interface.
+        aclk : in std_logic;															--! Clock. Tested with 50 MHz.
+        aresetn : in std_logic;															--! Reset on low.
+        -- Slave AXI4-Lite Read interface.
+        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Read signal.
+        axi_arprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Read signal.
+        axi_arvalid : in std_logic;														--! AXI4-Lite Address Read signal.
+        axi_arready : out std_logic;													--! AXI4-Lite Address Read signal.
+        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');	--! AXI4-Lite Read Data signal.
+        axi_rvalid : out std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rready : in std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Read Data signal.	
+        -- Interrupt Controller Interface.
+        int_id : in std_logic_vector(axi_data_width-1 downto 0);						--! Interrupt Identifier register.
+        int_enables : in std_logic_vector(axi_data_width-1 downto 0);					--! Interrupt Enables register.
+        int_active : in std_logic_vector(axi_data_width-1 downto 0)						--! Interrupt Active register.	
+	);
 end plasoc_int_axi4_read_cntrl;
 
 architecture Behavioral of plasoc_int_axi4_read_cntrl is

@@ -41,9 +41,9 @@ entity plasoc_int is
         axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
         axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.	
         axi_base_address : std_logic_vector := X"0000";			--! Defines the AXI4-Lite base address.
-        axi_int_id_offset : std_logic_vector := X"0004";		--! Defines the offset to address for the Interrupt Identifier register.
-        axi_int_enables_offset : std_logic_vector := X"0000";	--! Defines the offset to address for the Interrupt Enables register.
-        axi_int_active_offset : std_logic_vector := X"0008";	--! Defines the offset to address for the Interrupt Active register.
+        axi_int_id_offset : std_logic_vector := X"0004";		--! Defines the offset from axi_base_address for the Interrupt Identifier register.
+        axi_int_enables_offset : std_logic_vector := X"0000";	--! Defines the offset from axi_base_address for the Interrupt Enables register.
+        axi_int_active_offset : std_logic_vector := X"0008";	--! Defines the offset from axi_base_address for the Interrupt Active register.
         -- Interrupt Controller parameters.
         interrupt_total : integer := 8							--! Defines the number of available device interrupts.
      );
