@@ -385,9 +385,9 @@ begin
             axi_data_width => word_width,
             axi_base_address => int_axi_base_address,
             interrupt_total => default_interrupt_total,
-            int_id_address => default_int_id_offset,
-            int_enables_address => default_int_enables_offset,
-            int_active_address => default_int_active_address )
+            axi_int_id_offset => default_int_id_offset,
+            axi_int_enables_offset => default_int_enables_offset,
+            axi_int_active_offset => default_int_active_address )
         port map (
             aclk => aclk,
             aresetn => aresetn(0),

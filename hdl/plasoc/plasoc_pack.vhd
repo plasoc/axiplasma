@@ -1,32 +1,39 @@
----------------------------------------------------------------------
--- TITLE: Plasma-SoC Misc. Package
--- AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
--- DATE CREATED: 1/07/2017
--- FILENAME: mlitesoc_pack.vhd
--- PROJECT: Plasma-SoC core (extension of the Plasma CPU project)
--- COPYRIGHT: Software placed into the public domain by the author.
---    Software 'as is' without warranty.  Author liable for nothing.
--- DESCRIPTION:
---    Data types, constants, and add functions needed for the Plasma-SoC CPU.
----------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 7, 2017
+--! @brief Contains the package referenced by the cores
+--! defined for the Plasma-SoC.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
+--! This package contains the default parameters, component declarations,
+--! and uitility functions necessary for the cores created for the Plasma-SoC. 
+--!
+--! Many changes with this package will occur overtime with the progression of the 
+--! Plasma-SoC project. At some point, packages will be defined separately for each
+--! core whose component declaration is located within this package.
 package plasoc_pack is
 
-    constant default_cpu_mult_type       : string  := "DEFAULT"; --AREA_OPTIMIZED
-    constant default_cpu_shifter_type    : string  := "DEFAULT"; --AREA_OPTIMIZED
-    constant default_cpu_alu_type        : string  := "DEFAULT"; --AREA_OPTIMIZED
-    constant default_cache_address_width : integer := 12;
-    constant default_cache_way_width : integer := 2; 
-    constant default_cache_index_width : integer := 4;
-    constant default_cache_offset_width : integer := 5;
-    constant default_cache_replace_strat : string := "plru";
-    constant default_cache_base_address : std_logic_vector := X"10000000";
-    constant default_cache_enable : boolean := True;
+	-- Default CPU parameters. These values are modifiable. At this current time, 
+	-- though, some parameter combinations are incompatible. If these parameters are 
+	-- modified, modifications will also be necessary for corresponding header file 
+	-- for the CPU. 
+    constant default_cpu_mult_type       : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cpu_alu_type        : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cache_address_width : integer := 12;								--! Defines the default address width of the cacheable addresses.
+    constant default_cache_way_width : integer := 2; 									--! Associativity = 2^default_cache_way_width.	
+    constant default_cache_index_width : integer := 4;									--! Cache Size (rows) = 2^default_cache_index_width.
+    constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
+    constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
+    constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
+    constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
     
+	-- Default Interrupt Controller parameters. These values are modifiable.
     constant default_interrupt_total : integer := 8;
     constant default_int_id_offset : std_logic_vector := X"00000004";
     constant default_int_enables_offset : std_logic_vector := X"00000000"; 
@@ -128,14 +135,14 @@ package plasoc_pack is
     component plasoc_int is
         generic(
             -- axi parameters.
-            axi_address_width : integer := 32;
+            axi_address_width : integer := 16;
             axi_data_width : integer := 32;
             axi_base_address : std_logic_vector := X"0000";
+            axi_int_id_offset : std_logic_vector := default_int_id_offset;
+            axi_int_enables_offset : std_logic_vector := default_int_enables_offset;
+            axi_int_active_offset : std_logic_vector := default_int_active_address;
             -- interrupt controller parameters.
-            interrupt_total : integer := default_interrupt_total;
-            int_id_address : std_logic_vector := default_int_id_offset;
-            int_enables_address : std_logic_vector := default_int_enables_offset;
-            int_active_address : std_logic_vector := default_int_active_address );
+            interrupt_total : integer := default_interrupt_total);
         port(
             -- global interface.
             aclk : in std_logic;

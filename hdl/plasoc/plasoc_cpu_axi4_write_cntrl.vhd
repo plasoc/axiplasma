@@ -47,7 +47,7 @@ entity plasoc_cpu_axi4_write_cntrl is
         mem_write_enable : in std_logic;														--! Enables the operation of the write memory controller.
         mem_write_valid : in std_logic;															--! Indicates the cache has a valid word on mem_write_data.	
         mem_write_ready  : out std_logic;														--! Indicates the read memory controller is ready to sample a word from mem_write_data.	
-        -- cache interface.
+        -- Cache interface.
         cache_cacheable : in std_logic;															--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         -- Master AXI4-Full Write interface.
         axi_awid : out std_logic_vector(0 downto 0);											--! AXI4-Full Address Write signal.

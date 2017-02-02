@@ -1,68 +1,81 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/28/2017 06:10:40 PM
--- Design Name: 
--- Module Name: plasoc_int - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date January 28, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's Interrupt Controller.
+-------------------------------------------------------
 
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all; 
 use work.plasoc_pack.all;
 
+--! The Interrupt Controller is developed to extend 
+--! the single external interrupt of the Plasma-SoC's CPU to
+--! support multiple interrupts. The only goals behind the 
+--! development of the Interrupt Controller are simplicity and
+--! having a Slave AXI4-Lite interface.
+--!
+--! The operation of the Interrupt Controller is as follows. Each
+--! device interrupt, which are the interrupts associated with the
+--! devices connecting to the Interrupt Controller, is enabled by
+--! writing to the corresponding bit at the Interrupt Enables register
+--! located at axi_int_enables_offset. A device can trigger its respective
+--! interrupt by setting it high. At this point, the device interrupt is 
+--! consider active if it is both enabled in the Interrupt Enables register
+--! and set high by the respective device.
+--!
+--! If there is at least one active device interrupt, the Interrupt Controller 
+--! will set the CPU interrupt, which is the single interrupt associated with the
+--! CPU, high and set the Interrupt Identifier register at axi_int_id_offset
+--! as the identifier (IRQ) of the active device interrupt.
+--! If there are multiple active device interrupts, the lowest identifier will
+--! always have priority over the Interrupt Identifier register. The CPU
+--! interrupt will remain high until there are no active device interrupts.
+--!
+--! Information specific to the AXI4-Full
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_int is
     generic(
-        -- axi parameters.
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        axi_base_address : std_logic_vector := X"0000";
-        -- interrupt controller parameters.
-        interrupt_total : integer := 8;
-        int_id_address : std_logic_vector := X"0004";
-        int_enables_address : std_logic_vector := X"0000";
-        int_active_address : std_logic_vector := X"0008" );
+        -- Slave AXI4-Lite parameters.
+        axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.	
+        axi_base_address : std_logic_vector := X"0000";			--! Defines the AXI4-Lite base address.
+        axi_int_id_offset : std_logic_vector := X"0004";		--! Defines the offset to address for the Interrupt Identifier register.
+        axi_int_enables_offset : std_logic_vector := X"0000";	--! Defines the offset to address for the Interrupt Enables register.
+        axi_int_active_offset : std_logic_vector := X"0008";	--! Defines the offset to address for the Interrupt Active register.
+        -- Interrupt Controller parameters.
+        interrupt_total : integer := 8							--! Defines the number of available device interrupts.
+     );
     port(
-        -- global interface.
-        aclk : in std_logic;
-        aresetn : in std_logic;
-        -- axi write interface.
-        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_awprot : in std_logic_vector(2 downto 0);
-        axi_awvalid : in std_logic;
-        axi_awready : out std_logic;
-        axi_wvalid : in std_logic;
-        axi_wready : out std_logic;
-        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);
-        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);
-        axi_bvalid : out std_logic;
-        axi_bready : in std_logic;
-        axi_bresp : out std_logic_vector(1 downto 0);
-        -- axi read interface.
-        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_arprot : in std_logic_vector(2 downto 0);
-        axi_arvalid : in std_logic;
-        axi_arready : out std_logic;
-        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-        axi_rvalid : out std_logic;
-        axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0);
-        -- cpu interface.
-        cpu_int : out std_logic;
-        -- dev interface.
-        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
+        -- Global Interface.
+        aclk : in std_logic;															--! Clock. Tested with 50 MHz.
+        aresetn : in std_logic;															--! Reset on low.
+        -- Slave AXI4-Lite Write interface.
+        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Write signal.
+        axi_awprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Write signal.
+        axi_awvalid : in std_logic;														--! AXI4-Lite Address Write signal.
+        axi_awready : out std_logic;													--! AXI4-Lite Address Write signal.		
+        axi_wvalid : in std_logic;														--! AXI4-Lite Write Data signal.
+        axi_wready : out std_logic;														--! AXI4-Lite Write Data signal.
+        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);						--! AXI4-Lite Write Data signal.
+        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);					--! AXI4-Lite Write Data signal.
+        axi_bvalid : out std_logic;														--! AXI4-Lite Write Response signal.
+        axi_bready : in std_logic;														--! AXI4-Lite Write Response signal.
+        axi_bresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Write Response signal.	
+        -- Slave AXI4-Lite Read interface.
+        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);					--! AXI4-Lite Address Read signal.
+        axi_arprot : in std_logic_vector(2 downto 0);									--! AXI4-Lite Address Read signal.
+        axi_arvalid : in std_logic;														--! AXI4-Lite Address Read signal.
+        axi_arready : out std_logic;													--! AXI4-Lite Address Read signal.
+        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');	--! AXI4-Lite Read Data signal.
+        axi_rvalid : out std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rready : in std_logic;														--! AXI4-Lite Read Data signal.
+        axi_rresp : out std_logic_vector(1 downto 0);									--! AXI4-Lite Read Data signal.
+        -- CPU interface.
+        cpu_int : out std_logic;														-- CPU interrupt.
+        -- Device interface.
+        dev_ints : in std_logic_vector(interrupt_total-1 downto 0));					-- Device interrupts.	
 end plasoc_int;
 
 architecture Behavioral of plasoc_int is
@@ -70,31 +83,24 @@ architecture Behavioral of plasoc_int is
         generic (
             interrupt_total : integer := 8 );
         port (
-            -- global interface.
             clock : in std_logic;
             nreset : in std_logic;
-            -- cpu interface.
             cpu_int : out std_logic := '0';
             cpu_int_id : out std_logic_vector(clogb2(interrupt_total) downto 0) := (others=>'0');
             cpu_int_enables : in std_logic_vector(interrupt_total-1 downto 0);
             cpu_int_active : out std_logic_vector(interrupt_total-1 downto 0);
-            -- device interface.
             dev_ints : in std_logic_vector(interrupt_total-1 downto 0));
     end component;
     component plasoc_int_axi4_read_cntrl is
         generic (
-            -- axi parameters.
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
-            -- interrupt controller parameters.
             int_id_address : std_logic_vector := X"0004";
             int_enables_address : std_logic_vector := X"0000";
             int_active_address : std_logic_vector := X"0008");
         port ( 
-            -- global interface.
             aclk : in std_logic;
             aresetn : in std_logic;
-            -- axi read interface.
             axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_arprot : in std_logic_vector(2 downto 0);
             axi_arvalid : in std_logic;
@@ -103,23 +109,18 @@ architecture Behavioral of plasoc_int is
             axi_rvalid : out std_logic;
             axi_rready : in std_logic;
             axi_rresp : out std_logic_vector(1 downto 0);
-            -- interrupt controller interface.
             int_id : in std_logic_vector(axi_data_width-1 downto 0);
             int_enables : in std_logic_vector(axi_data_width-1 downto 0);
             int_active : in std_logic_vector(axi_data_width-1 downto 0));
     end component;
     component plasoc_int_axi4_write_cntrl is
         generic (
-            -- axi parameters.
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
-            -- interrupt controller parameters.
             int_enables_address : std_logic_vector := X"0000");
         port (
-            -- global interface.
             aclk : in std_logic;
             aresetn : in std_logic;
-            -- axi write interface.
             axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_awprot : in std_logic_vector(2 downto 0);
             axi_awvalid : in std_logic;
@@ -131,7 +132,6 @@ architecture Behavioral of plasoc_int is
             axi_bvalid : out std_logic;
             axi_bready : in std_logic;
             axi_bresp : out std_logic_vector(1 downto 0);
-            -- interrupt controller interface.
             int_enables : out std_logic_vector(axi_data_width-1 downto 0));
     end component;
     signal axi_awaddr_base : std_logic_vector(axi_address_width-1 downto 0);
@@ -163,9 +163,9 @@ begin
         generic map (
             axi_address_width => axi_address_width,
             axi_data_width => axi_data_width,
-            int_id_address => int_id_address,
-            int_enables_address => int_enables_address,
-            int_active_address => int_active_address )
+            int_id_address => axi_int_id_offset,
+            int_enables_address => axi_int_enables_offset,
+            int_active_address => axi_int_active_offset )
         port map ( 
             aclk => aclk,
             aresetn => aresetn,
@@ -186,7 +186,7 @@ begin
         generic map (
             axi_address_width => axi_address_width,
             axi_data_width => axi_data_width,
-            int_enables_address => int_enables_address)
+            int_enables_address => axi_int_enables_offset)
         port map (
             aclk => aclk,
             aresetn => aresetn,
