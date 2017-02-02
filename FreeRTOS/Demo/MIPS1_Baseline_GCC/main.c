@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* User libraries */
+#include "plasmasoc.h"
+#include "xgpio.h"
+#include "plasoc_int.h"
+#include "plasoc_timer.h"
+
 /* Scheduler include files. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -16,78 +22,81 @@
 #include "partest.h"
 #include "regtest.h"
 
+/*	XGPIO config	*/
+#define XGPIO_INPUT_BASE_ADDRESS		(0x40000000)
+#define XGPIO_OUTPUT_BASE_ADDRESS		(0x40010000)
+#define XGPIO_INPUT_TOTAL				(2)
+#define XGPIO_SWITCHES_PER_INPUT		(8)
+
+/*	Interrupt config	*/
+#define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
+#define INT_XGPIO_INPUT_ID				(0)
+
 /* Priority definitions for most of the tasks in the demo application.  Some
 tasks just use the idle priority. */
-#define mainLED_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
-#define mainCOM_TEST_PRIORITY			( tskIDLE_PRIORITY + 2 )
-#define mainQUEUE_POLL_PRIORITY			( tskIDLE_PRIORITY + 2 )
-#define mainCHECK_TASK_PRIORITY			( tskIDLE_PRIORITY + 3 )
+#define LED_TIMER_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
+#define USER_INPUT_TASK_PRIORITY	( tskIDLE_PRIORITY + 3 )
+#define RANDOM_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 
-/* Baud rate used by the serial port tasks. */
-#define mainCOM_TEST_BAUD_RATE			( ( unsigned long ) 38400 )
+/*	task config	*/
+#define RANDOM_WRITE_PERIOD		( TickType_t(10) / configTICK_PERIOD_MS )
+#define USER_INPUT_MAX_DELAY	( TickType_t(100) / configTICK_PERIOD_MS )
+#define BLINK_HALF_PERIOD		( TickType_t(1000) / configTICK_PERIOD_MS )
 
-/* LED used by the serial port tasks.  This is toggled on each character Tx,
-and mainCOM_TEST_LED + 1 is toggles on each character Rx. */
-#define mainCOM_TEST_LED				( 4 )
+/* The following functions are defined in the boot loader assembly.
+ They are necessary to initialize the interrupt of the CPU. */
+extern void OS_AsmInterruptEnable(unsigned enable_flag);
 
-/* LED that is toggled by the check task.  The check task periodically checks
-that all the other tasks are operating without error.  If no errors are found
-the LED is toggled.  If an error is found at any time the LED is never toggles
-again. */
-#define mainCHECK_TASK_LED				( 7 )
+/* Define the CPU's service routine such that it calls the
+ interrupt controller's service method. */
+extern void OS_InterruptServiceRoutine()
+{
+	plasoc_int_service_interrupts(&int_obj);
+}
+/*	other function declarations	*/
+static void vRandomWriteTask(void*);
+static void vBlinkTask(void*);
+static void vUserInput(void*);
+static void input_gpio_isr(void*);
 
-/* The period between executions of the check task. */
-#define mainCHECK_PERIOD				( ( TickType_t ) 3000 / portTICK_PERIOD_MS  )
-
-/* An address in the EEPROM used to count resets.  This is used to check that
-the demo application is not unexpectedly resetting. */
-#define mainRESET_COUNT_ADDRESS			( ( void * ) 0x50 )
-
-/* The number of coroutines to create. */
-#define mainNUM_FLASH_COROUTINES		( 3 )
-
-/*
- * The task function for the "Check" task.
- */
-static void vErrorChecks( void *pvParameters );
-
-/*
- * Checks the unique counts of other tasks to ensure they are still operational.
- * Flashes an LED if everything is okay.
- */
-static void prvCheckOtherTasksAreStillRunning( void );
-
-/*
- * Called on boot to increment a count stored in the EEPROM.  This is used to
- * ensure the CPU does not reset unexpectedly.
- */
-static void prvIncrementResetCount( void );
-
-/*
- * The idle hook is used to scheduler co-routines.
- */
-void vApplicationIdleHook( void );
-
-/*-----------------------------------------------------------*/
+/*	static variable declarations	*/
+static plasoc_int int_obj;
+static plasoc_timer timer_obj;
+static xgpio xgpio_input_obj;
+static xgpio xgpio_output_obj;
+static volatile unsigned input_value = 0;
+static volatile unsigned led_state = 0;
 
 short main( void )
 {
-	prvIncrementResetCount();
+	/* Configure the interrupt controller. */
+	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
 
-	/* Setup the LED's for output. */
-	vParTestInitialise();
+	/* Configure output gpio. */
+	xgpio_setup(&xgpio_output_obj,XGPIO_OUTPUT_BASE_ADDRESS);
+	xgpio_set_direction(&xgpio_output_obj,XGPIO_OUTPUTS);
+
+	/* Configure input gpio and interrupts */
+	xgpio_setup(&xgpio_input_obj,XGPIO_INPUT_BASE_ADDRESS);
+	xgpio_set_direction(&xgpio_input_obj,XGPIO_INPUTS);
+	xgpio_enable_channel_interrupt(&xgpio_input_obj,1);
+	plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,input_gpio_isr,0);
+
+	/* Configure the interrupts of the CPU. */
+	OS_AsmInterruptEnable(1);
+
+	/* Enable all interrupts in the interrupt controller. */
+	plasoc_int_enable_all(&int_obj);
 
 	/* Create the standard demo tasks. */
 	vStartIntegerMathTasks( tskIDLE_PRIORITY );
-	vAltStartComTestTasks( mainCOM_TEST_PRIORITY, mainCOM_TEST_BAUD_RATE, mainCOM_TEST_LED );
-	vStartPolledQueueTasks( mainQUEUE_POLL_PRIORITY );
 	vStartRegTestTasks();
 
 	/* Create the tasks defined within this file. */
-	xTaskCreate( vErrorChecks, "Check", configMINIMAL_STACK_SIZE, NULL, mainCHECK_TASK_PRIORITY, NULL );
+	xTaskCreate( vUserInputTask, "Get Switches", configMINIMAL_STACK_SIZE, NULL, USER_INPUT_TASK_PRIORITY, NULL );
+	xTaskCreate( vBlinkTask, "Blink Rate", configMINIMAL_STACK_SIZE, NULL, BLINK_TASK_PRIORITY, NULL );
+	xTaskCreate( vRandomWriteTask, "Random Write", configMINIMAL_STACK_SIZE, NULL, RANDOM_TASK_PRIORITY, NULL );
 
-	/* Create the co-routines that flash the LED's. */
-	vStartFlashCoRoutines( mainNUM_FLASH_COROUTINES );
 
 	/* In this port, to use preemptive scheduler define configUSE_PREEMPTION
 	as 1 in portmacro.h.  To use the cooperative scheduler define
@@ -96,76 +105,37 @@ short main( void )
 
 	return 0;
 }
-/*-----------------------------------------------------------*/
 
-static void vErrorChecks( void *pvParameters )
+static void vRandomWriteTask(void* pvParameters)
 {
-static volatile unsigned long ulDummyVariable = 3UL;
+	static int32_t random_mem[256] = {0};
 
-	/* The parameters are not used. */
-	( void ) pvParameters;
-
-	/* Cycle for ever, delaying then checking all the other tasks are still
-	operating without error. */
-	for( ;; )
+	while (1)
 	{
-		vTaskDelay( mainCHECK_PERIOD );
-
-		/* Perform a bit of 32bit maths to ensure the registers used by the
-		integer tasks get some exercise. The result here is not important -
-		see the demo application documentation for more info. */
-		ulDummyVariable *= 3;
-
-		prvCheckOtherTasksAreStillRunning();
+		random_mem[rand()&255] = rand();
+		vTaskDelay(RANDOM_WRITE_PERIOD);
 	}
 }
-/*-----------------------------------------------------------*/
 
-static void prvCheckOtherTasksAreStillRunning( void )
+#define outputLED() \
+	xgpio_set_data(&xgpio_output_obj, led_state ? input_value : 0);
+
+static void vBlinkTask(void* pvParameters)
 {
-static portBASE_TYPE xErrorHasOccurred = pdFALSE;
-
-	if( xAreIntegerMathsTaskStillRunning() != pdTRUE )
+	while (1)
 	{
-		xErrorHasOccurred = pdTRUE;
-	}
-
-	if( xAreComTestTasksStillRunning() != pdTRUE )
-	{
-		xErrorHasOccurred = pdTRUE;
-	}
-
-	if( xArePollingQueuesStillRunning() != pdTRUE )
-	{
-		xErrorHasOccurred = pdTRUE;
-	}
-
-	if( xAreRegTestTasksStillRunning() != pdTRUE )
-	{
-		xErrorHasOccurred = pdTRUE;
-	}
-
-	if( xErrorHasOccurred == pdFALSE )
-	{
-		/* Toggle the LED if everything is okay so we know if an error occurs even if not
-		using console IO. */
-		vParTestToggleLED( mainCHECK_TASK_LED );
+		led_state = !led_state;
+		outputLED();
+		vTaskDelay(BLINK_HALF_PERIOD);
 	}
 }
-/*-----------------------------------------------------------*/
 
-static void prvIncrementResetCount( void )
+/* Service the gpio input. */
+static void input_gpio_isr(void* ptr)
 {
-unsigned char ucCount;
-
-	eeprom_read_block( &ucCount, mainRESET_COUNT_ADDRESS, sizeof( ucCount ) );
-	ucCount++;
-	eeprom_write_byte( mainRESET_COUNT_ADDRESS, ucCount );
+	/* Acknowledge the interrupt, get the new data,
+	 and let the main application know to update output. */
+	xgpio_ack_channel_interrupt(&xgpio_input_obj,1);
+	input_value = xgpio_get_data(&xgpio_input_obj);
+	outputLED();
 }
-/*-----------------------------------------------------------*/
-
-void vApplicationIdleHook( void )
-{
-	vCoRoutineSchedule();
-}
-

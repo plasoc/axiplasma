@@ -17,7 +17,6 @@
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             1
 #define configUSE_COUNTING_SEMAPHORES           1
-#define configUSE_ALTERNATIVE_API               0 /* Deprecated! */
 #define configQUEUE_REGISTRY_SIZE               10
 #define configUSE_QUEUE_SETS                    0
 #define configUSE_TIME_SLICING                  0
@@ -53,7 +52,7 @@
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
 
-/* Interrupt nesting behaviour configuration. */
+/* Interrupt nesting behavior configuration. */
 #define configKERNEL_INTERRUPT_PRIORITY         0
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   3
 
