@@ -5,8 +5,8 @@
 #define XGPIO_INPUT_BASE_ADDRESS		(0x40000000)
 #define XGPIO_OUTPUT_BASE_ADDRESS		(0x40010000)
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
-//#define PLASOC_TIMER_HALF_SECOND_CYCLES	(25000000)
-#define PLASOC_TIMER_HALF_SECOND_CYCLES	(512)
+#define PLASOC_TIMER_HALF_SECOND_CYCLES	(25000000)
+//#define PLASOC_TIMER_HALF_SECOND_CYCLES	(512)
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 
 #define INT_PLASOC_TIMER_ID				(0)
@@ -78,7 +78,13 @@ int main()
 	plasoc_int_enable_all(&int_obj);
 	plasoc_timer_reload_start(&timer_obj,0);
 	
-	/* Run application's made loop. */
+	/* Initialize input value within a critical section. */
+	plasoc_int_disable_all(&int_obj);
+	input_value = xgpio_get_data(&xgpio_input_obj);
+	update_flag = 1;
+	plasoc_int_enable_all(&int_obj);
+
+	/* Run application's main loop. */
 	while (1) 
 	{
 		/* In order to prevent constant access to on-chip interconnect, only update when new data is available. */

@@ -24,6 +24,13 @@ architecture Behavioral of axiplasma_wrapper is
             raw_nreset : in std_logic; 
             dcm_locked : out std_logic);
     end component;
+    component clk_wiz_1 is
+        port (
+            raw_clock : in std_logic; 
+            aclk : out std_logic;
+            raw_nreset : in std_logic; 
+            dcm_locked : out std_logic);
+    end component;
     component ip_block_design_wrapper is
         port (
             aclk : in STD_LOGIC;
@@ -238,8 +245,19 @@ begin
     nexys4_clock_generate : 
     if board="nexys4" 
     generate
-        clk_wiz_0_inst : 
+        clk_wiz_inst : 
         clk_wiz_0 
+            port map (
+                raw_clock => raw_clock,
+                aclk => aclk,
+                raw_nreset => raw_nreset,
+                dcm_locked => dcm_locked);
+    end generate;
+    zybo_clock_generate :
+    if board="zybo" 
+    generate
+        clk_wiz_inst : 
+        clk_wiz_1 
             port map (
                 raw_clock => raw_clock,
                 aclk => aclk,
