@@ -21,7 +21,7 @@ use work.plasoc_pack.all;
 --! writing to the corresponding bit at the Interrupt Enables register
 --! located at axi_int_enables_offset. A device can trigger its respective
 --! interrupt by setting it high. At this point, the device interrupt is 
---! consider active if it is both enabled in the Interrupt Enables register
+--! considered active if it is both enabled in the Interrupt Enables register
 --! and set high by the respective device.
 --!
 --! If there is at least one active device interrupt, the Interrupt Controller 

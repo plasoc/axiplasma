@@ -1,17 +1,19 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-
-BIN_DIR = 
-LD_DIR = 
-PLASMA_DIR = ../plasma
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR)
+BIN_DIR = C:/mips-none-elf-newlib/bin/
+LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+MISC_DIR = ../../../misc
+PLASMA_DIR = ../../plasma
+PLASOC_DIR = ../../plasoc
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDFLAGS = -L$(LD_DIR) -static
 
 # Following are REQUIRED variables, but can be editted
-INSTALL_DIR = 
+INSTALL_DIR = ../../../hdl/test/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
-C_SOURCES = $(PLASMA_DIR)/no_os.c
-ASM_SOURCES = $(PLASMA_DIR)/boot.asm main.asm
+C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
+ASM_SOURCES = $(PLASMA_DIR)/boot.asm
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
 # No user editing or variables below this line
 
@@ -19,7 +21,7 @@ CFLAGS += -c -fno-pic -mips1 -mno-abicalls
 
 RM = rm -rf
 
-EXEC_NAME = $(shell basename $$(pwd))
+EXEC_NAME = main
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
 LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
@@ -42,6 +44,7 @@ else
 		$(notdir $(OBJECTS:=.o)) -lc
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
+	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).hex
 
 
 $(C_OBJECTS):%:%.c
@@ -57,12 +60,12 @@ $(ASM_OBJECTS):%:%.asm
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
-	install -c $(EXEC_NAME).bin $(INSTALL_DIR)
+	install -c $(EXEC_NAME).hex $(INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
 
 
 clean:
-	$(RM) $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
+	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
 

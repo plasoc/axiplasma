@@ -6,8 +6,8 @@
 --! Controller.
 -------------------------------------------------------
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;                           
+library ieee;
+use ieee.std_logic_1164.all;                        
 use work.plasoc_pack.all;
 
 --! The Write Controller implements a Slave AXI4-Lite Write 
@@ -19,7 +19,7 @@ use work.plasoc_pack.all;
 --! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_int_axi4_write_cntrl is
     generic (
-        -- AXI4-Lite Write parameters.
+        -- AXI4-Lite parameters.
         axi_address_width : integer := 16;						--! Defines the AXI4-Lite Address Width.
         axi_data_width : integer := 32;							--! Defines the AXI4-Lite Data Width.
         -- Interrupt Controller parameters.

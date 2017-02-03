@@ -1,25 +1,25 @@
 /**
  * @author Andrew Powell
- * @date 18 January 2017
- * @brief Contains hardware definitions and drivers for the Plasma-SoC.
+ * @date January 18, 2017
+ * @brief Contains hardware definitions and drivers for the Plasma-SoC's CPU.
  */
 
-#ifndef PLASMA_SOC_H_
-#define PLASMA_SOC_H_
+#ifndef PLASOC_CPU_H_
+#define PLASOC_CPU_H_
 
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
 
-	/* L1 cache definitions. */
-	#define L1_CACHE_OFFSET_WIDTH			(5)				
-	#define L1_CACHE_OFFSET_MASK			((1<<L1_CACHE_OFFSET_WIDTH)-1)	
-	#define L1_CACHE_ADDRESS_WIDTH			(12)				
+	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
+	#define L1_CACHE_OFFSET_WIDTH				(5)				
+	#define L1_CACHE_OFFSET_MASK				((1<<L1_CACHE_OFFSET_WIDTH)-1)	
+	#define L1_CACHE_ADDRESS_WIDTH				(12)				
 	#define L1_CACHE_NONCACHEABLE_BASE_ADDRESS	(1<<L1_CACHE_ADDRESS_WIDTH)	
-	#define L1_CACHE_ADDRESS_BASE			(0x10000000)			
-	#define L1_CACHE_INVALIDATE_OFFSET		(0)				
-	#define L1_CACHE_FLUSH_OFFSET			(4)				
+	#define L1_CACHE_ADDRESS_BASE				(0x10000000)			
+	#define L1_CACHE_INVALIDATE_OFFSET			(0)				
+	#define L1_CACHE_FLUSH_OFFSET				(4)				
 
 	/**
 	 * @brief Performs L1 cache operation.
@@ -91,4 +91,4 @@ extern "C"
 }
 #endif
 
-#endif /* PLASMA_SOC_H_ */
+#endif /* PLASOC_CPU_H_ */

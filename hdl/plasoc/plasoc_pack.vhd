@@ -34,14 +34,14 @@ package plasoc_pack is
     constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
     
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
-	-- modified, though, modifications will also be necessary for the corresponding header file 
-	-- for the CPU. 
+	-- modified, though, modifications will also be necessary for the corresponding header file. 
     constant default_interrupt_total : integer := 8;									--! Defines the default number of available device interrupts.
     constant default_int_id_offset : std_logic_vector := X"00000004";					--! For the Interrupt Identifier register, defines the default offset from the Interrupt Controller's axi_base_address.				
     constant default_int_enables_offset : std_logic_vector := X"00000000"; 				--! For the Interrupt Enables register, defines the default offset from the Interrupt Controller's axi_base_address.
     constant default_int_active_address : std_logic_vector := X"00000008";				--! For the Interrupt Active register, defines the default offset from the Interrupt Controller's axi_base_address.
     
-	-- 
+	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
+	-- modified, though, modifications will also be necessary for the corresponding header file. 
     constant default_timer_width : integer := 32;
     constant default_timer_axi_control_offset : std_logic_vector := X"00000000"; 
     constant default_timer_axi_control_start_bit_loc : integer := 0;

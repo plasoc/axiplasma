@@ -1,10 +1,11 @@
 /**
  * @author Andrew Powell
- * @date 18 January 2017
- * @brief Contains hardware definitions and drivers for the Plasma-SoC.
+ * @date January 18, 2017
+ * @brief Contains hardware definitions and drivers for the Plasma-SoC's CPU. See header file 
+ * for more information.
  */
 
-#include "plasmasoc.h"
+#include "plasoc_cpu.h"
 
 static inline __attribute__ ((always_inline))
 void l1_cache_find_range(unsigned addr, unsigned size, unsigned* cur_addr, unsigned* end_addr)
