@@ -1,7 +1,7 @@
 /**
  * @author Andrew Powell
  * @date January 28, 2017
- * @brief Contains hardware definitions and drivers for the Plasma-SoC's CPU.
+ * @brief Contains hardware definitions and driver for the Plasma-SoC's Interrupt Controller.
  */
 
 #ifndef PLASOC_INT_H_
