@@ -124,7 +124,7 @@ extern "C"
 	/**
 	 * @brief Get the Tick Value register.
 	 * @param obj Pointer to the object.
-	 * @return Value read from the Tick Value Register. */
+	 * @return Value read from the Tick Value Register. 
 	 */
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_timer_get_tick_value(plasoc_timer* obj)
