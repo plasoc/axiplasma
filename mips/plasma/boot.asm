@@ -79,10 +79,10 @@ interrupt_service_routine:
    mflo  $27
    sw    $27, 96($29)    #lo
 
-   lui   $6,  0x2000    
-   lw    $4,  0x20($6)   #IRQ_STATUS
-   lw    $6,  0x10($6)   #IRQ_MASK
-   and   $4,  $4, $6
+   #lui   $6,  0x2000    
+   #lw    $4,  0x20($6)   #IRQ_STATUS
+   #lw    $6,  0x10($6)   #IRQ_MASK
+   #and   $4,  $4, $6
    jal   OS_InterruptServiceRoutine
    addi  $5,  $29, 0
 
@@ -161,7 +161,6 @@ OS_AsmPatchValue:
 
    .set reorder
    .end OS_AsmInterruptInit
-
 
 ###################################################
    .global   setjmp

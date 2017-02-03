@@ -1,0 +1,42 @@
+{
+   guistr: "# # String gsaved with Nlview 6.5.12  2016-01-29 bk=1.3547 VDI=39 GEI=35 GUI=JA:1.6
+#  -string -flagsOSRD
+preplace port raw_nreset -pg 1 -y 570 -defaultsOSRD
+preplace port ram -pg 1 -y 70 -defaultsOSRD
+preplace port timer_axi -pg 1 -y 610 -defaultsOSRD
+preplace port int_axi -pg 1 -y 330 -defaultsOSRD
+preplace port axi -pg 1 -y 130 -defaultsOSRD
+preplace port aclk -pg 1 -y 150 -defaultsOSRD
+preplace port dcm_locked -pg 1 -y 630 -defaultsOSRD
+preplace port int_gpio_input -pg 1 -y 480 -defaultsOSRD
+preplace portBus gpio_input -pg 1 -y 490 -defaultsOSRD
+preplace portBus gpio_output -pg 1 -y 210 -defaultsOSRD
+preplace portBus aresetn -pg 1 -y 540 -defaultsOSRD
+preplace inst axi_gpio_input -pg 1 -lvl 2 -y 460 -defaultsOSRD
+preplace inst axi_gpio_output -pg 1 -lvl 2 -y 200 -defaultsOSRD
+preplace inst axi_register_slice_0 -pg 1 -lvl 2 -y 330 -defaultsOSRD
+preplace inst proc_sys_reset_0 -pg 1 -lvl 1 -y 590 -defaultsOSRD
+preplace inst axi_register_slice_1 -pg 1 -lvl 2 -y 610 -defaultsOSRD
+preplace inst axi_interconnect_0 -pg 1 -lvl 1 -y 270 -defaultsOSRD
+preplace inst axi_bram_ctrl_0 -pg 1 -lvl 2 -y 70 -defaultsOSRD
+preplace netloc axi_register_slice_0_M_AXI 1 2 1 NJ
+preplace netloc axi_gpio_input_0_ip2intc_irpt 1 2 1 NJ
+preplace netloc axi_bram_ctrl_0_BRAM_PORTA 1 2 1 NJ
+preplace netloc axi_gpio_output_gpio_io_o 1 2 1 NJ
+preplace netloc axi_interconnect_0_M02_AXI 1 1 1 430
+preplace netloc dcm_locked_1 1 0 1 NJ
+preplace netloc gpio_io_i_1 1 0 3 NJ 490 NJ 530 700
+preplace netloc proc_sys_reset_0_interconnect_aresetn 1 0 2 30 60 380
+preplace netloc axi_interconnect_0_M04_AXI 1 1 1 N
+preplace netloc resetn_1 1 0 1 NJ
+preplace netloc S00_AXI_1 1 0 1 NJ
+preplace netloc clk_wiz_0_clk_out1 1 0 2 20 50 420
+preplace netloc axi_interconnect_0_M00_AXI 1 1 1 430
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 0 3 40 70 410 540 NJ
+preplace netloc axi_interconnect_0_M01_AXI 1 1 1 440
+preplace netloc axi_register_slice_1_M_AXI 1 2 1 NJ
+preplace netloc axi_interconnect_0_M03_AXI 1 1 1 400
+levelinfo -pg 1 0 210 570 720 -top 0 -bot 680
+",
+}
+0
