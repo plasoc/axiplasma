@@ -1,8 +1,15 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
+<<<<<<< HEAD:mips/apps/timer_interrupt_app/makefile
 BIN_DIR = C:/mips-none-elf-newlib/bin/
 LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
 #BIN_DIR = /opt/mips_cross_compiler/mips/bin/
 #LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+=======
+#BIN_DIR = C:/mips-none-elf-newlib/bin/
+#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+BIN_DIR = /opt/mips_cross_compiler/mips/bin/
+LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+>>>>>>> 839a67dda6a2265107cdc57b26387ad2f4b0076f:mips/apps/timer_interrupt_app/makefile
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc

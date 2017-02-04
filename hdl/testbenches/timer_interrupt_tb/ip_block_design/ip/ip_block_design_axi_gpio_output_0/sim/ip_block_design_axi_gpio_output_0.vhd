@@ -78,7 +78,7 @@ ENTITY ip_block_design_axi_gpio_output_0 IS
     s_axi_rvalid : OUT STD_LOGIC;
     s_axi_rready : IN STD_LOGIC;
     ip2intc_irpt : OUT STD_LOGIC;
-    gpio_io_i : IN STD_LOGIC_VECTOR(15 DOWNTO 0)
+    gpio_io_i : IN STD_LOGIC_VECTOR(3 DOWNTO 0)
   );
 END ip_block_design_axi_gpio_output_0;
 
@@ -124,9 +124,9 @@ ARCHITECTURE ip_block_design_axi_gpio_output_0_arch OF ip_block_design_axi_gpio_
       s_axi_rvalid : OUT STD_LOGIC;
       s_axi_rready : IN STD_LOGIC;
       ip2intc_irpt : OUT STD_LOGIC;
-      gpio_io_i : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-      gpio_io_o : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-      gpio_io_t : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+      gpio_io_i : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+      gpio_io_o : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+      gpio_io_t : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
       gpio2_io_i : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
       gpio2_io_o : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
       gpio2_io_t : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
@@ -160,7 +160,7 @@ BEGIN
       C_FAMILY => "artix7",
       C_S_AXI_ADDR_WIDTH => 9,
       C_S_AXI_DATA_WIDTH => 32,
-      C_GPIO_WIDTH => 16,
+      C_GPIO_WIDTH => 4,
       C_GPIO2_WIDTH => 32,
       C_ALL_INPUTS => 1,
       C_ALL_INPUTS_2 => 0,

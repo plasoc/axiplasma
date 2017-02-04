@@ -23,14 +23,13 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity testbench_vivado_0 is
-    generic ( gpio_width : integer := 16; input_delay : time := 0 ns );
+    generic ( gpio_width : integer := 4; input_delay : time := 0 ns );
 end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
     component axiplasma_wrapper is
         port( 
-            raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
-            raw_nreset : in std_logic;
+            raw_clock : in std_logic; -- 100 MHz on the Nexys 4. 125 MHz on Zybo.
             gpio_output : out std_logic_vector(gpio_width-1 downto 0);
             gpio_input : in std_logic_vector(gpio_width-1 downto 0));
     end component;
@@ -38,7 +37,6 @@ architecture Behavioral of testbench_vivado_0 is
     constant time_out_threshold : integer := 2**13;
     subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
     signal raw_clock : std_logic := '1';
-    signal raw_nreset : std_logic := '0';
     signal gpio_output : gpio_type;
     signal gpio_input : gpio_type := (others=>'0');
 begin
@@ -47,12 +45,10 @@ begin
     axiplasma_wrapper 
         port map ( 
             raw_clock => raw_clock,
-            raw_nreset => raw_nreset,
             gpio_output => gpio_output,
             gpio_input => gpio_input);
     -- Drive syncrhonization signals.
     raw_clock <= not raw_clock after clock_period/2;
-    raw_nreset <= '1' after 10*clock_period+input_delay;
     -- Run testbench application.
     process 
         -- This procedure should force the simulation to stop if a 
@@ -86,8 +82,6 @@ begin
             wait for clock_period;
         end;
     begin
-        -- Let's wait for the reset to be disabled before starting anything.
-        wait until raw_nreset='1';
         -- Let's wait a WHOLE BUNCH of clock cycles until the boot loader finishes its thang.
         wait for 2**15*clock_period;
         -- Perform the following operation for all bits in gpio input.

@@ -1,8 +1,8 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
---Date        : Tue Jan 31 17:50:10 2017
---Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
+--Tool Version: Vivado v.2016.2 (lin64) Build 1577090 Thu Jun  2 16:32:35 MDT 2016
+--Date        : Fri Feb  3 09:31:28 2017
+--Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 --Command     : generate_target ip_block_design_wrapper.bd
 --Design      : ip_block_design_wrapper
 --Purpose     : IP block netlist
@@ -13,7 +13,7 @@ library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
 entity ip_block_design_wrapper is
   port (
-    aclk : out STD_LOGIC;
+    aclk : in STD_LOGIC;
     aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
     axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -50,8 +50,9 @@ entity ip_block_design_wrapper is
     axi_wready : out STD_LOGIC;
     axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
     axi_wvalid : in STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
+    dcm_locked : in STD_LOGIC;
+    gpio_input : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    gpio_output : out STD_LOGIC_VECTOR ( 3 downto 0 );
     int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
     int_axi_arready : in STD_LOGIC;
@@ -79,7 +80,6 @@ entity ip_block_design_wrapper is
     ram_en : out STD_LOGIC;
     ram_rst : out STD_LOGIC;
     ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
-    raw_clock : in STD_LOGIC;
     raw_nreset : in STD_LOGIC;
     timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -132,10 +132,26 @@ architecture STRUCTURE of ip_block_design_wrapper is
     int_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
     int_axi_rvalid : in STD_LOGIC;
     int_axi_rready : out STD_LOGIC;
-    raw_clock : in STD_LOGIC;
-    raw_nreset : in STD_LOGIC;
-    aclk : out STD_LOGIC;
-    gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
+    timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    timer_axi_awvalid : out STD_LOGIC;
+    timer_axi_awready : in STD_LOGIC;
+    timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    timer_axi_wvalid : out STD_LOGIC;
+    timer_axi_wready : in STD_LOGIC;
+    timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    timer_axi_bvalid : in STD_LOGIC;
+    timer_axi_bready : out STD_LOGIC;
+    timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    timer_axi_arvalid : out STD_LOGIC;
+    timer_axi_arready : in STD_LOGIC;
+    timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    timer_axi_rvalid : in STD_LOGIC;
+    timer_axi_rready : out STD_LOGIC;
+    gpio_output : out STD_LOGIC_VECTOR ( 3 downto 0 );
     aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
     int_gpio_input : out STD_LOGIC;
     axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -173,26 +189,10 @@ architecture STRUCTURE of ip_block_design_wrapper is
     axi_rlast : out STD_LOGIC;
     axi_rvalid : out STD_LOGIC;
     axi_rready : in STD_LOGIC;
-    timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    timer_axi_awvalid : out STD_LOGIC;
-    timer_axi_awready : in STD_LOGIC;
-    timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
-    timer_axi_wvalid : out STD_LOGIC;
-    timer_axi_wready : in STD_LOGIC;
-    timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    timer_axi_bvalid : in STD_LOGIC;
-    timer_axi_bready : out STD_LOGIC;
-    timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    timer_axi_arvalid : out STD_LOGIC;
-    timer_axi_arready : in STD_LOGIC;
-    timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    timer_axi_rvalid : in STD_LOGIC;
-    timer_axi_rready : out STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 )
+    raw_nreset : in STD_LOGIC;
+    gpio_input : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    aclk : in STD_LOGIC;
+    dcm_locked : in STD_LOGIC
   );
   end component ip_block_design;
 begin
@@ -235,8 +235,9 @@ ip_block_design_i: component ip_block_design
       axi_wready => axi_wready,
       axi_wstrb(3 downto 0) => axi_wstrb(3 downto 0),
       axi_wvalid => axi_wvalid,
-      gpio_input(15 downto 0) => gpio_input(15 downto 0),
-      gpio_output(15 downto 0) => gpio_output(15 downto 0),
+      dcm_locked => dcm_locked,
+      gpio_input(3 downto 0) => gpio_input(3 downto 0),
+      gpio_output(3 downto 0) => gpio_output(3 downto 0),
       int_axi_araddr(31 downto 0) => int_axi_araddr(31 downto 0),
       int_axi_arprot(2 downto 0) => int_axi_arprot(2 downto 0),
       int_axi_arready => int_axi_arready,
@@ -264,7 +265,6 @@ ip_block_design_i: component ip_block_design
       ram_en => ram_en,
       ram_rst => ram_rst,
       ram_we(3 downto 0) => ram_we(3 downto 0),
-      raw_clock => raw_clock,
       raw_nreset => raw_nreset,
       timer_axi_araddr(31 downto 0) => timer_axi_araddr(31 downto 0),
       timer_axi_arprot(2 downto 0) => timer_axi_arprot(2 downto 0),
