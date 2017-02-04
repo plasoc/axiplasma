@@ -1,8 +1,8 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2016.2 (lin64) Build 1577090 Thu Jun  2 16:32:35 MDT 2016
---Date        : Fri Feb  3 09:31:28 2017
---Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
+--Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
+--Date        : Tue Jan 31 17:50:10 2017
+--Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 --Command     : generate_target ip_block_design.bd
 --Design      : ip_block_design
 --Purpose     : IP block netlist
@@ -3530,7 +3530,7 @@ library UNISIM;
 use UNISIM.VCOMPONENTS.ALL;
 entity ip_block_design is
   port (
-    aclk : in STD_LOGIC;
+    aclk : out STD_LOGIC;
     aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
     axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -3567,9 +3567,8 @@ entity ip_block_design is
     axi_wready : out STD_LOGIC;
     axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
     axi_wvalid : in STD_LOGIC;
-    dcm_locked : in STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    gpio_output : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
+    gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
     int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
     int_axi_arready : in STD_LOGIC;
@@ -3597,6 +3596,7 @@ entity ip_block_design is
     ram_en : out STD_LOGIC;
     ram_rst : out STD_LOGIC;
     ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    raw_clock : in STD_LOGIC;
     raw_nreset : in STD_LOGIC;
     timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -3619,12 +3619,20 @@ entity ip_block_design is
     timer_axi_wvalid : out STD_LOGIC
   );
   attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of ip_block_design : entity is "ip_block_design,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=ip_block_design,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=22,numReposBlks=15,numNonXlnxBlks=0,numHierBlks=7,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=0,numPkgbdBlks=0,bdsource=USER,synth_mode=Global}";
+  attribute CORE_GENERATION_INFO of ip_block_design : entity is "ip_block_design,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=ip_block_design,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=23,numReposBlks=16,numNonXlnxBlks=0,numHierBlks=7,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=0,numPkgbdBlks=0,bdsource=USER,synth_mode=Global}";
   attribute HW_HANDOFF : string;
   attribute HW_HANDOFF of ip_block_design : entity is "ip_block_design.hwdef";
 end ip_block_design;
 
 architecture STRUCTURE of ip_block_design is
+  component ip_block_design_clk_wiz_0_0 is
+  port (
+    resetn : in STD_LOGIC;
+    clk_in1 : in STD_LOGIC;
+    clk_out1 : out STD_LOGIC;
+    locked : out STD_LOGIC
+  );
+  end component ip_block_design_clk_wiz_0_0;
   component ip_block_design_proc_sys_reset_0_0 is
   port (
     slowest_sync_clk : in STD_LOGIC;
@@ -3704,7 +3712,7 @@ architecture STRUCTURE of ip_block_design is
     s_axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
     s_axi_rvalid : out STD_LOGIC;
     s_axi_rready : in STD_LOGIC;
-    gpio_io_o : out STD_LOGIC_VECTOR ( 3 downto 0 )
+    gpio_io_o : out STD_LOGIC_VECTOR ( 15 downto 0 )
   );
   end component ip_block_design_axi_gpio_0_0;
   component ip_block_design_axi_gpio_output_0 is
@@ -3729,7 +3737,7 @@ architecture STRUCTURE of ip_block_design is
     s_axi_rvalid : out STD_LOGIC;
     s_axi_rready : in STD_LOGIC;
     ip2intc_irpt : out STD_LOGIC;
-    gpio_io_i : in STD_LOGIC_VECTOR ( 3 downto 0 )
+    gpio_io_i : in STD_LOGIC_VECTOR ( 15 downto 0 )
   );
   end component ip_block_design_axi_gpio_output_0;
   component ip_block_design_axi_register_slice_0_0 is
@@ -3863,7 +3871,7 @@ architecture STRUCTURE of ip_block_design is
   signal axi_bram_ctrl_0_BRAM_PORTA_RST : STD_LOGIC;
   signal axi_bram_ctrl_0_BRAM_PORTA_WE : STD_LOGIC_VECTOR ( 3 downto 0 );
   signal axi_gpio_input_0_ip2intc_irpt : STD_LOGIC;
-  signal axi_gpio_output_gpio_io_o : STD_LOGIC_VECTOR ( 3 downto 0 );
+  signal axi_gpio_output_gpio_io_o : STD_LOGIC_VECTOR ( 15 downto 0 );
   signal axi_interconnect_0_M00_AXI_ARADDR : STD_LOGIC_VECTOR ( 15 downto 0 );
   signal axi_interconnect_0_M00_AXI_ARBURST : STD_LOGIC_VECTOR ( 1 downto 0 );
   signal axi_interconnect_0_M00_AXI_ARCACHE : STD_LOGIC_VECTOR ( 3 downto 0 );
@@ -4005,9 +4013,10 @@ architecture STRUCTURE of ip_block_design is
   signal axi_register_slice_1_M_AXI_WREADY : STD_LOGIC;
   signal axi_register_slice_1_M_AXI_WSTRB : STD_LOGIC_VECTOR ( 3 downto 0 );
   signal axi_register_slice_1_M_AXI_WVALID : STD_LOGIC;
+  signal clk_in1_1 : STD_LOGIC;
   signal clk_wiz_0_clk_out1 : STD_LOGIC;
-  signal dcm_locked_1 : STD_LOGIC;
-  signal gpio_io_i_1 : STD_LOGIC_VECTOR ( 3 downto 0 );
+  signal clk_wiz_0_locked : STD_LOGIC;
+  signal gpio_io_i_1 : STD_LOGIC_VECTOR ( 15 downto 0 );
   signal proc_sys_reset_0_interconnect_aresetn : STD_LOGIC_VECTOR ( 0 to 0 );
   signal proc_sys_reset_0_peripheral_aresetn : STD_LOGIC_VECTOR ( 0 to 0 );
   signal resetn_1 : STD_LOGIC;
@@ -4041,6 +4050,7 @@ begin
   S00_AXI_1_WLAST <= axi_wlast;
   S00_AXI_1_WSTRB(3 downto 0) <= axi_wstrb(3 downto 0);
   S00_AXI_1_WVALID <= axi_wvalid;
+  aclk <= clk_wiz_0_clk_out1;
   aresetn(0) <= proc_sys_reset_0_peripheral_aresetn(0);
   axi_arready <= S00_AXI_1_ARREADY;
   axi_awready <= S00_AXI_1_AWREADY;
@@ -4068,10 +4078,9 @@ begin
   axi_rresp(1 downto 0) <= S00_AXI_1_RRESP(1 downto 0);
   axi_rvalid <= S00_AXI_1_RVALID;
   axi_wready <= S00_AXI_1_WREADY;
-  clk_wiz_0_clk_out1 <= aclk;
-  dcm_locked_1 <= dcm_locked;
-  gpio_io_i_1(3 downto 0) <= gpio_input(3 downto 0);
-  gpio_output(3 downto 0) <= axi_gpio_output_gpio_io_o(3 downto 0);
+  clk_in1_1 <= raw_clock;
+  gpio_io_i_1(15 downto 0) <= gpio_input(15 downto 0);
+  gpio_output(15 downto 0) <= axi_gpio_output_gpio_io_o(15 downto 0);
   int_axi_araddr(31 downto 0) <= axi_register_slice_0_M_AXI_ARADDR(31 downto 0);
   int_axi_arprot(2 downto 0) <= axi_register_slice_0_M_AXI_ARPROT(2 downto 0);
   int_axi_arvalid <= axi_register_slice_0_M_AXI_ARVALID;
@@ -4147,7 +4156,7 @@ axi_bram_ctrl_0: component ip_block_design_axi_bram_ctrl_0_0
     );
 axi_gpio_input: component ip_block_design_axi_gpio_output_0
      port map (
-      gpio_io_i(3 downto 0) => gpio_io_i_1(3 downto 0),
+      gpio_io_i(15 downto 0) => gpio_io_i_1(15 downto 0),
       ip2intc_irpt => axi_gpio_input_0_ip2intc_irpt,
       s_axi_aclk => clk_wiz_0_clk_out1,
       s_axi_araddr(8 downto 0) => axi_interconnect_0_M02_AXI_ARADDR(8 downto 0),
@@ -4171,7 +4180,7 @@ axi_gpio_input: component ip_block_design_axi_gpio_output_0
     );
 axi_gpio_output: component ip_block_design_axi_gpio_0_0
      port map (
-      gpio_io_o(3 downto 0) => axi_gpio_output_gpio_io_o(3 downto 0),
+      gpio_io_o(15 downto 0) => axi_gpio_output_gpio_io_o(15 downto 0),
       s_axi_aclk => clk_wiz_0_clk_out1,
       s_axi_araddr(8 downto 0) => axi_interconnect_0_M01_AXI_ARADDR(8 downto 0),
       s_axi_aresetn => proc_sys_reset_0_peripheral_aresetn(0),
@@ -4433,11 +4442,18 @@ axi_register_slice_1: component ip_block_design_axi_register_slice_1_0
       s_axi_wstrb(3 downto 0) => axi_interconnect_0_M03_AXI_WSTRB(3 downto 0),
       s_axi_wvalid => axi_interconnect_0_M03_AXI_WVALID
     );
+clk_wiz_0: component ip_block_design_clk_wiz_0_0
+     port map (
+      clk_in1 => clk_in1_1,
+      clk_out1 => clk_wiz_0_clk_out1,
+      locked => clk_wiz_0_locked,
+      resetn => resetn_1
+    );
 proc_sys_reset_0: component ip_block_design_proc_sys_reset_0_0
      port map (
       aux_reset_in => '1',
       bus_struct_reset(0) => NLW_proc_sys_reset_0_bus_struct_reset_UNCONNECTED(0),
-      dcm_locked => dcm_locked_1,
+      dcm_locked => clk_wiz_0_locked,
       ext_reset_in => resetn_1,
       interconnect_aresetn(0) => proc_sys_reset_0_interconnect_aresetn(0),
       mb_debug_sys_rst => '0',
