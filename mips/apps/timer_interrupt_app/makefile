@@ -1,21 +1,24 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-BIN_DIR = C:/mips-none-elf-newlib/bin/
-LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
-#BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-#LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+
+# It's time Andrew...
+# 	add the line 'export $PATH=$PATH:/opt/mips_cross_compiler/mips/bin/'
+# 	to your .bashrc or start specifying this on this command line with
+# 	'make BIN_DIR=/opt/mips_cross_compiler/mips/bin/'
+# Sorry, but I don't feel like getting into a commit war
+
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
-CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
-LDFLAGS = -L$(LD_DIR) -static
 
-# Following are REQUIRED variables, but can be editted
+CFLAGS += -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+LDFLAGS += -L$(LD_DIR) -static
+
+# Following are used directly by the script, but can be editted by the user
+BIN_PREFIX = $(BIN_DIR)mips-none-elf-
+BIN_SUFFIX =
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
-PREFIX = $(BIN_DIR)mips-none-elf-
-SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
 # No user editing or variables below this line
 
@@ -24,11 +27,12 @@ CFLAGS += -c -fno-pic -mips1 -mno-abicalls
 RM = rm -rf
 
 EXEC_NAME = main
-GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
-AS_MIPS = $(PREFIX)as$(SUFFIX)
-LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
-DUMP_MIPS = $(PREFIX)objdump$(SUFFIX)
-OBJCOPY_MIPS = $(PREFIX)objcopy$(SUFFIX)
+GCC_MIPS = $(BIN_PREFIX)gcc$(BIN_SUFFIX) $(CFLAGS)
+AS_MIPS = $(BIN_PREFIX)as$(BIN_SUFFIX)
+LD_MIPS = $(BIN_PREFIX)ld$(BIN_SUFFIX) $(LDFLAGS)
+DUMP_MIPS = $(BIN_PREFIX)objdump$(BIN_SUFFIX)
+OBJCOPY_MIPS = $(BIN_PREFIX)objcopy$(BIN_SUFFIX)
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
 ASM_OBJECTS = $(ASM_SOURCES:.asm=)
 C_OBJECTS = $(C_SOURCES:.c=)
