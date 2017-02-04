@@ -12,7 +12,7 @@ extern "C"
 {
 #endif
 
-	/* Interrupt Controller definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
+	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
 	#define PLASOC_INT_INTERRUPT_TOTAL		(8)
 	#define PLASOC_INT_INTERRUPT_MASK		((1<<PLASOC_INT_INTERRUPT_TOTAL)-1)	
 	#define PLASOC_INT_ENABLES_OFFSET		(0)
@@ -25,8 +25,8 @@ extern "C"
 	/** @brief Represents an entry in the vector table. */
 	typedef struct 
 	{
-		plasoc_int_isr* isr;  /**< Function pointer to ISR.*/
-		void* ptr;            /**< Pointer used as input to the ISR.*/
+		plasoc_int_isr* isr;	/**< Function pointer to ISR.*/
+		void* ptr;				/**< Pointer used as input to the ISR.*/
 	}
 	plasoc_int_vector_entry;
 
@@ -35,8 +35,8 @@ extern "C"
 	 */
 	typedef struct 
 	{
-		unsigned base_address;                                                 /**< Base address to Interrupt Controller's registers. */
-		plasoc_int_vector_entry vector_table[PLASOC_INT_INTERRUPT_TOTAL];      /**< Vector table. */
+		unsigned base_address;												/**< Base address to Interrupt Controller. */
+		plasoc_int_vector_entry vector_table[PLASOC_INT_INTERRUPT_TOTAL];	/**< Vector table. */
 	}
 	plasoc_int;
 
@@ -47,7 +47,7 @@ extern "C"
 	 * vector table.
 	 *
 	 * @param obj Pointer to the object.
-	 * @param base_address Base address of the Interrupt Controller's registers.
+	 * @param base_address Address of the Interrupt Controller's registers.
 	 */
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_setup(plasoc_int* obj,unsigned base_address)
