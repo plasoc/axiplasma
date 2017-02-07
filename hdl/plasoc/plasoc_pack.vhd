@@ -37,19 +37,19 @@ package plasoc_pack is
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
     constant default_interrupt_total : integer := 8;                                    --! Defines the default number of available device interrupts.
     constant default_int_id_offset : integer := 4;                                      --! For the Interrupt Identifier register, defines the default offset from the Interrupt Controller's axi_base_address.				
-    constant default_int_enables_offset : integer := 0;                                 --! For the Interrupt Enables register, defines the default offset from the Interrupt Controller's axi_base_address.
-    constant default_int_active_address : integer := 8;                                 --! For the Interrupt Active register, defines the default offset from the Interrupt Controller's axi_base_address.
+    constant default_int_enables_offset : integer := 0;                                 --! For the Interrupt Enables register, defines the default offset from the instantiations's base address.
+    constant default_int_active_address : integer := 8;                                 --! For the Interrupt Active register, defines the default offset from the instantiations's base address.
     
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
-    constant default_timer_width : integer := 32;
-    constant default_timer_axi_control_offset : std_logic_vector := X"00000000"; 
-    constant default_timer_axi_control_start_bit_loc : integer := 0;
-    constant default_timer_axi_control_reload_bit_loc : integer := 1;
-    constant default_timer_axi_control_ack_bit_loc : integer := 2;
-    constant default_timer_axi_control_done_bit_loc : integer := 3;
-    constant default_timer_axi_trig_value_offset : std_logic_vector := X"00000004";
-    constant default_timer_axi_tick_value_offset : std_logic_vector := X"00000008";
+    constant default_timer_width : integer := 32;                                       --! Defines the width of the timer's Trigger and Tick Value registers.
+    constant default_timer_axi_control_offset : integer := 0;                           --! For the Control register, defines the default offset from the instantiation's base address
+    constant default_timer_axi_control_start_bit_loc : integer := 0;                    --! For the Start bit, defines the bit location in the Control register.
+    constant default_timer_axi_control_reload_bit_loc : integer := 1;                   --! For the Reload bit, defines the bit location in the Control register.
+    constant default_timer_axi_control_ack_bit_loc : integer := 2;                      --! For the Ack bit, defines the bit location in the Control register.
+    constant default_timer_axi_control_done_bit_loc : integer := 3;                     --! For the Done bit, defines the bit location in the Control register.
+    constant default_timer_axi_trig_value_offset : integer := 4;                        --! For the Trigger Value register, defines the default offset from the instantiation's base address.
+    constant default_timer_axi_tick_value_offset : integer := 8;                        --! For the Tick Value register, defines the default offset from the instantiation's base address.
     
     constant error_axi_read_exokay : integer := 0;
     constant error_axi_read_slverr : integer := 1;
@@ -185,13 +185,13 @@ package plasoc_pack is
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
             axi_base_address : std_logic_vector := X"0000";
-            axi_control_offset : std_logic_vector := default_timer_axi_control_offset;
+            axi_control_offset : integer := default_timer_axi_control_offset;
             axi_control_start_bit_loc : integer := default_timer_axi_control_start_bit_loc;
             axi_control_reload_bit_loc : integer := default_timer_axi_control_reload_bit_loc;
             axi_control_ack_bit_loc : integer := default_timer_axi_control_ack_bit_loc;
             axi_control_done_bit_loc : integer := default_timer_axi_control_done_bit_loc;
-            axi_trig_value_offset : std_logic_vector := default_timer_axi_trig_value_offset;
-            axi_tick_value_offset : std_logic_vector := default_timer_axi_tick_value_offset);
+            axi_trig_value_offset : integer := default_timer_axi_trig_value_offset;
+            axi_tick_value_offset : integer := default_timer_axi_tick_value_offset);
         port (
             -- global interface.
             aclk : in std_logic;
