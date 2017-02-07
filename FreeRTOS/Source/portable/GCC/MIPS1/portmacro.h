@@ -19,11 +19,9 @@ extern "C" {
 #endif
 
 /* User includes */
-#include "plasmasoc.h"
-
-/* Scheduler includes. */
-#include "FreeRTOS.h"
-#include "task.h"
+#include "plasoc_cpu.h"
+#include "plasma.h"
+#include "inttypes.h"
 
 /* Type definitions. */
 #define portCHAR		char
@@ -32,12 +30,12 @@ extern "C" {
 #define portLONG		long
 #define portSHORT		short
 #define portSTACK_TYPE	uint32_t
-#define portBASE_TYPE	int32_t
-#define portUBASE_TYPE	uint32_t
+#define portBASE_TYPE	int
+#define portUBASE_TYPE	unsigned int
 
-typedef portSTACK_TYPE StackType_t;
-typedef portBASE_TYPE BaseType_t;
-typedef portUBASE_TYPE UBaseType_t;
+typedef uint32_t StackType_t;
+typedef int32_t BaseType_t;
+typedef uint32_t UBaseType_t;
 
 #if( configUSE_16_BIT_TICKS == 1 )
 	typedef uint16_t TickType_t;
@@ -66,11 +64,11 @@ typedef portUBASE_TYPE UBaseType_t;
 #define portENABLE_INTERRUPTS()	\
 	OS_AsmInterruptEnable(1);
 
-extern void vTaskEnterCritical(void);
+void vTaskEnterCritical(void);
 #define portENTER_CRITICAL() \
 	vTaskEnterCritical();
 
-extern void vTaskExitCritical(void);
+void vTaskExitCritical(void);
 #define portEXIT_CRITICAL() \
 	vTaskExitCritical();
 	
@@ -82,6 +80,8 @@ extern void vTaskExitCritical(void);
 /* Task function macros as described on the FreeRTOS.org WEB site. */
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) void vFunction( void *pvParameters )
+
+void vAssertCalled(const char*, int);
 
 #ifdef __cplusplus
 }

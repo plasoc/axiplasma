@@ -1,7 +1,8 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-#include "plasmasoc.h"
+#include "plasoc_cpu.h"
+#include "inttypes.h"
 
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
@@ -25,10 +26,10 @@
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
 
 /* Memory allocation related definitions. */
-#define configSUPPORT_STATIC_ALLOCATION         1
+#define configSUPPORT_STATIC_ALLOCATION         0
 #define configSUPPORT_DYNAMIC_ALLOCATION        1
-#define configTOTAL_HEAP_SIZE					L1_CACHE_NONCACHEABLE_BASE_ADDRESS-configMINIMAL_STACK_SIZE
-#define configAPPLICATION_ALLOCATED_HEAP        1
+#define configTOTAL_HEAP_SIZE					L1_CACHE_NONCACHEABLE_BASE_ADDRESS
+#define configAPPLICATION_ALLOCATED_HEAP        0
 
 /* Hook function related definitions. */
 #define configUSE_IDLE_HOOK                     0
@@ -57,7 +58,7 @@
 #define configMAX_API_CALL_INTERRUPT_PRIORITY   3
 
 /* Define to trap errors during development. */
-#define configASSERT( ( x ) ) if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )
+#define configASSERT( x ) if( ( x ) == 0 ) vAssertCalled( __FILE__, __LINE__ )
 
 /* FreeRTOS MPU specific definitions. */
 #define configINCLUDE_APPLICATION_DEFINED_PRIVILEGED_FUNCTIONS 0

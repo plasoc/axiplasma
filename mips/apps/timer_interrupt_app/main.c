@@ -64,12 +64,12 @@ int main()
 	xgpio_set_direction(&xgpio_input_obj,XGPIO_INPUTS);
 	xgpio_enable_global_interrupt(&xgpio_input_obj);
 	xgpio_enable_channel_interrupt(&xgpio_input_obj,1);
-	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,input_gpio_isr,0);
+	plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,timer_isr,0);
 
 	/* Configure the timer. */
 	plasoc_timer_setup(&timer_obj,PLASOC_TIMER_BASE_ADDRESS);
 	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_HALF_SECOND_CYCLES);
-	plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,timer_isr,0);
+	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,input_gpio_isr,0);
 
 	/* Configure the interrupts of the CPU. */
 	OS_AsmInterruptEnable(1);

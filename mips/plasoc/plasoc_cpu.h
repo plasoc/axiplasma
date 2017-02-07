@@ -87,6 +87,10 @@ extern "C"
 		l1_cache_operate_on_line_range(L1_CACHE_FLUSH_OFFSET,addr,size);
 	}
 
+	/*	Usable, cacheable memory addresses (heap)	*/
+	#define PLASOC_HEAP_BASE_ADDRESS	0x00000800
+	#define PLASOC_HEAP_MAX_SIZE		L1_CACHE_NONCACHEABLE_BASE_ADDRESS - PLASOC_HEAP_BASE_ADDRESS
+
 #ifdef __cplusplus
 }
 #endif
