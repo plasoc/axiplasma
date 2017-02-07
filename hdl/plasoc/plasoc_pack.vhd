@@ -35,10 +35,10 @@ package plasoc_pack is
     
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
-    constant default_interrupt_total : integer := 8;									--! Defines the default number of available device interrupts.
-    constant default_int_id_offset : std_logic_vector := X"00000004";					--! For the Interrupt Identifier register, defines the default offset from the Interrupt Controller's axi_base_address.				
-    constant default_int_enables_offset : std_logic_vector := X"00000000"; 				--! For the Interrupt Enables register, defines the default offset from the Interrupt Controller's axi_base_address.
-    constant default_int_active_address : std_logic_vector := X"00000008";				--! For the Interrupt Active register, defines the default offset from the Interrupt Controller's axi_base_address.
+    constant default_interrupt_total : integer := 8;                                    --! Defines the default number of available device interrupts.
+    constant default_int_id_offset : integer := 4;                                      --! For the Interrupt Identifier register, defines the default offset from the Interrupt Controller's axi_base_address.				
+    constant default_int_enables_offset : integer := 0;                                 --! For the Interrupt Enables register, defines the default offset from the Interrupt Controller's axi_base_address.
+    constant default_int_active_address : integer := 8;                                 --! For the Interrupt Active register, defines the default offset from the Interrupt Controller's axi_base_address.
     
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
@@ -141,9 +141,9 @@ package plasoc_pack is
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
             axi_base_address : std_logic_vector := X"0000";
-            axi_int_id_offset : std_logic_vector := default_int_id_offset;
-            axi_int_enables_offset : std_logic_vector := default_int_enables_offset;
-            axi_int_active_offset : std_logic_vector := default_int_active_address;
+            axi_int_id_offset : integer := default_int_id_offset;
+            axi_int_enables_offset : integer := default_int_enables_offset;
+            axi_int_active_offset : integer := default_int_active_address;
             -- interrupt controller parameters.
             interrupt_total : integer := default_interrupt_total);
         port(
