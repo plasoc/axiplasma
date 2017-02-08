@@ -27,55 +27,55 @@ use work.plasoc_pack.all;
 entity plasoc_cpu_axi4_write_cntrl is
     generic(
         -- CPU parameters.
-        cpu_address_width : integer := 16;		--! Defines the address width of the CPU. This should normally be equal to the CPU's width.	
-        cpu_data_width : integer := 32;			--! Defines the data width of the CPU. This should normally be equal to the CPU's width.
+        cpu_address_width : integer := 16;      --! Defines the address width of the CPU. This should normally be equal to the CPU's width.	
+        cpu_data_width : integer := 32;         --! Defines the data width of the CPU. This should normally be equal to the CPU's width.
         -- Cache parameters.
-        cache_offset_width : integer := 5;		--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
+        cache_offset_width : integer := 5;      --! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         -- AXI4-Full Write parameters.
-        axi_awuser_width : integer := 0;		--! Width of user-define AXI4-Full Address Write signal.
-        axi_wuser_width : integer := 0;			--! Width of user-define AXI4-Full Write Data signal.
-        axi_buser_width : integer := 0			--! Width of user-define AXI4-Full Write Response signal.
+        axi_awuser_width : integer := 0;        --! Width of user-define AXI4-Full Address Write signal.
+        axi_wuser_width : integer := 0;         --! Width of user-define AXI4-Full Write Data signal.
+        axi_buser_width : integer := 0          --! Width of user-define AXI4-Full Write Response signal.
 	);
     port(
         -- Global interfaces.
-        clock : in std_logic;																	--! Clock. Tested with 50 MHz.
-        nreset : in std_logic;																	--! Reset on low.
+        clock : in std_logic;                                                                   --! Clock. Tested with 50 MHz.
+        nreset : in std_logic;                                                                  --! Reset on low.
         -- Memory interface.
-        mem_write_address : in std_logic_vector(cpu_address_width-1 downto 0);					--! The requested address sent to the write memory controller.
-        mem_write_data : in std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');		--! The word written to the write memory controller.
-        mem_write_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);					--! Each bit that is high enables writing for the corresponding byte in mem_write_data.
-        mem_write_enable : in std_logic;														--! Enables the operation of the write memory controller.
-        mem_write_valid : in std_logic;															--! Indicates the cache has a valid word on mem_write_data.	
-        mem_write_ready  : out std_logic;														--! Indicates the read memory controller is ready to sample a word from mem_write_data.	
+        mem_write_address : in std_logic_vector(cpu_address_width-1 downto 0);                  --! The requested address sent to the write memory controller.
+        mem_write_data : in std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');       --! The word written to the write memory controller.
+        mem_write_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);                    --! Each bit that is high enables writing for the corresponding byte in mem_write_data.
+        mem_write_enable : in std_logic;                                                        --! Enables the operation of the write memory controller.
+        mem_write_valid : in std_logic;	                                                        --! Indicates the cache has a valid word on mem_write_data.	
+        mem_write_ready  : out std_logic;                                                       --! Indicates the read memory controller is ready to sample a word from mem_write_data.	
         -- Cache interface.
-        cache_cacheable : in std_logic;															--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
+        cache_cacheable : in std_logic;                                                         --! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         -- Master AXI4-Full Write interface.
-        axi_awid : out std_logic_vector(0 downto 0);											--! AXI4-Full Address Write signal.
-        axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');		--! AXI4-Full Address Write signal.	
-        axi_awlen : out std_logic_vector(7 downto 0);											--! AXI4-Full Address Write signal.
-        axi_awsize : out std_logic_vector(2 downto 0);											--! AXI4-Full Address Write signal.
-        axi_awburst : out std_logic_vector(1 downto 0);											--! AXI4-Full Address Write signal.
-        axi_awlock : out std_logic;																--! AXI4-Full Address Write signal.
-        axi_awcache : out std_logic_vector(3 downto 0);											--! AXI4-Full Address Write signal.
-        axi_awprot : out std_logic_vector(2 downto 0);											--! AXI4-Full Address Write signal.	
-        axi_awqos : out std_logic_vector(3 downto 0);											--! AXI4-Full Address Write signal.	
-        axi_awregion : out std_logic_vector(3 downto 0);										--! AXI4-Full Address Write signal.	
-        axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awvalid : out std_logic;															--! AXI4-Full Address Write signal.	
-        axi_awready : in std_logic;																--! AXI4-Full Address Write signal.	
-        axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');			--! AXI4-Full Write Data signal.
-        axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');			--! AXI4-Full Write Data signal.
-        axi_wlast : out std_logic := '0';														--! AXI4-Full Write Data signal.
-        axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);							--! AXI4-Full Write Data signal.	
-        axi_wvalid : out std_logic;																--! AXI4-Full Write Data signal.
-        axi_wready : in std_logic;																--! AXI4-Full Write Data signal.
-        axi_bid : in std_logic_vector(0 downto 0);												--! AXI4-Full Write Response signal.
-        axi_bresp : in  std_logic_vector(1 downto 0);											--! AXI4-Full Write Response signal.
-        axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);							--! AXI4-Full Write Response signal.
-        axi_bvalid : in std_logic;																--! AXI4-Full Write Response signal.
-        axi_bready : out std_logic;																--! AXI4-Full Write Response signal.
+        axi_awid : out std_logic_vector(0 downto 0);                                            --! AXI4-Full Address Write signal.
+        axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');       --! AXI4-Full Address Write signal.	
+        axi_awlen : out std_logic_vector(7 downto 0);                                           --! AXI4-Full Address Write signal.
+        axi_awsize : out std_logic_vector(2 downto 0);                                          --! AXI4-Full Address Write signal.
+        axi_awburst : out std_logic_vector(1 downto 0);                                         --! AXI4-Full Address Write signal.
+        axi_awlock : out std_logic;                                                             --! AXI4-Full Address Write signal.
+        axi_awcache : out std_logic_vector(3 downto 0);                                         --! AXI4-Full Address Write signal.
+        axi_awprot : out std_logic_vector(2 downto 0);                                          --! AXI4-Full Address Write signal.	
+        axi_awqos : out std_logic_vector(3 downto 0);                                           --! AXI4-Full Address Write signal.	
+        axi_awregion : out std_logic_vector(3 downto 0);                                        --! AXI4-Full Address Write signal.	
+        axi_awuser : out std_logic_vector(axi_awuser_width-1 downto 0);                         --! AXI4-Full Address Write signal.
+        axi_awvalid : out std_logic;                                                            --! AXI4-Full Address Write signal.	
+        axi_awready : in std_logic;                                                             --! AXI4-Full Address Write signal.	
+        axi_wdata : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');           --! AXI4-Full Write Data signal.
+        axi_wstrb : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');         --! AXI4-Full Write Data signal.
+        axi_wlast : out std_logic := '0';                                                       --! AXI4-Full Write Data signal.
+        axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);                           --! AXI4-Full Write Data signal.	
+        axi_wvalid : out std_logic;                                                             --! AXI4-Full Write Data signal.
+        axi_wready : in std_logic;                                                              --! AXI4-Full Write Data signal.
+        axi_bid : in std_logic_vector(0 downto 0);                                              --! AXI4-Full Write Response signal.
+        axi_bresp : in  std_logic_vector(1 downto 0);                                           --! AXI4-Full Write Response signal.
+        axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);                            --! AXI4-Full Write Response signal.
+        axi_bvalid : in std_logic;                                                              --! AXI4-Full Write Response signal.
+        axi_bready : out std_logic;                                                             --! AXI4-Full Write Response signal.
         -- Error interface.
-        error_data : out std_logic_vector(2 downto 0) := (others=>'0')							--! Returns value signifying error in the transaction.
+        error_data : out std_logic_vector(2 downto 0) := (others=>'0')                          --! Returns value signifying error in the transaction.
 	);
 end plasoc_cpu_axi4_write_cntrl;
 
