@@ -91,6 +91,7 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     signal axi_handshake : boolean;
     signal axi_finished : boolean;
     signal axi_finished_buff : boolean := False;
+    signal axi_finished_full : boolean;
     signal axi_error : boolean := False;
     signal axi_awid_buff : std_logic := '0';
     signal axi_awlen_buff : std_logic_vector(7 downto 0) := (others=>'0');
@@ -104,6 +105,7 @@ begin
 
     axi_handshake <= axi_wvalid_buff='1' and axi_wready='1';
     axi_finished <= counter=axi_awlen_buff+1 and axi_handshake;
+    axi_finished_full <= axi_finished or axi_finished_buff;
 
     axi_awid(0) <= axi_awid_buff;
     axi_awlen <= axi_awlen_buff;
@@ -182,25 +184,33 @@ begin
                         axi_wvalid_buff <= '0';
                         axi_wlast <= '0';
                     end if;
-                    -- On completition, this controller is no longer ready to accept more words. The axi
-                    -- id should be changed to the next id. Finally, the state of this controller
-                    -- should return to waiting for the next address.
-                    if axi_finished or axi_finished_buff then
+                    -- On fully finished transaction, this controller is no longer ready to accept more words.
+                    if axi_finished_full then
                         mem_write_ready_buff <= '0';
-                        
                     -- Only permit the memory write interface to write data if the axi write interface
                     -- is ready for more words.
                     elsif axi_wready='1' then
                         mem_write_ready_buff <= '1';
+                    -- If the axi write data interface isn't ready for data, then the axi
+                    -- write controller isn't ready for data from the memory interface either.
                     else
                         mem_write_ready_buff <= '0';
                     end if;
-                    
-                    if axi_finished or axi_finished_buff then
+                    -- Perform the following operations when the transaction is fully finished. Fully
+                    -- finished implies either a handshake just occurred on the last word or it had
+                    -- occurred on a previous cycle. 
+                    if axi_finished_full then
+                        -- Only start waiting for more address information from the memory interface
+                        -- if the response channel isn't already running.
                         if axi_bready_buff='0' then
+                            -- Reset the finish buffer flag which is needed to remember a full finished transaction.
                             axi_finished_buff <= False;
+                            -- Set the next identifier so that transactions can be split.
                             axi_awid_buff <= not axi_awid_buff;
+                            -- Start waiting for more address information.
                             state <= state_wait;
+                        -- If the response channel is busy, the axi write controller must remember that the
+                        -- write transaction is completed.
                         else
                             axi_finished_buff <= True;
                         end if;
@@ -246,10 +256,11 @@ begin
                             error_data(error_axi_read_decerr) <= '1';
                         end if;
                     end if;
-                -- On completion of a transaction, a response should be expected and
+                -- On a fully finished transaction and the response 
+                -- channel isn't already activated, a response should be expected and
                 -- the axi write response channel should be ready. The id of the transaction
                 -- is buffered for checking.
-                elsif (axi_finished or axi_finished_buff) and axi_bready_buff='0' then
+                elsif axi_finished_full and axi_bready_buff='0' then
                     axi_bready_buff <= '1';
                     axi_bid_buff <= axi_awid_buff;
                 end if;

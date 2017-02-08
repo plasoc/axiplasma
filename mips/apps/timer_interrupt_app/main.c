@@ -6,7 +6,6 @@
 #define XGPIO_OUTPUT_BASE_ADDRESS		(0x40010000)
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_TIMER_HALF_SECOND_CYCLES	(25000000)
-//#define PLASOC_TIMER_HALF_SECOND_CYCLES	(512)
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 
 #define INT_PLASOC_TIMER_ID				(0)
@@ -47,6 +46,7 @@ void input_gpio_isr(void* ptr)
 	 and let the main application know to update output. */
 	xgpio_ack_channel_interrupt(&xgpio_input_obj,1);
 	input_value = xgpio_get_data(&xgpio_input_obj);
+	led_state = 1; /* Setting the led state is not really a good idea if GPIO interrupt occurs simultaneously with timer's. */
 	update_flag = 1;
 }
 
