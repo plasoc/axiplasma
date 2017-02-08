@@ -1,7 +1,7 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2016.2 (win64) Build 1577090 Thu Jun  2 16:32:40 MDT 2016
---Date        : Tue Jan 31 17:50:10 2017
+--Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
+--Date        : Wed Feb 08 17:29:13 2017
 --Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 --Command     : generate_target ip_block_design_wrapper.bd
 --Design      : ip_block_design_wrapper
@@ -18,6 +18,7 @@ entity ip_block_design_wrapper is
     axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
     axi_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
     axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
     axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
     axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -29,6 +30,7 @@ entity ip_block_design_wrapper is
     axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
     axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
     axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
     axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
     axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -37,10 +39,12 @@ entity ip_block_design_wrapper is
     axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
     axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
     axi_awvalid : in STD_LOGIC;
+    axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
     axi_bready : in STD_LOGIC;
     axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
     axi_bvalid : out STD_LOGIC;
     axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 );
     axi_rlast : out STD_LOGIC;
     axi_rready : in STD_LOGIC;
     axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -132,12 +136,32 @@ architecture STRUCTURE of ip_block_design_wrapper is
     int_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
     int_axi_rvalid : in STD_LOGIC;
     int_axi_rready : out STD_LOGIC;
+    timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    timer_axi_awvalid : out STD_LOGIC;
+    timer_axi_awready : in STD_LOGIC;
+    timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    timer_axi_wvalid : out STD_LOGIC;
+    timer_axi_wready : in STD_LOGIC;
+    timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    timer_axi_bvalid : in STD_LOGIC;
+    timer_axi_bready : out STD_LOGIC;
+    timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    timer_axi_arvalid : out STD_LOGIC;
+    timer_axi_arready : in STD_LOGIC;
+    timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    timer_axi_rvalid : in STD_LOGIC;
+    timer_axi_rready : out STD_LOGIC;
     raw_clock : in STD_LOGIC;
     raw_nreset : in STD_LOGIC;
     aclk : out STD_LOGIC;
     gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
     aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
     int_gpio_input : out STD_LOGIC;
+    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
     axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
     axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -173,26 +197,10 @@ architecture STRUCTURE of ip_block_design_wrapper is
     axi_rlast : out STD_LOGIC;
     axi_rvalid : out STD_LOGIC;
     axi_rready : in STD_LOGIC;
-    timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    timer_axi_awvalid : out STD_LOGIC;
-    timer_axi_awready : in STD_LOGIC;
-    timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
-    timer_axi_wvalid : out STD_LOGIC;
-    timer_axi_wready : in STD_LOGIC;
-    timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    timer_axi_bvalid : in STD_LOGIC;
-    timer_axi_bready : out STD_LOGIC;
-    timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    timer_axi_arvalid : out STD_LOGIC;
-    timer_axi_arready : in STD_LOGIC;
-    timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    timer_axi_rvalid : in STD_LOGIC;
-    timer_axi_rready : out STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 )
+    axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 )
   );
   end component ip_block_design;
 begin
@@ -203,6 +211,7 @@ ip_block_design_i: component ip_block_design
       axi_araddr(31 downto 0) => axi_araddr(31 downto 0),
       axi_arburst(1 downto 0) => axi_arburst(1 downto 0),
       axi_arcache(3 downto 0) => axi_arcache(3 downto 0),
+      axi_arid(0) => axi_arid(0),
       axi_arlen(7 downto 0) => axi_arlen(7 downto 0),
       axi_arlock(0) => axi_arlock(0),
       axi_arprot(2 downto 0) => axi_arprot(2 downto 0),
@@ -214,6 +223,7 @@ ip_block_design_i: component ip_block_design
       axi_awaddr(31 downto 0) => axi_awaddr(31 downto 0),
       axi_awburst(1 downto 0) => axi_awburst(1 downto 0),
       axi_awcache(3 downto 0) => axi_awcache(3 downto 0),
+      axi_awid(0) => axi_awid(0),
       axi_awlen(7 downto 0) => axi_awlen(7 downto 0),
       axi_awlock(0) => axi_awlock(0),
       axi_awprot(2 downto 0) => axi_awprot(2 downto 0),
@@ -222,10 +232,12 @@ ip_block_design_i: component ip_block_design
       axi_awregion(3 downto 0) => axi_awregion(3 downto 0),
       axi_awsize(2 downto 0) => axi_awsize(2 downto 0),
       axi_awvalid => axi_awvalid,
+      axi_bid(0) => axi_bid(0),
       axi_bready => axi_bready,
       axi_bresp(1 downto 0) => axi_bresp(1 downto 0),
       axi_bvalid => axi_bvalid,
       axi_rdata(31 downto 0) => axi_rdata(31 downto 0),
+      axi_rid(0) => axi_rid(0),
       axi_rlast => axi_rlast,
       axi_rready => axi_rready,
       axi_rresp(1 downto 0) => axi_rresp(1 downto 0),

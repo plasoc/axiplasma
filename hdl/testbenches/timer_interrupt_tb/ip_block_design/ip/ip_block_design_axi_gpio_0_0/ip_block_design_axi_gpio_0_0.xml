@@ -256,6 +256,22 @@
           <spirit:name>CLK_DOMAIN</spirit:name>
           <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.CLK_DOMAIN">/clk_wiz_0_clk_out1</spirit:value>
         </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_READ_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.NUM_READ_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_WRITE_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.NUM_WRITE_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>RUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.RUSER_BITS_PER_BYTE">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>WUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.WUSER_BITS_PER_BYTE">0</spirit:value>
+        </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
     <spirit:busInterface>
@@ -743,11 +759,11 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:47:43 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:12:39 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>2b23ad90</spirit:value>
+            <spirit:value>0531491a</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -755,7 +771,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>c3924161</spirit:value>
+            <spirit:value>dc392abd</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -774,11 +790,11 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:47:43 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:12:39 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>2b23ad90</spirit:value>
+            <spirit:value>0531491a</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -786,7 +802,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>c3924161</spirit:value>
+            <spirit:value>dc392abd</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -814,11 +830,11 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:47:43 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:12:39 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>2b23ad90</spirit:value>
+            <spirit:value>0531491a</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -826,7 +842,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>8cd8af17</spirit:value>
+            <spirit:value>4be5804f</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -845,11 +861,11 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:47:43 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:12:40 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>2b23ad90</spirit:value>
+            <spirit:value>0531491a</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -857,7 +873,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>8cd8af17</spirit:value>
+            <spirit:value>4be5804f</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -875,11 +891,11 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:47:43 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:12:40 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>2b23ad90</spirit:value>
+            <spirit:value>0531491a</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -887,7 +903,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>c3924161</spirit:value>
+            <spirit:value>dc392abd</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1468,33 +1484,13 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlsynthesis_xilinx_com_ip_axi_lite_ipif_3_0__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/ipif_pkg.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/pselect_f.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/address_decoder.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/slave_attachment.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/axi_lite_ipif.vhd</spirit:name>
+        <spirit:name>../../ipshared/0ba0/hdl/axi_lite_ipif_v3_0_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_lite_ipif" xilinx:version="3.0" xilinx:isGenerated="true" xilinx:checksum="77be8595">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_lite_ipif" xilinx:version="3.0" xilinx:isGenerated="true" xilinx:checksum="19a13c85">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1503,13 +1499,13 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlsynthesis_xilinx_com_ip_lib_cdc_1_0__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>lib_cdc_v1_0_2/hdl/src/vhdl/cdc_sync.vhd</spirit:name>
+        <spirit:name>../../ipshared/52cb/hdl/lib_cdc_v1_0_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:logicalName>lib_cdc_v1_0_2</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="lib_cdc" xilinx:version="1.0" xilinx:isGenerated="true" xilinx:checksum="64acfbf8">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="lib_cdc" xilinx:version="1.0" xilinx:isGenerated="true" xilinx:checksum="726cb4eb">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1518,13 +1514,13 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlsynthesis_xilinx_com_ip_interrupt_control_3_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>interrupt_control_v3_1_4/hdl/src/vhdl/interrupt_control.vhd</spirit:name>
+        <spirit:name>../../ipshared/e956/hdl/interrupt_control_v3_1_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:logicalName>interrupt_control_v3_1_4</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="interrupt_control" xilinx:version="3.1" xilinx:isGenerated="true" xilinx:checksum="9ae766ae">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="interrupt_control" xilinx:version="3.1" xilinx:isGenerated="true" xilinx:checksum="ea03478d">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1544,14 +1540,9 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
         <spirit:userFileType>xdc</spirit:userFileType>
       </spirit:file>
       <spirit:file>
-        <spirit:name>axi_gpio_v2_0_11/hdl/src/vhdl/gpio_core.vhd</spirit:name>
+        <spirit:name>../../ipshared/4f16/hdl/axi_gpio_v2_0_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_gpio_v2_0_11</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_gpio_v2_0_11/hdl/src/vhdl/axi_gpio.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>axi_gpio_v2_0_11</spirit:logicalName>
+        <spirit:logicalName>axi_gpio_v2_0_13</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -1565,38 +1556,14 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_xilinx_com_ip_axi_lite_ipif_3_0__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/ipif_pkg.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/pselect_f.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/address_decoder.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/slave_attachment.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_lite_ipif_v3_0_4/hdl/src/vhdl/axi_lite_ipif.vhd</spirit:name>
+        <spirit:name>../../ipshared/0ba0/hdl/axi_lite_ipif_v3_0_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:logicalName>axi_lite_ipif_v3_0_4</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_lite_ipif" xilinx:version="3.0" xilinx:isGenerated="true" xilinx:checksum="77be8595">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_lite_ipif" xilinx:version="3.0" xilinx:isGenerated="true" xilinx:checksum="19a13c85">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1605,14 +1572,14 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_xilinx_com_ip_lib_cdc_1_0__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>lib_cdc_v1_0_2/hdl/src/vhdl/cdc_sync.vhd</spirit:name>
+        <spirit:name>../../ipshared/52cb/hdl/lib_cdc_v1_0_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:logicalName>lib_cdc_v1_0_2</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="lib_cdc" xilinx:version="1.0" xilinx:isGenerated="true" xilinx:checksum="64acfbf8">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="lib_cdc" xilinx:version="1.0" xilinx:isGenerated="true" xilinx:checksum="726cb4eb">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1621,14 +1588,14 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_xilinx_com_ip_interrupt_control_3_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>interrupt_control_v3_1_4/hdl/src/vhdl/interrupt_control.vhd</spirit:name>
+        <spirit:name>../../ipshared/e956/hdl/interrupt_control_v3_1_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:logicalName>interrupt_control_v3_1_4</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="interrupt_control" xilinx:version="3.1" xilinx:isGenerated="true" xilinx:checksum="9ae766ae">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="interrupt_control" xilinx:version="3.1" xilinx:isGenerated="true" xilinx:checksum="ea03478d">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -1637,16 +1604,10 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
     <spirit:fileSet>
       <spirit:name>xilinx_vhdlbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_gpio_v2_0_11/hdl/src/vhdl/gpio_core.vhd</spirit:name>
+        <spirit:name>../../ipshared/4f16/hdl/axi_gpio_v2_0_vh_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_gpio_v2_0_11</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_gpio_v2_0_11/hdl/src/vhdl/axi_gpio.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_gpio_v2_0_11</spirit:logicalName>
+        <spirit:logicalName>axi_gpio_v2_0_13</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -1863,7 +1824,7 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
   <spirit:vendorExtensions>
     <xilinx:coreExtensions>
       <xilinx:displayName>AXI GPIO</xilinx:displayName>
-      <xilinx:coreRevision>11</xilinx:coreRevision>
+      <xilinx:coreRevision>13</xilinx:coreRevision>
       <xilinx:configElementInfos>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.ADDR_WIDTH" xilinx:valueSource="constant"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.ARUSER_WIDTH" xilinx:valueSource="constant"/>
@@ -1899,10 +1860,10 @@ Each I/O pin of the AXI GPIO is individually programmable as an input or output 
       </xilinx:configElementInfos>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
-      <xilinx:xilinxVersion>2016.2</xilinx:xilinxVersion>
+      <xilinx:xilinxVersion>2016.4</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="832b93b0"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="b916e60e"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="4e635455"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="853591b8"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="f2a1ad23"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="d9998103"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="1fe7786e"/>

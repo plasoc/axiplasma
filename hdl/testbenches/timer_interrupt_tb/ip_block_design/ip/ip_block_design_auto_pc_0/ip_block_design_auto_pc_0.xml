@@ -388,7 +388,7 @@
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>ID_WIDTH</spirit:name>
-          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.ID_WIDTH">0</spirit:value>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.ID_WIDTH">1</spirit:value>
         </spirit:parameter>
         <spirit:parameter>
           <spirit:name>ADDR_WIDTH</spirit:name>
@@ -477,6 +477,22 @@
         <spirit:parameter>
           <spirit:name>CLK_DOMAIN</spirit:name>
           <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.CLK_DOMAIN">/clk_wiz_0_clk_out1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_READ_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.NUM_READ_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_WRITE_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.NUM_WRITE_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>RUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.RUSER_BITS_PER_BYTE">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>WUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.S_AXI.WUSER_BITS_PER_BYTE">0</spirit:value>
         </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
@@ -953,6 +969,22 @@
           <spirit:name>CLK_DOMAIN</spirit:name>
           <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.M_AXI.CLK_DOMAIN">/clk_wiz_0_clk_out1</spirit:value>
         </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_READ_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.M_AXI.NUM_READ_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>NUM_WRITE_THREADS</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.M_AXI.NUM_WRITE_THREADS">1</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>RUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.M_AXI.RUSER_BITS_PER_BYTE">0</spirit:value>
+        </spirit:parameter>
+        <spirit:parameter>
+          <spirit:name>WUSER_BITS_PER_BYTE</spirit:name>
+          <spirit:value spirit:resolve="generated" spirit:id="BUSIFPARAM_VALUE.M_AXI.WUSER_BITS_PER_BYTE">0</spirit:value>
+        </spirit:parameter>
       </spirit:parameters>
     </spirit:busInterface>
     <spirit:busInterface>
@@ -1055,11 +1087,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:50:12 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:29:15 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>e1fe7ff9</spirit:value>
+            <spirit:value>2feb7cbe</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -1067,7 +1099,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>84ffbd3d</spirit:value>
+            <spirit:value>58979775</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1085,11 +1117,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:50:12 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:29:15 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>e1fe7ff9</spirit:value>
+            <spirit:value>2feb7cbe</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -1097,7 +1129,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>84ffbd3d</spirit:value>
+            <spirit:value>58979775</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1116,11 +1148,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:50:12 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:29:15 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>e1fe7ff9</spirit:value>
+            <spirit:value>2feb7cbe</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -1128,7 +1160,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>84ffbd3d</spirit:value>
+            <spirit:value>58979775</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1162,11 +1194,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:50:12 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:29:15 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>e1fe7ff9</spirit:value>
+            <spirit:value>2feb7cbe</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -1174,7 +1206,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>bc7f1f4e</spirit:value>
+            <spirit:value>84da2184</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1193,11 +1225,11 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>GENtimestamp</spirit:name>
-            <spirit:value>Tue Jan 31 22:50:12 UTC 2017</spirit:value>
+            <spirit:value>Wed Feb 08 22:29:15 UTC 2017</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRC</spirit:name>
-            <spirit:value>e1fe7ff9</spirit:value>
+            <spirit:value>2feb7cbe</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>boundaryCRCversion</spirit:name>
@@ -1205,7 +1237,7 @@
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRC</spirit:name>
-            <spirit:value>bc7f1f4e</spirit:value>
+            <spirit:value>84da2184</spirit:value>
           </spirit:parameter>
           <spirit:parameter>
             <spirit:name>customizationCRCversion</spirit:name>
@@ -1263,7 +1295,7 @@
         <spirit:vendorExtensions>
           <xilinx:portInfo>
             <xilinx:enablement>
-              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_awid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_WRITE&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">false</xilinx:isEnabled>
+              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_awid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_WRITE&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">true</xilinx:isEnabled>
             </xilinx:enablement>
           </xilinx:portInfo>
         </spirit:vendorExtensions>
@@ -1774,7 +1806,7 @@
         <spirit:vendorExtensions>
           <xilinx:portInfo>
             <xilinx:enablement>
-              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_bid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_WRITE&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">false</xilinx:isEnabled>
+              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_bid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_WRITE&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">true</xilinx:isEnabled>
             </xilinx:enablement>
           </xilinx:portInfo>
         </spirit:vendorExtensions>
@@ -1892,7 +1924,7 @@
         <spirit:vendorExtensions>
           <xilinx:portInfo>
             <xilinx:enablement>
-              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_arid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_READ&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">false</xilinx:isEnabled>
+              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_arid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_READ&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">true</xilinx:isEnabled>
             </xilinx:enablement>
           </xilinx:portInfo>
         </spirit:vendorExtensions>
@@ -2229,7 +2261,7 @@
         <spirit:vendorExtensions>
           <xilinx:portInfo>
             <xilinx:enablement>
-              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_rid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_READ&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">false</xilinx:isEnabled>
+              <xilinx:isEnabled xilinx:resolve="dependent" xilinx:id="PORT_ENABLEMENT.s_axi_rid" xilinx:dependency="( ( (spirit:decode(id(&apos;PARAM_VALUE.SI_PROTOCOL&apos;)) != &quot;AXI4LITE&quot;) and (spirit:decode(id(&apos;MODELPARAM_VALUE.C_AXI_SUPPORTS_READ&apos;)) = 1) ) and (spirit:decode(id(&apos;PARAM_VALUE.ID_WIDTH&apos;)) != 0) )">true</xilinx:isEnabled>
             </xilinx:enablement>
           </xilinx:portInfo>
         </spirit:vendorExtensions>
@@ -3456,7 +3488,7 @@
       </spirit:modelParameter>
       <spirit:modelParameter spirit:dataType="integer">
         <spirit:name>C_IGNORE_ID</spirit:name>
-        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.C_IGNORE_ID">1</spirit:value>
+        <spirit:value spirit:format="long" spirit:resolve="generated" spirit:id="MODELPARAM_VALUE.C_IGNORE_ID">0</spirit:value>
       </spirit:modelParameter>
       <spirit:modelParameter spirit:dataType="integer">
         <spirit:name>C_AXI_ID_WIDTH</spirit:name>
@@ -3541,93 +3573,13 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_generic_baseblocks_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_and.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_latch_and.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_latch_or.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_or.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_command_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_mask_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_mask.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_mask_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_mask.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_mux_enc.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_mux.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_nto1_mux.v</spirit:name>
+        <spirit:name>../../ipshared/7ee0/hdl/generic_baseblocks_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="generic_baseblocks" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="4e94621c">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="generic_baseblocks" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="4fec3ca8">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3636,18 +3588,13 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_blk_mem_gen_8_3__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>blk_mem_gen_v8_3_3/hdl/blk_mem_gen_v8_3_vhsyn_rfs.vhd</spirit:name>
+        <spirit:name>../../ipshared/6273/hdl/blk_mem_gen_v8_3_vhsyn_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>blk_mem_gen_v8_3_3</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>blk_mem_gen_v8_3_3/hdl/blk_mem_gen_v8_3.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>blk_mem_gen_v8_3_3</spirit:logicalName>
+        <spirit:logicalName>blk_mem_gen_v8_3_5</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="blk_mem_gen" xilinx:version="8.3" xilinx:isGenerated="true" xilinx:checksum="4a61723d">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="blk_mem_gen" xilinx:version="8.3" xilinx:isGenerated="true" xilinx:checksum="eaba6970">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3656,18 +3603,13 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_fifo_generator_13_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_vhsyn_rfs.vhd</spirit:name>
+        <spirit:name>../../ipshared/564d/hdl/fifo_generator_v13_1_vhsyn_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>fifo_generator_v13_1_1</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>fifo_generator_v13_1_1/hdl/fifo_generator_v13_1.vhd</spirit:name>
-        <spirit:fileType>vhdlSource</spirit:fileType>
-        <spirit:logicalName>fifo_generator_v13_1_1</spirit:logicalName>
+        <spirit:logicalName>fifo_generator_v13_1_3</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="fifo_generator" xilinx:version="13.1" xilinx:isGenerated="true" xilinx:checksum="f2c57a43">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="fifo_generator" xilinx:version="13.1" xilinx:isGenerated="true" xilinx:checksum="5030ce54">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3676,38 +3618,13 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_axi_data_fifo_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_fifo.v</spirit:name>
+        <spirit:name>../../ipshared/39ba/hdl/axi_data_fifo_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_fifo_gen.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_reg_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_ndeep_srl.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axi_data_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
+        <spirit:logicalName>axi_data_fifo_v2_1_10</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_data_fifo" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="a5b90438">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_data_fifo" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="c60cdd63">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3716,29 +3633,19 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_axi_infrastructure_1_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_0_header.vh</spirit:name>
+        <spirit:name>../../ipshared/7e3a/hdl/axi_infrastructure_v1_1_0.vh</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:isIncludeFile>true</spirit:isIncludeFile>
         <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_axi2vector.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_axic_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_vector2axi.v</spirit:name>
+        <spirit:name>../../ipshared/7e3a/hdl/axi_infrastructure_v1_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_infrastructure" xilinx:version="1.1" xilinx:isGenerated="true" xilinx:checksum="3d9dbc22">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_infrastructure" xilinx:version="1.1" xilinx:isGenerated="true" xilinx:checksum="5a88adbb">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3747,18 +3654,13 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_xilinx_com_ip_axi_register_slice_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_register_slice_v2_1_9/hdl/verilog/axi_register_slice_v2_1_axic_register_slice.v</spirit:name>
+        <spirit:name>../../ipshared/0b6b/hdl/axi_register_slice_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_register_slice_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_register_slice_v2_1_9/hdl/verilog/axi_register_slice_v2_1_axi_register_slice.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_register_slice_v2_1_9</spirit:logicalName>
+        <spirit:logicalName>axi_register_slice_v2_1_11</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_register_slice" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="da4b185e">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_register_slice" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="c8c7e5b4">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -3767,94 +3669,9 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogsynthesis_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_a_axi3_conv.v</spirit:name>
+        <spirit:name>../../ipshared/df1b/hdl/axi_protocol_converter_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axilite_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_r_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_w_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b_downsizer.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_decerr_slave.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_simple_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_wrap_cmd.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_incr_cmd.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_wr_cmd_fsm.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_rd_cmd_fsm.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_cmd_translator.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_b_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_r_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_aw_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_ar_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
+        <spirit:logicalName>axi_protocol_converter_v2_1_11</spirit:logicalName>
       </spirit:file>
       <spirit:file>
         <spirit:name>ip_block_design_auto_pc_0_ooc.xdc</spirit:name>
@@ -3862,11 +3679,6 @@
         <spirit:userFileType>USED_IN_implementation</spirit:userFileType>
         <spirit:userFileType>USED_IN_out_of_context</spirit:userFileType>
         <spirit:userFileType>USED_IN_synthesis</spirit:userFileType>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axi_protocol_converter.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -3890,110 +3702,14 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_xilinx_com_ip_generic_baseblocks_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_and.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_latch_and.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_latch_or.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry_or.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_carry.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_command_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_mask_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_mask.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_mask_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_mask.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_sel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator_static.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_comparator.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_mux_enc.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_mux.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>generic_baseblocks_v2_1_0/hdl/verilog/generic_baseblocks_v2_1_nto1_mux.v</spirit:name>
+        <spirit:name>../../ipshared/7ee0/hdl/generic_baseblocks_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:logicalName>generic_baseblocks_v2_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="generic_baseblocks" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="4e94621c">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="generic_baseblocks" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="4fec3ca8">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -4002,27 +3718,27 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_xilinx_com_ip_fifo_generator_13_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>fifo_generator_v13_1_1/simulation/fifo_generator_vlog_beh.v</spirit:name>
+        <spirit:name>../../ipshared/564d/simulation/fifo_generator_vlog_beh.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>fifo_generator_v13_1_1</spirit:logicalName>
+        <spirit:logicalName>fifo_generator_v13_1_3</spirit:logicalName>
         <spirit:exportedName>fifo_generator_vlog_beh</spirit:exportedName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_rfs.vhd</spirit:name>
+        <spirit:name>../../ipshared/564d/hdl/fifo_generator_v13_1_rfs.vhd</spirit:name>
         <spirit:fileType>vhdlSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>fifo_generator_v13_1_1</spirit:logicalName>
+        <spirit:logicalName>fifo_generator_v13_1_3</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_rfs.v</spirit:name>
+        <spirit:name>../../ipshared/564d/hdl/fifo_generator_v13_1_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>fifo_generator_v13_1_1</spirit:logicalName>
+        <spirit:logicalName>fifo_generator_v13_1_3</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="fifo_generator" xilinx:version="13.1" xilinx:isGenerated="true" xilinx:checksum="2bf3d781">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="fifo_generator" xilinx:version="13.1" xilinx:isGenerated="true" xilinx:checksum="23c83920">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -4031,44 +3747,14 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_xilinx_com_ip_axi_data_fifo_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_fifo.v</spirit:name>
+        <spirit:name>../../ipshared/39ba/hdl/axi_data_fifo_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_fifo_gen.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axic_reg_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_ndeep_srl.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_data_fifo_v2_1_8/hdl/verilog/axi_data_fifo_v2_1_axi_data_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_data_fifo_v2_1_8</spirit:logicalName>
+        <spirit:logicalName>axi_data_fifo_v2_1_10</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_data_fifo" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="6a3f9594">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_data_fifo" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="68b094f5">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -4077,33 +3763,21 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_xilinx_com_ip_axi_infrastructure_1_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_0_header.vh</spirit:name>
+        <spirit:name>../../ipshared/7e3a/hdl/axi_infrastructure_v1_1_0.vh</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:isIncludeFile>true</spirit:isIncludeFile>
         <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_axi2vector.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_axic_srl_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_infrastructure_v1_1_0/hdl/verilog/axi_infrastructure_v1_1_vector2axi.v</spirit:name>
+        <spirit:name>../../ipshared/7e3a/hdl/axi_infrastructure_v1_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
         <spirit:logicalName>axi_infrastructure_v1_1_0</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_infrastructure" xilinx:version="1.1" xilinx:isGenerated="true" xilinx:checksum="3d9dbc22">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_infrastructure" xilinx:version="1.1" xilinx:isGenerated="true" xilinx:checksum="5a88adbb">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -4112,20 +3786,14 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_xilinx_com_ip_axi_register_slice_2_1__ref_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_register_slice_v2_1_9/hdl/verilog/axi_register_slice_v2_1_axic_register_slice.v</spirit:name>
+        <spirit:name>../../ipshared/0b6b/hdl/axi_register_slice_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_register_slice_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_register_slice_v2_1_9/hdl/verilog/axi_register_slice_v2_1_axi_register_slice.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_register_slice_v2_1_9</spirit:logicalName>
+        <spirit:logicalName>axi_register_slice_v2_1_11</spirit:logicalName>
       </spirit:file>
       <spirit:vendorExtensions>
         <xilinx:subCoreRef>
-          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_register_slice" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="da4b185e">
+          <xilinx:componentRef xilinx:vendor="xilinx.com" xilinx:library="ip" xilinx:name="axi_register_slice" xilinx:version="2.1" xilinx:isGenerated="true" xilinx:checksum="c8c7e5b4">
             <xilinx:mode xilinx:name="copy_mode"/>
           </xilinx:componentRef>
         </xilinx:subCoreRef>
@@ -4134,118 +3802,10 @@
     <spirit:fileSet>
       <spirit:name>xilinx_verilogbehavioralsimulation_view_fileset</spirit:name>
       <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_a_axi3_conv.v</spirit:name>
+        <spirit:name>../../ipshared/df1b/hdl/axi_protocol_converter_v2_1_vl_rfs.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
         <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axilite_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_r_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_w_axi3_conv.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b_downsizer.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_decerr_slave.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_simple_fifo.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_wrap_cmd.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_incr_cmd.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_wr_cmd_fsm.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_rd_cmd_fsm.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_cmd_translator.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_b_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_r_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_aw_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s_ar_channel.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_b2s.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
-      </spirit:file>
-      <spirit:file>
-        <spirit:name>axi_protocol_converter_v2_1_9/hdl/verilog/axi_protocol_converter_v2_1_axi_protocol_converter.v</spirit:name>
-        <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>USED_IN_ipstatic</spirit:userFileType>
-        <spirit:logicalName>axi_protocol_converter_v2_1_9</spirit:logicalName>
+        <spirit:logicalName>axi_protocol_converter_v2_1_11</spirit:logicalName>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -4292,7 +3852,7 @@
     <spirit:parameter>
       <spirit:name>ID_WIDTH</spirit:name>
       <spirit:displayName>ID Width</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.ID_WIDTH" spirit:order="8" spirit:minimum="0" spirit:maximum="32" spirit:rangeType="long">0</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.ID_WIDTH" spirit:order="8" spirit:minimum="0" spirit:maximum="32" spirit:rangeType="long">1</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>AWUSER_WIDTH</spirit:name>
@@ -4327,7 +3887,7 @@
   <spirit:vendorExtensions>
     <xilinx:coreExtensions>
       <xilinx:displayName>AXI Protocol Converter</xilinx:displayName>
-      <xilinx:coreRevision>9</xilinx:coreRevision>
+      <xilinx:coreRevision>11</xilinx:coreRevision>
       <xilinx:configElementInfos>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.CLK.CLK_DOMAIN" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.CLK.FREQ_HZ" xilinx:valueSource="ip_propagated"/>
@@ -4342,6 +3902,7 @@
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.HAS_LOCK" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.HAS_QOS" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.HAS_WSTRB" xilinx:valueSource="constant"/>
+        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.ID_WIDTH" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.MAX_BURST_LENGTH" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.NUM_READ_OUTSTANDING" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.M_AXI.NUM_WRITE_OUTSTANDING" xilinx:valueSource="propagated"/>
@@ -4363,24 +3924,26 @@
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.HAS_REGION" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.HAS_RRESP" xilinx:valueSource="constant_prop"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.HAS_WSTRB" xilinx:valueSource="constant_prop"/>
+        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.ID_WIDTH" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.MAX_BURST_LENGTH" xilinx:valueSource="ip_propagated"/>
-        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.NUM_READ_OUTSTANDING" xilinx:valueSource="ip_propagated"/>
-        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.NUM_WRITE_OUTSTANDING" xilinx:valueSource="ip_propagated"/>
+        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.NUM_READ_OUTSTANDING" xilinx:valueSource="default_prop"/>
+        <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.NUM_WRITE_OUTSTANDING" xilinx:valueSource="default_prop"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.PHASE" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.PROTOCOL" xilinx:valueSource="user_prop"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.READ_WRITE_MODE" xilinx:valueSource="constant"/>
         <xilinx:configElementInfo xilinx:referenceId="BUSIFPARAM_VALUE.S_AXI.SUPPORTS_NARROW_BURST" xilinx:valueSource="ip_propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.ADDR_WIDTH" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.DATA_WIDTH" xilinx:valueSource="propagated"/>
+        <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.ID_WIDTH" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.MI_PROTOCOL" xilinx:valueSource="user"/>
         <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.READ_WRITE_MODE" xilinx:valueSource="propagated"/>
         <xilinx:configElementInfo xilinx:referenceId="PARAM_VALUE.SI_PROTOCOL" xilinx:valueSource="user"/>
       </xilinx:configElementInfos>
     </xilinx:coreExtensions>
     <xilinx:packagingInfo>
-      <xilinx:xilinxVersion>2016.2</xilinx:xilinxVersion>
+      <xilinx:xilinxVersion>2016.4</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="35a0dd09"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="64031b26"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="b4b7cd92"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="ac342c66"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="7ccb8402"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="c67d7c48"/>

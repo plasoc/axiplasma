@@ -2,9 +2,9 @@
 <Root MajorVersion="0" MinorVersion="33">
   <CompositeFile CompositeFileTopName="ip_block_design" CanBeSetAsTop="true" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1485903016"/>
-    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1485903016"/>
-    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1485903016"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1486592956"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1486592956"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1486592956"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip\ip_block_design_clk_wiz_0_0\ip_block_design_clk_wiz_0_0.xci" Type="IP">
         <Instance HierarchyPath="clk_wiz_0"/>
@@ -25,14 +25,6 @@
       <File Name="ip\ip_block_design_axi_interconnect_0_0\ip_block_design_axi_interconnect_0_0.xci" Type="IP">
         <Instance HierarchyPath="axi_interconnect_0"/>
         <Properties IsEditable="false" IsVisible="false" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_xbar_0\ip_block_design_xbar_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0/xbar"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
         <UsedIn Val="IMPLEMENTATION"/>
@@ -78,10 +70,26 @@
         <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
+      <File Name="ip\ip_block_design_xbar_0\ip_block_design_xbar_0.xci" Type="IP">
+        <Instance HierarchyPath="axi_interconnect_0/xbar"/>
+        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
+        <Library Name="xil_defaultlib"/>
+        <UsedIn Val="SYNTHESIS"/>
+        <UsedIn Val="IMPLEMENTATION"/>
+        <UsedIn Val="SIMULATION"/>
+      </File>
       <File Name="hdl\ip_block_design.vhd" Type="VHDL">
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="false" IsStatusTracked="false"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
+        <UsedIn Val="SIMULATION"/>
+      </File>
+      <File Name="ip\ip_block_design_axi_register_slice_2_1\ip_block_design_axi_register_slice_2_1.xci" Type="IP">
+        <Instance HierarchyPath="axi_register_slice_2"/>
+        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
+        <Library Name="xil_defaultlib"/>
+        <UsedIn Val="SYNTHESIS"/>
+        <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
       <File Name="ip\ip_block_design_s00_data_fifo_0\ip_block_design_s00_data_fifo_0.xci" Type="IP">

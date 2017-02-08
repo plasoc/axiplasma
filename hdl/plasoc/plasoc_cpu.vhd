@@ -247,7 +247,7 @@ architecture Behavioral of plasoc_cpu is
             axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
             axi_bvalid : in std_logic;
             axi_bready : out std_logic;
-            error_data : out std_logic_vector(2 downto 0) := (others=>'0'));
+            error_data : out std_logic_vector(4 downto 0) := (others=>'0'));
     end component;
     -- Constants and type definitions.
     constant cpu_width : integer := 32;

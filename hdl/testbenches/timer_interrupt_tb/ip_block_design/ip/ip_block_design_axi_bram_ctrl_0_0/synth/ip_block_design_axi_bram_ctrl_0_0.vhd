@@ -47,19 +47,20 @@
 -- DO NOT MODIFY THIS FILE.
 
 -- IP VLNV: xilinx.com:ip:axi_bram_ctrl:4.0
--- IP Revision: 8
+-- IP Revision: 10
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-LIBRARY axi_bram_ctrl_v4_0_8;
-USE axi_bram_ctrl_v4_0_8.axi_bram_ctrl;
+LIBRARY axi_bram_ctrl_v4_0_10;
+USE axi_bram_ctrl_v4_0_10.axi_bram_ctrl;
 
 ENTITY ip_block_design_axi_bram_ctrl_0_0 IS
   PORT (
     s_axi_aclk : IN STD_LOGIC;
     s_axi_aresetn : IN STD_LOGIC;
+    s_axi_awid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
     s_axi_awaddr : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
     s_axi_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
     s_axi_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -74,9 +75,11 @@ ENTITY ip_block_design_axi_bram_ctrl_0_0 IS
     s_axi_wlast : IN STD_LOGIC;
     s_axi_wvalid : IN STD_LOGIC;
     s_axi_wready : OUT STD_LOGIC;
+    s_axi_bid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
     s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
     s_axi_bvalid : OUT STD_LOGIC;
     s_axi_bready : IN STD_LOGIC;
+    s_axi_arid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
     s_axi_araddr : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
     s_axi_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
     s_axi_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -86,6 +89,7 @@ ENTITY ip_block_design_axi_bram_ctrl_0_0 IS
     s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
     s_axi_arvalid : IN STD_LOGIC;
     s_axi_arready : OUT STD_LOGIC;
+    s_axi_rid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
     s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
     s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
     s_axi_rlast : OUT STD_LOGIC;
@@ -116,6 +120,7 @@ ARCHITECTURE ip_block_design_axi_bram_ctrl_0_0_arch OF ip_block_design_axi_bram_
       C_S_AXI_SUPPORTS_NARROW_BURST : INTEGER;
       C_SINGLE_PORT_BRAM : INTEGER;
       C_FAMILY : STRING;
+      C_SELECT_XPM : INTEGER;
       C_S_AXI_CTRL_ADDR_WIDTH : INTEGER;
       C_S_AXI_CTRL_DATA_WIDTH : INTEGER;
       C_ECC : INTEGER;
@@ -196,15 +201,16 @@ ARCHITECTURE ip_block_design_axi_bram_ctrl_0_0_arch OF ip_block_design_axi_bram_
     );
   END COMPONENT axi_bram_ctrl;
   ATTRIBUTE X_CORE_INFO : STRING;
-  ATTRIBUTE X_CORE_INFO OF ip_block_design_axi_bram_ctrl_0_0_arch: ARCHITECTURE IS "axi_bram_ctrl,Vivado 2016.2";
+  ATTRIBUTE X_CORE_INFO OF ip_block_design_axi_bram_ctrl_0_0_arch: ARCHITECTURE IS "axi_bram_ctrl,Vivado 2016.4";
   ATTRIBUTE CHECK_LICENSE_TYPE : STRING;
   ATTRIBUTE CHECK_LICENSE_TYPE OF ip_block_design_axi_bram_ctrl_0_0_arch : ARCHITECTURE IS "ip_block_design_axi_bram_ctrl_0_0,axi_bram_ctrl,{}";
   ATTRIBUTE CORE_GENERATION_INFO : STRING;
-  ATTRIBUTE CORE_GENERATION_INFO OF ip_block_design_axi_bram_ctrl_0_0_arch: ARCHITECTURE IS "ip_block_design_axi_bram_ctrl_0_0,axi_bram_ctrl,{x_ipProduct=Vivado 2016.2,x_ipVendor=xilinx.com,x_ipLibrary=ip,x_ipName=axi_bram_ctrl,x_ipVersion=4.0,x_ipCoreRevision=8,x_ipLanguage=VHDL,x_ipSimLanguage=MIXED,C_BRAM_INST_MODE=EXTERNAL,C_MEMORY_DEPTH=16384,C_BRAM_ADDR_WIDTH=14,C_S_AXI_ADDR_WIDTH=16,C_S_AXI_DATA_WIDTH=32,C_S_AXI_ID_WIDTH=1,C_S_AXI_PROTOCOL=AXI4,C_S_AXI_SUPPORTS_NARROW_BURST=1,C_SINGLE_PORT_BRAM=1,C_FAMILY=artix7,C_S_AXI_CTRL_ADDR_WIDTH=32,C_S_AXI_CTRL_DATA_WIDTH=32,C_ECC=0,C_ECC_" & 
-"TYPE=0,C_FAULT_INJECT=0,C_ECC_ONOFF_RESET_VALUE=0}";
+  ATTRIBUTE CORE_GENERATION_INFO OF ip_block_design_axi_bram_ctrl_0_0_arch: ARCHITECTURE IS "ip_block_design_axi_bram_ctrl_0_0,axi_bram_ctrl,{x_ipProduct=Vivado 2016.4,x_ipVendor=xilinx.com,x_ipLibrary=ip,x_ipName=axi_bram_ctrl,x_ipVersion=4.0,x_ipCoreRevision=10,x_ipLanguage=VHDL,x_ipSimLanguage=VHDL,C_BRAM_INST_MODE=EXTERNAL,C_MEMORY_DEPTH=16384,C_BRAM_ADDR_WIDTH=14,C_S_AXI_ADDR_WIDTH=16,C_S_AXI_DATA_WIDTH=32,C_S_AXI_ID_WIDTH=1,C_S_AXI_PROTOCOL=AXI4,C_S_AXI_SUPPORTS_NARROW_BURST=1,C_SINGLE_PORT_BRAM=1,C_FAMILY=artix7,C_SELECT_XPM=0,C_S_AXI_CTRL_ADDR_WIDTH=32,C_S_AXI_CTRL_DATA_WIDTH=32" & 
+",C_ECC=0,C_ECC_TYPE=0,C_FAULT_INJECT=0,C_ECC_ONOFF_RESET_VALUE=0}";
   ATTRIBUTE X_INTERFACE_INFO : STRING;
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_aclk: SIGNAL IS "xilinx.com:signal:clock:1.0 CLKIF CLK";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_aresetn: SIGNAL IS "xilinx.com:signal:reset:1.0 RSTIF RST";
+  ATTRIBUTE X_INTERFACE_INFO OF s_axi_awid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI AWID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_awaddr: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI AWADDR";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_awlen: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI AWLEN";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_awsize: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI AWSIZE";
@@ -219,9 +225,11 @@ ARCHITECTURE ip_block_design_axi_bram_ctrl_0_0_arch OF ip_block_design_axi_bram_
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_wlast: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI WLAST";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_wvalid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI WVALID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_wready: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI WREADY";
+  ATTRIBUTE X_INTERFACE_INFO OF s_axi_bid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI BID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_bresp: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI BRESP";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_bvalid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI BVALID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_bready: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI BREADY";
+  ATTRIBUTE X_INTERFACE_INFO OF s_axi_arid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_araddr: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARADDR";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_arlen: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARLEN";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_arsize: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARSIZE";
@@ -231,6 +239,7 @@ ARCHITECTURE ip_block_design_axi_bram_ctrl_0_0_arch OF ip_block_design_axi_bram_
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_arprot: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARPROT";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_arvalid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARVALID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_arready: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI ARREADY";
+  ATTRIBUTE X_INTERFACE_INFO OF s_axi_rid: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI RID";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_rdata: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI RDATA";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_rresp: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI RRESP";
   ATTRIBUTE X_INTERFACE_INFO OF s_axi_rlast: SIGNAL IS "xilinx.com:interface:aximm:1.0 S_AXI RLAST";
@@ -256,6 +265,7 @@ BEGIN
       C_S_AXI_SUPPORTS_NARROW_BURST => 1,
       C_SINGLE_PORT_BRAM => 1,
       C_FAMILY => "artix7",
+      C_SELECT_XPM => 0,
       C_S_AXI_CTRL_ADDR_WIDTH => 32,
       C_S_AXI_CTRL_DATA_WIDTH => 32,
       C_ECC => 0,
@@ -266,7 +276,7 @@ BEGIN
     PORT MAP (
       s_axi_aclk => s_axi_aclk,
       s_axi_aresetn => s_axi_aresetn,
-      s_axi_awid => STD_LOGIC_VECTOR(TO_UNSIGNED(0, 1)),
+      s_axi_awid => s_axi_awid,
       s_axi_awaddr => s_axi_awaddr,
       s_axi_awlen => s_axi_awlen,
       s_axi_awsize => s_axi_awsize,
@@ -281,10 +291,11 @@ BEGIN
       s_axi_wlast => s_axi_wlast,
       s_axi_wvalid => s_axi_wvalid,
       s_axi_wready => s_axi_wready,
+      s_axi_bid => s_axi_bid,
       s_axi_bresp => s_axi_bresp,
       s_axi_bvalid => s_axi_bvalid,
       s_axi_bready => s_axi_bready,
-      s_axi_arid => STD_LOGIC_VECTOR(TO_UNSIGNED(0, 1)),
+      s_axi_arid => s_axi_arid,
       s_axi_araddr => s_axi_araddr,
       s_axi_arlen => s_axi_arlen,
       s_axi_arsize => s_axi_arsize,
@@ -294,6 +305,7 @@ BEGIN
       s_axi_arprot => s_axi_arprot,
       s_axi_arvalid => s_axi_arvalid,
       s_axi_arready => s_axi_arready,
+      s_axi_rid => s_axi_rid,
       s_axi_rdata => s_axi_rdata,
       s_axi_rresp => s_axi_rresp,
       s_axi_rlast => s_axi_rlast,

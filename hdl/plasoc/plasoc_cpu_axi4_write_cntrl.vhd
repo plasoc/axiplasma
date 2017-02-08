@@ -75,7 +75,7 @@ entity plasoc_cpu_axi4_write_cntrl is
         axi_bvalid : in std_logic;                                                              --! AXI4-Full Write Response signal.
         axi_bready : out std_logic;                                                             --! AXI4-Full Write Response signal.
         -- Error interface.
-        error_data : out std_logic_vector(2 downto 0) := (others=>'0')                          --! Returns value signifying error in the transaction.
+        error_data : out std_logic_vector(4 downto 0) := (others=>'0')                          --! Returns value signifying error in the transaction.
 	);
 end plasoc_cpu_axi4_write_cntrl;
 
@@ -85,17 +85,27 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     constant cache_words_per_line : integer := 2**cache_offset_width/cpu_bytes_per_word;
     constant axi_burst_len_noncacheable : integer := 0;
     constant axi_burst_len_cacheable : integer := cache_words_per_line-1;
-    type state_type is (state_wait,state_write,state_response,state_error);
+    type state_type is (state_wait,state_write);
     signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
+    signal axi_handshake : boolean;
+    signal axi_finished : boolean;
+    signal axi_finished_buff : boolean := False;
+    signal axi_error : boolean := False;
+    signal axi_awid_buff : std_logic := '0';
     signal axi_awlen_buff : std_logic_vector(7 downto 0) := (others=>'0');
     signal axi_awvalid_buff : std_logic := '0';
     signal axi_wvalid_buff : std_logic := '0';
     signal mem_write_ready_buff : std_logic := '0';
+    signal axi_bid_check : std_logic := '0';
+    signal axi_bid_buff : std_logic := '0';
     signal axi_bready_buff : std_logic := '0';
 begin
 
-    axi_awid <= (others=>'0');
+    axi_handshake <= axi_wvalid_buff='1' and axi_wready='1';
+    axi_finished <= counter=axi_awlen_buff+1 and axi_handshake;
+
+    axi_awid(0) <= axi_awid_buff;
     axi_awlen <= axi_awlen_buff;
     axi_awsize <= std_logic_vector(to_unsigned(clogb2(cpu_bytes_per_word),axi_awsize'length));
     axi_awburst <= axi_burst_incr;
@@ -115,12 +125,15 @@ begin
         variable burst_len : integer range 0 to 2**axi_awlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
         variable mem_handshake : boolean;
-        variable axi_handshake : boolean;
         variable finished : boolean;
     begin
         if rising_edge(clock) then
             if nreset='0' then
-                error_data <= (others=>'0');
+                axi_awvalid_buff <= '0';
+                axi_wvalid_buff <= '0';
+                axi_wlast <= '0';
+                mem_write_ready_buff <= '0';
+                axi_finished_buff <= False;
                 state <= state_wait;
             else
                 case state is
@@ -139,11 +152,13 @@ begin
                         axi_awlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_awlen'length));
                         -- Set counter to keep track the number of words written to the axi write interface.
                         counter <= 0;
-                        -- Wait until handshake before writing data.
+                        -- Before writing data, wait until handshake and .
                         if axi_awvalid_buff='1' and axi_awready='1' then
                             axi_awvalid_buff <= '0';
                             state <= state_write;
-                        else
+                        -- The axi address channel can only be valid if
+                        -- the response isn't processing a transaction with the same id
+                        elsif axi_bready_buff='0' or axi_bid_buff/=axi_awid_buff then
                             axi_awvalid_buff <= '1';
                         end if;
                     end if;
@@ -151,7 +166,6 @@ begin
                 when state_write=>
                     -- Check for handshakes;
                     mem_handshake := mem_write_valid='1' and mem_write_ready_buff='1';
-                    axi_handshake := axi_wvalid_buff='1' and axi_wready='1';
                     -- On handshake with the mem interface, sample the word and
                     -- let the axi write interface know that data is valid.
                     if mem_handshake then
@@ -168,12 +182,12 @@ begin
                         axi_wvalid_buff <= '0';
                         axi_wlast <= '0';
                     end if;
-                    -- On completition, it is no longer valid for the memory write interface to 
-                    -- continue to write more words. Also, it is time to acknowledge the write response
-                    -- from the axi write interface.
-                    if counter=axi_awlen_buff+1 and axi_handshake then
+                    -- On completition, this controller is no longer ready to accept more words. The axi
+                    -- id should be changed to the next id. Finally, the state of this controller
+                    -- should return to waiting for the next address.
+                    if axi_finished or axi_finished_buff then
                         mem_write_ready_buff <= '0';
-                        state <= state_response;
+                        
                     -- Only permit the memory write interface to write data if the axi write interface
                     -- is ready for more words.
                     elsif axi_wready='1' then
@@ -181,35 +195,64 @@ begin
                     else
                         mem_write_ready_buff <= '0';
                     end if;
-                -- RESPONSE mode.
-                when state_response=>
-                    -- Wait until handshake before reading the response.
-                    if axi_bvalid='1' and axi_bready_buff='1' then
-                        -- The response channel should no longer be ready once the response has been acquired.
-                        axi_bready_buff <= '0';
-                        -- Check if an error occurred.
-                        if axi_bresp/=axi_resp_okay then
-                            -- Block on error.
-                            state <= state_error;
-                            -- Determine error code.
-                            if axi_bresp=axi_resp_exokay then
-                                error_data(error_axi_read_exokay) <= '1';
-                            elsif axi_bresp=axi_resp_slverr then
-                                error_data(error_axi_read_slverr) <= '1';
-                            elsif axi_bresp=axi_resp_decerr then
-                                error_data(error_axi_read_decerr) <= '1';
-                            end if;
-                        else
-                            -- If an error didn't occur, begin waiting for the next memory write request.
+                    
+                    if axi_finished or axi_finished_buff then
+                        if axi_bready_buff='0' then
+                            axi_finished_buff <= False;
+                            axi_awid_buff <= not axi_awid_buff;
                             state <= state_wait;
+                        else
+                            axi_finished_buff <= True;
                         end if;
-                    -- Let the slave axi write interface know the master is ready for the response.
-                    else
-                        axi_bready_buff <= '1';
                     end if;
-                -- ERROR mode.
-                when state_error=> 
                 end case;
+            end if;
+        end if;
+    end process;
+    
+    -- RESPONSE channel.
+    process (clock)
+    begin
+        if rising_edge(clock) then
+            if nreset='0' then
+                axi_bready_buff <= '0';
+                axi_bid_buff <= '0';
+                axi_error <= False;
+                error_data <= (others=>'0');
+            else
+                -- The response channel should block if an error occurred.
+                if axi_error then
+                    -- Block response channel.
+                -- Wait until handshake before reading the response.
+                elsif axi_bvalid='1' and axi_bready_buff='1' then 
+                    -- The response channel should no longer be ready once the response has been acquired.
+                    axi_bready_buff <= '0';
+                    -- Check if an id error occurred.
+                    if axi_bid_buff/=axi_bid(0) then
+                        -- Block on error.
+                        axi_error <= True;
+                        -- Set the corresponding error bit.
+                        error_data(error_axi_read_id) <= '1';
+                    -- Check if an response error occurred.
+                    elsif axi_bresp/=axi_resp_okay then
+                        -- Block on error.
+                        axi_error <= True;
+                        -- Determine error code.
+                        if axi_bresp=axi_resp_exokay then
+                            error_data(error_axi_read_exokay) <= '1';
+                        elsif axi_bresp=axi_resp_slverr then
+                            error_data(error_axi_read_slverr) <= '1';
+                        elsif axi_bresp=axi_resp_decerr then
+                            error_data(error_axi_read_decerr) <= '1';
+                        end if;
+                    end if;
+                -- On completion of a transaction, a response should be expected and
+                -- the axi write response channel should be ready. The id of the transaction
+                -- is buffered for checking.
+                elsif (axi_finished or axi_finished_buff) and axi_bready_buff='0' then
+                    axi_bready_buff <= '1';
+                    axi_bid_buff <= axi_awid_buff;
+                end if;
             end if;
         end if;
     end process;

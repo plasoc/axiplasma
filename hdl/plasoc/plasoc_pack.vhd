@@ -31,7 +31,7 @@ package plasoc_pack is
     constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
     constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
     constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
-    constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
+    constant default_cache_enable : boolean := False;									--! Defines whether or not the cache is enabled by default. 	
     
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
@@ -55,6 +55,7 @@ package plasoc_pack is
     constant error_axi_read_slverr : integer := 1;
     constant error_axi_read_decerr : integer := 2;
     constant error_axi_read_rlast : integer := 3;
+    constant error_axi_read_id : integer := 4;
     
     subtype axi_resp_type is std_logic_vector(1 downto 0);
     constant axi_lock_normal_access : std_logic := '0';

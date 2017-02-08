@@ -47,14 +47,14 @@
 -- DO NOT MODIFY THIS FILE.
 
 -- IP VLNV: xilinx.com:ip:proc_sys_reset:5.0
--- IP Revision: 9
+-- IP Revision: 10
 
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-LIBRARY proc_sys_reset_v5_0_9;
-USE proc_sys_reset_v5_0_9.proc_sys_reset;
+LIBRARY proc_sys_reset_v5_0_10;
+USE proc_sys_reset_v5_0_10.proc_sys_reset;
 
 ENTITY ip_block_design_proc_sys_reset_0_0 IS
   PORT (

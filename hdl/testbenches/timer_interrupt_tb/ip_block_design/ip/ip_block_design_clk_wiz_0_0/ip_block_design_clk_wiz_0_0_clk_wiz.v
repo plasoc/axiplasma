@@ -68,12 +68,12 @@
 module ip_block_design_clk_wiz_0_0_clk_wiz 
 
  (// Clock in ports
-  input         clk_in1,
   // Clock out ports
   output        clk_out1,
   // Status and control signals
   input         resetn,
-  output        locked
+  output        locked,
+  input         clk_in1
  );
   // Input buffering
   //------------------------------------
@@ -175,7 +175,6 @@ wire clk_in2_ip_block_design_clk_wiz_0_0;
     .CLKFBSTOPPED        (clkfbstopped_unused),
     .PWRDWN              (1'b0),
     .RST                 (reset_high));
-
   assign reset_high = ~resetn; 
 
   assign locked = locked_int;
