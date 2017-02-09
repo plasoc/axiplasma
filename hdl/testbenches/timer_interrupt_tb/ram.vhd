@@ -5,7 +5,6 @@ use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
-use work.plasoc_pack.all;
 
 entity ram is
     port(
@@ -25,8 +24,6 @@ architecture Behavioral of ram is
     constant bytes_per_word : integer := (cpu_width/8);
     constant ram_address_width : integer := 16;
     constant ram_size : integer := 2**ram_address_width/bytes_per_word;
-    constant cache_address_0 : integer := to_integer(unsigned(default_cache_base_address))/bytes_per_word;
-    constant cache_address_1 : integer := cache_address_0+1;
     subtype word_type is std_logic_vector(cpu_width-1 downto 0);
     type ram_type is array(0 to ram_size-1) of word_type;
     -- Unfortunately, the vhdl read function for binary loading doesn't appear to work, statically. 

@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use work.mlite_pack.all;
-use work.plasoc_pack.all;
+use work.plasoc_cpu_pack.all;
 
 --! The 32-bit CPU of the Plasma-SoC comprises only the original 
 --! Plasma Mlite CPU developed by Steve Rhoads, configurable cache,

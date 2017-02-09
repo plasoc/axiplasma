@@ -18,21 +18,6 @@ use ieee.numeric_std.all;
 --! core whose component declaration is located within this package.
 package plasoc_pack is
 
-	-- Default CPU parameters. These values are modifiable. At this current time, 
-	-- though, some parameter combinations are incompatible. If these parameters are 
-	-- modified, though, modifications will also be necessary for the corresponding header file 
-	-- for the CPU. 
-    constant default_cpu_mult_type       : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_alu_type        : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cache_address_width : integer := 12;								--! Defines the default address width of the cacheable addresses.
-    constant default_cache_way_width : integer := 2; 									--! Associativity = 2^default_cache_way_width.	
-    constant default_cache_index_width : integer := 4;									--! Cache Size (rows) = 2^default_cache_index_width.
-    constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
-    constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
-    constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
-    constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
-    
 	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
     constant default_interrupt_total : integer := 8;                                    --! Defines the default number of available device interrupts.
@@ -73,68 +58,7 @@ package plasoc_pack is
     function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
     function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
 
-    component plasoc_cpu is
-        generic(
-            -- cpu constants
-            cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
-            -- cache constants
-            cache_address_width : integer := default_cache_address_width;
-            cache_way_width : integer := default_cache_way_width; 
-            cache_index_width : integer := default_cache_index_width;
-            cache_offset_width : integer := default_cache_offset_width;
-            cache_replace_strat : string := default_cache_replace_strat;
-            cache_base_address : std_logic_vector := default_cache_base_address;
-            cache_enable : boolean := default_cache_enable );
-        port(
-            -- global signals
-            aclk : in std_logic;
-            aresetn     : in std_logic;
-            -- axi write interface.
-            axi_awid : out std_logic_vector(0 downto 0);
-            axi_awaddr : out std_logic_vector(31 downto 0);
-            axi_awlen : out std_logic_vector(7 downto 0);
-            axi_awsize : out std_logic_vector(2 downto 0);
-            axi_awburst : out std_logic_vector(1 downto 0);
-            axi_awlock : out std_logic;
-            axi_awcache : out std_logic_vector(3 downto 0);
-            axi_awprot : out std_logic_vector(2 downto 0);
-            axi_awqos : out std_logic_vector(3 downto 0);
-            axi_awregion : out std_logic_vector(3 downto 0);
-            axi_awvalid : out std_logic;
-            axi_awready : in std_logic;
-            axi_wdata : out std_logic_vector(31 downto 0);
-            axi_wstrb : out std_logic_vector(3 downto 0);
-            axi_wlast : out std_logic;
-            axi_wvalid : out std_logic;
-            axi_wready : in std_logic;
-            axi_bid : in std_logic_vector(0 downto 0);
-            axi_bresp : in  std_logic_vector(1 downto 0);
-            axi_bvalid : in std_logic;
-            axi_bready : out std_logic;
-            -- axi read interface.
-            axi_arid : out std_logic_vector(0 downto 0);
-            axi_araddr : out std_logic_vector(31 downto 0);
-            axi_arlen : out std_logic_vector(7 downto 0);
-            axi_arsize : out std_logic_vector(2 downto 0);
-            axi_arburst : out std_logic_vector(1 downto 0);
-            axi_arlock : out std_logic;
-            axi_arcache : out std_logic_vector(3 downto 0);
-            axi_arprot : out std_logic_vector(2 downto 0);
-            axi_arqos : out std_logic_vector(3 downto 0);
-            axi_arregion : out std_logic_vector(3 downto 0);
-            axi_arvalid : out std_logic;
-            axi_arready : in std_logic;
-            axi_rid : in std_logic_vector(0 downto 0);
-            axi_rdata : in std_logic_vector(31 downto 0);
-            axi_rresp : in std_logic_vector(1 downto 0);
-            axi_rlast : in std_logic;
-            axi_rvalid : in std_logic;
-            axi_rready : out std_logic;
-            -- cpu signals
-            intr_in      : in std_logic);
-    end component;
+    
     
     component plasoc_int is
         generic(

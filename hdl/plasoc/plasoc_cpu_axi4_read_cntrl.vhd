@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
-use work.plasoc_pack.all;
+use work.plasoc_cpu_pack.all;
 
 --! The Read Memory Controller implements a Master AXI4-Full Read 
 --! interface in order to allow the CPU to perform reads from

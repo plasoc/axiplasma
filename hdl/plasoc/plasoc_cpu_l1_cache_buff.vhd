@@ -6,10 +6,10 @@
 -------------------------------------------------------
 
 library ieee;
-use work.plasoc_pack.all;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
+use work.plasoc_cpu_pack.all;
 
 --! The cache buffer is implemented separately from the
 --! cache controller in order to ensure that the synthesizer

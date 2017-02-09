@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
-use work.plasoc_pack.all;
+use work.plasoc_cpu_pack.all;
 
 --! The Noncacheable Memory Controller is an alternative to the
 --! Cache Controller. As its name suggests, the Noncacheable Memory
