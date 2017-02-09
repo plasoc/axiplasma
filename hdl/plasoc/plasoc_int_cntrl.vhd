@@ -10,7 +10,7 @@ use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
-use work.plasoc_pack.all;
+use work.plasoc_int_pack.all;
 
 --! The functionality of the Interrupt Controller is defined
 --! in this entity. For more information on how the Interrupt Controller

@@ -8,7 +8,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all; 
-use work.plasoc_pack.all;
+use work.plasoc_int_pack.all;
 
 --! The Interrupt Controller is developed to extend 
 --! the single external interrupt of the Plasma-SoC's CPU to
