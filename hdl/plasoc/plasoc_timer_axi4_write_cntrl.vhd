@@ -7,7 +7,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;                           
-use work.plasoc_pack.all;
+use work.plasoc_timer_pack.all;
 
 --! The Write Controller implements a Slave AXI4-Lite Write 
 --! interface in order to allow a Master interface to write to

@@ -1,26 +1,11 @@
--------------------------------------------------------
---! @author Andrew Powell
---! @date January 7, 2017
---! @brief Contains the package referenced by the cores
---! defined for the Plasma-SoC.
--------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 
---! This package contains the default parameters, component declarations,
---! and uitility functions necessary for the cores created for the Plasma-SoC. 
---!
---! Many changes with this package will occur overtime with the progression of the 
---! Plasma-SoC project. At some point, packages will be defined separately for each
---! core whose component declaration is located within this package.
-package plasoc_pack is
+package plasoc_timer_pack is
 
-	
-    
-	-- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
+    -- Default Interrupt Controller parameters. These values are modifiable. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file. 
     constant default_timer_width : integer := 32;                                       --! Defines the width of the timer's Trigger and Tick Value registers.
     constant default_timer_axi_control_offset : integer := 0;                           --! For the Control register, defines the default offset from the instantiation's base address
@@ -30,34 +15,14 @@ package plasoc_pack is
     constant default_timer_axi_control_done_bit_loc : integer := 3;                     --! For the Done bit, defines the bit location in the Control register.
     constant default_timer_axi_trig_value_offset : integer := 4;                        --! For the Trigger Value register, defines the default offset from the instantiation's base address.
     constant default_timer_axi_tick_value_offset : integer := 8;                        --! For the Tick Value register, defines the default offset from the instantiation's base address.
-    
-    constant error_axi_read_exokay : integer := 0;
-    constant error_axi_read_slverr : integer := 1;
-    constant error_axi_read_decerr : integer := 2;
-    constant error_axi_read_rlast : integer := 3;
-    constant error_axi_read_id : integer := 4;
-    
-    subtype axi_resp_type is std_logic_vector(1 downto 0);
-    constant axi_lock_normal_access : std_logic := '0';
-    constant axi_burst_incr : std_logic_vector(1 downto 0) := "01";
-    constant axi_resp_okay : axi_resp_type := "00";
-    constant axi_resp_exokay : axi_resp_type := "01";
-    constant axi_resp_slverr : axi_resp_type := "10";
-    constant axi_resp_decerr : axi_resp_type := "11";
-    constant axi_cache_device_nonbufferable : std_logic_vector(3 downto 0) := "0000"; 
-    constant axi_prot_priv : std_logic := '1';
-    constant axi_prot_sec : std_logic := '0';
-    constant axi_prot_instr : std_logic := '1';
 
-    function clogb2(bit_depth : in integer ) return integer;
-    function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector;
+    constant axi_resp_okay : std_logic_vector := "00";
+    
     function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
 
     component plasoc_timer is
         generic (
-            -- timer parameters.
             timer_width : integer := default_timer_width;
-            -- axi parameters.
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
             axi_base_address : std_logic_vector := X"0000";
@@ -69,10 +34,8 @@ package plasoc_pack is
             axi_trig_value_offset : integer := default_timer_axi_trig_value_offset;
             axi_tick_value_offset : integer := default_timer_axi_tick_value_offset);
         port (
-            -- global interface.
             aclk : in std_logic;
             aresetn : in std_logic;
-            -- axi write interface.
             axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_awprot : in std_logic_vector(2 downto 0);
             axi_awvalid : in std_logic;
@@ -84,7 +47,6 @@ package plasoc_pack is
             axi_bvalid : out std_logic;
             axi_bready : in std_logic;
             axi_bresp : out std_logic_vector(1 downto 0);
-            -- axi read interface.
             axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
             axi_arprot : in std_logic_vector(2 downto 0);
             axi_arvalid : in std_logic;
@@ -93,32 +55,12 @@ package plasoc_pack is
             axi_rvalid : out std_logic;
             axi_rready : in std_logic;
             axi_rresp : out std_logic_vector(1 downto 0);
-            -- timer controller interface.
             done : out std_logic);
     end component;
+end;
 
-end; --package body
+package body plasoc_timer_pack is
 
-package body plasoc_pack is
-
-	function clogb2(bit_depth : in natural ) return integer is
-		variable result : integer := 0;
-		variable bit_depth_buff : integer := bit_depth;
-	begin
-		while bit_depth_buff>1 loop
-			bit_depth_buff := bit_depth_buff/2;
-			result := result+1;
-		end loop; 
-		return result;
-	end; --function
-	
-	function add_offset2base( base_address : in std_logic_vector; offset : in integer ) return std_logic_vector is
-        variable result : std_logic_vector(base_address'length-1 downto 0);
-    begin
-        result := std_logic_vector(to_unsigned(to_integer(unsigned(base_address))+offset,base_address'length));
-        return result;
-    end;
-    
     function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector is
         variable result : std_logic_vector(base_address'length-1 downto 0);
         variable address_0 : integer :=  to_integer(unsigned(address));
@@ -128,4 +70,4 @@ package body plasoc_pack is
         return result;
     end;
 
-end; --package body
+end;

@@ -1,8 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use work.plasoc_pack.all;
 use work.plasoc_cpu_pack.all;
 use work.plasoc_int_pack.all;
+use work.plasoc_timer_pack.all;
 
 entity axiplasma_wrapper is
     port( 

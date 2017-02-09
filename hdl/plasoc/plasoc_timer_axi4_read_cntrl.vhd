@@ -7,7 +7,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;  
-use work.plasoc_pack.all;
+use work.plasoc_timer_pack.all;
 
 --! The Read Controller implements a Slave AXI4-Lite Read 
 --! interface in order to allow a Master interface to read from

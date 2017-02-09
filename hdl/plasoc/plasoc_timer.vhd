@@ -8,7 +8,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all; 
-use work.plasoc_pack.all;
+use work.plasoc_timer_pack.all;
 
 --! The Timer Core is developed so that the Plasma-SoC can
 --! perform operations reactively to deterministic periods of time. This
