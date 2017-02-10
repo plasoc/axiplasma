@@ -7,9 +7,9 @@ entity plasoc_gpio_axi4_write_cntrl is
     generic (
         -- AXI4-Lite parameters.
         axi_address_width : integer := 16;                        --! Defines the AXI4-Lite Address Width.
-        axi_data_width : integer := 32;                            --! Defines the AXI4-Lite Data Width.    
+        axi_data_width : integer := 32;                           --! Defines the AXI4-Lite Data Width.    
         -- Register interface.
-        reg_control_offset : std_logic_vector := X"0000";        --! Defines the offset for the Control register.
+        reg_control_offset : std_logic_vector := X"0000";         --! Defines the offset for the Control register.
         reg_control_enable_bit_loc : integer := 0;
         reg_control_ack_bit_loc : integer := 1;
         reg_data_out_offset : std_logic_vector := X"0008" 
@@ -17,19 +17,19 @@ entity plasoc_gpio_axi4_write_cntrl is
     port (
         -- Global interface.
         aclk : in std_logic;                                                --! Clock. Tested with 50 MHz.
-        aresetn : in std_logic;                                                --! Reset on low.    
+        aresetn : in std_logic;                                             --! Reset on low.    
         -- Slave AXI4-Lite Write interface.
-        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);        --! AXI4-Lite Address Write signal.
-        axi_awprot : in std_logic_vector(2 downto 0);                        --! AXI4-Lite Address Write signal.
-        axi_awvalid : in std_logic;                                            --! AXI4-Lite Address Write signal.
+        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);     --! AXI4-Lite Address Write signal.
+        axi_awprot : in std_logic_vector(2 downto 0);                       --! AXI4-Lite Address Write signal.
+        axi_awvalid : in std_logic;                                         --! AXI4-Lite Address Write signal.
         axi_awready : out std_logic;                                        --! AXI4-Lite Address Write signal.
-        axi_wvalid : in std_logic;                                            --! AXI4-Lite Write Data signal.
-        axi_wready : out std_logic;                                            --! AXI4-Lite Write Data signal.
-        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);            --! AXI4-Lite Write Data signal.
-        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);        --! AXI4-Lite Write Data signal.
-        axi_bvalid : out std_logic;                                            --! AXI4-Lite Write Response signal.
-        axi_bready : in std_logic;                                            --! AXI4-Lite Write Response signal.
-        axi_bresp : out std_logic_vector(1 downto 0);                        --! AXI4-Lite Write Response signal.
+        axi_wvalid : in std_logic;                                          --! AXI4-Lite Write Data signal.
+        axi_wready : out std_logic;                                         --! AXI4-Lite Write Data signal.
+        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);         --! AXI4-Lite Write Data signal.
+        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);       --! AXI4-Lite Write Data signal.
+        axi_bvalid : out std_logic;                                         --! AXI4-Lite Write Response signal.
+        axi_bready : in std_logic;                                          --! AXI4-Lite Write Response signal.
+        axi_bresp : out std_logic_vector(1 downto 0);                       --! AXI4-Lite Write Response signal.
         -- Register interface.
         reg_control_enable : out std_logic;		--! Control register.
         reg_control_ack : out std_logic;
@@ -59,6 +59,8 @@ begin
                 axi_awready_buff <= '0';
                 axi_wready_buff <= '0';
                 axi_bvalid_buff <= '0';
+                reg_control_enable <= '0';
+                reg_control_ack <= '0';
                 reg_data_out <= (others=>'0');
                 state <= state_wait;
             else
