@@ -14,6 +14,8 @@
 
 #include "inttypes.h"
 
+#define PLASMA_HZ 50000000
+
 extern uint32_t OS_AsmInterruptEnable(uint32_t);
 extern void OS_InterruptServiceRoutine(void);
 extern void OS_AsmInterruptInit(void);

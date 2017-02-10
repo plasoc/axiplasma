@@ -5,8 +5,24 @@
 	<projects>
 	</projects>
 	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.core.ccnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
@@ -20,7 +36,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>testhdl_vivado_2</name>
+			<name>plasoc</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -75,29 +91,29 @@
 			<locationURI>PARENT-3-PROJECT_LOC/mips/plasma/plasma.h</locationURI>
 		</link>
 		<link>
-			<name>plasma/plasmasoc.c</name>
+			<name>plasoc/plasoc_cpu.c</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/mips/plasma/plasmasoc.c</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/mips/plasoc/plasoc_cpu.c</locationURI>
 		</link>
 		<link>
-			<name>plasma/plasmasoc.h</name>
+			<name>plasoc/plasoc_cpu.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/mips/plasma/plasmasoc.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/mips/plasoc/plasoc_cpu.h</locationURI>
 		</link>
 		<link>
-			<name>testhdl_vivado_2/plasoc_int.h</name>
+			<name>plasoc/plasoc_int.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/mips/testhdl_vivado_2/plasoc_int.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/mips/plasoc/plasoc_int.h</locationURI>
 		</link>
 		<link>
-			<name>testhdl_vivado_2/plasoc_timer.h</name>
+			<name>plasoc/plasoc_timer.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/mips/testhdl_vivado_2/plasoc_timer.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/mips/plasoc/plasoc_timer.h</locationURI>
 		</link>
 		<link>
-			<name>testhdl_vivado_2/xgpio.h</name>
+			<name>plasoc/xgpio.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/mips/testhdl_vivado_2/xgpio.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/mips/plasoc/xgpio.h</locationURI>
 		</link>
 		<link>
 			<name>Source/include/FreeRTOS.h</name>
