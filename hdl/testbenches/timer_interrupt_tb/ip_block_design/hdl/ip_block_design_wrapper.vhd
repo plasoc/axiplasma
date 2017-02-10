@@ -1,7 +1,7 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
---Date        : Wed Feb 08 17:29:13 2017
+--Date        : Fri Feb 10 16:13:53 2017
 --Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 --Command     : generate_target ip_block_design_wrapper.bd
 --Design      : ip_block_design_wrapper
@@ -54,8 +54,25 @@ entity ip_block_design_wrapper is
     axi_wready : out STD_LOGIC;
     axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
     axi_wvalid : in STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
+    gpio_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    gpio_axi_arready : in STD_LOGIC;
+    gpio_axi_arvalid : out STD_LOGIC;
+    gpio_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    gpio_axi_awready : in STD_LOGIC;
+    gpio_axi_awvalid : out STD_LOGIC;
+    gpio_axi_bready : out STD_LOGIC;
+    gpio_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    gpio_axi_bvalid : in STD_LOGIC;
+    gpio_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_rready : out STD_LOGIC;
+    gpio_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    gpio_axi_rvalid : in STD_LOGIC;
+    gpio_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_wready : in STD_LOGIC;
+    gpio_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    gpio_axi_wvalid : out STD_LOGIC;
     int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
     int_axi_arready : in STD_LOGIC;
@@ -75,7 +92,6 @@ entity ip_block_design_wrapper is
     int_axi_wready : in STD_LOGIC;
     int_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
     int_axi_wvalid : out STD_LOGIC;
-    int_gpio_input : out STD_LOGIC;
     ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
     ram_clk : out STD_LOGIC;
     ram_din : out STD_LOGIC_VECTOR ( 31 downto 0 );
@@ -117,6 +133,45 @@ architecture STRUCTURE of ip_block_design_wrapper is
     ram_en : out STD_LOGIC;
     ram_rst : out STD_LOGIC;
     ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+    axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_awvalid : in STD_LOGIC;
+    axi_awready : out STD_LOGIC;
+    axi_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_wlast : in STD_LOGIC;
+    axi_wvalid : in STD_LOGIC;
+    axi_wready : out STD_LOGIC;
+    axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+    axi_bvalid : out STD_LOGIC;
+    axi_bready : in STD_LOGIC;
+    axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+    axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+    axi_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+    axi_arvalid : in STD_LOGIC;
+    axi_arready : out STD_LOGIC;
+    axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 );
+    axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+    axi_rlast : out STD_LOGIC;
+    axi_rvalid : out STD_LOGIC;
+    axi_rready : in STD_LOGIC;
     int_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
     int_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
     int_axi_awvalid : out STD_LOGIC;
@@ -158,49 +213,26 @@ architecture STRUCTURE of ip_block_design_wrapper is
     raw_clock : in STD_LOGIC;
     raw_nreset : in STD_LOGIC;
     aclk : out STD_LOGIC;
-    gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
     aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
-    int_gpio_input : out STD_LOGIC;
-    gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
-    axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
-    axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
-    axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_awvalid : in STD_LOGIC;
-    axi_awready : out STD_LOGIC;
-    axi_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_wlast : in STD_LOGIC;
-    axi_wvalid : in STD_LOGIC;
-    axi_wready : out STD_LOGIC;
-    axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-    axi_bvalid : out STD_LOGIC;
-    axi_bready : in STD_LOGIC;
-    axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
-    axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
-    axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
-    axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
-    axi_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
-    axi_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-    axi_arvalid : in STD_LOGIC;
-    axi_arready : out STD_LOGIC;
-    axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-    axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-    axi_rlast : out STD_LOGIC;
-    axi_rvalid : out STD_LOGIC;
-    axi_rready : in STD_LOGIC;
-    axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
-    axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
-    axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
-    axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 )
+    gpio_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    gpio_axi_awvalid : out STD_LOGIC;
+    gpio_axi_awready : in STD_LOGIC;
+    gpio_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+    gpio_axi_wvalid : out STD_LOGIC;
+    gpio_axi_wready : in STD_LOGIC;
+    gpio_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    gpio_axi_bvalid : in STD_LOGIC;
+    gpio_axi_bready : out STD_LOGIC;
+    gpio_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    gpio_axi_arvalid : out STD_LOGIC;
+    gpio_axi_arready : in STD_LOGIC;
+    gpio_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+    gpio_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+    gpio_axi_rvalid : in STD_LOGIC;
+    gpio_axi_rready : out STD_LOGIC
   );
   end component ip_block_design;
 begin
@@ -247,8 +279,25 @@ ip_block_design_i: component ip_block_design
       axi_wready => axi_wready,
       axi_wstrb(3 downto 0) => axi_wstrb(3 downto 0),
       axi_wvalid => axi_wvalid,
-      gpio_input(15 downto 0) => gpio_input(15 downto 0),
-      gpio_output(15 downto 0) => gpio_output(15 downto 0),
+      gpio_axi_araddr(31 downto 0) => gpio_axi_araddr(31 downto 0),
+      gpio_axi_arprot(2 downto 0) => gpio_axi_arprot(2 downto 0),
+      gpio_axi_arready => gpio_axi_arready,
+      gpio_axi_arvalid => gpio_axi_arvalid,
+      gpio_axi_awaddr(31 downto 0) => gpio_axi_awaddr(31 downto 0),
+      gpio_axi_awprot(2 downto 0) => gpio_axi_awprot(2 downto 0),
+      gpio_axi_awready => gpio_axi_awready,
+      gpio_axi_awvalid => gpio_axi_awvalid,
+      gpio_axi_bready => gpio_axi_bready,
+      gpio_axi_bresp(1 downto 0) => gpio_axi_bresp(1 downto 0),
+      gpio_axi_bvalid => gpio_axi_bvalid,
+      gpio_axi_rdata(31 downto 0) => gpio_axi_rdata(31 downto 0),
+      gpio_axi_rready => gpio_axi_rready,
+      gpio_axi_rresp(1 downto 0) => gpio_axi_rresp(1 downto 0),
+      gpio_axi_rvalid => gpio_axi_rvalid,
+      gpio_axi_wdata(31 downto 0) => gpio_axi_wdata(31 downto 0),
+      gpio_axi_wready => gpio_axi_wready,
+      gpio_axi_wstrb(3 downto 0) => gpio_axi_wstrb(3 downto 0),
+      gpio_axi_wvalid => gpio_axi_wvalid,
       int_axi_araddr(31 downto 0) => int_axi_araddr(31 downto 0),
       int_axi_arprot(2 downto 0) => int_axi_arprot(2 downto 0),
       int_axi_arready => int_axi_arready,
@@ -268,7 +317,6 @@ ip_block_design_i: component ip_block_design
       int_axi_wready => int_axi_wready,
       int_axi_wstrb(3 downto 0) => int_axi_wstrb(3 downto 0),
       int_axi_wvalid => int_axi_wvalid,
-      int_gpio_input => int_gpio_input,
       ram_addr(15 downto 0) => ram_addr(15 downto 0),
       ram_clk => ram_clk,
       ram_din(31 downto 0) => ram_din(31 downto 0),

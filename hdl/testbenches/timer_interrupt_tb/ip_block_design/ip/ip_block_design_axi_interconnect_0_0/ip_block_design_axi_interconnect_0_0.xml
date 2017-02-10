@@ -58,7 +58,7 @@
     <spirit:parameter>
       <spirit:name>NUM_MI</spirit:name>
       <spirit:displayName>Number of Master Interfaces</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.NUM_MI" spirit:order="3" spirit:minimum="1" spirit:maximum="64" spirit:rangeType="long">5</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.NUM_MI" spirit:order="3" spirit:minimum="1" spirit:maximum="64" spirit:rangeType="long">4</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>STRATEGY</spirit:name>
@@ -103,17 +103,17 @@
     <spirit:parameter>
       <spirit:name>M00_HAS_REGSLICE</spirit:name>
       <spirit:displayName>Enable Register Slice on interface M00_AXI</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M00_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635284">4</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M00_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635284">0</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>M01_HAS_REGSLICE</spirit:name>
       <spirit:displayName>Enable Register Slice on interface M01_AXI</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M01_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635285">4</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M01_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635285">0</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>M02_HAS_REGSLICE</spirit:name>
       <spirit:displayName>Enable Register Slice on interface M02_AXI</spirit:displayName>
-      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M02_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635286">4</spirit:value>
+      <spirit:value spirit:format="long" spirit:resolve="user" spirit:id="PARAM_VALUE.M02_HAS_REGSLICE" spirit:choiceRef="choice_pairs_b6c9535e" spirit:order="1635286">0</spirit:value>
     </spirit:parameter>
     <spirit:parameter>
       <spirit:name>M03_HAS_REGSLICE</spirit:name>

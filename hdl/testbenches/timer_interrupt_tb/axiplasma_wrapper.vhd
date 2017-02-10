@@ -3,111 +3,127 @@ use IEEE.STD_LOGIC_1164.ALL;
 use work.plasoc_cpu_pack.all;
 use work.plasoc_int_pack.all;
 use work.plasoc_timer_pack.all;
+use work.plasoc_gpio_pack.all;
 
 entity axiplasma_wrapper is
     port( 
         raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
         raw_nreset : in std_logic;
-        gpio_output : out std_logic_vector(15 downto 0);
-        gpio_input : in std_logic_vector(15 downto 0));
+        gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
+        gpio_input : in std_logic_vector(default_data_in_width-1 downto 0));
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
     -- Component declarations.
     component ip_block_design_wrapper is
-      port (
-    aclk : out STD_LOGIC;
-      aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      axi_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
-      axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
-      axi_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_arready : out STD_LOGIC;
-      axi_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-      axi_arvalid : in STD_LOGIC;
-      axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
-      axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
-      axi_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_awready : out STD_LOGIC;
-      axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
-      axi_awvalid : in STD_LOGIC;
-      axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_bready : in STD_LOGIC;
-      axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-      axi_bvalid : out STD_LOGIC;
-      axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 );
-      axi_rlast : out STD_LOGIC;
-      axi_rready : in STD_LOGIC;
-      axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
-      axi_rvalid : out STD_LOGIC;
-      axi_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      axi_wlast : in STD_LOGIC;
-      axi_wready : out STD_LOGIC;
-      axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
-      axi_wvalid : in STD_LOGIC;
-      gpio_input : in STD_LOGIC_VECTOR ( 15 downto 0 );
-      gpio_output : out STD_LOGIC_VECTOR ( 15 downto 0 );
-      int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-      int_axi_arready : in STD_LOGIC;
-      int_axi_arvalid : out STD_LOGIC;
-      int_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      int_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-      int_axi_awready : in STD_LOGIC;
-      int_axi_awvalid : out STD_LOGIC;
-      int_axi_bready : out STD_LOGIC;
-      int_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      int_axi_bvalid : in STD_LOGIC;
-      int_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      int_axi_rready : out STD_LOGIC;
-      int_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      int_axi_rvalid : in STD_LOGIC;
-      int_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      int_axi_wready : in STD_LOGIC;
-      int_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
-      int_axi_wvalid : out STD_LOGIC;
-      int_gpio_input : out STD_LOGIC;
-      ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
-      ram_clk : out STD_LOGIC;
-      ram_din : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      ram_dout : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      ram_en : out STD_LOGIC;
-      ram_rst : out STD_LOGIC;
-      ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
-      raw_clock : in STD_LOGIC;
-      raw_nreset : in STD_LOGIC;
-      timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-      timer_axi_arready : in STD_LOGIC;
-      timer_axi_arvalid : out STD_LOGIC;
-      timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
-      timer_axi_awready : in STD_LOGIC;
-      timer_axi_awvalid : out STD_LOGIC;
-      timer_axi_bready : out STD_LOGIC;
-      timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      timer_axi_bvalid : in STD_LOGIC;
-      timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
-      timer_axi_rready : out STD_LOGIC;
-      timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
-      timer_axi_rvalid : in STD_LOGIC;
-      timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
-      timer_axi_wready : in STD_LOGIC;
-      timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
-      timer_axi_wvalid : out STD_LOGIC
-      );
+        port (
+            aclk : out STD_LOGIC;
+            aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            axi_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            axi_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_arid : in STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+            axi_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            axi_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_arready : out STD_LOGIC;
+            axi_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            axi_arvalid : in STD_LOGIC;
+            axi_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            axi_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            axi_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_awid : in STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+            axi_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            axi_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_awready : out STD_LOGIC;
+            axi_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            axi_awvalid : in STD_LOGIC;
+            axi_bid : out STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_bready : in STD_LOGIC;
+            axi_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            axi_bvalid : out STD_LOGIC;
+            axi_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            axi_rid : out STD_LOGIC_VECTOR ( 0 to 0 );
+            axi_rlast : out STD_LOGIC;
+            axi_rready : in STD_LOGIC;
+            axi_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            axi_rvalid : out STD_LOGIC;
+            axi_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            axi_wlast : in STD_LOGIC;
+            axi_wready : out STD_LOGIC;
+            axi_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            axi_wvalid : in STD_LOGIC;
+            gpio_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            gpio_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            gpio_axi_arready : in STD_LOGIC;
+            gpio_axi_arvalid : out STD_LOGIC;
+            gpio_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            gpio_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            gpio_axi_awready : in STD_LOGIC;
+            gpio_axi_awvalid : out STD_LOGIC;
+            gpio_axi_bready : out STD_LOGIC;
+            gpio_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            gpio_axi_bvalid : in STD_LOGIC;
+            gpio_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            gpio_axi_rready : out STD_LOGIC;
+            gpio_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            gpio_axi_rvalid : in STD_LOGIC;
+            gpio_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            gpio_axi_wready : in STD_LOGIC;
+            gpio_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            gpio_axi_wvalid : out STD_LOGIC;
+            int_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            int_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            int_axi_arready : in STD_LOGIC;
+            int_axi_arvalid : out STD_LOGIC;
+            int_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            int_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            int_axi_awready : in STD_LOGIC;
+            int_axi_awvalid : out STD_LOGIC;
+            int_axi_bready : out STD_LOGIC;
+            int_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            int_axi_bvalid : in STD_LOGIC;
+            int_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            int_axi_rready : out STD_LOGIC;
+            int_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            int_axi_rvalid : in STD_LOGIC;
+            int_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            int_axi_wready : in STD_LOGIC;
+            int_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            int_axi_wvalid : out STD_LOGIC;
+            ram_addr : out STD_LOGIC_VECTOR ( 15 downto 0 );
+            ram_clk : out STD_LOGIC;
+            ram_din : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            ram_dout : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            ram_en : out STD_LOGIC;
+            ram_rst : out STD_LOGIC;
+            ram_we : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            raw_clock : in STD_LOGIC;
+            raw_nreset : in STD_LOGIC;
+            timer_axi_araddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            timer_axi_arprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            timer_axi_arready : in STD_LOGIC;
+            timer_axi_arvalid : out STD_LOGIC;
+            timer_axi_awaddr : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            timer_axi_awprot : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            timer_axi_awready : in STD_LOGIC;
+            timer_axi_awvalid : out STD_LOGIC;
+            timer_axi_bready : out STD_LOGIC;
+            timer_axi_bresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            timer_axi_bvalid : in STD_LOGIC;
+            timer_axi_rdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            timer_axi_rready : out STD_LOGIC;
+            timer_axi_rresp : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            timer_axi_rvalid : in STD_LOGIC;
+            timer_axi_wdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            timer_axi_wready : in STD_LOGIC;
+            timer_axi_wstrb : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            timer_axi_wvalid : out STD_LOGIC);
     end component;
     component ram is      port(
             bram_rst_a : in STD_LOGIC;
@@ -122,6 +138,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant word_width : integer := 32;
     constant int_axi_base_address : std_logic_vector := X"44A00000";
     constant timer_axi_base_address : std_logic_vector := X"44A10000";
+    constant gpio_axi_base_address : std_logic_vector := X"44A20000";
     -- global interface.
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -173,8 +190,27 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_addr_a : std_logic_vector(15 downto 0);
     signal bram_wrdata_a : std_logic_vector(31 downto 0);
     signal bram_rddata_a : std_logic_vector(31 downto 0);
-    -- gpio interface.
-    signal int_gpio_input : STD_LOGIC;
+    -- GPIO interface.
+    signal gpio_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal gpio_axi_arready : STD_LOGIC;
+    signal gpio_axi_arvalid : STD_LOGIC;
+    signal gpio_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
+    signal gpio_axi_awready : STD_LOGIC;
+    signal gpio_axi_awvalid : STD_LOGIC;
+    signal gpio_axi_bready : STD_LOGIC;
+    signal gpio_axi_bresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal gpio_axi_bvalid : STD_LOGIC;
+    signal gpio_axi_rdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_rready : STD_LOGIC;
+    signal gpio_axi_rresp : STD_LOGIC_VECTOR ( 1 downto 0 );
+    signal gpio_axi_rvalid : STD_LOGIC;
+    signal gpio_axi_wdata : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_wready : STD_LOGIC;
+    signal gpio_axi_wstrb : STD_LOGIC_VECTOR ( 3 downto 0 );
+    signal gpio_axi_wvalid : STD_LOGIC;
+    signal gpio_int : std_logic;
     -- interrupt controller interface;
     signal int_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
     signal int_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
@@ -219,7 +255,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal timer_axi_wvalid : STD_LOGIC;
     signal timer_done : std_logic;
 begin
-    dev_ints(1 downto 0) <= timer_done & int_gpio_input;
+    dev_ints(1 downto 0) <= timer_done & gpio_int;
     dev_ints(default_interrupt_total-1 downto 2) <= (others=>'0');
      
     -- The IP block design contains all of the xilinx ip needed 
@@ -268,8 +304,25 @@ begin
         axi_wready => axi_wready,
         axi_wstrb => axi_wstrb,
         axi_wvalid => axi_wvalid,
-        gpio_input => gpio_input,
-        gpio_output => gpio_output,
+        gpio_axi_araddr => gpio_axi_araddr,
+        gpio_axi_arprot => gpio_axi_arprot,
+        gpio_axi_arready => gpio_axi_arready,
+        gpio_axi_arvalid => gpio_axi_arvalid,
+        gpio_axi_awaddr => gpio_axi_awaddr,
+        gpio_axi_awprot => gpio_axi_awprot,
+        gpio_axi_awready => gpio_axi_awready,
+        gpio_axi_awvalid => gpio_axi_awvalid,
+        gpio_axi_bready => gpio_axi_bready,
+        gpio_axi_bresp => gpio_axi_bresp,
+        gpio_axi_bvalid => gpio_axi_bvalid,
+        gpio_axi_rdata => gpio_axi_rdata,
+        gpio_axi_rready => gpio_axi_rready,
+        gpio_axi_rresp => gpio_axi_rresp,
+        gpio_axi_rvalid => gpio_axi_rvalid,
+        gpio_axi_wdata => gpio_axi_wdata,
+        gpio_axi_wready => gpio_axi_wready,
+        gpio_axi_wstrb => gpio_axi_wstrb,
+        gpio_axi_wvalid => gpio_axi_wvalid,
         int_axi_araddr => int_axi_araddr,
         int_axi_arprot => int_axi_arprot,
         int_axi_arready => int_axi_arready,
@@ -289,7 +342,6 @@ begin
         int_axi_wready => int_axi_wready,
         int_axi_wstrb => int_axi_wstrb,
         int_axi_wvalid => int_axi_wvalid,
-        int_gpio_input => int_gpio_input,
         ram_addr => bram_addr_a,
         ram_clk => bram_clk_a,
         ram_din => bram_wrdata_a,
@@ -386,6 +438,38 @@ begin
             bram_addr_a => bram_addr_a,
             bram_wrdata_a => bram_wrdata_a,
             bram_rddata_a => bram_rddata_a);
+    -- GPIO core instantiation.
+    plasoc_gpio_inst : plasoc_gpio 
+            generic map (
+                axi_address_width => word_width,                   
+                axi_data_width => word_width,                      
+                axi_base_address => gpio_axi_base_address
+            )
+            port map (
+                aclk => aclk,
+                aresetn => aresetn(0),
+                data_in => gpio_input,
+                data_out => gpio_output,
+                axi_awaddr => gpio_axi_awaddr,
+                axi_awprot => gpio_axi_awprot,
+                axi_awvalid => gpio_axi_awvalid,
+                axi_awready => gpio_axi_awready,
+                axi_wvalid => gpio_axi_wvalid,
+                axi_wready => gpio_axi_wready,
+                axi_wdata => gpio_axi_wdata,
+                axi_wstrb => gpio_axi_wstrb,
+                axi_bvalid => gpio_axi_bvalid,
+                axi_bready => gpio_axi_bready,
+                axi_bresp => gpio_axi_bresp,
+                axi_araddr => gpio_axi_araddr,
+                axi_arprot => gpio_axi_arprot,
+                axi_arvalid => gpio_axi_arvalid,
+                axi_arready => gpio_axi_arready,
+                axi_rdata => gpio_axi_rdata,
+                axi_rvalid => gpio_axi_rvalid,
+                axi_rready => gpio_axi_rready,
+                axi_rresp => gpio_axi_rresp,
+                int => gpio_int );    
     -- interrupt controller instantiation.
     plasoc_int_inst :
     plasoc_int 

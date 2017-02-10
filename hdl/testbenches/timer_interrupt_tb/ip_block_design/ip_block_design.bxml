@@ -2,9 +2,9 @@
 <Root MajorVersion="0" MinorVersion="33">
   <CompositeFile CompositeFileTopName="ip_block_design" CanBeSetAsTop="true" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1486592956"/>
-    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1486592956"/>
-    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1486592956"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1486761235"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1486761235"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1486761235"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip\ip_block_design_clk_wiz_0_0\ip_block_design_clk_wiz_0_0.xci" Type="IP">
         <Instance HierarchyPath="clk_wiz_0"/>
@@ -23,7 +23,6 @@
         <UsedIn Val="SIMULATION"/>
       </File>
       <File Name="ip\ip_block_design_axi_interconnect_0_0\ip_block_design_axi_interconnect_0_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0"/>
         <Properties IsEditable="false" IsVisible="false" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
@@ -32,22 +31,6 @@
       </File>
       <File Name="ip\ip_block_design_axi_bram_ctrl_0_0\ip_block_design_axi_bram_ctrl_0_0.xci" Type="IP">
         <Instance HierarchyPath="axi_bram_ctrl_0"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_axi_gpio_0_0\ip_block_design_axi_gpio_0_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_gpio_output"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_axi_gpio_output_0\ip_block_design_axi_gpio_output_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_gpio_input"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
@@ -92,32 +75,16 @@
         <UsedIn Val="IMPLEMENTATION"/>
         <UsedIn Val="SIMULATION"/>
       </File>
+      <File Name="ip\ip_block_design_axi_register_slice_1_1\ip_block_design_axi_register_slice_1_1.xci" Type="IP">
+        <Instance HierarchyPath="axi_register_slice_3"/>
+        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
+        <Library Name="xil_defaultlib"/>
+        <UsedIn Val="SYNTHESIS"/>
+        <UsedIn Val="IMPLEMENTATION"/>
+        <UsedIn Val="SIMULATION"/>
+      </File>
       <File Name="ip\ip_block_design_s00_data_fifo_0\ip_block_design_s00_data_fifo_0.xci" Type="IP">
         <Instance HierarchyPath="axi_interconnect_0/s00_couplers/s00_data_fifo"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_m00_regslice_0\ip_block_design_m00_regslice_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0/m00_couplers/m00_regslice"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_m01_regslice_0\ip_block_design_m01_regslice_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0/m01_couplers/m01_regslice"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_m02_regslice_0\ip_block_design_m02_regslice_0.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0/m02_couplers/m02_regslice"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
@@ -142,14 +109,6 @@
       </File>
       <File Name="ip\ip_block_design_auto_pc_2\ip_block_design_auto_pc_2.xci" Type="IP">
         <Instance HierarchyPath="axi_interconnect_0/m03_couplers/auto_pc"/>
-        <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
-        <Library Name="xil_defaultlib"/>
-        <UsedIn Val="SYNTHESIS"/>
-        <UsedIn Val="IMPLEMENTATION"/>
-        <UsedIn Val="SIMULATION"/>
-      </File>
-      <File Name="ip\ip_block_design_auto_pc_3\ip_block_design_auto_pc_3.xci" Type="IP">
-        <Instance HierarchyPath="axi_interconnect_0/m04_couplers/auto_pc"/>
         <Properties IsEditable="false" IsVisible="true" Timestamp="0" IsTrackable="true" IsStatusTracked="true"/>
         <Library Name="xil_defaultlib"/>
         <UsedIn Val="SYNTHESIS"/>
