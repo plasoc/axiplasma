@@ -65,41 +65,6 @@ extern "C"
 	}
 
 	/**
-	 * @brief Sets the Interrupt Enable register. 
-	 *
-	 * Each bit in the Interrupt Enable register refers to a 
-	 * different device interrupt. Before an active interrupt is possible,
-	 * the corresponding bit in the Interrupt Enable register must be
-	 * high.
-	 *
-	 * @param obj Pointer to the object.
-	 * @param mask Value written to the Interrupt Enable register.
-	 */
-	static inline __attribute__ ((always_inline))
-	void plasoc_int_set_enables(plasoc_int* obj,unsigned mask)
-	{
-		__asm__ __volatile__ ( "" : : : "memory");
-		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = mask;
-	}
-
-	/**
-	 * @brief Gets the Interrupt Enable register. 
-	 *
-	 * Each bit in the Interrupt Enable register refers to a 
-	 * different device interrupt. Before an active interrupt is possible,
-	 * the corresponding bit in the Interrupt Enable register must be
-	 * high.
-	 *
-	 * @param obj Pointer to the object.
-	 * @return Current value of the Interrupt Enable register.
-	 */
-	static inline __attribute__ ((always_inline))
-	unsigned plasoc_int_get_enables(plasoc_int* obj)
-	{
-		return (unsigned)(*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)));
-	}
-
-	/**
 	 * @brief Gets the Interrupt Identifier register. 
 	 *
 	 * The Interrupt Identifier register is set to the identifier of a

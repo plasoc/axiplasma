@@ -122,11 +122,11 @@ architecture Behavioral of plasoc_gpio is
             reg_data_out : in std_logic_vector(axi_data_width-1 downto 0)
         ); 
     end component;
-    -- constant declarations.
-        constant axi_control_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_control_offset,axi_address_width));
-        constant axi_data_in_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_data_in_offset,axi_address_width));
-        constant axi_data_out_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_data_out_offset,axi_address_width));
-        signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
+    -- Constant declarations.
+    constant axi_control_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_control_offset,axi_address_width));
+    constant axi_data_in_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_data_in_offset,axi_address_width));
+    constant axi_data_out_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(axi_data_out_offset,axi_address_width));
+    signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
     signal reg_control_enable :  std_logic;        --! Control register.
     signal reg_control_ack :  std_logic;
     signal reg_control_enable_buff : std_logic_vector(axi_data_width-1 downto 0);
@@ -155,7 +155,6 @@ begin
         int => int,
         data_in_axi => reg_data_in(data_in_width-1 downto 0),
         data_in_periph => data_in );
-
 
     plasoc_gpio_axi4_write_cntrl_inst : 
     plasoc_gpio_axi4_write_cntrl 
@@ -191,8 +190,7 @@ begin
             axi_data_width => axi_data_width,
             reg_control_offset => axi_control_offset_slv,
             reg_data_in_offset => axi_data_in_offset_slv,
-            reg_data_out_offset => axi_data_out_offset_slv
-        )
+            reg_data_out_offset => axi_data_out_offset_slv)
         port map (
             aclk => aclk,
             aresetn => aresetn, 

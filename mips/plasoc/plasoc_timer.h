@@ -56,6 +56,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_timer_start(plasoc_timer* obj)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*(volatile unsigned*)(obj->base_address+PLASOC_TIMER_CONTROL_OFFSET) = (1<<PLASOC_TIMER_START_BIT_LOC);
 	}
 	
@@ -78,6 +79,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_timer_reload_start(plasoc_timer* obj,unsigned ack_flag)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*(volatile unsigned*)(obj->base_address+PLASOC_TIMER_CONTROL_OFFSET) = 
 			(1<<PLASOC_TIMER_START_BIT_LOC)|(1<<PLASOC_TIMER_RELOAD_BIT_LOC)|
 			((ack_flag)?(1<<PLASOC_TIMER_ACK_BIT_LOC):0);
@@ -90,6 +92,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_timer_stop(plasoc_timer* obj)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		*(volatile unsigned*)(obj->base_address+PLASOC_TIMER_CONTROL_OFFSET) = 0;
 	}
 	
@@ -101,6 +104,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_timer_get_done(plasoc_timer* obj)
 	{
+		__asm__ __volatile__ ( "" : : : "memory");
 		return ((unsigned)*(volatile unsigned*)(obj->base_address+PLASOC_TIMER_CONTROL_OFFSET))&
 			(1<<PLASOC_TIMER_DONE_BIT_LOC);
 	}

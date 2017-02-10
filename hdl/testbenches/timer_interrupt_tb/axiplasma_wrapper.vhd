@@ -255,7 +255,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal timer_axi_wvalid : STD_LOGIC;
     signal timer_done : std_logic;
 begin
-    dev_ints(1 downto 0) <= timer_done & gpio_int;
+    dev_ints(1 downto 0) <= gpio_int & timer_done;
     dev_ints(default_interrupt_total-1 downto 2) <= (others=>'0');
      
     -- The IP block design contains all of the xilinx ip needed 
