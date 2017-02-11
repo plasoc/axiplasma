@@ -54,6 +54,69 @@ typedef uint32_t UBaseType_t;
 #define portNOP()				{__asm__ __volatile__ ("nop");}
 /*-----------------------------------------------------------*/
 
+#define portSAVE_CONTEXT()							\
+	__asm__ __volatile__ (							\
+"	addi  $29, $29, -104  #adjust sp				\n"\
+"	sw    $1,  16($29)    #at						\n"\
+"	sw    $2,  20($29)    #v0						\n"\
+"	sw    $3,  24($29)    #v1						\n"\
+"	sw    $4,  28($29)    #a0						\n"\
+"	sw    $5,  32($29)    #a1						\n"\
+"	sw    $6,  36($29)    #a2						\n"\
+"	sw    $7,  40($29)    #a3						\n"\
+"	sw    $8,  44($29)    #t0						\n"\
+"	sw    $9,  48($29)    #t1						\n"\
+"	sw    $10, 52($29)    #t2						\n"\
+"	sw    $11, 56($29)    #t3						\n"\
+"	sw    $12, 60($29)    #t4						\n"\
+"	sw    $13, 64($29)    #t5						\n"\
+"	sw    $14, 68($29)    #t6						\n"\
+"	sw    $15, 72($29)    #t7						\n"\
+"	sw    $24, 76($29)    #t8						\n"\
+"	sw    $25, 80($29)    #t9						\n"\
+"	sw    $31, 84($29)    #lr						\n"\
+"	mfc0  $26, $14        #C0_EPC=14 (Exception PC)	\n"\
+"	addi  $26, $26, -4    #Backup one opcode		\n"\
+"	sw    $26, 88($29)    #pc						\n"\
+"	mfhi  $27										\n"\
+"	sw    $27, 92($29)    #hi						\n"\
+"	mflo  $27										\n"\
+"	sw    $27, 96($29)    #lo						\n"\
+	:												\
+	:												\
+	: "memory"										\
+	);
+
+#define portRESTORE_CONTEXT()			\
+	__asm__ __volatile__ (				\
+"	lw    $1,  16($29)    #at			\n"\
+"	lw    $2,  20($29)    #v0			\n"\
+"	lw    $3,  24($29)    #v1			\n"\
+"	lw    $4,  28($29)    #a0			\n"\
+"	lw    $5,  32($29)    #a1			\n"\
+"	lw    $6,  36($29)    #a2			\n"\
+"	lw    $7,  40($29)    #a3			\n"\
+"	lw    $8,  44($29)    #t0			\n"\
+"	lw    $9,  48($29)    #t1			\n"\
+"	lw    $10, 52($29)    #t2			\n"\
+"	lw    $11, 56($29)    #t3			\n"\
+"	lw    $12, 60($29)    #t4			\n"\
+"	lw    $13, 64($29)    #t5			\n"\
+"	lw    $14, 68($29)    #t6			\n"\
+"	lw    $15, 72($29)    #t7			\n"\
+"	lw    $24, 76($29)    #t8			\n"\
+"	lw    $25, 80($29)    #t9			\n"\
+"	lw    $31, 84($29)    #lr			\n"\
+"	lw    $26, 88($29)    #pc			\n"\
+"	lw    $27, 92($29)    #hi			\n"\
+"	mthi  $27							\n"\
+"	lw    $27, 96($29)    #lo			\n"\
+"	mtlo  $27							\n"\
+"	addi  $29, $29, 104   #adjust sp	\n"\
+	:									\
+	:									\
+	: "memory"							\
+	);
 
 /*	Critical section management. */
 #define portCRITICAL_NESTING_IN_TCB 1

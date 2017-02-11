@@ -13,9 +13,9 @@ WARNINGS += -Wall
 CFLAGS += -Os -s -std=c11
 LDFLAGS += -L$(LD_DIR) -static
 
-# Following are REQUIRED variables, but can be editted
+# Following are REQUIRED variables, but can be edited
 EXEC_NAME = FreeRTOS_Demo
-INSTALL_DIR = 
+INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 
