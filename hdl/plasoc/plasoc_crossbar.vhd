@@ -103,8 +103,56 @@ entity plasoc_crossbar is
 end plasoc_crossbar;
 
 architecture Behavioral of plasoc_crossbar is
-
+    component plasoc_crossbar_base is
+        generic (
+            width : integer := 16;
+            input_amount : integer := 2;
+            output_amount : integer := 2);
+        port (
+            inputs : in std_logic_vector(width*input_amount-1 downto 0);
+            enables : in std_logic_vector(input_amount*output_amount-1 downto 0);
+            outputs : out std_logic_vector(width*output_amount-1 downto 0));
+    end component;
+    type master_id_width_vector_type is array (0 to axi_master_amount-1) of integer;
+    -- This function converts the id width string into an array of integers.
+    function get_master_id_width_vector return master_id_width_vector_type is
+        variable char_buff : character;
+        variable string_buff : string := "";
+        variable integer_buff : integer;
+        variable master_id_width_vector_buff : master_id_width_vector_type := (others=>0);
+        variable id_width_index : integer := 0;
+    begin
+        -- It assumed the values are separated by a single white space. The for-loop
+        -- checks each character in the string.
+        for each_char in 0 to axi_master_id_widths'length-1 loop
+            -- The current character is acquired from the string.
+            char_buff := axi_master_id_widths(each_char);
+            -- If the current character is a white space, then beging the
+            -- value conversion.
+            if char_buff=' ' then
+                -- Convert the current value into an integer.
+                integer_buff := integer'value(string_buff);
+                -- Reset the string buffer for the next integer.
+                string_buff := "";
+                -- Store the buffered integer into the vector buffer.
+                master_id_width_vector_buff(id_width_index) := integer_buff;
+                -- Point to the next entry in the buffer.
+                id_width_index := id_width_index+1;
+            -- If the current character is not a white space, it is assumed it is 
+            -- a value. The value is concatenated with the current string buffer.
+            else
+                string_buff := string_buff & char_buff;
+            end if;
+        end loop;
+        -- The last value needs to be converted into an integer and stored in the vector buffer.
+        integer_buff := integer'value(string_buff);
+        master_id_width_vector_buff(id_width_index) := integer_buff;
+        -- Finally, return the vector buffer.
+        return master_id_width_vector_buff;
+    end;
+    constant master_id_width_vector : master_id_width_vector_type := get_master_id_width_vector;
 begin
+
 
 
 end Behavioral;
