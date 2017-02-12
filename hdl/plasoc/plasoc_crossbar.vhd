@@ -117,21 +117,27 @@ architecture Behavioral of plasoc_crossbar is
     constant axi_master_full_axi_id_width : integer := axi_master_full_axi_id_head_width+axi_master_id_width;
     signal axi_master_full_axi_awid : std_logic_vector(axi_master_amount*axi_master_full_axi_id_width-1 downto 0);
     signal axi_master_full_axi_arid : std_logic_vector(axi_master_amount*axi_master_full_axi_id_width-1 downto 0);
+    signal axi_slave_body_axi_rid : std_logic_vector(axi_slave_amount*axi_master_id_width-1 downto 0);
+    signal axi_slave_head_axi_rid : std_logic_vector(axi_slave_amount*axi_master_full_axi_id_head_width-1 downto 0);
     signal axi_address_m2s_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
-    signal axi_address_s2m_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    signal axi_address_s2m_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+    signal axi_data_m2s_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    signal axi_data_s2m_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     signal axi_address_m2s_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
-    signal axi_address_s2m_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    signal axi_address_s2m_read_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+    signal axi_data_s2m_read_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+    signal axi_data_m2s_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
 begin
     -- Assign the identifiers for the master identifiers.
     generate_axi_master_full_id :
     for each_master in 0 to axi_master_amount-1 generate
         ---- awid assignments.
-        -- Assign the header identifier.
+        -- Assign the header identifier. Header identifier is unique to the master interface.
         axi_master_full_axi_awid(
             (1+each_master)*axi_master_full_axi_id_width-1 downto 
             (1+each_master)*axi_master_full_axi_id_width-axi_master_full_axi_id_head_width) <= 
         std_logic_vector(to_unsigned(each_master,axi_master_full_axi_id_head_width));
-        -- Assign the corresponding master identifier.
+        -- Assign the corresponding master identifier. 
         axi_master_full_axi_awid(
             each_master*axi_master_full_axi_id_width+axi_master_id_width-1 downto 
             each_master*axi_master_full_axi_id_width+0) <= 
@@ -139,7 +145,7 @@ begin
             (each_master+1)*axi_master_id_width-1 downto 
             each_master*axi_master_id_width);
         ---- arid assignments.
-        -- Assign the header identifier.
+        -- Assign the header identifier. Header identifier is unique to the master interface.
         axi_master_full_axi_arid(
             (1+each_master)*axi_master_full_axi_id_width-1 downto 
             (1+each_master)*axi_master_full_axi_id_width-axi_master_full_axi_id_head_width) <= 
@@ -152,6 +158,25 @@ begin
             (each_master+1)*axi_master_id_width-1 downto 
             each_master*axi_master_id_width);
     end generate generate_axi_master_full_id;
+    -- 
+    generate_axi_slave_full_id :
+    for each_slave in 0 to axi_slave_amount-1 generate
+        ---- rid assignments.
+        -- Assign the header identifier.
+        axi_slave_head_axi_rid(
+            (1+each_slave)*axi_master_full_axi_id_head_width-1 downto
+            each_slave*axi_master_full_axi_id_head_width) <=
+        axi_slave_head_axi_rid(
+            (1+each_slave)*axi_master_full_axi_id_width-1 downto
+            (1+each_slave)*axi_master_full_axi_id_width-axi_master_full_axi_id_head_width);
+        -- Assign the corresponding master identifier.
+        axi_slave_body_axi_rid(
+            (1+each_slave)*axi_master_id_width-1 downto 
+            each_slave*axi_master_id_width) <= 
+        s_axi_rid(
+            each_slave*axi_master_full_axi_id_width+axi_master_id_width-1 downto 
+            each_slave*axi_master_full_axi_id_width+0);
+    end generate generate_axi_slave_full_id;
     -- AXI4-Full Write Address Instantiations.
     axi_awid_cross_inst : plasoc_crossbar_base 
         generic map (width => axi_master_full_axi_id_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
@@ -189,6 +214,22 @@ begin
     axi_awready_cross_inst : plasoc_crossbar_base
         generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
         port map(inputs => s_axi_awready,enables => axi_address_s2m_write_enables,outputs => m_axi_awready);
+    -- AXI4-Full Write Data Instantiations.
+    axi_wdata_cross_inst : plasoc_crossbar_base
+        generic map (width => axi_data_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_wdata,enables => axi_data_m2s_write_enables,outputs => s_axi_wdata);
+    axi_wstrb_cross_inst : plasoc_crossbar_base
+        generic map (width => axi_data_width/8,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_wstrb,enables => axi_data_m2s_write_enables,outputs => s_axi_wstrb);
+    axi_wlast_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_wlast,enables => axi_data_m2s_write_enables,outputs => s_axi_wlast);
+    axi_wvalid_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_wvalid,enables => axi_data_m2s_write_enables,outputs => s_axi_wvalid);
+    axi_wready_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_wready,enables => axi_data_s2m_write_enables,outputs => m_axi_wready);
     -- AXI4-Full Read Address Instantiations.    
     axi_arid_cross_inst : plasoc_crossbar_base 
         generic map (width => axi_master_full_axi_id_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
@@ -226,4 +267,20 @@ begin
     axi_arready_cross_inst : plasoc_crossbar_base
         generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
         port map(inputs => s_axi_arready,enables => axi_address_s2m_read_enables,outputs => m_axi_arready);
+    -- AXI4-Full Read Data Instantiations.
+    axi_rid_cross_inst : plasoc_crossbar_base
+        generic map (width => axi_master_id_width,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => axi_slave_body_axi_rid,enables => axi_data_s2m_read_enables,outputs => m_axi_rid);
+    axi_rdata_cross_inst : plasoc_crossbar_base
+        generic map (width => axi_data_width,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_rdata,enables => axi_data_s2m_read_enables,outputs => m_axi_rdata);
+    axi_rlast_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_rlast,enables => axi_data_s2m_read_enables,outputs => m_axi_rlast);
+    axi_rvalid_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_rvalid,enables => axi_data_s2m_read_enables,outputs => m_axi_rvalid);
+    axi_rready_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_rready,enables => axi_data_m2s_read_enables,outputs => s_axi_rready);
 end Behavioral;
