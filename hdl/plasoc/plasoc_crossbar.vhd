@@ -118,7 +118,9 @@ architecture Behavioral of plasoc_crossbar is
     signal axi_master_full_axi_awid : std_logic_vector(axi_master_amount*axi_master_full_axi_id_width-1 downto 0);
     signal axi_master_full_axi_arid : std_logic_vector(axi_master_amount*axi_master_full_axi_id_width-1 downto 0);
     signal axi_address_m2s_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    signal axi_address_s2m_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
     signal axi_address_m2s_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    signal axi_address_s2m_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
 begin
     -- Assign the identifiers for the master identifiers.
     generate_axi_master_full_id :
@@ -157,6 +159,36 @@ begin
     axi_awaddr_cross_inst : plasoc_crossbar_base
         generic map (width => axi_address_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
         port map (inputs => m_axi_awaddr,enables => axi_address_m2s_write_enables,outputs => s_axi_awaddr);
+    axi_awlen_cross_inst : plasoc_crossbar_base
+        generic map (width => 8,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awlen,enables => axi_address_m2s_write_enables,outputs => s_axi_awlen);
+    axi_awsize_cross_inst : plasoc_crossbar_base
+        generic map (width => 3,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awsize,enables => axi_address_m2s_write_enables,outputs => s_axi_awsize);
+    axi_awburst_cross_inst : plasoc_crossbar_base
+        generic map (width => 2,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awburst,enables => axi_address_m2s_write_enables,outputs => s_axi_awburst);
+    axi_awlock_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awlock,enables => axi_address_m2s_write_enables,outputs => s_axi_awlock);  
+    axi_awcache_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awcache,enables => axi_address_m2s_write_enables,outputs => s_axi_awcache);
+    axi_awprot_cross_inst : plasoc_crossbar_base
+        generic map (width => 3,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awprot,enables => axi_address_m2s_write_enables,outputs => s_axi_awprot);
+    axi_awqos_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awqos,enables => axi_address_m2s_write_enables,outputs => s_axi_awqos);
+    axi_awregion_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awregion,enables => axi_address_m2s_write_enables,outputs => s_axi_awregion);
+    axi_awvalid_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_awvalid,enables => axi_address_m2s_write_enables,outputs => s_axi_awvalid);
+    axi_awready_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_awready,enables => axi_address_s2m_write_enables,outputs => m_axi_awready);
     -- AXI4-Full Read Address Instantiations.    
     axi_arid_cross_inst : plasoc_crossbar_base 
         generic map (width => axi_master_full_axi_id_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
@@ -164,4 +196,34 @@ begin
     axi_araddr_cross_inst : plasoc_crossbar_base
         generic map (width => axi_address_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
         port map (inputs => m_axi_araddr,enables => axi_address_m2s_read_enables,outputs => s_axi_araddr);
+    axi_arlen_cross_inst : plasoc_crossbar_base
+        generic map (width => 8,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arlen,enables => axi_address_m2s_read_enables,outputs => s_axi_arlen);
+    axi_arsize_cross_inst : plasoc_crossbar_base
+        generic map (width => 3,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arsize,enables => axi_address_m2s_read_enables,outputs => s_axi_arsize);
+    axi_arburst_cross_inst : plasoc_crossbar_base
+        generic map (width => 2,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arburst,enables => axi_address_m2s_read_enables,outputs => s_axi_arburst);
+    axi_arlock_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arlock,enables => axi_address_m2s_read_enables,outputs => s_axi_arlock);
+    axi_arcache_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arcache,enables => axi_address_m2s_read_enables,outputs => s_axi_arcache);  
+    axi_arprot_cross_inst : plasoc_crossbar_base
+        generic map (width => 3,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arprot,enables => axi_address_m2s_read_enables,outputs => s_axi_arprot);
+    axi_arqos_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arqos,enables => axi_address_m2s_read_enables,outputs => s_axi_arqos);
+    axi_arregion_cross_inst : plasoc_crossbar_base
+        generic map (width => 4,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arregion,enables => axi_address_m2s_read_enables,outputs => s_axi_arregion);
+    axi_arvalid_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_master_amount,output_amount => axi_slave_amount)
+        port map(inputs => m_axi_arvalid,enables => axi_address_m2s_read_enables,outputs => s_axi_arvalid);
+    axi_arready_cross_inst : plasoc_crossbar_base
+        generic map (width => 1,input_amount => axi_slave_amount,output_amount => axi_master_amount)
+        port map(inputs => s_axi_arready,enables => axi_address_s2m_read_enables,outputs => m_axi_arready);
 end Behavioral;
