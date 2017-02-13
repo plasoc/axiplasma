@@ -48,6 +48,9 @@ entity plasoc_crossbar_axi4_write_controller is
         m_axi_awaddr : in std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);
         m_axi_awvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
         s_axi_awready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        m_axi_wvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
+        s_axi_wready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        m_axi_wlast : in std_logic_vector(axi_master_amount*1-1 downto 0);
         
         axi_address_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
         axi_address_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
@@ -66,9 +69,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
     type permission_master_vector_type is array(0 to axi_master_amount-1) of Boolean;
     type occupied_slave_vector_type is array(0 to axi_slave_amount-1) of Boolean;
     type occupied_slave_matrix_type is array(0 to axi_master_amount-1) of std_logic_vector(axi_slave_amount-1 downto 0);
-    
-    type master_state_type is (mst_address,mst_data,mst_response);
-    type master_state_vector_type is array(0 to axi_master_amount-1) of master_state_type;
+   
     
     function get_slave_base_address_vector( address : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0) ) return slave_address_vector_type is
         variable address_vector_buff : slave_address_vector_type;
@@ -80,17 +81,109 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
         return address_vector_buff;
     end;
     
+    function get_permission_master_vector (
+        decoded_slave_id_vector : in decoded_slave_id_vector_type; 
+        signaled_master_vector : in permission_master_vector_type;
+        handshake_master_vector : in permission_master_vector_type;
+        occupied_slave_vector : in occupied_slave_vector_type ) 
+        return permission_master_vector_type is
+        variable permission_master_vector_buff : permission_master_vector_type;
+        variable decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
+    begin
+        -- By default, no master has permission to use a data slave interface.
+        permission_master_vector_buff := (others=>False);
+        -- Perform operation per each slave interface.
+        for each_slave in 0 to axi_slave_amount-1 loop
+            -- Perform operation per each master interface.
+            for each_master in 0 to axi_master_amount-1 loop
+                -- Determine which slave interface the current master interface is trying to reach.
+                decoded_slave_id_buff := decoded_slave_id_vector(each_master);
+                -- Give permission to the master interface if they are signal, there is a handshake, and the slave is
+                -- not being occupied. Priority goes to the master interface whose unique head identifier is the lowest.
+                if signaled_master_vector(each_master) and
+                        handshake_master_vector(each_master) and
+                        not occupied_slave_vector(decoded_slave_id_buff) and  
+                        each_slave=decoded_slave_id_buff then
+                    permission_master_vector_buff(each_master) := True;
+                    exit;
+                end if;
+            end loop;
+        end loop;
+        -- Return the master vector.
+        return permission_master_vector_buff;
+    end;
+    
+    function get_occupied_slave_vector( occupied_slave_matrix : in occupied_slave_matrix_type ) return occupied_slave_vector_type is
+        variable occupied_slave_vector_buff : occupied_slave_vector_type;
+        variable reduce_or : Boolean;
+    begin
+        -- Perform operation per each slave interface.
+        for each_slave in 0 to axi_slave_amount-1 loop
+            -- Perform the reduction operation.
+            reduce_or := False;
+            for each_master in 0 to axi_master_amount-1 loop
+                reduce_or := reduce_or or (occupied_slave_matrix(each_master)(each_slave)='1');
+            end loop;
+            -- Store the result of the reduce or operation.
+            occupied_slave_vector_buff(each_slave) := reduce_or;
+        end loop;
+        -- Return the master vector.
+        return occupied_slave_vector_buff;
+    end;
+    
+    function set_m2s_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
+        variable m2s_enable_buff : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    begin
+        m2s_enable_buff := (others=>'0');
+        for each_master in 0 to axi_master_amount-1 loop
+            for each_slave in 0 to axi_slave_amount-1 loop
+                if occupied_slave_matrix(each_master)(each_slave)='1' then
+                    m2s_enable_buff(each_master+each_slave*axi_master_amount) := '1';
+                end if;
+            end loop;
+        end loop;
+        return m2s_enable_buff;
+    end;
+    
+    function set_s2m_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
+        variable s2m_enable_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+    begin
+        s2m_enable_buff := (others=>'0');
+        for each_master in 0 to axi_master_amount-1 loop
+            for each_slave in 0 to axi_slave_amount-1 loop
+                if occupied_slave_matrix(each_master)(each_slave)='1' then
+                    s2m_enable_buff(each_slave+each_master*axi_slave_amount) := '1';
+                end if;
+            end loop;
+        end loop;
+        return s2m_enable_buff;
+    end;
+    
+    constant slave_base_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_base_address);
+    constant slave_high_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_high_address);
+    
     signal master_address_input_vector : master_address_vector_type := (others=>(others=>'0'));
-    signal slave_base_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_base_address);
-    signal slave_high_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_high_address);
+    
     signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>axi_slave_amount);
     signal permission_master_vector : permission_master_vector_type := (others=>False);
+    signal handshake_master_vector : permission_master_vector_type := (others=>False);
     signal occupied_slave_vector : occupied_slave_vector_type := (others=>False);
     signal occupied_slave_matrix : occupied_slave_matrix_type := (others=>(others=>'0'));
+    
+    signal data_signaled_master_vector : permission_master_vector_type := (others=>False);
     signal data_decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>0);
     signal data_permission_master_vector : permission_master_vector_type := (others=>False);
-    signal master_state_vector : master_state_vector_type := (others=>mst_address);
+    signal data_handshake_master_vector : permission_master_vector_type := (others=>False);
+    signal data_occupied_slave_vector : occupied_slave_vector_type := (others=>False);
+    signal data_occupied_slave_matrix : occupied_slave_matrix_type := (others=>(others=>'0'));
 begin
+
+    generate_handshakes:
+    for each_master in 0 to axi_master_amount-1 generate
+        handshake_master_vector(each_master) <= m_axi_awvalid(each_master)='1' and s_axi_awready(decoded_slave_id_vector(each_master))='1';
+        data_handshake_master_vector(each_master) <= m_axi_wvalid(each_master)='1' and s_axi_wready(data_decoded_slave_id_vector(each_master))='1';
+    end generate generate_handshakes;
+     
 
     -- Determine vector of master input addresses.
     process (m_axi_awaddr)
@@ -126,90 +219,54 @@ begin
     end process;
     
     -- Determine the permission of each master address interface.
-    process (decoded_slave_id_vector,m_axi_awvalid,s_axi_awready)
-        variable permission_master_vector_buff : permission_master_vector_type;
-        variable decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
+    process (decoded_slave_id_vector,handshake_master_vector,occupied_slave_vector)
+        constant signaled_master_vector_buff : permission_master_vector_type := (others=>True);
     begin
-        -- By default, no master has permission to use a slave interface.
-        permission_master_vector_buff := (others=>False);
-        -- Perform operation per each slave interface.
-        for each_slave in 0 to axi_slave_amount-1 loop
-            -- Perform operation per each master interface.
-            for each_master in 0 to axi_master_amount-1 loop
-                -- Determine which slave interface the current master interface is trying to reach.
-                decoded_slave_id_buff := decoded_slave_id_vector(each_master);
-                -- Give permission to the master interface if there is a handshake, the slave is
-                -- not being occupied, and the master interface is waiting for address. 
-                -- Priority goes to the master interface whose unique head identifier is the lowest.
-                if m_axi_awvalid(each_master)='1' and s_axi_awready(decoded_slave_id_buff)='1' and 
-                        not occupied_slave_vector(decoded_slave_id_buff) and 
-                        master_state_vector(each_master)=mst_address and
-                        each_slave=decoded_slave_id_buff then 
-                    permission_master_vector_buff(each_master) := True;
-                    exit;
-                end if;
-            end loop;
-        end loop;
-        -- Store the permission slave vector.
-        permission_master_vector <= permission_master_vector_buff;
+        permission_master_vector <= get_permission_master_vector (
+            decoded_slave_id_vector => decoded_slave_id_vector,
+            signaled_master_vector => signaled_master_vector_buff,
+            handshake_master_vector => handshake_master_vector,
+            occupied_slave_vector => occupied_slave_vector ); 
     end process;
     
     -- Determine the permission for each data master interface.
-    process
-        variable permission_master_vector_buff : permission_master_vector_type;
-        variable decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
+    process (data_decoded_slave_id_vector,data_signaled_master_vector,data_handshake_master_vector,data_occupied_slave_vector)
     begin
-        -- By default, no master has permission to use a data slave interface.
-        permission_master_vector_buff := (others=>False);
-        -- Perform operation per each slave interface.
-        for each_slave in 0 to axi_slave_amount-1 loop
-            -- Perform operation per each master interface.
-            for each_master in 0 to axi_master_amount-1 loop
-                -- Determine which slave interface the current master interface is trying to reach.
-                decoded_slave_id_buff := data_decoded_slave_id_vector(each_master);
-                
-            end loop;
-        end loop;
+        data_permission_master_vector <= get_permission_master_vector (
+            decoded_slave_id_vector => data_decoded_slave_id_vector,
+            signaled_master_vector => data_signaled_master_vector,
+            handshake_master_vector => data_handshake_master_vector,
+            occupied_slave_vector => data_occupied_slave_vector ); 
     end process;
     
     -- Determine which slave interfaces are occupied.
     process (occupied_slave_matrix)
-        variable occupied_slave_vector_buff : occupied_slave_vector_type;
-        variable reduce_or : Boolean;
     begin
-        -- Perform operation per each slave interface.
-        for each_slave in 0 to axi_slave_amount-1 loop
-            -- Perform the reduction operation.
-            reduce_or := False;
-            for each_master in 0 to axi_master_amount-1 loop
-                reduce_or := reduce_or or (occupied_slave_matrix(each_master)(each_slave)='1');
-            end loop;
-            -- Store the result of the reduce or operation.
-            occupied_slave_vector_buff(each_slave) := reduce_or;
-        end loop;
-        -- Store the vector.
-        occupied_slave_vector <= occupied_slave_vector_buff;
+        occupied_slave_vector <= get_occupied_slave_vector(occupied_slave_matrix);
+    end process;
+    
+    -- Determine which data slave interfaces are occupied.
+    process (data_occupied_slave_matrix)
+    begin
+        data_occupied_slave_vector <= get_occupied_slave_vector(data_occupied_slave_matrix);
     end process;
     
     -- Set the corresponding enables for the crossbars for the address interface.
     process (occupied_slave_matrix)
-        variable axi_address_m2s_write_enables_buff : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
-        variable axi_address_s2m_write_enables_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     begin
-        axi_address_m2s_write_enables_buff := (others=>'0');
-        axi_address_s2m_write_enables_buff := (others=>'0');
-        for each_master in 0 to axi_master_amount-1 loop
-            for each_slave in 0 to axi_slave_amount-1 loop
-                if occupied_slave_matrix(each_master)(each_slave)='1' then
-                    axi_address_m2s_write_enables_buff(each_master+each_slave*axi_master_amount) := '1';
-                    axi_address_s2m_write_enables_buff(each_slave+each_master*axi_slave_amount) := '1';
-                end if;
-            end loop;
-        end loop;
+        axi_address_m2s_write_enables <= set_m2s_enables(occupied_slave_matrix);
+        axi_address_s2m_write_enables <= set_s2m_enables(occupied_slave_matrix);
+    end process;
+    
+    -- Set the corresponding enables for the crossbars for the data interface.
+    process (data_occupied_slave_matrix)
+    begin
+        axi_data_m2s_write_enables <= set_m2s_enables(data_occupied_slave_matrix);
+        axi_data_s2m_write_enables <= set_s2m_enables(data_occupied_slave_matrix);
     end process;
 
-    -- The following array of state machines perform the arbitration.
-    generate_master_state_machines:
+    -- The following perform the arbitration from the side of the master interfaces.
+    generate_master_flipflops:
         -- Generate a state machine for each master interface.
         for each_master in 0 to axi_master_amount-1 generate
             process (aclk)
@@ -224,41 +281,43 @@ begin
                     -- Perform reset on low.
                     if aresetn='0' then
                         occupied_slave_matrix(each_master) <= (others=>'0');
-                        master_state_vector(each_master) <= mst_address;
+                        data_signaled_master_vector(each_master) <= False;
+                        data_occupied_slave_matrix(each_master) <= (others=>'0');
                     else
-                        -- Drive the state machine.
-                        case master_state_vector(each_master) is
-                            
-                            when mst_address=>
-                            
-                                -- Wait until the master interface has permission 
-                                -- to use its desired slave interface.
-                                if permission_master_vector(each_master) then
-                                    -- Connect and indicate that the current slave interface is occupied.
-                                    occupied_slave_matrix(each_master)(decoded_slave_id_buff) <= '1';
-                                    -- Store the decoded slave id for the data operation.
-                                    data_decoded_slave_id_vector(each_master) <= decoded_slave_id_buff;
-                                    -- Got to the address state and wait until the address information has been transferred.
-                                     master_state_vector(each_master) <= mst_data;
-                                end if;
-                                
-                            when mst_data=>
-                                
-                                -- The address channel only needs to be active for a single clock cycle upon handshake.
-                                occupied_slave_matrix(each_master) <= (others=>'0');
-                                
-                                if data_permission_master_vector(each_master) then
-                                end if;
-                                
-                                
-                            when others=>
-                                master_state_vector(each_master) <= mst_address;
-                        end case;
+                        ---- ADDRESS block.
+                        -- Wait until the master interface has permission 
+                        -- to use its desired slave interface.
+                        if permission_master_vector(each_master) then
+                            -- Connect and indicate that the current slave interface is occupied.
+                            occupied_slave_matrix(each_master)(decoded_slave_id_buff) <= '1';
+                            -- Store the decoded slave id for the data operation.
+                            data_decoded_slave_id_vector(each_master) <= decoded_slave_id_buff;
+                        -- Wait until the master and occupied slave interface performs their handshake.
+                        elsif or_reduce(occupied_slave_matrix(each_master))='1' and handshake_master_vector(each_master) then
+                            -- The slave should no longer be occupied after handshake.
+                            occupied_slave_matrix(each_master) <= (others=>'0');
+                            -- Alert the data block.
+                            data_signaled_master_vector(each_master) <= True;
+                        end if;
+                        ---- DATA block.
+                        -- Wait until the master interface has permission to use its desired slave interface.
+                        if data_permission_master_vector(each_master) then
+                            -- Connect and indicate the decoded slave interface is occupied.
+                            data_occupied_slave_matrix(each_master)(data_decoded_slave_id_buff) <= '1';
+                            -- Reset the signal used to enable this interface.
+                            data_signaled_master_vector(each_master) <= False;
+                        -- Wait until the master and occupied slave interface perform their handshake on the last word.
+                        elsif or_reduce(data_occupied_slave_matrix(each_master))='1' and
+                                data_handshake_master_vector(each_master) and 
+                                m_axi_wlast(each_master)='1' then
+                            -- The slave should no longer be occupied after handshake.
+                            data_occupied_slave_matrix(each_master) <= (others=>'0');
+                        end if;
                     end if;
                 end if;
             end process;
         end generate 
-    generate_master_state_machines;
+    generate_master_flipflops;
     
     
 
