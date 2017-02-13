@@ -23,6 +23,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
+use IEEE.NUMERIC_STD.ALL;
                             
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -38,6 +39,7 @@ entity plasoc_crossbar_axi4_write_controller is
         axi_address_width : integer := 8;
         axi_master_amount : integer := 2;
         axi_master_id_width : integer := 2;
+        axi_master_full_axi_id_head_width : integer := 2;
         axi_slave_amount : integer := 2;
         axi_slave_base_address : std_logic_vector := X"0400";
         axi_slave_high_address : std_logic_vector := X"ff03");
@@ -51,6 +53,9 @@ entity plasoc_crossbar_axi4_write_controller is
         m_axi_wvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
         s_axi_wready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         m_axi_wlast : in std_logic_vector(axi_master_amount*1-1 downto 0);
+        s_axi_bid_head : in std_logic_vector(axi_slave_amount*axi_master_full_axi_id_head_width-1 downto 0);
+        s_axi_bvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        m_axi_bready : in std_logic_vector(axi_master_amount*1-1 downto 0);
         
         axi_address_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
         axi_address_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
@@ -69,7 +74,11 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
     type permission_master_vector_type is array(0 to axi_master_amount-1) of Boolean;
     type occupied_slave_vector_type is array(0 to axi_slave_amount-1) of Boolean;
     type occupied_slave_matrix_type is array(0 to axi_master_amount-1) of std_logic_vector(axi_slave_amount-1 downto 0);
-   
+    
+    type decoded_master_id_vector_type is array(0 to axi_slave_amount-1) of integer range 0 to 2**axi_master_amount-1;
+    type permission_slave_vector_type is array(0 to axi_slave_amount-1) of Boolean;
+    type occupied_master_vector_type is array(0 to axi_master_amount-1) of Boolean;
+    type occupied_master_matrix_type is array(0 to axi_slave_amount-1) of std_logic_vector(axi_master_amount-1 downto 0);
     
     function get_slave_base_address_vector( address : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0) ) return slave_address_vector_type is
         variable address_vector_buff : slave_address_vector_type;
@@ -88,9 +97,9 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
         occupied_slave_vector : in occupied_slave_vector_type ) 
         return permission_master_vector_type is
         variable permission_master_vector_buff : permission_master_vector_type;
-        variable decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
+        variable decoded_slave_id_buff : integer range 0 to axi_slave_amount-1;
     begin
-        -- By default, no master has permission to use a data slave interface.
+        -- By default, no master has permission to use a slave interface.
         permission_master_vector_buff := (others=>False);
         -- Perform operation per each slave interface.
         for each_slave in 0 to axi_slave_amount-1 loop
@@ -113,6 +122,29 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
         return permission_master_vector_buff;
     end;
     
+    function get_permission_slave_vector (
+        decoded_master_id_vector : in decoded_master_id_vector_type;
+        handshake_slave_vector : in permission_slave_vector_type;
+        occupied_master_vector : in occupied_master_vector_type )
+        return permission_slave_vector_type is
+        variable permission_slave_vector_buff : permission_slave_vector_type;
+        variable decoded_master_id_buff : integer range 0 to axi_master_amount-1;
+    begin
+        -- By default, no slave has permission to use a master interface.
+        permission_slave_vector_buff := (others=>False);
+        for each_master in 0 to axi_master_amount-1 loop
+            for each_slave in 0 to axi_slave_amount-1 loop
+                decoded_master_id_buff := decoded_master_id_vector(each_slave);
+                if handshake_slave_vector(each_slave) and
+                        not occupied_master_vector(decoded_master_id_buff) and
+                        each_master=decoded_master_id_buff then
+                    permission_slave_vector_buff(each_slave) := True;
+                end if;
+            end loop;
+        end loop;
+        return permission_slave_vector_buff;
+    end;
+    
     function get_occupied_slave_vector( occupied_slave_matrix : in occupied_slave_matrix_type ) return occupied_slave_vector_type is
         variable occupied_slave_vector_buff : occupied_slave_vector_type;
         variable reduce_or : Boolean;
@@ -127,11 +159,29 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
             -- Store the result of the reduce or operation.
             occupied_slave_vector_buff(each_slave) := reduce_or;
         end loop;
-        -- Return the master vector.
+        -- Return the slave vector.
         return occupied_slave_vector_buff;
     end;
     
-    function set_m2s_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
+    function get_occupied_master_vector( occupied_master_matrix : in occupied_master_matrix_type ) return occupied_master_vector_type is
+        variable occupied_master_vector_buff : occupied_master_vector_type;
+        variable reduce_or : Boolean;
+    begin
+    -- Perform operation per each master interface.
+    for each_master in 0 to axi_master_amount-1 loop
+        -- Perform the reduction operation.
+        reduce_or := False;
+        for each_slave in 0 to axi_slave_amount-1 loop
+            reduce_or := reduce_or or (occupied_master_matrix(each_slave)(each_master)='1');
+        end loop;
+        -- Store the result of the reduce or operation.
+        occupied_master_vector_buff(each_master) := reduce_or;
+    end loop;
+    -- Return the master vector.
+    return occupied_master_vector_buff;
+    end;
+    
+    function set_master_m2s_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
         variable m2s_enable_buff : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
     begin
         m2s_enable_buff := (others=>'0');
@@ -145,7 +195,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
         return m2s_enable_buff;
     end;
     
-    function set_s2m_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
+    function set_master_s2m_enables( occupied_slave_matrix : in occupied_slave_matrix_type ) return std_logic_vector is
         variable s2m_enable_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     begin
         s2m_enable_buff := (others=>'0');
@@ -159,9 +209,36 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
         return s2m_enable_buff;
     end;
     
+    function set_slave_m2s_enables( occupied_master_matrix : in occupied_master_matrix_type ) return std_logic_vector is
+        variable m2s_enable_buff : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
+    begin
+        m2s_enable_buff := (others=>'0');
+        for each_master in 0 to axi_master_amount-1 loop
+            for each_slave in 0 to axi_slave_amount-1 loop
+                if occupied_master_matrix(each_slave)(each_master)='1' then
+                    m2s_enable_buff(each_master+each_slave*axi_master_amount) := '1';
+                end if;
+            end loop;
+        end loop;
+        return m2s_enable_buff;
+    end;
+    
+    function set_slave_s2m_enables( occupied_master_matrix : in occupied_master_matrix_type ) return std_logic_vector is
+        variable s2m_enable_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+    begin
+        s2m_enable_buff := (others=>'0');
+        for each_master in 0 to axi_master_amount-1 loop
+            for each_slave in 0 to axi_slave_amount-1 loop
+                if occupied_master_matrix(each_slave)(each_master)='1' then
+                    s2m_enable_buff(each_slave+each_master*axi_slave_amount) := '1';
+                end if;
+            end loop;
+        end loop;
+        return s2m_enable_buff;
+    end;
+    
     constant slave_base_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_base_address);
     constant slave_high_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_high_address);
-    
     signal master_address_input_vector : master_address_vector_type := (others=>(others=>'0'));
     
     signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>axi_slave_amount);
@@ -176,14 +253,24 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
     signal data_handshake_master_vector : permission_master_vector_type := (others=>False);
     signal data_occupied_slave_vector : occupied_slave_vector_type := (others=>False);
     signal data_occupied_slave_matrix : occupied_slave_matrix_type := (others=>(others=>'0'));
+    
+    signal response_decoded_master_id_vector : decoded_master_id_vector_type := (others=>0);
+    signal response_permission_slave_vector : permission_slave_vector_type := (others=>False);
+    signal response_handshake_slave_vector : permission_slave_vector_type := (others=>False);
+    signal response_occupied_master_vector : occupied_master_vector_type := (others=>False);
+    signal response_occupied_master_matrix : occupied_master_matrix_type := (others=>(others=>'0'));
 begin
 
-    generate_handshakes:
+    generate_master_handshakes:
     for each_master in 0 to axi_master_amount-1 generate
         handshake_master_vector(each_master) <= m_axi_awvalid(each_master)='1' and s_axi_awready(decoded_slave_id_vector(each_master))='1';
         data_handshake_master_vector(each_master) <= m_axi_wvalid(each_master)='1' and s_axi_wready(data_decoded_slave_id_vector(each_master))='1';
-    end generate generate_handshakes;
+    end generate generate_master_handshakes;
      
+    generate_slave_handshakes:
+    for each_slave in 0 to axi_slave_amount-1 generate
+        response_handshake_slave_vector(each_slave) <= s_axi_bvalid(each_slave)='1' and m_axi_bready(response_decoded_master_id_vector(each_slave))='1';
+    end generate generate_slave_handshakes;
 
     -- Determine vector of master input addresses.
     process (m_axi_awaddr)
@@ -218,6 +305,17 @@ begin
         decoded_slave_id_vector <= decoded_slave_id_vector_buff;
     end process;
     
+    -- Determine vector of decoded master ids for each slave interface.
+    process (s_axi_bid_head)
+        variable response_decoded_master_id_vector_buff : decoded_master_id_vector_type;
+    begin
+        for each_slave in 0 to axi_slave_amount-1 loop
+            response_decoded_master_id_vector_buff(each_slave) := 
+                to_integer(unsigned(s_axi_bid_head((1+each_slave)*axi_master_full_axi_id_head_width-1 downto each_slave*axi_master_full_axi_id_head_width)));
+        end loop;
+        response_decoded_master_id_vector <= response_decoded_master_id_vector_buff;
+    end process;
+    
     -- Determine the permission of each master address interface.
     process (decoded_slave_id_vector,handshake_master_vector,occupied_slave_vector)
         constant signaled_master_vector_buff : permission_master_vector_type := (others=>True);
@@ -239,6 +337,15 @@ begin
             occupied_slave_vector => data_occupied_slave_vector ); 
     end process;
     
+    -- Determine the permission for each response slave interface.
+    process (response_decoded_master_id_vector,response_handshake_slave_vector,response_occupied_master_vector)
+    begin
+        response_permission_slave_vector <= get_permission_slave_vector (
+            decoded_master_id_vector => response_decoded_master_id_vector,
+            handshake_slave_vector => response_handshake_slave_vector,
+            occupied_master_vector => response_occupied_master_vector );
+    end process;
+    
     -- Determine which slave interfaces are occupied.
     process (occupied_slave_matrix)
     begin
@@ -251,31 +358,41 @@ begin
         data_occupied_slave_vector <= get_occupied_slave_vector(data_occupied_slave_matrix);
     end process;
     
-    -- Set the corresponding enables for the crossbars for the address interface.
-    process (occupied_slave_matrix)
+    -- Determine which response master interfaces are occupied.
+    process (response_occupied_master_matrix)
     begin
-        axi_address_m2s_write_enables <= set_m2s_enables(occupied_slave_matrix);
-        axi_address_s2m_write_enables <= set_s2m_enables(occupied_slave_matrix);
+        response_occupied_master_vector <= get_occupied_master_vector(response_occupied_master_matrix);
     end process;
     
-    -- Set the corresponding enables for the crossbars for the data interface.
+    -- Set the corresponding enables for the crossbars for the master controlled address interfaces.
+    process (occupied_slave_matrix)
+    begin
+        axi_address_m2s_write_enables <= set_master_m2s_enables(occupied_slave_matrix);
+        axi_address_s2m_write_enables <= set_master_s2m_enables(occupied_slave_matrix);
+    end process;
+    
+    -- Set the corresponding enables for the crossbars for the master controlled data interfaces.
     process (data_occupied_slave_matrix)
     begin
-        axi_data_m2s_write_enables <= set_m2s_enables(data_occupied_slave_matrix);
-        axi_data_s2m_write_enables <= set_s2m_enables(data_occupied_slave_matrix);
+        axi_data_m2s_write_enables <= set_master_m2s_enables(data_occupied_slave_matrix);
+        axi_data_s2m_write_enables <= set_master_s2m_enables(data_occupied_slave_matrix);
     end process;
-
+    
+    -- Set the corresponding enables for the crossbars for the slaved controlled response interfaces.
+    process (response_occupied_master_matrix)
+    begin
+        axi_response_m2s_write_enables <= set_slave_m2s_enables(response_occupied_master_matrix);
+        axi_response_s2m_write_enables <= set_slave_s2m_enables(response_occupied_master_matrix);
+    end process;
+        
     -- The following perform the arbitration from the side of the master interfaces.
     generate_master_flipflops:
         -- Generate a state machine for each master interface.
         for each_master in 0 to axi_master_amount-1 generate
             process (aclk)
-                variable decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
-                variable data_decoded_slave_id_buff : integer range 0 to axi_master_amount-1;
+                variable decoded_slave_id_buff : integer range 0 to axi_slave_amount-1;
+                variable data_decoded_slave_id_buff : integer range 0 to axi_slave_amount-1;
             begin
-                -- Acquire useful variables.
-                decoded_slave_id_buff := decoded_slave_id_vector(each_master);
-                data_decoded_slave_id_buff := data_decoded_slave_id_vector(each_master);
                 -- Perform operations synchronously.
                 if rising_edge(aclk) then
                     -- Perform reset on low.
@@ -284,6 +401,9 @@ begin
                         data_signaled_master_vector(each_master) <= False;
                         data_occupied_slave_matrix(each_master) <= (others=>'0');
                     else
+                        -- Acquire useful variables.
+                        decoded_slave_id_buff := decoded_slave_id_vector(each_master);
+                        data_decoded_slave_id_buff := data_decoded_slave_id_vector(each_master);
                         ---- ADDRESS block.
                         -- Wait until the master interface has permission 
                         -- to use its desired slave interface.
@@ -319,6 +439,25 @@ begin
         end generate 
     generate_master_flipflops;
     
-    
+    generate_slave_flipflops:
+        for each_slave in 0 to axi_slave_amount-1 generate
+            process (aclk)
+                variable response_decoded_master_id_buff : integer range 0 to axi_master_amount-1;
+            begin
+                if rising_edge(aclk) then
+                    if aresetn='0' then
+                        response_occupied_master_matrix(each_slave) <= (others=>'0');
+                    else
+                        response_decoded_master_id_buff := response_decoded_master_id_vector(each_slave);
+                        if response_permission_slave_vector(each_slave) then
+                            response_occupied_master_matrix(each_slave)(response_decoded_master_id_buff) <= '1';
+                        elsif or_reduce(response_occupied_master_matrix(each_slave))='1' and response_handshake_slave_vector(each_slave) then
+                            response_occupied_master_matrix(each_slave) <= (others=>'0');
+                        end if;
+                    end if;
+                end if;
+            end process;
+        end generate
+    generate_slave_flipflops;
 
 end Behavioral;
