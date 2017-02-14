@@ -7,13 +7,13 @@ use work.plasoc_crossbar_pack.all;
 
 entity plasoc_crossbar is
     generic (
-        axi_address_width : integer := 8;
-        axi_data_width : integer := 16;
+        axi_address_width : integer := 32;
+        axi_data_width : integer := 32;
         axi_master_amount : integer := 2;
         axi_master_id_width : integer := 2;
         axi_slave_amount : integer := 2;
-        axi_slave_base_address : std_logic_vector := X"0400";
-        axi_slave_high_address : std_logic_vector := X"ff03"
+        axi_slave_base_address : std_logic_vector := X"4000000000000000";
+        axi_slave_high_address : std_logic_vector := X"ffffffff3fffffff"
     );
     port (
         -- Global interface.
