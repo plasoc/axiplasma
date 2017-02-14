@@ -12,7 +12,8 @@ entity plasoc_crossbar is
         axi_master_amount : integer := 2;
         axi_master_id_width : integer := 2;
         axi_slave_amount : integer := 2;
-        axi_slave_base_address : std_logic_vector := X"0400"
+        axi_slave_base_address : std_logic_vector := X"0400";
+        axi_slave_high_address : std_logic_vector := X"ff03"
     );
     port (
         -- Global interface.
@@ -114,6 +115,60 @@ architecture Behavioral of plasoc_crossbar is
             enables : in std_logic_vector(input_amount*output_amount-1 downto 0);
             outputs : out std_logic_vector(width*output_amount-1 downto 0));
     end component;
+    component plasoc_crossbar_axi4_write_controller is
+        generic (
+            axi_address_width : integer := 8;
+            axi_master_amount : integer := 2;
+            axi_master_id_width : integer := 2;
+            axi_master_full_axi_id_head_width : integer := 2;
+            axi_slave_amount : integer := 2;
+            axi_slave_base_address : std_logic_vector := X"0400";
+            axi_slave_high_address : std_logic_vector := X"ff03");
+        port (
+            aclk : in std_logic;                                                   
+            aresetn : in std_logic;                                                
+            m_axi_awaddr : in std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);
+            m_axi_awvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            s_axi_awready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_wvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            s_axi_wready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_wlast : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            s_axi_bid_head : in std_logic_vector(axi_slave_amount*axi_master_full_axi_id_head_width-1 downto 0);
+            s_axi_bvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_bready : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            axi_address_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+            axi_address_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
+            axi_data_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+            axi_data_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
+            axi_response_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
+            axi_response_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0')
+        );
+    end component;
+    component plasoc_crossbar_axi4_read_controller is
+        generic (
+            axi_address_width : integer := 8;
+            axi_master_amount : integer := 2;
+            axi_master_id_width : integer := 2;
+            axi_master_full_axi_id_head_width : integer := 2;
+            axi_slave_amount : integer := 2;
+            axi_slave_base_address : std_logic_vector := X"0400";
+            axi_slave_high_address : std_logic_vector := X"ff03");
+        port (
+            aclk : in std_logic;                                                   
+            aresetn : in std_logic;   
+            m_axi_araddr : in std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);
+            m_axi_arvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            s_axi_arready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_rvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_rready : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            s_axi_rlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_rid_head : in std_logic_vector(axi_slave_amount*axi_master_full_axi_id_head_width-1 downto 0);
+            axi_address_m2s_read_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+            axi_address_s2m_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
+            axi_data_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+            axi_data_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0')
+        );
+    end component;
     constant axi_master_full_axi_id_head_width : integer := clogb2(axi_master_amount+1);
     constant axi_master_full_axi_id_width : integer := axi_master_full_axi_id_head_width+axi_master_id_width;
     signal axi_master_full_axi_awid : std_logic_vector(axi_master_amount*axi_master_full_axi_id_width-1 downto 0);
@@ -210,6 +265,58 @@ begin
             each_slave*axi_master_full_axi_id_width+axi_master_id_width-1 downto 
             each_slave*axi_master_full_axi_id_width+0);
     end generate generate_axi_slave_full_id;
+    -- AXI4-Full Write Controller.
+    plasoc_crossbar_axi4_write_controller_inst : plasoc_crossbar_axi4_write_controller 
+        generic map (
+            axi_address_width => axi_address_width,
+            axi_master_amount => axi_master_amount,
+            axi_master_id_width => axi_master_id_width,
+            axi_master_full_axi_id_head_width => axi_master_full_axi_id_head_width,
+            axi_slave_amount => axi_slave_amount,
+            axi_slave_base_address => axi_slave_base_address,
+            axi_slave_high_address => axi_slave_high_address)
+        port map (
+            aclk => aclk,                                                  
+            aresetn => aresetn,                                             
+            m_axi_awaddr => m_axi_awaddr,
+            m_axi_awvalid => m_axi_awvalid,
+            s_axi_awready => s_axi_awready,
+            m_axi_wvalid => m_axi_wvalid,
+            s_axi_wready => s_axi_wready,
+            m_axi_wlast => m_axi_wlast,
+            s_axi_bid_head => axi_slave_head_axi_bid,
+            s_axi_bvalid => s_axi_bvalid,
+            m_axi_bready => m_axi_bready,
+            axi_address_m2s_write_enables => axi_address_m2s_write_enables,
+            axi_address_s2m_write_enables => axi_address_s2m_write_enables,
+            axi_data_m2s_write_enables => axi_data_m2s_write_enables,
+            axi_data_s2m_write_enables => axi_data_s2m_write_enables,
+            axi_response_s2m_write_enables => axi_response_s2m_write_enables,
+            axi_response_m2s_write_enables => axi_response_m2s_write_enables);
+    -- AXI4-Full Read controller.
+    plasoc_crossbar_axi4_read_controller_inst : plasoc_crossbar_axi4_read_controller 
+        generic map (
+            axi_address_width => axi_address_width,
+            axi_master_amount => axi_master_amount,
+            axi_master_id_width => axi_master_id_width,
+            axi_master_full_axi_id_head_width => axi_master_full_axi_id_head_width,
+            axi_slave_amount => axi_slave_amount,
+            axi_slave_base_address => axi_slave_base_address,
+            axi_slave_high_address => axi_slave_high_address )
+        port map (
+            aclk => aclk,                                                  
+            aresetn => aresetn,
+            m_axi_araddr => m_axi_araddr,
+            m_axi_arvalid => m_axi_arvalid,
+            s_axi_arready => s_axi_arready,
+            s_axi_rvalid => s_axi_rvalid,
+            m_axi_rready => m_axi_rready,
+            s_axi_rlast => s_axi_rlast,
+            s_axi_rid_head => axi_slave_head_axi_rid,
+            axi_address_m2s_read_enables => axi_address_m2s_read_enables,
+            axi_address_s2m_read_enables => axi_address_s2m_read_enables,
+            axi_data_m2s_write_enables => axi_data_m2s_write_enables,
+            axi_data_s2m_write_enables => axi_data_s2m_write_enables);
     -- AXI4-Full Write Address Instantiations.
     axi_awid_cross_inst : plasoc_crossbar_base 
         generic map (width => axi_master_full_axi_id_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)
