@@ -5,6 +5,7 @@ use work.plasoc_int_pack.all;
 use work.plasoc_timer_pack.all;
 use work.plasoc_gpio_pack.all;
 use work.plasoc_crossbar_pack.all; 
+use work.plasoc_axi4_full2lite_pack.all;
 
 entity axiplasma_wrapper is
     port( 
@@ -104,7 +105,7 @@ architecture Behavioral of axiplasma_wrapper is
       PORT (
         s_axi_aclk : IN STD_LOGIC;
         s_axi_aresetn : IN STD_LOGIC;
-        s_axi_awid : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
         s_axi_awaddr : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         s_axi_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
         s_axi_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -119,11 +120,11 @@ architecture Behavioral of axiplasma_wrapper is
         s_axi_wlast : IN STD_LOGIC;
         s_axi_wvalid : IN STD_LOGIC;
         s_axi_wready : OUT STD_LOGIC;
-        s_axi_bid : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_bid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
         s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_bvalid : OUT STD_LOGIC;
         s_axi_bready : IN STD_LOGIC;
-        s_axi_arid : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
         s_axi_araddr : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         s_axi_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
         s_axi_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -133,7 +134,7 @@ architecture Behavioral of axiplasma_wrapper is
         s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         s_axi_arvalid : IN STD_LOGIC;
         s_axi_arready : OUT STD_LOGIC;
-        s_axi_rid : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_rid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
         s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
         s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
         s_axi_rlast : OUT STD_LOGIC;
@@ -149,14 +150,110 @@ architecture Behavioral of axiplasma_wrapper is
       );
     END component;
     constant word_width : integer := 32;
+    constant axi_address_width : integer := word_width;
+    constant axi_data_width : integer := word_width;
+    constant axi_master_amount : integer := 2;
+    constant axi_slave_amount : integer := 5;
+    constant axi_master_id_width : integer := 0;
+    constant ram_axi_base_address : std_logic_vector:= X"00000000";
+    constant ram_axi_high_address : std_logic_vector:= X"0000FFFF";
     constant int_axi_base_address : std_logic_vector := X"44A00000";
+    constant int_axi_high_address : std_logic_vector := X"44A0FFFF";
     constant timer_axi_base_address : std_logic_vector := X"44A10000";
+    constant timer_axi_high_address : std_logic_vector := X"44A1FFFF";
     constant gpio_axi_base_address : std_logic_vector := X"44A20000";
+    constant gpio_axi_high_address : std_logic_vector := X"44A2FFFF";
+    constant cdma_axi_base_address : std_logic_vector := X"44A30000";
+    constant cdma_axi_high_address : std_logic_vector := X"44A3FFFF";
+    constant axi_slave_base_address : std_logic_vector := cdma_axi_base_address & gpio_axi_base_address & timer_axi_base_address & int_axi_base_address & ram_axi_base_address;
+    constant axi_slave_high_address : std_logic_vector := cdma_axi_high_address & gpio_axi_high_address & timer_axi_high_address & int_axi_high_address & ram_axi_high_address;
     -- global interface.
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
     signal interconnect_aresetn : std_logic_vector(0 downto 0);
     signal locked : std_logic;
+    -- Crossbar Master AXI4-Full Write interfaces.
+    signal cross_m_axi_awid : std_logic_vector(axi_master_amount*axi_master_id_width-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awaddr : std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awlen : std_logic_vector(axi_master_amount*8-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awsize : std_logic_vector(axi_master_amount*3-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awburst : std_logic_vector(axi_master_amount*2-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awlock : std_logic_vector(axi_master_amount*1-1 downto 0);                                                --! AXI4-Full Address Write signal.    
+    signal cross_m_axi_awcache : std_logic_vector(axi_master_amount*4-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awprot : std_logic_vector(axi_master_amount*3-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awqos : std_logic_vector(axi_master_amount*4-1 downto 0);                            --! AXI4-Full Address Write signal.    
+    signal cross_m_axi_awregion : std_logic_vector(axi_master_amount*4-1 downto 0);                        --! AXI4-Full Address Write signal.                    
+    signal cross_m_axi_awvalid : std_logic_vector(axi_master_amount*1-1 downto 0);                                            --! AXI4-Full Address Write signal.
+    signal cross_m_axi_awready : std_logic_vector(axi_master_amount*1-1 downto 0);                                                --! AXI4-Full Address Write signal.    
+    signal cross_m_axi_wdata : std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);                            --! AXI4-Full Write Data signal.
+    signal cross_m_axi_wstrb : std_logic_vector(axi_master_amount*axi_data_width/8-1 downto 0);                            --! AXI4-Full Write Data signal.
+    signal cross_m_axi_wlast : std_logic_vector(axi_master_amount*1-1 downto 0);                                                --! AXI4-Full Write Data signal.
+    signal cross_m_axi_wvalid : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Write Data signal.
+    signal cross_m_axi_wready : std_logic_vector(axi_master_amount*1-1 downto 0);                                                --! AXI4-Full Write Data signal.
+    signal cross_m_axi_bid : std_logic_vector(axi_master_amount*axi_master_id_width-1 downto 0);                                --! AXI4-Full Write Response signal.
+    signal cross_m_axi_bresp : std_logic_vector(axi_master_amount*2-1 downto 0);                            --! AXI4-Full Write Response signal.
+    signal cross_m_axi_bvalid : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Write Response signal.
+    signal cross_m_axi_bready : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Write Response signal.
+    -- Master AXI4-Full Read interface.
+    signal cross_m_axi_arid : std_logic_vector(axi_master_amount*axi_master_id_width-1 downto 0);                              --! AXI4-Full Address Read signal.
+    signal cross_m_axi_araddr : std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arlen : std_logic_vector(axi_master_amount*8-1 downto 0);                             --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arsize : std_logic_vector(axi_master_amount*3-1 downto 0);                           --! AXI4-Full Address Read signal.    
+    signal cross_m_axi_arburst : std_logic_vector(axi_master_amount*2-1 downto 0);                            --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arlock : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Address Read signal.        
+    signal cross_m_axi_arcache : std_logic_vector(axi_master_amount*4-1 downto 0);                           --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arprot : std_logic_vector(axi_master_amount*3-1 downto 0);                         --! AXI4-Full Address Read signal.    
+    signal cross_m_axi_arqos : std_logic_vector(axi_master_amount*4-1 downto 0);                           --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arregion : std_logic_vector(axi_master_amount*4-1 downto 0);                        --! AXI4-Full Address Write signal.        
+    signal cross_m_axi_arvalid : std_logic_vector(axi_master_amount*1-1 downto 0);                                          --! AXI4-Full Address Read signal.
+    signal cross_m_axi_arready : std_logic_vector(axi_master_amount*1-1 downto 0);                                              --! AXI4-Full Address Read signal.
+    signal cross_m_axi_rid : std_logic_vector(axi_master_amount*axi_master_id_width-1 downto 0);                                --! AXI4-Full Read Data signal.
+    signal cross_m_axi_rdata : std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
+    signal cross_m_axi_rresp : std_logic_vector(axi_master_amount*2-1 downto 0);                            --! AXI4-Full Read Data signal.    
+    signal cross_m_axi_rlast : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
+    signal cross_m_axi_rvalid : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
+    signal cross_m_axi_rready : std_logic_vector(axi_master_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
+    -- Slave AXI4-Full Write interfaces.
+    signal cross_s_axi_awid : std_logic_vector(axi_slave_amount*(work.plasoc_cpu_pack.clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awaddr : std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awlen : std_logic_vector(axi_slave_amount*8-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awsize : std_logic_vector(axi_slave_amount*3-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awburst : std_logic_vector(axi_slave_amount*2-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awlock : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Address Write signal.    
+    signal cross_s_axi_awcache : std_logic_vector(axi_slave_amount*4-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awprot : std_logic_vector(axi_slave_amount*3-1 downto 0);                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awqos : std_logic_vector(axi_slave_amount*4-1 downto 0);                            --! AXI4-Full Address Write signal.    
+    signal cross_s_axi_awregion : std_logic_vector(axi_slave_amount*4-1 downto 0);                        --! AXI4-Full Address Write signal.                    
+    signal cross_s_axi_awvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                            --! AXI4-Full Address Write signal.
+    signal cross_s_axi_awready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Address Write signal.    
+    signal cross_s_axi_wdata : std_logic_vector(axi_slave_amount*axi_data_width-1 downto 0);                            --! AXI4-Full Write Data signal.
+    signal cross_s_axi_wstrb : std_logic_vector(axi_slave_amount*axi_data_width/8-1 downto 0);                            --! AXI4-Full Write Data signal.
+    signal cross_s_axi_wlast : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Write Data signal.
+    signal cross_s_axi_wvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Write Data signal.
+    signal cross_s_axi_wready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Write Data signal.
+    signal cross_s_axi_bid : std_logic_vector(axi_slave_amount*(work.plasoc_cpu_pack.clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);                                --! AXI4-Full Write Response signal.
+    signal cross_s_axi_bresp : std_logic_vector(axi_slave_amount*2-1 downto 0);                            --! AXI4-Full Write Response signal.
+    signal cross_s_axi_bvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Write Response signal.
+    signal cross_s_axi_bready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Write Response signal.
+    -- Slave AXI4-Full Read interface.
+    signal cross_s_axi_arid : std_logic_vector(axi_slave_amount*(work.plasoc_cpu_pack.clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);                              --! AXI4-Full Address Read signal.
+    signal cross_s_axi_araddr : std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);                            --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arlen : std_logic_vector(axi_slave_amount*8-1 downto 0);                             --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arsize : std_logic_vector(axi_slave_amount*3-1 downto 0);                           --! AXI4-Full Address Read signal.    
+    signal cross_s_axi_arburst : std_logic_vector(axi_slave_amount*2-1 downto 0);                            --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arlock : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Address Read signal.        
+    signal cross_s_axi_arcache : std_logic_vector(axi_slave_amount*4-1 downto 0);                           --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arprot : std_logic_vector(axi_slave_amount*3-1 downto 0);                         --! AXI4-Full Address Read signal.    
+    signal cross_s_axi_arqos : std_logic_vector(axi_slave_amount*4-1 downto 0);                           --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arregion : std_logic_vector(axi_slave_amount*4-1 downto 0);                        --! AXI4-Full Address Write signal.        
+    signal cross_s_axi_arvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                          --! AXI4-Full Address Read signal.
+    signal cross_s_axi_arready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                              --! AXI4-Full Address Read signal.
+    signal cross_s_axi_rid : std_logic_vector(axi_slave_amount*(work.plasoc_cpu_pack.clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);                                --! AXI4-Full Read Data signal.
+    signal cross_s_axi_rdata : std_logic_vector(axi_slave_amount*axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
+    signal cross_s_axi_rresp : std_logic_vector(axi_slave_amount*2-1 downto 0);                            --! AXI4-Full Read Data signal.    
+    signal cross_s_axi_rlast : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
+    signal cross_s_axi_rvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
+    signal cross_s_axi_rready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Read Data signal.
     -- CPU interface.
     signal axi_awid : std_logic_vector(0 downto 0);
     signal axi_awaddr : std_logic_vector(31 downto 0);
@@ -245,7 +342,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal cdma_m_axi_bvalid : STD_LOGIC;
     signal cdma_m_axi_bresp : STD_LOGIC_VECTOR(1 DOWNTO 0);
     -- Bram interface.
-    signal bram_s_axi_awid : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    signal bram_s_axi_awid : STD_LOGIC_VECTOR(0 DOWNTO 0);
     signal bram_s_axi_awaddr : STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal bram_s_axi_awlen : STD_LOGIC_VECTOR(7 DOWNTO 0);
     signal bram_s_axi_awsize : STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -260,11 +357,11 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_s_axi_wlast : STD_LOGIC;
     signal bram_s_axi_wvalid : STD_LOGIC;
     signal bram_s_axi_wready : STD_LOGIC;
-    signal bram_s_axi_bid : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    signal bram_s_axi_bid : STD_LOGIC_VECTOR(0 DOWNTO 0);
     signal bram_s_axi_bresp : STD_LOGIC_VECTOR(1 DOWNTO 0);
     signal bram_s_axi_bvalid : STD_LOGIC;
     signal bram_s_axi_bready : STD_LOGIC;
-    signal bram_s_axi_arid : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    signal bram_s_axi_arid : STD_LOGIC_VECTOR(0 DOWNTO 0);
     signal bram_s_axi_araddr : STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal bram_s_axi_arlen : STD_LOGIC_VECTOR(7 DOWNTO 0);
     signal bram_s_axi_arsize : STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -274,7 +371,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_s_axi_arprot : STD_LOGIC_VECTOR(2 DOWNTO 0);
     signal bram_s_axi_arvalid : STD_LOGIC;
     signal bram_s_axi_arready : STD_LOGIC;
-    signal bram_s_axi_rid : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    signal bram_s_axi_rid : STD_LOGIC_VECTOR(0 DOWNTO 0);
     signal bram_s_axi_rdata : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal bram_s_axi_rresp : STD_LOGIC_VECTOR(1 DOWNTO 0);
     signal bram_s_axi_rlast : STD_LOGIC;
@@ -308,7 +405,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal gpio_axi_wstrb : STD_LOGIC_VECTOR ( 3 downto 0 );
     signal gpio_axi_wvalid : STD_LOGIC;
     signal gpio_int : std_logic;
-    -- interrupt controller interface;
+    -- Interrupt controller interface;
     signal int_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
     signal int_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal int_axi_arready : STD_LOGIC;
@@ -376,6 +473,97 @@ begin
             peripheral_reset => open,
             interconnect_aresetn => interconnect_aresetn,
             peripheral_aresetn => aresetn);
+            
+    plasoc_crossbar_inst : plasoc_crossbar 
+        generic map (
+            axi_address_width => axi_address_width,
+            axi_data_width => axi_data_width,
+            axi_master_amount => axi_master_amount,
+            axi_master_id_width => axi_master_id_width,
+            axi_slave_amount => axi_slave_amount,
+            axi_slave_base_address => axi_slave_base_address,
+            axi_slave_high_address => axi_slave_high_address )
+        port map (
+            aclk => aclk,
+            aresetn => interconnect_aresetn(0),
+            m_axi_awid => cross_m_axi_awid,
+            m_axi_awaddr => cross_m_axi_awaddr,
+            m_axi_awlen => cross_m_axi_awlen,
+            m_axi_awsize => cross_m_axi_awsize,
+            m_axi_awburst => cross_m_axi_awburst,
+            m_axi_awlock => cross_m_axi_awlock,   
+            m_axi_awcache => cross_m_axi_awcache,
+            m_axi_awprot => cross_m_axi_awprot,
+            m_axi_awqos => cross_m_axi_awqos,   
+            m_axi_awregion => cross_m_axi_awregion,   
+            m_axi_awvalid => cross_m_axi_awvalid,
+            m_axi_awready => cross_m_axi_awready,   
+            m_axi_wdata => cross_m_axi_wdata,
+            m_axi_wstrb => cross_m_axi_wstrb,
+            m_axi_wlast => cross_m_axi_wlast,
+            m_axi_wvalid => cross_m_axi_wvalid,
+            m_axi_wready => cross_m_axi_wready,
+            m_axi_bid => cross_m_axi_bid,
+            m_axi_bresp => cross_m_axi_bresp,
+            m_axi_bvalid => cross_m_axi_bvalid,
+            m_axi_bready => cross_m_axi_bready,
+            m_axi_arid => cross_m_axi_arid,
+            m_axi_araddr => cross_m_axi_araddr,
+            m_axi_arlen => cross_m_axi_arlen,
+            m_axi_arsize => cross_m_axi_arsize,   
+            m_axi_arburst => cross_m_axi_arburst,
+            m_axi_arlock => cross_m_axi_arlock,        
+            m_axi_arcache => cross_m_axi_arcache,
+            m_axi_arprot => cross_m_axi_arprot,
+            m_axi_arqos => cross_m_axi_arqos,
+            m_axi_arregion => cross_m_axi_arregion, 
+            m_axi_arvalid => cross_m_axi_arvalid,
+            m_axi_arready => cross_m_axi_arready,
+            m_axi_rid => cross_m_axi_rid,
+            m_axi_rdata => cross_m_axi_rdata,
+            m_axi_rresp => cross_m_axi_rresp, 
+            m_axi_rlast => cross_m_axi_rlast,
+            m_axi_rvalid => cross_m_axi_rvalid,
+            m_axi_rready => cross_m_axi_rready,
+            s_axi_awid => cross_s_axi_awid,                           
+            s_axi_awaddr => cross_s_axi_awaddr,
+            s_axi_awlen => cross_s_axi_awlen,
+            s_axi_awsize => cross_s_axi_awsize,
+            s_axi_awburst => cross_s_axi_awburst,
+            s_axi_awlock => cross_s_axi_awlock, 
+            s_axi_awcache => cross_s_axi_awcache,
+            s_axi_awprot => cross_s_axi_awprot,
+            s_axi_awqos => cross_s_axi_awqos,
+            s_axi_awregion => cross_s_axi_awregion,                  
+            s_axi_awvalid => cross_s_axi_awvalid,
+            s_axi_awready => cross_s_axi_awready,   
+            s_axi_wdata => cross_s_axi_wdata,
+            s_axi_wstrb => cross_s_axi_wstrb,
+            s_axi_wlast => cross_s_axi_wlast,
+            s_axi_wvalid => cross_s_axi_wvalid,
+            s_axi_wready => cross_s_axi_wready,
+            s_axi_bid => cross_s_axi_bid,
+            s_axi_bresp => cross_s_axi_bresp,
+            s_axi_bvalid => cross_s_axi_bvalid,
+            s_axi_bready => cross_s_axi_bready,
+            s_axi_arid => cross_s_axi_arid,
+            s_axi_araddr => cross_s_axi_araddr,
+            s_axi_arlen => cross_s_axi_arlen,
+            s_axi_arsize => cross_s_axi_arsize,
+            s_axi_arburst => cross_s_axi_arburst,
+            s_axi_arlock => cross_s_axi_arlock,    
+            s_axi_arcache => cross_s_axi_arcache,
+            s_axi_arprot => cross_s_axi_arprot,  
+            s_axi_arqos => cross_s_axi_arqos,
+            s_axi_arregion => cross_s_axi_arregion,
+            s_axi_arvalid => cross_s_axi_arvalid,
+            s_axi_arready => cross_s_axi_arready,
+            s_axi_rid => cross_s_axi_rid,
+            s_axi_rdata => cross_s_axi_rdata,
+            s_axi_rresp => cross_s_axi_rresp,  
+            s_axi_rlast => cross_s_axi_rlast,
+            s_axi_rvalid => cross_s_axi_rvalid,
+            s_axi_rready => cross_s_axi_rready);
             
     -- CDMA instantiation.
     axi_cdma_inst : axi_cdma_0 

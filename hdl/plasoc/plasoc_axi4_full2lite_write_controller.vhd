@@ -83,6 +83,7 @@ architecture Behavioral of plasoc_axi4_full2lite_write_controller is
     signal counter : integer range 0 to 2**8-1 := 0;  
     signal s_axi_awready_buff : std_logic := '0';
     signal s_axi_wready_buff : std_logic := '0';
+    signal s_axi_bvalid_buff : std_logic := '0'; 
     signal m_axi_awaddr_buff : std_logic_vector(axi_address_width-1 downto 0) := (others=>'0');   
     signal m_axi_awvalid_buff : std_logic := '0';
     signal m_axi_wvalid_buff : std_logic := '0';
@@ -91,16 +92,26 @@ architecture Behavioral of plasoc_axi4_full2lite_write_controller is
 begin
     s_axi_awready <= s_axi_awready_buff;
     s_axi_wready <= s_axi_wready_buff;
+    s_axi_bvalid <= s_axi_bvalid_buff;
     m_axi_awaddr <= m_axi_awaddr_buff;
     m_axi_awvalid <= m_axi_awvalid_buff;
     m_axi_wvalid <= m_axi_wvalid_buff;
     m_axi_bready <= m_axi_bready_buff;
+    s_axi_bresp <= (others=>'0');
+    
+    -- Drive the address and data channels.
     process (aclk)
     begin
         -- Perform operations synchronously.
         if rising_edge(aclk) then
             -- Reset on low.
             if aresetn='0' then
+                state <= s_wait;
+                m_axi_awvalid_buff <= '0';
+                m_axi_wvalid_buff <= '0';
+                s_axi_awready_buff <= '0';
+                s_axi_wready_buff <= '0';
+                m_axi_bready_buff <= '0';
             else
                 -- Controller's operation is based on its state.
                 case state is
@@ -124,7 +135,6 @@ begin
                     -- The operation state represents the main state of operation of
                     -- the controller upon a request.
                     when s_operate=>
-                        -- Set the next address information upon handshake of the lite address interface.
                         if m_axi_awvalid_buff='1' and m_axi_awready='1' then
                             case burst_buff is
                                 when axi_burst_fixed=>                               
@@ -132,42 +142,51 @@ begin
                                 when others=> error_occurred_with_burst <= True;
                             end case;
                         end if;
-                        -- Set data information upon handshake of the full data interface.
                         if s_axi_wvalid='1' and s_axi_wready_buff='1' then
                             m_axi_wdata <= s_axi_wdata;
                             m_axi_wstrb <= s_axi_wstrb;
                         end if;
-                            
-                        -- Drive the ready for the full data interface.
+                        if m_axi_awvalid_buff='1' and m_axi_awready='1' and counter=to_integer(unsigned(len_buff)) then
+                            m_axi_awvalid_buff <= '0';
+                        end if;
+                        if m_axi_awvalid_buff='1' and m_axi_awready='1' then
+                            counter <= counter+1;
+                        end if;
                         if m_axi_awvalid_buff='1' and m_axi_awready='1' then
                             s_axi_wready_buff <= '1';
                         elsif s_axi_wvalid='1' and s_axi_wready_buff='1' then
                             s_axi_wready_buff <= '0';
                         end if;
-                        
-                        -- Drive the valid for the lite data interface.
                         if s_axi_wvalid='1' and s_axi_wready_buff='1' then
                             m_axi_wvalid_buff <= '1';
                         elsif m_axi_wvalid_buff='1' and m_axi_wready='1' then
                             m_axi_wvalid_buff <= '0';
                         end if;
-                        
-                        -- Drive the ready for the lite response interface.
                         if m_axi_wvalid_buff='1' and m_axi_wready='1' then
                             m_axi_bready_buff <= '1';
                         elsif m_axi_bvalid='1' and m_axi_bready_buff='1' then
                             m_axi_bready_buff <= '0';
                         end if;
-                        
-                        if m_axi_awvalid_buff='1' and m_axi_awready='1' and counter=to_integer(unsigned(len_buff)) then
-                            m_axi_awvalid_buff <= '0';
-                        end if;
-                        
-                        -- Drive the counter.
-                        if m_axi_awvalid_buff='1' and m_axi_awready='1' then
-                            counter <= counter+1;
+                        if m_axi_bvalid='1' and m_axi_bready_buff='1' and m_axi_awvalid_buff='0' and m_axi_wvalid_buff='0' then
+                            state <= s_wait;
                         end if;
                 end case;
+            end if;
+        end if;
+    end process;
+    
+    -- Drive the response channel for the full interface.
+    process (aclk)
+    begin
+        if rising_edge(aclk) then
+            if aresetn='0' then
+                s_axi_bvalid_buff <= '0';
+            else
+                if s_axi_wvalid='1' and s_axi_wready_buff='1' and s_axi_wlast='1' then
+                    s_axi_bvalid_buff <= '1';
+                elsif s_axi_bvalid_buff='1' and s_axi_bready='1' then
+                    s_axi_bvalid_buff <= '0';
+                end if;
             end if;
         end if;
     end process;
