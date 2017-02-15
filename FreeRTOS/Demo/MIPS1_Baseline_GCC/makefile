@@ -10,7 +10,7 @@ PORT_SRC_DIR = ../../Source/portable/GCC/MIPS1
 
 INCLUDE_DIRS += $(PORT_SRC_DIR) $(FREERTOS_SRC_DIR)/include $(PLASMA_SRC_DIR) $(PLASOC_SRC_DIR)
 WARNINGS += -Wall
-CFLAGS += -Os -s -std=c11
+CFLAGS += -O2 -std=c11
 LDFLAGS += -L$(LD_DIR) -static
 
 # Following are REQUIRED variables, but can be edited
@@ -29,7 +29,8 @@ $(FREERTOS_SRC_DIR)/portable/MemMang/heap_1.c	\
 $(PORT_SRC_DIR)/port.c							
 
 ASM_SOURCES = \
-$(PLASMA_SRC_DIR)/boot.asm
+$(PLASMA_SRC_DIR)/boot.asm						\
+$(PORT_SRC_DIR)/port_asm.asm
 
 # No user editing or variables below this line
 
@@ -41,7 +42,7 @@ RM = rm -f
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
 LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
-DUMP_MIPS = $(PREFIX)objdump$(SUFFIX)
+DUMP_MIPS = $(PREFIX)objdump$(SUFFIX) -g
 OBJCOPY_MIPS = $(PREFIX)objcopy$(SUFFIX)
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
 
@@ -67,7 +68,7 @@ endif
 $(C_OBJECTS):%:%.c
 	$(GCC_MIPS) -o $(notdir $@).o $@.c
 ifdef DEBUG_MAKE
-	$(GCC_MIPS) -o $(notdir $@).asm -S $@.c
+	$(GCC_MIPS) -o $(notdir $@).s -S $@.c
 endif
 	
 $(ASM_OBJECTS):%:%.asm

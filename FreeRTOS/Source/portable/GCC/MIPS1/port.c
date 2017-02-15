@@ -1,6 +1,6 @@
 /*! \file *********************************************************************
  *
- * \brief FreeRTOS port source for customized MIPS rev 1 architecture.
+ * \brief FreeRTOS port source for customized MIPS R2000 architecture.
  *
  * - Compiler:			 GNU GCC for MIPS1
  * - Supported devices:  https://github.com/andrewandrepowell/axiplasma
@@ -16,16 +16,11 @@
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
-
-#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
-#define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
-
-#define ucHeap = (*(volatile uint8_t (*)[PLASOC_HEAP_MAX_SIZE])(PLASOC_HEAP_BASE_ADDRESS))
+#include "xgpio.h"
 
 static inline void SetupTickTimer(void);
 static inline void DisableTickTimer(void);
-#define StartFirstTask() \
-	portRESTORE_CONTEXT();
+extern void StartFirstTask(void);
 
 void vAssertCalled(const char *file, int line)
 {
@@ -39,42 +34,22 @@ void vAssertCalled(const char *file, int line)
 	while(1) __asm__ __volatile__("");
 }
 
-StackType_t* pxPortInitialiseStack(StackType_t* pxTopOfStack, TaskFunction_t pxCode, void* pvParameters)
-{
-	// follows semantics of interrupt_service_routine from boot.asm
-
-	// reserved for saving a0-a3
-	pxTopOfStack -= 4;
-
-	// at, v0 and v1
-	pxTopOfStack -= 3;
-
-	// a0 gets parameter list
-	*pxTopOfStack-- = (StackType_t)pvParameters;
-
-	// a1-a3, t0-t9
-	pxTopOfStack -= 13;
-
-	// lr with (potentially) special value
-	*pxTopOfStack-- = 0;
-
-	// pc
-	*pxTopOfStack-- = (StackType_t)pxCode;
-
-	// hi and lo
-	pxTopOfStack -= 2;
-
-	return pxTopOfStack;
-}
-
 BaseType_t xPortStartScheduler(void)
 {
+	static xgpio xgpio_output_obj;
+	xgpio_setup(&xgpio_output_obj,0x40010000);
+	xgpio_set_direction(&xgpio_output_obj,XGPIO_OUTPUTS);
+	xgpio_set_data(&xgpio_output_obj, 1);
+
 	// setup timer interrupt for FreeRTOS tick
 	SetupTickTimer();
 
 	// TODO: save link register so vPortEndScheduler can return from this function
 
-	// start first task
+	xgpio_set_data(&xgpio_output_obj, 0);
+	portENABLE_INTERRUPTS();
+
+	// Start first task
 	StartFirstTask();
 
 	// shouldn't reach here unless vPortEndScheduler is called
@@ -93,8 +68,8 @@ void vPortEndScheduler(void)
 
 /******		Tick functions		******/
 
-static plasoc_int int_obj;
-static plasoc_timer timer_obj;
+extern plasoc_int int_obj;
+extern plasoc_timer timer_obj;
 
 static void FreeRTOSTick(void* extraArgs)
 {
@@ -110,16 +85,10 @@ static void FreeRTOSTick(void* extraArgs)
 
 static inline void SetupTickTimer(void)
 {
-	// initialize interrupt and timer objects
-	plasoc_int_setup(&int_obj, PLASOC_INT_BASE_ADDRESS);
-	plasoc_timer_setup(&timer_obj, PLASOC_TIMER_BASE_ADDRESS);
 
 	// attach FreeRTOS's tick to trigger
-	plasoc_timer_set_trig_value(&timer_obj, configTICK_RATE_HZ/PLASMA_HZ);
-	plasoc_int_attach_isr(&int_obj, 0, FreeRTOSTick, NULL);
-
-	/* Configure the interrupts of the CPU. */
-	OS_AsmInterruptEnable(1);
+	plasoc_timer_set_trig_value(&timer_obj, PLASMA_HZ/configTICK_RATE_HZ);
+	plasoc_int_attach_isr(&int_obj, INT_PLASOC_TIMER_ID, FreeRTOSTick, NULL);
 
 	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */
 	plasoc_int_enable_all(&int_obj);

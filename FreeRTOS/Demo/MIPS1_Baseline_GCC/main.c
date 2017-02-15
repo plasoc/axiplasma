@@ -18,10 +18,6 @@
 #define XGPIO_INPUT_TOTAL				(2)
 #define XGPIO_SWITCHES_PER_INPUT		(8)
 
-/*	Interrupt config	*/
-#define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
-#define INT_XGPIO_INPUT_ID				(0)
-
 /* Priority definitions for most of the tasks in the demo application.  Some
 tasks just use the idle priority. */
 #define BLINK_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
@@ -29,9 +25,11 @@ tasks just use the idle priority. */
 #define RANDOM_TASK_PRIORITY		( tskIDLE_PRIORITY + 1 )
 
 /*	task config	*/
-#define RANDOM_WRITE_PERIOD		( (TickType_t)10 / portTICK_PERIOD_MS )
-#define USER_INPUT_MAX_DELAY	( (TickType_t)100 / portTICK_PERIOD_MS )
-#define BLINK_HALF_PERIOD		( (TickType_t)1000 / portTICK_PERIOD_MS )
+#define RANDOM_WRITE_PERIOD		( (TickType_t)1 * portTICK_PERIOD_MS )
+#define USER_INPUT_MAX_DELAY	( (TickType_t)100 * portTICK_PERIOD_MS )
+#define BLINK_HALF_PERIOD		( (TickType_t)1000 * portTICK_PERIOD_MS )
+//#define USER_INPUT_MAX_DELAY	( (TickType_t) 1)
+//#define BLINK_HALF_PERIOD		( (TickType_t) 10)
 
 /*	other function declarations	*/
 static void vRandomWriteTask(void*);
@@ -39,7 +37,8 @@ static void vBlinkTask(void*);
 static void input_gpio_isr(void*);
 
 /*	static variable declarations	*/
-static plasoc_int int_obj;
+plasoc_int int_obj;
+plasoc_timer timer_obj;
 static xgpio xgpio_input_obj;
 static xgpio xgpio_output_obj;
 static volatile unsigned input_value = 0;
@@ -52,30 +51,31 @@ extern void OS_InterruptServiceRoutine()
 	plasoc_int_service_interrupts(&int_obj);
 }
 
+#define ucHeap = (*(volatile uint8_t (*)[configTOTAL_HEAP_SIZE])(PLASOC_HEAP_BASE_ADDRESS))
+
 int main( void )
 {
-	/* Configure the interrupt controller. */
-	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
+	// initialize interrupt and timer objects
+	plasoc_int_setup(&int_obj);
+	plasoc_timer_setup(&timer_obj);
 
 	/* Configure output gpio. */
 	xgpio_setup(&xgpio_output_obj,XGPIO_OUTPUT_BASE_ADDRESS);
 	xgpio_set_direction(&xgpio_output_obj,XGPIO_OUTPUTS);
 
 	/* Configure input gpio and interrupts */
-	xgpio_setup(&xgpio_input_obj,XGPIO_INPUT_BASE_ADDRESS);
-	xgpio_set_direction(&xgpio_input_obj,XGPIO_INPUTS);
-	xgpio_enable_global_interrupt(&xgpio_input_obj);
-	xgpio_enable_channel_interrupt(&xgpio_input_obj,1);
-	plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,input_gpio_isr,0);
+	//xgpio_setup(&xgpio_input_obj,XGPIO_INPUT_BASE_ADDRESS);
+	//xgpio_set_direction(&xgpio_input_obj,XGPIO_INPUTS);
+	//xgpio_enable_global_interrupt(&xgpio_input_obj);
+	//xgpio_enable_channel_interrupt(&xgpio_input_obj,1);
+	//plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,input_gpio_isr,0);
 
-	/* Configure the interrupts of the CPU. */
-	taskENABLE_INTERRUPTS();
 
 	/* Enable all interrupts in the interrupt controller. */
 	plasoc_int_enable_all(&int_obj);
 
 	/* Create the tasks defined within this file. */
-	xTaskCreate( vBlinkTask, "Blink Rate", configMINIMAL_STACK_SIZE, NULL, BLINK_TASK_PRIORITY, NULL );
+	//xTaskCreate( vBlinkTask, "Blink Rate", configMINIMAL_STACK_SIZE, NULL, BLINK_TASK_PRIORITY, NULL );
 	xTaskCreate( vRandomWriteTask, "Random Write", configMINIMAL_STACK_SIZE, NULL, RANDOM_TASK_PRIORITY, NULL );
 
 

@@ -6,6 +6,8 @@ extern "C"
 {
 #endif
 
+	#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
+	#define INT_PLASOC_TIMER_ID				(1)
 	#define PLASOC_TIMER_CONTROL_OFFSET		(0)
 	#define PLASOC_TIMER_START_BIT_LOC		(0)
 	#define PLASOC_TIMER_RELOAD_BIT_LOC		(1)
@@ -21,9 +23,9 @@ extern "C"
 	plasoc_timer;
 	
 	static inline __attribute__ ((always_inline))
-	void plasoc_timer_setup(plasoc_timer* obj,unsigned base_address)
+	void plasoc_timer_setup(plasoc_timer* obj)
 	{
-		obj->base_address = base_address;
+		obj->base_address = PLASOC_TIMER_BASE_ADDRESS;
 	}
 	
 	static inline __attribute__ ((always_inline))
