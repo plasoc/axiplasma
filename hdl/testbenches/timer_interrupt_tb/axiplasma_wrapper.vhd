@@ -1,5 +1,6 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
 use work.plasoc_cpu_pack.all;
 use work.plasoc_int_pack.all;
 use work.plasoc_timer_pack.all;
@@ -155,6 +156,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_master_amount : integer := 2;
     constant axi_slave_amount : integer := 5;
     constant axi_master_id_width : integer := 0;
+    constant axi_dev_address_width : integer := 16;
     constant ram_axi_base_address : std_logic_vector:= X"00000000";
     constant ram_axi_high_address : std_logic_vector:= X"0000FFFF";
     constant int_axi_base_address : std_logic_vector := X"44A00000";
@@ -167,6 +169,9 @@ architecture Behavioral of axiplasma_wrapper is
     constant cdma_axi_high_address : std_logic_vector := X"44A3FFFF";
     constant axi_slave_base_address : std_logic_vector := cdma_axi_base_address & gpio_axi_base_address & timer_axi_base_address & int_axi_base_address & ram_axi_base_address;
     constant axi_slave_high_address : std_logic_vector := cdma_axi_high_address & gpio_axi_high_address & timer_axi_high_address & int_axi_high_address & ram_axi_high_address;
+    constant full2lite_axi_slave_amount : integer := 5;
+    type full2lite_axi_awid is array(0 to full2lite_axi_slave_amount-1) of std_logic_vector((work.plasoc_cpu_pack.clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);
+    type full2lite_axi_awaddr is array(0 to full2lite_axi_slave_amount-1) of std_logic_vector(axi_address_width-1 downto 0);
     -- global interface.
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -254,6 +259,7 @@ architecture Behavioral of axiplasma_wrapper is
     signal cross_s_axi_rlast : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
     signal cross_s_axi_rvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);                                               --! AXI4-Full Read Data signal.
     signal cross_s_axi_rready : std_logic_vector(axi_slave_amount*1-1 downto 0);                                                --! AXI4-Full Read Data signal.
+    -- Slave AXI4-Full 
     -- CPU interface.
     signal axi_awid : std_logic_vector(0 downto 0);
     signal axi_awaddr : std_logic_vector(31 downto 0);
@@ -385,11 +391,11 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_wrdata_a : std_logic_vector(31 downto 0);
     signal bram_rddata_a : std_logic_vector(31 downto 0);
     -- GPIO interface.
-    signal gpio_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_araddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal gpio_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal gpio_axi_arready : STD_LOGIC;
     signal gpio_axi_arvalid : STD_LOGIC;
-    signal gpio_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal gpio_axi_awaddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal gpio_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal gpio_axi_awready : STD_LOGIC;
     signal gpio_axi_awvalid : STD_LOGIC;
@@ -406,11 +412,11 @@ architecture Behavioral of axiplasma_wrapper is
     signal gpio_axi_wvalid : STD_LOGIC;
     signal gpio_int : std_logic;
     -- Interrupt controller interface;
-    signal int_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_araddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal int_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal int_axi_arready : STD_LOGIC;
     signal int_axi_arvalid : STD_LOGIC;
-    signal int_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal int_axi_awaddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal int_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal int_axi_awready : STD_LOGIC;
     signal int_axi_awvalid : STD_LOGIC;
@@ -428,11 +434,11 @@ architecture Behavioral of axiplasma_wrapper is
     signal cpu_int : std_logic;
     signal dev_ints : std_logic_vector(default_interrupt_total-1 downto 0);
     -- timer core interface.
-    signal timer_axi_araddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_araddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal timer_axi_arprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal timer_axi_arready : STD_LOGIC;
     signal timer_axi_arvalid : STD_LOGIC;
-    signal timer_axi_awaddr : STD_LOGIC_VECTOR ( 31 downto 0 );
+    signal timer_axi_awaddr : STD_LOGIC_VECTOR ( 15 downto 0 );
     signal timer_axi_awprot : STD_LOGIC_VECTOR ( 2 downto 0 );
     signal timer_axi_awready : STD_LOGIC;
     signal timer_axi_awvalid : STD_LOGIC;
@@ -451,6 +457,42 @@ architecture Behavioral of axiplasma_wrapper is
 begin
     dev_ints(2 downto 0) <= cdma_int & gpio_int & timer_done;
     dev_ints(default_interrupt_total-1 downto 3) <= (others=>'0');
+    
+    cross_m_axi_awaddr <= cdma_m_axi_awaddr & axi_awaddr;
+    cross_m_axi_awlen <= cdma_m_axi_awlen & axi_awlen;
+    cross_m_axi_awsize <= cdma_m_axi_awsize & axi_awsize;
+    cross_m_axi_awburst <= cdma_m_axi_awburst & axi_awburst;
+    cross_m_axi_awlock <= '0' & axi_awlock;
+    cross_m_axi_awcache <= cdma_m_axi_awcache & axi_awcache;
+    cross_m_axi_awprot <= cdma_m_axi_awprot & axi_awprot;
+    cross_m_axi_awqos <= std_logic_vector(to_unsigned(0,4)) & axi_awqos;
+    cross_m_axi_awregion <= std_logic_vector(to_unsigned(0,4)) & axi_awregion;
+    cross_m_axi_awvalid <= cdma_m_axi_awvalid & axi_awvalid;
+    cross_m_axi_awready <= cdma_m_axi_awready & axi_awready;
+    cross_m_axi_wdata <= cdma_m_axi_wdata & axi_wdata;
+    cross_m_axi_wstrb <= cdma_m_axi_wstrb & axi_wstrb;
+    cross_m_axi_wlast <= cdma_m_axi_wlast & axi_wlast;
+    cross_m_axi_wvalid <= cdma_m_axi_wvalid & axi_wvalid;
+    cross_m_axi_wready <= cdma_m_axi_wready & axi_wready; 
+    cross_m_axi_bresp <= cdma_m_axi_bresp & axi_bresp;
+    cross_m_axi_bvalid <= cdma_m_axi_bvalid & axi_bvalid;
+    cross_m_axi_bready <= cdma_m_axi_bready & axi_bready;
+    cross_m_axi_araddr <= cdma_m_axi_araddr & axi_araddr;
+    cross_m_axi_arlen <= cdma_m_axi_arlen & axi_arlen;
+    cross_m_axi_arsize <= cdma_m_axi_arsize & axi_arsize;
+    cross_m_axi_arburst <= cdma_m_axi_arburst & axi_arburst;
+    cross_m_axi_arlock <= '0' & axi_arlock;
+    cross_m_axi_arcache <= cdma_m_axi_arcache & axi_arcache;
+    cross_m_axi_arprot <= cdma_m_axi_arprot & axi_arprot;
+    cross_m_axi_arqos <= std_logic_vector(to_unsigned(0,4)) & axi_arqos;
+    cross_m_axi_arregion <= std_logic_vector(to_unsigned(0,4)) & axi_arregion;
+    cross_m_axi_arvalid <= cdma_m_axi_arvalid & axi_arvalid;
+    cross_m_axi_arready <= cdma_m_axi_arready & axi_arready;
+    cross_m_axi_rdata <= cdma_m_axi_rdata & axi_rdata;
+    cross_m_axi_rresp <= cdma_m_axi_rresp & axi_rresp;
+    cross_m_axi_rlast <= cdma_m_axi_rlast & axi_rlast;
+    cross_m_axi_rvalid <= cdma_m_axi_rvalid & axi_rvalid;
+    cross_m_axi_rready <= cdma_m_axi_rready & axi_rready;
      
      -- Clock instantiation.
      clk_wiz_inst : clk_wiz_0  
@@ -729,10 +771,8 @@ begin
     -- GPIO core instantiation.
     plasoc_gpio_inst : plasoc_gpio 
         generic map (
-            axi_address_width => word_width,                   
-            axi_data_width => word_width,                      
-            axi_base_address => gpio_axi_base_address
-        )
+            axi_address_width => axi_dev_address_width,                   
+            axi_data_width => axi_data_width )
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
@@ -763,9 +803,8 @@ begin
     plasoc_int_inst :
     plasoc_int 
         generic map (
-            axi_address_width => word_width,
-            axi_data_width => word_width,
-            axi_base_address => int_axi_base_address )
+            axi_address_width => axi_dev_address_width,
+            axi_data_width => axi_data_width )
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
@@ -796,9 +835,8 @@ begin
     plasoc_timer
         generic map (
             timer_width => default_timer_width,
-            axi_address_width =>  word_width,
-            axi_data_width => word_width,
-            axi_base_address => timer_axi_base_address )
+            axi_address_width => axi_dev_address_width,
+            axi_data_width => axi_data_width )
         port map (
             aclk => aclk,
             aresetn => aresetn(0),

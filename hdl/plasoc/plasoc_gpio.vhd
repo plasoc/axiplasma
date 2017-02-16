@@ -10,7 +10,6 @@ entity plasoc_gpio is
         -- Slave AXI4-Lite parameters.
         axi_address_width : integer := 16;                      --! Defines the AXI4-Lite Address Width.
         axi_data_width : integer := 32;                         --! Defines the AXI4-Lite Data Width.   
-        axi_base_address : std_logic_vector := X"0000";
         axi_control_offset : integer := 0;         --! Defines the offset for the Control register.
         axi_control_enable_bit_loc : integer := 0;
         axi_control_ack_bit_loc : integer := 1;
@@ -133,13 +132,9 @@ architecture Behavioral of plasoc_gpio is
     signal reg_control_ack_buff : std_logic_vector(axi_data_width-1 downto 0);
     signal reg_data_in : std_logic_vector(axi_data_width-1 downto 0);
     signal reg_data_out : std_logic_vector(axi_data_width-1 downto 0);
-    signal axi_awaddr_base : std_logic_vector(axi_address_width-1 downto 0);
-    signal axi_araddr_base : std_logic_vector(axi_address_width-1 downto 0);
 begin
     reg_data_in(axi_data_width-1 downto data_in_width) <= (others=>'0');
     data_out <= reg_data_out(data_out_width-1 downto 0);
-    axi_awaddr_base <= remove_baseFaddress(address=>axi_awaddr,base_address=>axi_base_address);
-    axi_araddr_base <= remove_baseFaddress(address=>axi_araddr,base_address=>axi_base_address);
     
     reg_control(axi_control_enable_bit_loc) <= reg_control_enable;
     reg_control(axi_control_ack_bit_loc) <= reg_control_ack;
@@ -168,7 +163,7 @@ begin
         port map (
             aclk => aclk,
             aresetn => aresetn, 
-            axi_awaddr => axi_awaddr_base,
+            axi_awaddr => axi_awaddr,
             axi_awprot => axi_awprot,
             axi_awvalid => axi_awvalid,
             axi_awready => axi_awready,
@@ -194,7 +189,7 @@ begin
         port map (
             aclk => aclk,
             aresetn => aresetn, 
-            axi_araddr => axi_araddr_base,
+            axi_araddr => axi_araddr,
             axi_arprot => axi_arprot,
             axi_arvalid => axi_arvalid,
             axi_arready => axi_arready,

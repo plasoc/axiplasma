@@ -15,15 +15,12 @@ package plasoc_gpio_pack is
 
 	constant axi_resp_okay : std_logic_vector := "00";
     
-    function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
-
     component plasoc_gpio is
         generic (
             data_in_width : integer := default_data_in_width;
             data_out_width : integer := default_data_out_width;
             axi_address_width : integer := 16;                     
-            axi_data_width : integer := 32;                        
-            axi_base_address : std_logic_vector := X"0000";
+            axi_data_width : integer := 32;    
             axi_control_offset : integer := default_axi_control_offset;        
             axi_control_enable_bit_loc : integer := default_axi_control_enable_bit_loc;
             axi_control_ack_bit_loc : integer := default_axi_control_ack_bit_loc;
@@ -56,18 +53,5 @@ package plasoc_gpio_pack is
             axi_rresp : out std_logic_vector(1 downto 0);
             int : out std_logic);    
     end component;
-
-end;
-
-package body plasoc_gpio_pack is
-
-	function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector is
-		variable result : std_logic_vector(base_address'length-1 downto 0);
-		variable address_0 : integer :=  to_integer(unsigned(address));
-		variable base_address_0 : integer :=  to_integer(unsigned(base_address));
-	begin
-		result := std_logic_vector(to_unsigned(address_0-base_address_0,base_address'length));
-		return result;
-	end;
 
 end;

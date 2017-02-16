@@ -19,7 +19,7 @@ architecture Behavioral of plasoc_crossbar_base is
     type output_vector_type is array(0 to output_amount-1) of word_type;
     type tristate_type is array(0 to input_amount-1) of output_vector_type;
     signal input_vector : input_vector_type := (others=>(others=>'0'));
-    signal output_vector : input_vector_type := (others=>(others=>'0'));
+    signal output_vector : output_vector_type := (others=>(others=>'0'));
     signal tristate_matrix : tristate_type := (others=>(others=>(others=>'Z')));
 begin
     -- Connect the tristate array.

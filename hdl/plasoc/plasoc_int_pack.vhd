@@ -16,14 +16,12 @@ package plasoc_int_pack is
 
     -- Function declarations.
     function clogb2(bit_depth : in integer ) return integer;
-    function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector;
-
+    
     -- Component declaration.
     component plasoc_int is
         generic(
             axi_address_width : integer := 16;
             axi_data_width : integer := 32;
-            axi_base_address : std_logic_vector := X"0000";
             axi_int_id_offset : integer := default_int_id_offset;
             axi_int_enables_offset : integer := default_int_enables_offset;
             axi_int_active_offset : integer := default_int_active_address;
@@ -68,14 +66,5 @@ package body plasoc_int_pack is
 		end loop; 
 		return result;
 	end; 
-	
-	function remove_baseFaddress(  address : in std_logic_vector; base_address : in std_logic_vector ) return std_logic_vector is
-        variable result : std_logic_vector(base_address'length-1 downto 0);
-        variable address_0 : integer :=  to_integer(unsigned(address));
-        variable base_address_0 : integer :=  to_integer(unsigned(base_address));
-    begin
-        result := std_logic_vector(to_unsigned(address_0-base_address_0,base_address'length));
-        return result;
-    end;
 
 end;
