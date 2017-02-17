@@ -1,6 +1,59 @@
 
 import argparse, struct, binascii, array, time
 
+def get_formatted_inst_signals(names,ismaster=True,ntabs=1):
+	if ismaster:
+		f0 = 'm'
+	else:
+		f0 = 's'
+	f1 = ''.join(['\t'for _ in range(ntabs)])
+
+	lines = []
+	for name in names:
+		lines.extend([\
+			f1+name+'_'+f0+'_axi_awid <= '+name+'_'+f0+'_axi_awid,\n',\
+			f1+name+'_'+f0+'_axi_awaddr <= '+name+'_'+f0+'_axi_awaddr,\n',\
+			f1+name+'_'+f0+'_axi_awlen <= '+name+'_'+f0+'_axi_awlen,\n',\
+			f1+name+'_'+f0+'_axi_awsize <= '+name+'_'+f0+'_axi_awsize,\n',\
+			f1+name+'_'+f0+'_axi_awburst <= '+name+'_'+f0+'_axi_awburst,\n',\
+			f1+name+'_'+f0+'_axi_awlock <= '+name+'_'+f0+'_axi_awlock,\n',\
+			f1+name+'_'+f0+'_axi_awcache <= '+name+'_'+f0+'_axi_awcache,\n',\
+			f1+name+'_'+f0+'_axi_awprot <= '+name+'_'+f0+'_axi_awprot,\n',\
+			f1+name+'_'+f0+'_axi_awqos <= '+name+'_'+f0+'_axi_awqos,\n',\
+			f1+name+'_'+f0+'_axi_awregion <= '+name+'_'+f0+'_axi_awregion,\n',\
+			f1+name+'_'+f0+'_axi_awvalid <= '+name+'_'+f0+'_axi_awvalid,\n',\
+			f1+name+'_'+f0+'_axi_awready <= '+name+'_'+f0+'_axi_awready,\n',\
+			f1+name+'_'+f0+'_axi_wdata <= '+name+'_'+f0+'_axi_wdata,\n',\
+			f1+name+'_'+f0+'_axi_wstrb <= '+name+'_'+f0+'_axi_wstrb,\n',\
+			f1+name+'_'+f0+'_axi_wlast <= '+name+'_'+f0+'_axi_wlast,\n',\
+			f1+name+'_'+f0+'_axi_wvalid <= '+name+'_'+f0+'_axi_wvalid,\n',\
+			f1+name+'_'+f0+'_axi_wready <= '+name+'_'+f0+'_axi_wready,\n',\
+			f1+name+'_'+f0+'_axi_bid <= '+name+'_'+f0+'_axi_bid,\n',\
+			f1+name+'_'+f0+'_axi_bresp <= '+name+'_'+f0+'_axi_bresp,\n',\
+			f1+name+'_'+f0+'_axi_bvalid <= '+name+'_'+f0+'_axi_bvalid,\n',\
+			f1+name+'_'+f0+'_axi_bready <= '+name+'_'+f0+'_axi_bready,\n',\
+			f1+name+'_'+f0+'_axi_arid <= '+name+'_'+f0+'_axi_arid,\n',\
+			f1+name+'_'+f0+'_axi_araddr <= '+name+'_'+f0+'_axi_araddr,\n',\
+			f1+name+'_'+f0+'_axi_arlen <= '+name+'_'+f0+'_axi_arlen,\n',\
+			f1+name+'_'+f0+'_axi_arsize <= '+name+'_'+f0+'_axi_arsize,\n',\
+			f1+name+'_'+f0+'_axi_arburst <= '+name+'_'+f0+'_axi_arburst,\n',\
+			f1+name+'_'+f0+'_axi_arlock <= '+name+'_'+f0+'_axi_arlock,\n',\
+			f1+name+'_'+f0+'_axi_arcache <= '+name+'_'+f0+'_axi_arcache,\n',\
+			f1+name+'_'+f0+'_axi_arprot <= '+name+'_'+f0+'_axi_arprot,\n',\
+			f1+name+'_'+f0+'_axi_arqos <= '+name+'_'+f0+'_axi_arqos,\n',\
+			f1+name+'_'+f0+'_axi_arregion <= '+name+'_'+f0+'_axi_arregion,\n',\
+			f1+name+'_'+f0+'_axi_arvalid <= '+name+'_'+f0+'_axi_arvalid,\n',\
+			f1+name+'_'+f0+'_axi_arready <= '+name+'_'+f0+'_axi_arready,\n',\
+			f1+name+'_'+f0+'_axi_rid <= '+name+'_'+f0+'_axi_rid,\n',\
+			f1+name+'_'+f0+'_axi_rdata <= '+name+'_'+f0+'_axi_rdata,\n',\
+			f1+name+'_'+f0+'_axi_rresp <= '+name+'_'+f0+'_axi_rresp,\n',\
+			f1+name+'_'+f0+'_axi_rlast <= '+name+'_'+f0+'_axi_rlast,\n',\
+			f1+name+'_'+f0+'_axi_rvalid <= '+name+'_'+f0+'_axi_rvalid,\n',\
+			f1+name+'_'+f0+'_axi_rready <= '+name+'_'+f0+'_axi_rready,\n'\
+		])
+
+	return ''.join(lines)
+
 def get_formatted_assignments(slave_names,master_names):
 	lines = \
 		[\
@@ -346,6 +399,9 @@ if __name__ == '__main__':
 	parser.add_argument('--verbose',dest='verbose',action='store_const',
 		const=True,default=False,
 		help='Enables verbose output')
+	parser.add_argument('--generate_instant',dest='generate_instant',action='store_const',
+		const=True,default=False,
+		help='Generates entity instantiation file.')
 	parser.add_argument('--master_count',metavar='master_count',type=int,nargs=1,default=[1],
 		help='Specifies the number of master interfaces.')
 	parser.add_argument('--slave_count',metavar='slave_count',type=int,nargs=1,default=[1],
@@ -370,6 +426,7 @@ if __name__ == '__main__':
 	# Perform the parsing.
 	args = parser.parse_args()
 	verbose_flag = args.verbose
+	generate_instant_flag = args.generate_instant
 	master_count = args.master_count[0]
 	slave_count = args.slave_count[0]
 	address_width = args.address_width[0]
@@ -383,6 +440,7 @@ if __name__ == '__main__':
 	
 	# Display parameters.
 	if verbose_flag:
+		print('generate_instant_flag: ' + repr(generate_instant_flag))
 		print('master_count: ' + repr(master_count))
 		print('slave_count: ' + repr(slave_count))
 		print('address_width: ' + repr(address_width))
@@ -391,6 +449,8 @@ if __name__ == '__main__':
 		print('cross_name: ' + cross_name)
 		print('master_names: ' + repr(master_names))
 		print('slave_names: ' + repr(slave_names))
+		print('slave_base_addresses: ' + repr(slave_base_addresses))
+		print('slave_high_addresses: ' + repr(slave_high_addresses))
 		print('')
 		
 	# Generate full names.
@@ -420,7 +480,7 @@ if __name__ == '__main__':
 		'\t\taresetn : in std_logic\n'+\
 		'\t);\n'
 		
-	# Generate package and entity string.
+	# Generate package string.
 	package_string = STRING_PACKAGES+'\npackage '+package_full_name+' is\n\n'+\
 		'function clogb2(bit_depth : in integer ) return integer;\n\n'+\
 		'component '+entity_full_name+' is\n\n'+\
@@ -438,7 +498,9 @@ if __name__ == '__main__':
 		'		end loop; \n'+\
 		'		return result;\n'+\
 		'	end;\n'+\
-		'end;'
+		'end;\n'
+
+	# Generate entity string.
 	entity_string = STRING_PACKAGES+'use work.plasoc_crossbar_pack.plasoc_crossbar;\n'+'use work.'+package_full_name+'.all;\n\n'+\
 		'entity '+entity_full_name+' is\n'+\
 		generic_full+port_full+\
@@ -449,15 +511,40 @@ if __name__ == '__main__':
 		get_formatted_assignments(slave_names,master_names)+\
 		get_formatted_cross_inst()+\
 		'end Behavioral;\n'
+
+	# Generate instantiation string.
+	instant_string = \
+		entity_full_name+'_inst : '+entity_full_name+'\n'+\
+		'\tgeneric map\n'+\
+		'\t(\n'+\
+		'\t\taxi_address_width => axi_address_width,\n'+\
+		'\t\taxi_data_width => axi_data_width,\n'+\
+		'\t\taxi_master_id_width => axi_master_id_width,\n'+\
+		'\t\taxi_master_amount => axi_master_amount,\n'+\
+		'\t\taxi_slave_amount => axi_slave_amount,\n'+\
+		'\t\taxi_slave_base_address => axi_slave_base_address,\n'+\
+		'\t\taxi_slave_high_address => axi_slave_high_address\n'+\
+		'\t)\n'+\
+		'\tport map\n'+\
+		'\t(\n'+\
+		get_formatted_inst_signals(master_names,ismaster=True,ntabs=2)+\
+		get_formatted_inst_signals(slave_names,ismaster=False,ntabs=2)+\
+		'\t\taclk => aclk,\n'+\
+		'\t\taresetn => aresetn\n'+\
+		'\t);\n'
+		
 		
 	# View the files
 	if verbose_flag:
-		print(package_string+'\n')
+		print(package_string)
 		print(entity_string)
+		print(instant_string)
 		
 	# Save the VHDL files.
 	with open(package_full_name+'.vhd',mode='w') as package_file: package_file.write(package_string)
 	with open(entity_full_name+'.vhd',mode='w') as entity_file: entity_file.write(entity_string)
+	if generate_instant_flag: 
+		with open(entity_full_name+'.instant',mode='w') as instant_file: instant_file.write(instant_string)
 		
 	
 	
