@@ -187,19 +187,6 @@ architecture Behavioral of plasoc_crossbar is
     signal axi_address_s2m_read_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     signal axi_data_s2m_read_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     signal axi_data_m2s_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
-    attribute keep : boolean;
-    attribute keep of s_axi_awid : signal is true;
-    attribute keep of s_axi_awaddr : signal is true;
-    attribute keep of s_axi_awlen : signal is true;
-    attribute keep of s_axi_awsize : signal is true;
-    attribute keep of s_axi_awburst : signal is true;
-    attribute keep of s_axi_awlock : signal is true;
-    attribute keep of s_axi_awcache : signal is true;
-    attribute keep of s_axi_awprot : signal is true;
-    attribute keep of s_axi_awqos : signal is true;
-    attribute keep of s_axi_awregion : signal is true;
-    attribute keep of s_axi_awvalid : signal is true;
-    attribute keep of m_axi_awready : signal is true;
 begin
     -- Assign the identifiers.
     generate_axi_master_full_id :
