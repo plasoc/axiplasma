@@ -325,7 +325,7 @@ def get_formatted_cross_signals():
 	]
 	return ''.join(lines)
 
-def get_formatted_wrapper_signals(names,ismaster=True,ntabs=1):
+def get_formatted_wrapper_signals(names,ismaster=True,ntabs=1,issignals=False):
 	if ismaster:
 		f0 = '_m_'
 		f1 = ' in '
@@ -337,49 +337,55 @@ def get_formatted_wrapper_signals(names,ismaster=True,ntabs=1):
 		f2 = ' in '
 		f3 = '(clogb2(axi_master_amount+1)+axi_master_id_width)'
 	f4 = ''.join(['\t'for _ in range(ntabs)])
+	if issignals:
+		f5 = 'signal '
+		f1 = ''
+		f2 = ''
+	else:
+		f5 = ''
 	formatted_signals = []
 	for name in names:
 		lines = \
 		[\
-			f4+name+f0+'axi_awid : '+f1+' std_logic_vector('+f3+'-1 downto 0);\n',\
-			f4+name+f0+'axi_awaddr : '+f1+' std_logic_vector(axi_address_width-1 downto 0);\n',\
-			f4+name+f0+'axi_awlen : '+f1+' std_logic_vector(7 downto 0);\n',\
-			f4+name+f0+'axi_awsize : '+f1+' std_logic_vector(2 downto 0);\n',\
-			f4+name+f0+'axi_awburst : '+f1+' std_logic_vector(1 downto 0);\n',\
-			f4+name+f0+'axi_awlock : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_awcache : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_awprot : '+f1+' std_logic_vector(2 downto 0);\n',\
-			f4+name+f0+'axi_awqos : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_awregion : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_awvalid : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_awready : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_wdata : '+f1+' std_logic_vector(axi_data_width-1 downto 0);\n',\
-			f4+name+f0+'axi_wstrb : '+f1+' std_logic_vector(axi_data_width/8-1 downto 0);\n',\
-			f4+name+f0+'axi_wlast : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_wvalid : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_wready : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_bid : '+f2+' std_logic_vector('+f3+'-1 downto 0);\n',\
-			f4+name+f0+'axi_bresp : '+f2+' std_logic_vector(1 downto 0);\n',\
-			f4+name+f0+'axi_bvalid : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_bready : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_arid : '+f1+' std_logic_vector('+f3+'-1 downto 0);\n',\
-			f4+name+f0+'axi_araddr : '+f1+' std_logic_vector(axi_address_width-1 downto 0);\n',\
-			f4+name+f0+'axi_arlen : '+f1+' std_logic_vector(7 downto 0);\n',\
-			f4+name+f0+'axi_arsize : '+f1+' std_logic_vector(2 downto 0);\n',\
-			f4+name+f0+'axi_arburst : '+f1+' std_logic_vector(1 downto 0);\n',\
-			f4+name+f0+'axi_arlock : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_arcache : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_arprot : '+f1+' std_logic_vector(2 downto 0);\n',\
-			f4+name+f0+'axi_arqos : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_arregion : '+f1+' std_logic_vector(3 downto 0);\n',\
-			f4+name+f0+'axi_arvalid : '+f1+' std_logic;\n',\
-			f4+name+f0+'axi_arready : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_rid : '+f2+' std_logic_vector('+f3+'-1 downto 0);\n',\
-			f4+name+f0+'axi_rdata : '+f2+' std_logic_vector(axi_data_width-1 downto 0);\n',\
-			f4+name+f0+'axi_rresp : '+f2+' std_logic_vector(1 downto 0);\n',\
-			f4+name+f0+'axi_rlast : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_rvalid : '+f2+' std_logic;\n',\
-			f4+name+f0+'axi_rready : '+f1+' std_logic;\n'\
+			f4+f5+name+f0+'axi_awid : '+f1+' std_logic_vector('+f3+'-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_awaddr : '+f1+' std_logic_vector(axi_address_width-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_awlen : '+f1+' std_logic_vector(7 downto 0);\n',\
+			f4+f5+name+f0+'axi_awsize : '+f1+' std_logic_vector(2 downto 0);\n',\
+			f4+f5+name+f0+'axi_awburst : '+f1+' std_logic_vector(1 downto 0);\n',\
+			f4+f5+name+f0+'axi_awlock : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_awcache : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_awprot : '+f1+' std_logic_vector(2 downto 0);\n',\
+			f4+f5+name+f0+'axi_awqos : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_awregion : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_awvalid : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_awready : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_wdata : '+f1+' std_logic_vector(axi_data_width-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_wstrb : '+f1+' std_logic_vector(axi_data_width/8-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_wlast : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_wvalid : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_wready : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_bid : '+f2+' std_logic_vector('+f3+'-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_bresp : '+f2+' std_logic_vector(1 downto 0);\n',\
+			f4+f5+name+f0+'axi_bvalid : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_bready : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_arid : '+f1+' std_logic_vector('+f3+'-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_araddr : '+f1+' std_logic_vector(axi_address_width-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_arlen : '+f1+' std_logic_vector(7 downto 0);\n',\
+			f4+f5+name+f0+'axi_arsize : '+f1+' std_logic_vector(2 downto 0);\n',\
+			f4+f5+name+f0+'axi_arburst : '+f1+' std_logic_vector(1 downto 0);\n',\
+			f4+f5+name+f0+'axi_arlock : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_arcache : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_arprot : '+f1+' std_logic_vector(2 downto 0);\n',\
+			f4+f5+name+f0+'axi_arqos : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_arregion : '+f1+' std_logic_vector(3 downto 0);\n',\
+			f4+f5+name+f0+'axi_arvalid : '+f1+' std_logic;\n',\
+			f4+f5+name+f0+'axi_arready : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_rid : '+f2+' std_logic_vector('+f3+'-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_rdata : '+f2+' std_logic_vector(axi_data_width-1 downto 0);\n',\
+			f4+f5+name+f0+'axi_rresp : '+f2+' std_logic_vector(1 downto 0);\n',\
+			f4+f5+name+f0+'axi_rlast : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_rvalid : '+f2+' std_logic;\n',\
+			f4+f5+name+f0+'axi_rready : '+f1+' std_logic;\n'\
 		]
 		formatted_signals.extend(lines)
 	return ''.join(formatted_signals)
@@ -402,6 +408,9 @@ if __name__ == '__main__':
 	parser.add_argument('--generate_instant',dest='generate_instant',action='store_const',
 		const=True,default=False,
 		help='Generates entity instantiation file.')
+	parser.add_argument('--generate_signals',dest='generate_signals',action='store_const',
+		const=True,default=False,
+		help='Generates signal declaration file.')
 	parser.add_argument('--master_count',metavar='master_count',type=int,nargs=1,default=[1],
 		help='Specifies the number of master interfaces.')
 	parser.add_argument('--slave_count',metavar='slave_count',type=int,nargs=1,default=[1],
@@ -427,6 +436,7 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 	verbose_flag = args.verbose
 	generate_instant_flag = args.generate_instant
+	generate_signals_flag = args.generate_signals
 	master_count = args.master_count[0]
 	slave_count = args.slave_count[0]
 	address_width = args.address_width[0]
@@ -441,6 +451,7 @@ if __name__ == '__main__':
 	# Display parameters.
 	if verbose_flag:
 		print('generate_instant_flag: ' + repr(generate_instant_flag))
+		print('generate_signals_flag: ' + repr(generate_signals_flag))
 		print('master_count: ' + repr(master_count))
 		print('slave_count: ' + repr(slave_count))
 		print('address_width: ' + repr(address_width))
@@ -533,18 +544,26 @@ if __name__ == '__main__':
 		'\t\taresetn => aresetn\n'+\
 		'\t);\n'
 		
-		
+	# Generate signal string.
+	signals_string = \
+		get_formatted_wrapper_signals(master_names,ismaster=True,ntabs=0,issignals=True)+\
+		get_formatted_wrapper_signals(slave_names,ismaster=False,ntabs=0,issignals=True)	
+
 	# View the files
 	if verbose_flag:
 		print(package_string)
 		print(entity_string)
 		print(instant_string)
+		print(signals_string)
 		
 	# Save the VHDL files.
 	with open(package_full_name+'.vhd',mode='w') as package_file: package_file.write(package_string)
 	with open(entity_full_name+'.vhd',mode='w') as entity_file: entity_file.write(entity_string)
 	if generate_instant_flag: 
 		with open(entity_full_name+'.instant',mode='w') as instant_file: instant_file.write(instant_string)
+	if generate_signals_flag:
+		with open(entity_full_name+'.signals',mode='w') as signals_file: signals_file.write(signals_string)
+		
 		
 	
 	
