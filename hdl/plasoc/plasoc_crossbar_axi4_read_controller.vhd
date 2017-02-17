@@ -264,6 +264,9 @@ begin
         variable decoded_slave_id_buff : integer range 0 to axi_slave_amount-1;
         variable decoded_slave_id_vector_buff : decoded_slave_id_vector_type;
     begin
+        -- The default value is zero. This is actually pretty dangerous and should be changed
+        -- in later revisions.
+        decoded_slave_id_buff := 0;
         -- Perform operation per each master interface.
         for each_master in 0 to axi_master_amount-1 loop
             -- Perform operation per each slave interface.
