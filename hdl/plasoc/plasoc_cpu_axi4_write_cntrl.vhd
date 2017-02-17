@@ -91,6 +91,7 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     signal axi_awlen_buff : std_logic_vector(7 downto 0) := (others=>'0');
     signal axi_awvalid_buff : std_logic := '0';
     signal axi_wvalid_buff : std_logic := '0';
+    signal axi_wlast_buff : std_logic := '0';
     signal mem_write_ready_buff : std_logic := '0';
     signal axi_bready_buff : std_logic := '0';
 begin
@@ -107,6 +108,7 @@ begin
     axi_awuser <= (others=>'0');
     axi_awvalid <= axi_awvalid_buff;
     axi_wvalid <= axi_wvalid_buff;
+    axi_wlast <= axi_wlast_buff;
     mem_write_ready <= mem_write_ready_buff;
     axi_bready <= axi_bready_buff;
     axi_wuser <= (others=>'0');
@@ -142,6 +144,7 @@ begin
                         -- Wait until handshake before writing data.
                         if axi_awvalid_buff='1' and axi_awready='1' then
                             axi_awvalid_buff <= '0';
+                            mem_write_ready_buff <= '1';
                             state <= state_write;
                         else
                             axi_awvalid_buff <= '1';
@@ -149,37 +152,38 @@ begin
                     end if;
                 -- WRITE mode.
                 when state_write=>
-                    -- Check for handshakes;
                     mem_handshake := mem_write_valid='1' and mem_write_ready_buff='1';
                     axi_handshake := axi_wvalid_buff='1' and axi_wready='1';
-                    -- On handshake with the mem interface, sample the word and
-                    -- let the axi write interface know that data is valid.
                     if mem_handshake then
                         axi_wdata <= mem_write_data;
                         axi_wstrb <= mem_write_strobe;
-                        counter <= counter+1;
-                        axi_wvalid_buff <= '1';
-                        -- Set the last signal on the last word in the burst.
-                        if counter=axi_awlen_buff then
-                            axi_wlast <= '1';
+                    end if;
+                    if axi_handshake then
+                        if axi_wlast_buff='0' then
+                            mem_write_ready_buff <= '1';
+                        else
+                            mem_write_ready_buff <= '0'; 
                         end if;
-                    -- Once the axi write interface samples the data, the data becomes invalid.
+                    elsif mem_handshake then
+                        mem_write_ready_buff <= '0';
+                    end if;
+                    if mem_handshake then
+                        axi_wvalid_buff <= '1';
                     elsif axi_handshake then
                         axi_wvalid_buff <= '0';
-                        axi_wlast <= '0';
                     end if;
-                    -- On completition, it is no longer valid for the memory write interface to 
-                    -- continue to write more words. Also, it is time to acknowledge the write response
-                    -- from the axi write interface.
-                    if counter=axi_awlen_buff+1 and axi_handshake then
-                        mem_write_ready_buff <= '0';
+                    if axi_handshake and counter/=axi_awlen_buff then
+                        counter <= counter+1;
+                    end if;
+                    if counter=axi_awlen_buff then
+                        if mem_handshake then
+                            axi_wlast_buff <= '1';
+                        elsif axi_handshake then 
+                            axi_wlast_buff <= '0';
+                        end if;
+                    end if;
+                    if axi_handshake and axi_wlast_buff='1' then
                         state <= state_response;
-                    -- Only permit the memory write interface to write data if the axi write interface
-                    -- is ready for more words.
-                    elsif axi_wready='1' then
-                        mem_write_ready_buff <= '1';
-                    else
-                        mem_write_ready_buff <= '0';
                     end if;
                 -- RESPONSE mode.
                 when state_response=>

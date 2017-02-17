@@ -46,7 +46,7 @@ entity plasoc_axi4_full2lite_read_controller is
         s_axi_arregion : in std_logic_vector(4-1 downto 0);                        --! AXI4-Full Address Write signal.        
         s_axi_arvalid : in std_logic;                                          --! AXI4-Full Address Read signal.
         s_axi_arready : out std_logic;                                              --! AXI4-Full Address Read signal.
-        s_axi_rid : out std_logic_vector(axi_slave_id_width-1 downto 0);
+        s_axi_rid : out std_logic_vector(axi_slave_id_width-1 downto 0) := (others=>'0');
         s_axi_rdata : out std_logic_vector(axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
         s_axi_rresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Read Data signal.    
         s_axi_rlast : out std_logic;                                               --! AXI4-Full Read Data signal.
@@ -91,11 +91,12 @@ begin
                 m_axi_rready_buff <= '0';
                 s_axi_arready_buff <= '0';
                 s_axi_rvalid_buff <= '0';
-                s_axi_rlast <= '0';
+                s_axi_rlast_buff <= '0';
             else
                 case state is
                     when s_wait=>
                         if s_axi_arvalid='1' and s_axi_arready_buff='1' then
+                            s_axi_rid <= s_axi_arid;
                             s_axi_arready_buff <= '0';
                             s_axi_arlen_buff <= to_integer(unsigned(s_axi_arlen));
                             s_axi_arburst_buff <= s_axi_arburst;
@@ -124,9 +125,9 @@ begin
                         if m_axi_arvalid_buff='1' and m_axi_arready='1' then
                             counter <= counter+1;
                         end if;
-                        if s_axi_rready='1' then
+                        if m_axi_arvalid_buff='1' and m_axi_arready='1' then
                             m_axi_rready_buff <= '1';
-                        else
+                        elsif s_axi_rvalid_buff='1' and s_axi_rready='1' then
                             m_axi_rready_buff <= '0';
                         end if;
                         if m_axi_rvalid='1' and m_axi_rready_buff='1' then
@@ -135,9 +136,9 @@ begin
                             s_axi_rvalid_buff <= '0';
                         end if;
                         if m_axi_rvalid='1' and m_axi_rready_buff='1' and m_axi_arvalid_buff='0' then
-                            s_axi_rlast <= '1';
+                            s_axi_rlast_buff <= '1';
                         elsif s_axi_rvalid_buff='1' and s_axi_rready='1' and s_axi_rlast_buff='1' then
-                            s_axi_rlast <= '0';
+                            s_axi_rlast_buff <= '0';
                         end if;
                         if s_axi_rvalid_buff='1' and s_axi_rready='1' and s_axi_rlast_buff='1' then
                             state <= s_wait;
