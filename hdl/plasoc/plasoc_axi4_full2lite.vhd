@@ -33,6 +33,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 entity plasoc_axi4_full2lite is
     generic (
+        axi_slave_id_width : integer := 1;
         axi_address_width : integer := 32;
         axi_data_width : integer := 32);
     port (
@@ -40,6 +41,7 @@ entity plasoc_axi4_full2lite is
         aclk : in std_logic;                                    --! Defines the AXI4-Lite Address Width.
         aresetn : in std_logic;                                 --! Reset on low.
         -- Slave AXI4-Full Write outterface.
+        s_axi_awid : in std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Write signal.
         s_axi_awlen : in std_logic_vector(8-1 downto 0);                            --! AXI4-Full Address Write signal.
         s_axi_awsize : in std_logic_vector(3-1 downto 0);                            --! AXI4-Full Address Write signal.
@@ -56,10 +58,12 @@ entity plasoc_axi4_full2lite is
         s_axi_wlast : in std_logic;                                                --! AXI4-Full Write Data signal.
         s_axi_wvalid : in std_logic;                                               --! AXI4-Full Write Data signal.
         s_axi_wready : out std_logic;                                                --! AXI4-Full Write Data signal.
+        s_axi_bid : out std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_bresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Write Response signal.
         s_axi_bvalid : out std_logic;                                               --! AXI4-Full Write Response signal.
         s_axi_bready : in std_logic;                                               --! AXI4-Full Write Response signal.
         -- Slave AXI4-Full Read outterface.
+        s_axi_arid : in std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Read signal.
         s_axi_arlen : in std_logic_vector(8-1 downto 0);                             --! AXI4-Full Address Read signal.
         s_axi_arsize : in std_logic_vector(3-1 downto 0);                           --! AXI4-Full Address Read signal.    
@@ -71,6 +75,7 @@ entity plasoc_axi4_full2lite is
         s_axi_arregion : in std_logic_vector(4-1 downto 0);                        --! AXI4-Full Address Write signal.        
         s_axi_arvalid : in std_logic;                                          --! AXI4-Full Address Read signal.
         s_axi_arready : out std_logic;                                              --! AXI4-Full Address Read signal.
+        s_axi_rid : out std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_rdata : out std_logic_vector(axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
         s_axi_rresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Read Data signal.    
         s_axi_rlast : out std_logic;                                               --! AXI4-Full Read Data signal.
@@ -103,6 +108,7 @@ end plasoc_axi4_full2lite;
 architecture Behavioral of plasoc_axi4_full2lite is
     component plasoc_axi4_full2lite_write_controller is
         generic (
+            axi_slave_id_width : integer := 1;
             axi_address_width : integer := 32;
             axi_data_width : integer := 32);
         port (
@@ -110,6 +116,7 @@ architecture Behavioral of plasoc_axi4_full2lite is
             aclk : in std_logic;                                    --! Defines the AXI4-Lite Address Width.
             aresetn : in std_logic;                                 --! Reset on low.
             -- Slave AXI4-Full Write outterface.
+            s_axi_awid : in std_logic_vector(axi_slave_id_width-1 downto 0);
             s_axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Write signal.
             s_axi_awlen : in std_logic_vector(8-1 downto 0);                            --! AXI4-Full Address Write signal.
             s_axi_awsize : in std_logic_vector(3-1 downto 0);                            --! AXI4-Full Address Write signal.
@@ -126,6 +133,7 @@ architecture Behavioral of plasoc_axi4_full2lite is
             s_axi_wlast : in std_logic;                                                --! AXI4-Full Write Data signal.
             s_axi_wvalid : in std_logic;                                               --! AXI4-Full Write Data signal.
             s_axi_wready : out std_logic;                                                --! AXI4-Full Write Data signal.
+            s_axi_bid : out std_logic_vector(axi_slave_id_width-1 downto 0);
             s_axi_bresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Write Response signal.
             s_axi_bvalid : out std_logic;                                               --! AXI4-Full Write Response signal.
             s_axi_bready : in std_logic;                                               --! AXI4-Full Write Response signal.
@@ -144,6 +152,7 @@ architecture Behavioral of plasoc_axi4_full2lite is
     end component;
     component plasoc_axi4_full2lite_read_controller is
         generic (
+            axi_slave_id_width : integer := 1;
             axi_address_width : integer := 32;
             axi_data_width : integer := 32);
         port(
@@ -151,6 +160,7 @@ architecture Behavioral of plasoc_axi4_full2lite is
             aclk : in std_logic;                                    --! Defines the AXI4-Lite Address Width.
             aresetn : in std_logic;                                 --! Reset on low.
             -- Slave AXI4-Full Read outterface.
+            s_axi_arid : in std_logic_vector(axi_slave_id_width-1 downto 0);
             s_axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Read signal.
             s_axi_arlen : in std_logic_vector(8-1 downto 0);                             --! AXI4-Full Address Read signal.
             s_axi_arsize : in std_logic_vector(3-1 downto 0);                           --! AXI4-Full Address Read signal.    
@@ -162,6 +172,7 @@ architecture Behavioral of plasoc_axi4_full2lite is
             s_axi_arregion : in std_logic_vector(4-1 downto 0);                        --! AXI4-Full Address Write signal.        
             s_axi_arvalid : in std_logic;                                          --! AXI4-Full Address Read signal.
             s_axi_arready : out std_logic;                                              --! AXI4-Full Address Read signal.
+            s_axi_rid : out std_logic_vector(axi_slave_id_width-1 downto 0);
             s_axi_rdata : out std_logic_vector(axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
             s_axi_rresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Read Data signal.    
             s_axi_rlast : out std_logic;                                               --! AXI4-Full Read Data signal.
@@ -186,6 +197,7 @@ begin
         port map (
             aclk => aclk,
             aresetn => aresetn,
+            s_axi_awid => s_axi_awid,
             s_axi_awaddr => s_axi_awaddr,
             s_axi_awlen => s_axi_awlen,
             s_axi_awsize => s_axi_awsize,
@@ -202,6 +214,7 @@ begin
             s_axi_wlast => s_axi_wlast,
             s_axi_wvalid => s_axi_wvalid,
             s_axi_wready => s_axi_wready,
+            s_axi_bid => s_axi_bid,
             s_axi_bresp => s_axi_bresp,
             s_axi_bvalid => s_axi_bvalid,
             s_axi_bready => s_axi_bready,
@@ -224,6 +237,7 @@ begin
         port map (
             aclk => aclk,
             aresetn => aresetn,
+            s_axi_arid => s_axi_arid,
             s_axi_araddr => s_axi_araddr,
             s_axi_arlen => s_axi_arlen,
             s_axi_arsize => s_axi_arsize,   
@@ -235,6 +249,7 @@ begin
             s_axi_arregion => s_axi_arregion,     
             s_axi_arvalid => s_axi_arvalid,
             s_axi_arready => s_axi_arready,
+            s_axi_rid => s_axi_rid,
             s_axi_rdata => s_axi_rdata,
             s_axi_rresp => s_axi_rresp,
             s_axi_rlast => s_axi_rlast,

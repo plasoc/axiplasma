@@ -2,13 +2,16 @@
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
 #include "plasoc_gpio.h"
-#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
-#define PLASOC_TIMER_HALF_SECOND_CYCLES	(25000000)
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
+#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
+#define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
 
-#define INT_PLASOC_TIMER_ID				(0)
-#define INT_PLASOC_GPIO_ID				(1)
+#define PLASOC_TIMER_HALF_SECOND_CYCLES		(25000000)
+
+#define INT_PLASOC_TIMER_ID			(0)
+#define INT_PLASOC_GPIO_ID			(1)
+#define INT_XILINX_CDMA_ID			(2)
 
 plasoc_int int_obj;
 plasoc_timer timer_obj;

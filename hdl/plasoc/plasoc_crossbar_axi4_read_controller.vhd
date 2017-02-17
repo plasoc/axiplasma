@@ -47,8 +47,8 @@ entity plasoc_crossbar_axi4_read_controller is
         
         axi_address_m2s_read_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
         axi_address_s2m_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
-        axi_data_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
-        axi_data_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0')
+        axi_data_m2s_read_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+        axi_data_s2m_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0')
     );
 end plasoc_crossbar_axi4_read_controller;
 
@@ -226,7 +226,7 @@ architecture Behavioral of plasoc_crossbar_axi4_read_controller is
     constant slave_high_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_high_address);
     signal master_address_input_vector : master_address_vector_type := (others=>(others=>'0'));
     
-    signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>axi_slave_amount);
+    signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>0);
     signal permission_master_vector : permission_master_vector_type := (others=>False);
     signal handshake_master_vector : permission_master_vector_type := (others=>False);
     signal occupied_slave_vector : occupied_slave_vector_type := (others=>False);
@@ -336,8 +336,8 @@ begin
     -- Set the corresponding enables for the crossbars for the slaved controlled response interfaces.
     process (data_occupied_master_matrix)
     begin
-        axi_data_m2s_write_enables <= set_slave_m2s_enables(data_occupied_master_matrix);
-        axi_data_s2m_write_enables <= set_slave_s2m_enables(data_occupied_master_matrix);
+        axi_data_m2s_read_enables <= set_slave_m2s_enables(data_occupied_master_matrix);
+        axi_data_s2m_read_enables <= set_slave_s2m_enables(data_occupied_master_matrix);
     end process;
     
     -- The following perform the arbitration from the side of the master interfaces.

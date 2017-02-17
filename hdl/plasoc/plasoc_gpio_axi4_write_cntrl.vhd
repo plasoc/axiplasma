@@ -31,9 +31,9 @@ entity plasoc_gpio_axi4_write_cntrl is
         axi_bready : in std_logic;                                          --! AXI4-Lite Write Response signal.
         axi_bresp : out std_logic_vector(1 downto 0);                       --! AXI4-Lite Write Response signal.
         -- Register interface.
-        reg_control_enable : out std_logic;		--! Control register.
-        reg_control_ack : out std_logic;
-        reg_data_out : out std_logic_vector(axi_data_width-1 downto 0)
+        reg_control_enable : out std_logic := '0';		--! Control register.
+        reg_control_ack : out std_logic := '0';
+        reg_data_out : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0')
         );
 end plasoc_gpio_axi4_write_cntrl;
 

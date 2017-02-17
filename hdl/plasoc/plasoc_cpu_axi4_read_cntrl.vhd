@@ -48,7 +48,7 @@ entity plasoc_cpu_axi4_read_cntrl is
         -- Cache interface.
         cache_cacheable : in std_logic;                                                     --! Indicates whether the requested address of the CPU is cacheable or noncacheable.	
         -- Master AXI4-Full Read interface.
-        axi_arid : out std_logic_vector(0 downto 0);                                        --! AXI4-Full Address Read signal.
+        axi_arid : out std_logic_vector(-1 downto 0);                                        --! AXI4-Full Address Read signal.
         axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');   --! AXI4-Full Address Read signal.
         axi_arlen : out std_logic_vector(7 downto 0);                                       --! AXI4-Full Address Read signal.	
         axi_arsize : out std_logic_vector(2 downto 0);                                      --! AXI4-Full Address Read signal.
@@ -61,7 +61,7 @@ entity plasoc_cpu_axi4_read_cntrl is
         axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);                     --! AXI4-Full Address Read signal.		
         axi_arvalid : out std_logic;                                                        --! AXI4-Full Address Read signal.	
         axi_arready : in std_logic;                                                         --! AXI4-Full Address Read signal.	
-        axi_rid : in std_logic_vector(0 downto 0);                                          --! AXI4-Full Read Data signal.
+        axi_rid : in std_logic_vector(-1 downto 0);                                          --! AXI4-Full Read Data signal.
         axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);                         --! AXI4-Full Read Data signal.
         axi_rresp : in std_logic_vector(1 downto 0);                                        --! AXI4-Full Read Data signal.
         axi_rlast : in std_logic;                                                           --! AXI4-Full Read Data signal.

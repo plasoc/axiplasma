@@ -50,7 +50,7 @@ entity plasoc_cpu_axi4_write_cntrl is
         -- Cache interface.
         cache_cacheable : in std_logic;                                                         --! Indicates whether the requested address of the CPU is cacheable or noncacheable.
         -- Master AXI4-Full Write interface.
-        axi_awid : out std_logic_vector(0 downto 0);                                            --! AXI4-Full Address Write signal.
+        axi_awid : out std_logic_vector(-1 downto 0);                                            --! AXI4-Full Address Write signal.
         axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');       --! AXI4-Full Address Write signal.	
         axi_awlen : out std_logic_vector(7 downto 0);                                           --! AXI4-Full Address Write signal.
         axi_awsize : out std_logic_vector(2 downto 0);                                          --! AXI4-Full Address Write signal.
@@ -69,7 +69,7 @@ entity plasoc_cpu_axi4_write_cntrl is
         axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);                           --! AXI4-Full Write Data signal.	
         axi_wvalid : out std_logic;                                                             --! AXI4-Full Write Data signal.
         axi_wready : in std_logic;                                                              --! AXI4-Full Write Data signal.
-        axi_bid : in std_logic_vector(0 downto 0);                                              --! AXI4-Full Write Response signal.
+        axi_bid : in std_logic_vector(-1 downto 0);                                              --! AXI4-Full Write Response signal.
         axi_bresp : in  std_logic_vector(1 downto 0);                                           --! AXI4-Full Write Response signal.
         axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);                            --! AXI4-Full Write Response signal.
         axi_bvalid : in std_logic;                                                              --! AXI4-Full Write Response signal.

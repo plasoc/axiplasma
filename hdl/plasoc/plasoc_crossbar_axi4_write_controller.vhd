@@ -234,7 +234,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_controller is
     constant slave_high_address_vector : slave_address_vector_type := get_slave_base_address_vector(axi_slave_high_address);
     signal master_address_input_vector : master_address_vector_type := (others=>(others=>'0'));
     
-    signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>axi_slave_amount);
+    signal decoded_slave_id_vector : decoded_slave_id_vector_type := (others=>0);
     signal permission_master_vector : permission_master_vector_type := (others=>False);
     signal handshake_master_vector : permission_master_vector_type := (others=>False);
     signal occupied_slave_vector : occupied_slave_vector_type := (others=>False);

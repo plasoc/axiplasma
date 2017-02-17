@@ -31,6 +31,19 @@ architecture Behavioral of axiplasma_wrapper is
         bram_wrdata_a : in STD_LOGIC_VECTOR(31 DOWNTO 0);
         bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
     end component; 
+    component axi_bram_address_cntrl is
+        port (
+            aclk : in std_logic;
+            aresetn : in std_logic;
+            m_axi_awvalid : in std_logic;
+            m_axi_awready : out std_logic;
+            s_axi_awvalid : out std_logic;
+            s_axi_awready : in std_logic;
+            m_axi_arvalid : in std_logic;
+            m_axi_arready : out std_logic;
+            s_axi_arvalid : out std_logic;
+            s_axi_arready : in std_logic);
+    end component;
     component axi_cdma_0 IS
       PORT (
         m_axi_aclk : IN STD_LOGIC;
@@ -159,6 +172,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_master_amount : integer := 2;
     constant axi_slave_amount : integer := 5;
     constant axi_master_id_width : integer := 0;
+    constant axi_slave_id_width : integer := clogb2(axi_master_amount+1)+axi_master_id_width;
     constant axi_lite_address_width : integer := 16;
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -254,6 +268,8 @@ architecture Behavioral of axiplasma_wrapper is
     signal ram_axi_full_awregion : std_logic_vector(3 downto 0);
     signal ram_axi_full_awvalid : std_logic;
     signal ram_axi_full_awready : std_logic;
+    signal ram_axi_full_awvalid_0 : std_logic;
+    signal ram_axi_full_awready_0 : std_logic;
     signal ram_axi_full_wdata : std_logic_vector(axi_data_width-1 downto 0);
     signal ram_axi_full_wstrb : std_logic_vector(axi_data_width/8-1 downto 0);
     signal ram_axi_full_wlast : std_logic;
@@ -275,6 +291,8 @@ architecture Behavioral of axiplasma_wrapper is
     signal ram_axi_full_arregion : std_logic_vector(3 downto 0);
     signal ram_axi_full_arvalid : std_logic;
     signal ram_axi_full_arready : std_logic;
+    signal ram_axi_full_arvalid_0 : std_logic;
+    signal ram_axi_full_arready_0 : std_logic;
     signal ram_axi_full_rid : std_logic_vector((clogb2(axi_master_amount+1)+axi_master_id_width)-1 downto 0);
     signal ram_axi_full_rdata : std_logic_vector(axi_data_width-1 downto 0);
     signal ram_axi_full_rresp : std_logic_vector(1 downto 0);
@@ -878,11 +896,13 @@ begin
             
     int_full2lite_inst : plasoc_axi4_full2lite
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
+            s_axi_awid => int_axi_full_awid,
             s_axi_awaddr => int_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => int_axi_full_awlen,
             s_axi_awsize => int_axi_full_awsize,
@@ -899,9 +919,11 @@ begin
             s_axi_wlast => int_axi_full_wlast,
             s_axi_wvalid => int_axi_full_wvalid,
             s_axi_wready => int_axi_full_wready,
+            s_axi_bid => int_axi_full_bid,
             s_axi_bresp => int_axi_full_bresp,
             s_axi_bvalid => int_axi_full_bvalid,
             s_axi_bready => int_axi_full_bready,
+            s_axi_arid => int_axi_full_arid,
             s_axi_araddr => int_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => int_axi_full_arlen,
             s_axi_arsize => int_axi_full_arsize,
@@ -913,6 +935,7 @@ begin
             s_axi_arregion => int_axi_full_arregion,
             s_axi_arvalid => int_axi_full_arvalid,
             s_axi_arready => int_axi_full_arready,
+            s_axi_rid => int_axi_full_rid,
             s_axi_rdata => int_axi_full_rdata,
             s_axi_rresp => int_axi_full_rresp,
             s_axi_rlast => int_axi_full_rlast,
@@ -940,11 +963,13 @@ begin
             
     timer_full2lite_inst : plasoc_axi4_full2lite
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
+            s_axi_awid => timer_axi_full_awid,
             s_axi_awaddr => timer_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => timer_axi_full_awlen,
             s_axi_awsize => timer_axi_full_awsize,
@@ -961,9 +986,11 @@ begin
             s_axi_wlast => timer_axi_full_wlast,
             s_axi_wvalid => timer_axi_full_wvalid,
             s_axi_wready => timer_axi_full_wready,
+            s_axi_bid => timer_axi_full_bid,
             s_axi_bresp => timer_axi_full_bresp,
             s_axi_bvalid => timer_axi_full_bvalid,
             s_axi_bready => timer_axi_full_bready,
+            s_axi_arid => timer_axi_full_arid,
             s_axi_araddr => timer_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => timer_axi_full_arlen,
             s_axi_arsize => timer_axi_full_arsize,
@@ -975,6 +1002,7 @@ begin
             s_axi_arregion => timer_axi_full_arregion,
             s_axi_arvalid => timer_axi_full_arvalid,
             s_axi_arready => timer_axi_full_arready,
+            s_axi_rid => timer_axi_full_rid,
             s_axi_rdata => timer_axi_full_rdata,
             s_axi_rresp => timer_axi_full_rresp,
             s_axi_rlast => timer_axi_full_rlast,
@@ -1002,11 +1030,13 @@ begin
     
     gpio_full2lite_inst : plasoc_axi4_full2lite
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
+            s_axi_awid => gpio_axi_full_awid,
             s_axi_awaddr => gpio_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => gpio_axi_full_awlen,
             s_axi_awsize => gpio_axi_full_awsize,
@@ -1023,9 +1053,11 @@ begin
             s_axi_wlast => gpio_axi_full_wlast,
             s_axi_wvalid => gpio_axi_full_wvalid,
             s_axi_wready => gpio_axi_full_wready,
+            s_axi_bid => gpio_axi_full_bid,
             s_axi_bresp => gpio_axi_full_bresp,
             s_axi_bvalid => gpio_axi_full_bvalid,
             s_axi_bready => gpio_axi_full_bready,
+            s_axi_arid => gpio_axi_full_arid,
             s_axi_araddr => gpio_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => gpio_axi_full_arlen,
             s_axi_arsize => gpio_axi_full_arsize,
@@ -1037,6 +1069,7 @@ begin
             s_axi_arregion => gpio_axi_full_arregion,
             s_axi_arvalid => gpio_axi_full_arvalid,
             s_axi_arready => gpio_axi_full_arready,
+            s_axi_rid => gpio_axi_full_rid,
             s_axi_rdata => gpio_axi_full_rdata,
             s_axi_rresp => gpio_axi_full_rresp,
             s_axi_rlast => gpio_axi_full_rlast,
@@ -1064,11 +1097,13 @@ begin
             
     cdmareg_full2lite_inst : plasoc_axi4_full2lite
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
+            s_axi_awid => cdmareg_axi_full_awid,
             s_axi_awaddr => cdmareg_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => cdmareg_axi_full_awlen,
             s_axi_awsize => cdmareg_axi_full_awsize,
@@ -1085,9 +1120,11 @@ begin
             s_axi_wlast => cdmareg_axi_full_wlast,
             s_axi_wvalid => cdmareg_axi_full_wvalid,
             s_axi_wready => cdmareg_axi_full_wready,
+            s_axi_bid => cdmareg_axi_full_bid,
             s_axi_bresp => cdmareg_axi_full_bresp,
             s_axi_bvalid => cdmareg_axi_full_bvalid,
             s_axi_bready => cdmareg_axi_full_bready,
+            s_axi_arid => cdmareg_axi_full_arid,
             s_axi_araddr => cdmareg_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => cdmareg_axi_full_arlen,
             s_axi_arsize => cdmareg_axi_full_arsize,
@@ -1099,6 +1136,7 @@ begin
             s_axi_arregion => cdmareg_axi_full_arregion,
             s_axi_arvalid => cdmareg_axi_full_arvalid,
             s_axi_arready => cdmareg_axi_full_arready,
+            s_axi_rid => cdmareg_axi_full_rid,
             s_axi_rdata => cdmareg_axi_full_rdata,
             s_axi_rresp => cdmareg_axi_full_rresp,
             s_axi_rlast => cdmareg_axi_full_rlast,
@@ -1124,6 +1162,19 @@ begin
             m_axi_rready => cdmareg_axi_lite_rready,
             m_axi_rresp => cdmareg_axi_lite_rresp);
             
+    axi_bram_address_cntrl_inst : axi_bram_address_cntrl 
+        port map (
+            aclk => aclk,
+            aresetn => aresetn(0),
+            m_axi_awvalid => ram_axi_full_awvalid,
+            m_axi_awready => ram_axi_full_awready,
+            s_axi_awvalid => ram_axi_full_awvalid_0,
+            s_axi_awready => ram_axi_full_awready_0,
+            m_axi_arvalid => ram_axi_full_arvalid,
+            m_axi_arready => ram_axi_full_arready,
+            s_axi_arvalid => ram_axi_full_arvalid_0,
+            s_axi_arready => ram_axi_full_arready_0);
+            
     ram_cntrl_inst : axi_bram_ctrl_0
         port map (
             s_axi_aclk => aclk,
@@ -1136,8 +1187,8 @@ begin
             s_axi_awlock => ram_axi_full_awlock,
             s_axi_awcache => ram_axi_full_awcache,
             s_axi_awprot => ram_axi_full_awprot,
-            s_axi_awvalid => ram_axi_full_awvalid,
-            s_axi_awready => ram_axi_full_awready,
+            s_axi_awvalid => ram_axi_full_awvalid_0,
+            s_axi_awready => ram_axi_full_awready_0,
             s_axi_wdata => ram_axi_full_wdata,
             s_axi_wstrb => ram_axi_full_wstrb,
             s_axi_wlast => ram_axi_full_wlast,
@@ -1155,8 +1206,8 @@ begin
             s_axi_arlock => ram_axi_full_arlock,
             s_axi_arcache => ram_axi_full_arcache,
             s_axi_arprot => ram_axi_full_arprot,
-            s_axi_arvalid => ram_axi_full_arvalid,
-            s_axi_arready => ram_axi_full_arready,
+            s_axi_arvalid => ram_axi_full_arvalid_0,
+            s_axi_arready => ram_axi_full_arready_0,
             s_axi_rdata => ram_axi_full_rdata,
             s_axi_rresp => ram_axi_full_rresp,
             s_axi_rlast => ram_axi_full_rlast,

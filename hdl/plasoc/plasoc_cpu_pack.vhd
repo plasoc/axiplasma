@@ -64,7 +64,7 @@ package plasoc_cpu_pack is
             aclk : in std_logic;
             aresetn     : in std_logic;
             -- axi write interface.
-            axi_awid : out std_logic_vector(0 downto 0);
+            axi_awid : out std_logic_vector(-1 downto 0);
             axi_awaddr : out std_logic_vector(31 downto 0);
             axi_awlen : out std_logic_vector(7 downto 0);
             axi_awsize : out std_logic_vector(2 downto 0);
@@ -81,12 +81,12 @@ package plasoc_cpu_pack is
             axi_wlast : out std_logic;
             axi_wvalid : out std_logic;
             axi_wready : in std_logic;
-            axi_bid : in std_logic_vector(0 downto 0);
+            axi_bid : in std_logic_vector(-1 downto 0);
             axi_bresp : in  std_logic_vector(1 downto 0);
             axi_bvalid : in std_logic;
             axi_bready : out std_logic;
             -- axi read interface.
-            axi_arid : out std_logic_vector(0 downto 0);
+            axi_arid : out std_logic_vector(-1 downto 0);
             axi_araddr : out std_logic_vector(31 downto 0);
             axi_arlen : out std_logic_vector(7 downto 0);
             axi_arsize : out std_logic_vector(2 downto 0);
@@ -98,7 +98,7 @@ package plasoc_cpu_pack is
             axi_arregion : out std_logic_vector(3 downto 0);
             axi_arvalid : out std_logic;
             axi_arready : in std_logic;
-            axi_rid : in std_logic_vector(0 downto 0);
+            axi_rid : in std_logic_vector(-1 downto 0);
             axi_rdata : in std_logic_vector(31 downto 0);
             axi_rresp : in std_logic_vector(1 downto 0);
             axi_rlast : in std_logic;

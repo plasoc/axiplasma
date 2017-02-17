@@ -42,7 +42,7 @@ entity plasoc_cpu is
         aclk : in std_logic;													--! Clock. Tested with 50 MHz.
         aresetn     : in std_logic;												--! Reset on low.
         -- Master AXI4-Full Write interface.
-        axi_awid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Write signal.
+        axi_awid : out std_logic_vector(-1 downto 0);							--! AXI4-Full Address Write signal.
         axi_awaddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Write signal.
         axi_awlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Write signal.
         axi_awsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Write signal.
@@ -59,12 +59,12 @@ entity plasoc_cpu is
         axi_wlast : out std_logic;												--! AXI4-Full Write Data signal.
         axi_wvalid : out std_logic;												--! AXI4-Full Write Data signal.
         axi_wready : in std_logic;												--! AXI4-Full Write Data signal.
-        axi_bid : in std_logic_vector(0 downto 0);								--! AXI4-Full Write Response signal.
+        axi_bid : in std_logic_vector(-1 downto 0);								--! AXI4-Full Write Response signal.
         axi_bresp : in  std_logic_vector(1 downto 0);							--! AXI4-Full Write Response signal.
         axi_bvalid : in std_logic;												--! AXI4-Full Write Response signal.
         axi_bready : out std_logic;												--! AXI4-Full Write Response signal.
         -- Master AXI4-Full Read interface.
-        axi_arid : out std_logic_vector(0 downto 0);							--! AXI4-Full Address Read signal.
+        axi_arid : out std_logic_vector(-1 downto 0);							--! AXI4-Full Address Read signal.
         axi_araddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Read signal.
         axi_arlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Read signal.
         axi_arsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Read signal.	
@@ -76,7 +76,7 @@ entity plasoc_cpu is
         axi_arregion : out std_logic_vector(3 downto 0);						--! AXI4-Full Address Write signal.		
         axi_arvalid : out std_logic;											--! AXI4-Full Address Read signal.
         axi_arready : in std_logic;												--! AXI4-Full Address Read signal.
-        axi_rid : in std_logic_vector(0 downto 0);								--! AXI4-Full Read Data signal.
+        axi_rid : in std_logic_vector(-1 downto 0);								--! AXI4-Full Read Data signal.
         axi_rdata : in std_logic_vector(31 downto 0);							--! AXI4-Full Read Data signal.
         axi_rresp : in std_logic_vector(1 downto 0);							--! AXI4-Full Read Data signal.	
         axi_rlast : in std_logic;												--! AXI4-Full Read Data signal.
@@ -183,7 +183,7 @@ architecture Behavioral of plasoc_cpu is
             mem_read_valid : out std_logic;
             mem_read_ready : in std_logic;
             cache_cacheable : in std_logic;
-            axi_arid : out std_logic_vector(0 downto 0);
+            axi_arid : out std_logic_vector(-1 downto 0);
             axi_araddr : out std_logic_vector(cpu_address_width-1 downto 0);
             axi_arlen : out std_logic_vector(7 downto 0);
             axi_arsize : out std_logic_vector(2 downto 0);
@@ -196,7 +196,7 @@ architecture Behavioral of plasoc_cpu is
             axi_aruser : out std_logic_vector(axi_aruser_width-1 downto 0);
             axi_arvalid : out std_logic;
             axi_arready : in std_logic;
-            axi_rid : in std_logic_vector(0 downto 0);
+            axi_rid : in std_logic_vector(-1 downto 0);
             axi_rdata : in std_logic_vector(cpu_data_width-1 downto 0);
             axi_rresp : in std_logic_vector(1 downto 0);
             axi_rlast : in std_logic;
@@ -223,7 +223,7 @@ architecture Behavioral of plasoc_cpu is
             mem_write_valid : in std_logic;
             mem_write_ready  : out std_logic;
             cache_cacheable : in std_logic;
-            axi_awid : out std_logic_vector(0 downto 0);
+            axi_awid : out std_logic_vector(-1 downto 0);
             axi_awaddr : out std_logic_vector(cpu_address_width-1 downto 0);
             axi_awlen : out std_logic_vector(7 downto 0);
             axi_awsize : out std_logic_vector(2 downto 0);
@@ -242,7 +242,7 @@ architecture Behavioral of plasoc_cpu is
             axi_wuser : out std_logic_vector(axi_wuser_width-1 downto 0);
             axi_wvalid : out std_logic;
             axi_wready : in std_logic;
-            axi_bid : in std_logic_vector(0 downto 0);
+            axi_bid : in std_logic_vector(-1 downto 0);
             axi_bresp : in  std_logic_vector(1 downto 0);
             axi_buser : in std_logic_vector(axi_buser_width-1 downto 0);
             axi_bvalid : in std_logic;

@@ -26,6 +26,7 @@ use work.plasoc_axi4_full2lite_pack.all;
 
 entity plasoc_axi4_full2lite_read_controller is
     generic (
+        axi_slave_id_width : integer := 1;
         axi_address_width : integer := 32;
         axi_data_width : integer := 32);
     port(
@@ -33,6 +34,7 @@ entity plasoc_axi4_full2lite_read_controller is
         aclk : in std_logic;                                    --! Defines the AXI4-Lite Address Width.
         aresetn : in std_logic;                                 --! Reset on low.
         -- Slave AXI4-Full Read outterface.
+        s_axi_arid : in std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Read signal.
         s_axi_arlen : in std_logic_vector(8-1 downto 0);                             --! AXI4-Full Address Read signal.
         s_axi_arsize : in std_logic_vector(3-1 downto 0);                           --! AXI4-Full Address Read signal.    
@@ -44,6 +46,7 @@ entity plasoc_axi4_full2lite_read_controller is
         s_axi_arregion : in std_logic_vector(4-1 downto 0);                        --! AXI4-Full Address Write signal.        
         s_axi_arvalid : in std_logic;                                          --! AXI4-Full Address Read signal.
         s_axi_arready : out std_logic;                                              --! AXI4-Full Address Read signal.
+        s_axi_rid : out std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_rdata : out std_logic_vector(axi_data_width-1 downto 0);                            --! AXI4-Full Read Data signal.
         s_axi_rresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Read Data signal.    
         s_axi_rlast : out std_logic;                                               --! AXI4-Full Read Data signal.

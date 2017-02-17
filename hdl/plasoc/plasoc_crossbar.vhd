@@ -165,8 +165,8 @@ architecture Behavioral of plasoc_crossbar is
             s_axi_rid_head : in std_logic_vector(axi_slave_amount*axi_master_full_axi_id_head_width-1 downto 0);
             axi_address_m2s_read_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
             axi_address_s2m_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0');
-            axi_data_m2s_write_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
-            axi_data_s2m_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0')
+            axi_data_m2s_read_enables : out std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0) := (others=>'0');
+            axi_data_s2m_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := (others=>'0')
         );
     end component;
     constant axi_master_full_axi_id_head_width : integer := clogb2(axi_master_amount+1);
@@ -315,8 +315,8 @@ begin
             s_axi_rid_head => axi_slave_head_axi_rid,
             axi_address_m2s_read_enables => axi_address_m2s_read_enables,
             axi_address_s2m_read_enables => axi_address_s2m_read_enables,
-            axi_data_m2s_write_enables => axi_data_m2s_write_enables,
-            axi_data_s2m_write_enables => axi_data_s2m_write_enables);
+            axi_data_m2s_read_enables => axi_data_m2s_read_enables,
+            axi_data_s2m_read_enables => axi_data_s2m_read_enables);
     -- AXI4-Full Write Address Instantiations.
     axi_awid_cross_inst : plasoc_crossbar_base 
         generic map (width => axi_master_full_axi_id_width,input_amount => axi_master_amount,output_amount => axi_slave_amount)

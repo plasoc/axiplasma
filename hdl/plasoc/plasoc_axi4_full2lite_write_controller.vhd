@@ -35,6 +35,7 @@ use work.plasoc_axi4_full2lite_pack.all;
 
 entity plasoc_axi4_full2lite_write_controller is
     generic (
+        axi_slave_id_width : integer := 1;
         axi_address_width : integer := 32;
         axi_data_width : integer := 32);
     port (
@@ -42,6 +43,7 @@ entity plasoc_axi4_full2lite_write_controller is
         aclk : in std_logic;                                    --! Defines the AXI4-Lite Address Width.
         aresetn : in std_logic;                                 --! Reset on low.
         -- Slave AXI4-Full Write outterface.
+        s_axi_awid : in std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);                            --! AXI4-Full Address Write signal.
         s_axi_awlen : in std_logic_vector(8-1 downto 0);                            --! AXI4-Full Address Write signal.
         s_axi_awsize : in std_logic_vector(3-1 downto 0);                            --! AXI4-Full Address Write signal.
@@ -58,6 +60,7 @@ entity plasoc_axi4_full2lite_write_controller is
         s_axi_wlast : in std_logic;                                                --! AXI4-Full Write Data signal.
         s_axi_wvalid : in std_logic;                                               --! AXI4-Full Write Data signal.
         s_axi_wready : out std_logic;                                                --! AXI4-Full Write Data signal.
+        s_axi_bid : out std_logic_vector(axi_slave_id_width-1 downto 0);
         s_axi_bresp : out std_logic_vector(2-1 downto 0);                            --! AXI4-Full Write Response signal.
         s_axi_bvalid : out std_logic;                                               --! AXI4-Full Write Response signal.
         s_axi_bready : in std_logic;                                               --! AXI4-Full Write Response signal.
@@ -107,6 +110,7 @@ begin
             -- Reset on low.
             if aresetn='0' then
                 state <= s_wait;
+                s_axi_bid <= (others=>'0');
                 m_axi_awvalid_buff <= '0';
                 m_axi_wvalid_buff <= '0';
                 s_axi_awready_buff <= '0';
@@ -119,6 +123,7 @@ begin
                     when s_wait=>
                         -- Sample pertinent address information upon handshake.
                         if s_axi_awvalid='1' and s_axi_awready_buff='1' then
+                            s_axi_bid <= s_axi_awid;
                             s_axi_awready_buff <= '0';
                             m_axi_awvalid_buff <= '1';
                             m_axi_awaddr_buff <= s_axi_awaddr;
