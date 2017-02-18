@@ -84,26 +84,33 @@ entity plasoc_axi4_full2full_write_cntrl is
 end plasoc_axi4_full2full_write_cntrl;
 
 architecture Behavioral of plasoc_axi4_full2full_write_cntrl is
+    constant fifo_index_width : integer := 3;
+    type fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector(axi_data_width-1 downto 0);
+    type cntrl_fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector((axi_data_width/8+1)-1 downto 0);
     signal s_axi_awready_buff : std_logic := '0';
     signal m_axi_awvalid_buff : std_logic := '0';
     signal s_axi_wready_buff : std_logic := '0';
     signal m_axi_wvalid_buff : std_logic := '0';
-    signal m_axi_wlast_buff : std_logic := '0';
     signal s_axi_bvalid_buff : std_logic := '0';
     signal m_axi_bready_buff : std_logic := '0';
+    signal fifo : fifo_type := (others=>(others=>'0'));
+    signal cntrl_fifo : cntrl_fifo_type := (others=>(others=>'0'));
+    signal m_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
+    signal s_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
 begin
+
     s_axi_awready <= s_axi_awready_buff;
     m_axi_awvalid <= m_axi_awvalid_buff;
     s_axi_wready <= s_axi_wready_buff;
     m_axi_wvalid <= m_axi_wvalid_buff;
-    m_axi_wlast <= m_axi_wlast_buff;
     s_axi_bvalid <= s_axi_bvalid_buff;
     m_axi_bready <= m_axi_bready_buff;
+    
     process (aclk)
     begin
         if rising_edge(aclk) then
             if aresetn='0' then
-                s_axi_awready_buff <= '1';
+                s_axi_awready_buff <= '0';
                 m_axi_awvalid_buff <= '0';
             else
                 if s_axi_awvalid='1' and s_axi_awready_buff='1' then
@@ -131,42 +138,63 @@ begin
             end if;
         end if;
     end process;
+    
+    m_axi_wdata <= fifo(m_ptr);
+    m_axi_wstrb <= cntrl_fifo(m_ptr)(axi_data_width/8-1 downto 0);
+    m_axi_wlast <= cntrl_fifo(m_ptr)(axi_data_width/8);
+    
     process (aclk)
     begin
         if rising_edge(aclk) then
             if aresetn='0' then
-                s_axi_wready_buff <= '1';
+                s_axi_wready_buff <= '0';
                 m_axi_wvalid_buff <= '0';
-                m_axi_wlast_buff <= '0';
+                m_ptr <= 0;
+                s_ptr <= 0;
             else
+            
                 if s_axi_wvalid='1' and s_axi_wready_buff='1' then
-                    m_axi_wdata <= s_axi_wdata;
-                    m_axi_wstrb <= s_axi_wstrb;
+                    fifo(s_ptr) <= s_axi_wdata;
+                    cntrl_fifo(s_ptr)(axi_data_width/8-1 downto 0) <= s_axi_wstrb;
+                    cntrl_fifo(s_ptr)(axi_data_width/8) <= s_axi_wlast;
+                end if;
+                
+                if m_axi_wvalid_buff='1' and m_axi_wready='1' then
+                    if m_ptr=2**fifo_index_width-1 then
+                        m_ptr <= 0;
+                    else
+                        m_ptr <= m_ptr+1;
+                    end if;
                 end if;
                 if s_axi_wvalid='1' and s_axi_wready_buff='1' then
-                    m_axi_wvalid_buff <= '1';
-                elsif m_axi_wvalid_buff='1' and m_axi_wready='1' then
-                    m_axi_wvalid_buff <= '0';
+                    if s_ptr=2**fifo_index_width-1 then
+                        s_ptr <= 0;
+                    else
+                        s_ptr <= s_ptr+1;
+                    end if;
                 end if;
-                if s_axi_wvalid='1' and s_axi_wready_buff='1' and s_axi_wlast='1' then
-                    m_axi_wlast_buff <= '1';
-                elsif m_axi_wvalid_buff='1' and m_axi_wready='1' then
-                    m_axi_wlast_buff <= '0';
-                end if;
-                if m_axi_wready='1' then
+                
+                if ((s_ptr+1)mod 2**fifo_index_width)/=m_ptr then
                     s_axi_wready_buff <= '1';
-                elsif s_axi_wvalid='1' and s_axi_wready_buff='1' then
+                else
                     s_axi_wready_buff <= '0';
                 end if;
+                if s_ptr/=m_ptr then
+                    m_axi_wvalid_buff <= '1';
+                else
+                    m_axi_wvalid_buff <= '0';
+                end if;
+
             end if;
         end if;
     end process;
+    
     process (aclk)
     begin
         if rising_edge(aclk) then
             if aresetn='0' then
                 s_axi_bvalid_buff <= '0';
-                m_axi_bready_buff <= '1';
+                m_axi_bready_buff <= '0';
             else
                 if m_axi_bvalid='1' and m_axi_bready_buff='1' then
                     s_axi_bid <= m_axi_bid;

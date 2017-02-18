@@ -133,6 +133,7 @@ begin
     s_axi_rid <= cntrl_fifo(s_ptr)(axi_id_width-1 downto 0);
     s_axi_rresp <= cntrl_fifo(s_ptr)(axi_id_width+1 downto axi_id_width);
     s_axi_rlast <= cntrl_fifo(s_ptr)(axi_id_width+2);
+    
     process (aclk)
     begin
         if rising_edge(aclk) then 
