@@ -358,8 +358,8 @@ begin
                         -- Wait until the master interface has permission 
                         -- to use its desired slave interface.
                         if permission_master_vector(each_master) then
-                        -- Connect and indicate that the current slave interface is occupied.
-                        occupied_slave_matrix(each_master)(decoded_slave_id_buff) <= '1';
+                            -- Connect and indicate that the current slave interface is occupied.
+                            occupied_slave_matrix(each_master)(decoded_slave_id_buff) <= '1';
                         -- Wait until the master and occupied slave interface performs their handshake.
                         elsif or_reduce(occupied_slave_matrix(each_master))='1' and handshake_master_vector(each_master) then
                             -- The slave should no longer be occupied after handshake.

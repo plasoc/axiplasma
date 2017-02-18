@@ -158,12 +158,10 @@ begin
                         axi_wdata <= mem_write_data;
                         axi_wstrb <= mem_write_strobe;
                     end if;
-                    if axi_handshake then
-                        if axi_wlast_buff='0' then
-                            mem_write_ready_buff <= '1';
-                        else
-                            mem_write_ready_buff <= '0'; 
-                        end if;
+                    if axi_handshake and axi_wlast_buff='1' then
+                        mem_write_ready_buff <= '0';
+                    elsif axi_wready='1' then
+                        mem_write_ready_buff <= '1';
                     elsif mem_handshake then
                         mem_write_ready_buff <= '0';
                     end if;
@@ -172,7 +170,7 @@ begin
                     elsif axi_handshake then
                         axi_wvalid_buff <= '0';
                     end if;
-                    if axi_handshake and counter/=axi_awlen_buff then
+                    if mem_handshake and counter/=axi_awlen_buff then
                         counter <= counter+1;
                     end if;
                     if counter=axi_awlen_buff then
@@ -183,6 +181,7 @@ begin
                         end if;
                     end if;
                     if axi_handshake and axi_wlast_buff='1' then
+                        axi_bready_buff <= '1';
                         state <= state_response;
                     end if;
                 -- RESPONSE mode.
@@ -206,10 +205,7 @@ begin
                         else
                             -- If an error didn't occur, begin waiting for the next memory write request.
                             state <= state_wait;
-                        end if;
-                    -- Let the slave axi write interface know the master is ready for the response.
-                    else
-                        axi_bready_buff <= '1';
+                        end if;  
                     end if;
                 -- ERROR mode.
                 when state_error=> 

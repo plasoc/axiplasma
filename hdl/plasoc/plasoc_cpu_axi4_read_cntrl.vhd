@@ -145,33 +145,29 @@ begin
                     end if;
                 -- READ mode.
                 when state_read=>
-                    -- Check for axi handshake;
-                    handshake := axi_rvalid='1' and axi_rready_buff='1';
-                    -- On handshake with the axi4 read interface, sample the word and
-                    -- let the memory interface know the data is valid.
-                    if handshake then
+                    if axi_rvalid='1' and axi_rready_buff='1' then
                         mem_read_data <= axi_rdata;
-                        counter <= counter+1;
+                    end if;
+                    if axi_rvalid='1' and axi_rready_buff='1' then
                         mem_read_valid_buff <= '1';
-                    -- Once the memory interface samples the data, the data becomes invalid.
                     elsif mem_read_valid_buff='1' and mem_read_ready='1' then
                         mem_read_valid_buff <= '0';
                     end if;
-                    -- Only permit a read if the memory interface is ready to accept.
-                    if mem_read_ready='1' then
+                    if axi_rvalid='1' and axi_rready_buff='1' and counter=axi_arlen_buff then
+                        axi_rready_buff <= '0';
+                    elsif mem_read_ready='1' then
                         axi_rready_buff <= '1';
-                    else
+                    elsif axi_rvalid='1' and axi_rready_buff='1' then
                         axi_rready_buff <= '0';
                     end if;
-                    -- Check if enough words have been received.
-                    if counter=axi_arlen_buff and handshake then
-                        -- Check if an error occurred.
+                    if axi_rvalid='1' and axi_rready_buff='1' and counter/=axi_arlen_buff then
+                        counter <= counter+1;
+                    end if;
+                    if axi_rvalid='1' and axi_rready_buff='1' and counter=axi_arlen_buff then
                         if axi_rlast='0' or axi_rresp/=axi_resp_okay then
-                            -- Assert on last flag
                             if axi_rlast='0' then
                                 error_data_buff(error_axi_read_rlast) := '1';
                             end if;
-                            -- Assert on read response.
                             if axi_rresp/=axi_resp_okay then
                                 if axi_rresp=axi_resp_exokay then
                                     error_data_buff(error_axi_read_exokay) := '1';
@@ -181,19 +177,11 @@ begin
                                     error_data_buff(error_axi_read_decerr) := '1';
                                 end if;
                             end if;
-                            -- Send out error bits.
                             error_data <= error_data_buff;
-                            -- Block on error state.
                             state <= state_error;
-                        -- Upon successful completion, signal that the transaction is finished.
                         else
-                            axi_finished <= True;
+                            state <= state_wait;
                         end if;
-                    end if;
-                    -- Start waiting again if both the transaction is finished and the 
-                    -- last word is read from the memory read interface.
-                    if axi_finished and mem_read_ready='0' then
-                        state <= state_wait;
                     end if;
                 -- block in ERROR mode.
                 when state_error=>

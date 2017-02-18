@@ -13,7 +13,7 @@ package plasoc_cpu_pack is
     constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cpu_alu_type        : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cache_address_width : integer := 12;								--! Defines the default address width of the cacheable addresses.
-    constant default_cache_way_width : integer := 2; 									--! Associativity = 2^default_cache_way_width.	
+    constant default_cache_way_width : integer := 1; 									--! Associativity = 2^default_cache_way_width.	
     constant default_cache_index_width : integer := 4;									--! Cache Size (rows) = 2^default_cache_index_width.
     constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
     constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
