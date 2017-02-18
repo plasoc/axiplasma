@@ -153,35 +153,18 @@ begin
                     elsif mem_read_valid_buff='1' and mem_read_ready='1' then
                         mem_read_valid_buff <= '0';
                     end if;
-                    if axi_rvalid='1' and axi_rready_buff='1' and counter=axi_arlen_buff then
+                    if mem_read_valid_buff='1' and mem_read_ready='1' and counter=axi_arlen_buff then
                         axi_rready_buff <= '0';
                     elsif mem_read_ready='1' then
                         axi_rready_buff <= '1';
                     elsif axi_rvalid='1' and axi_rready_buff='1' then
                         axi_rready_buff <= '0';
                     end if;
-                    if axi_rvalid='1' and axi_rready_buff='1' and counter/=axi_arlen_buff then
+                    if mem_read_valid_buff='1' and mem_read_ready='1' and counter/=axi_arlen_buff then
                         counter <= counter+1;
                     end if;
-                    if axi_rvalid='1' and axi_rready_buff='1' and counter=axi_arlen_buff then
-                        if axi_rlast='0' or axi_rresp/=axi_resp_okay then
-                            if axi_rlast='0' then
-                                error_data_buff(error_axi_read_rlast) := '1';
-                            end if;
-                            if axi_rresp/=axi_resp_okay then
-                                if axi_rresp=axi_resp_exokay then
-                                    error_data_buff(error_axi_read_exokay) := '1';
-                                elsif axi_rresp=axi_resp_slverr then
-                                    error_data_buff(error_axi_read_slverr) := '1';
-                                elsif axi_rresp=axi_resp_decerr then
-                                    error_data_buff(error_axi_read_decerr) := '1';
-                                end if;
-                            end if;
-                            error_data <= error_data_buff;
-                            state <= state_error;
-                        else
-                            state <= state_wait;
-                        end if;
+                    if mem_read_valid_buff='1' and mem_read_ready='1' and counter=axi_arlen_buff then
+                        state <= state_wait;
                     end if;
                 -- block in ERROR mode.
                 when state_error=>

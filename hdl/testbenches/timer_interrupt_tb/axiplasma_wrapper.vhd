@@ -1421,6 +1421,7 @@ begin
             s_axi_arprot => ram_axi_full_1_arprot,
             s_axi_arvalid => ram_axi_full_1_arvalid,
             s_axi_arready => ram_axi_full_1_arready,
+            s_axi_rid => ram_axi_full_0_rid,
             s_axi_rdata => ram_axi_full_0_rdata,
             s_axi_rresp => ram_axi_full_0_rresp,
             s_axi_rlast => ram_axi_full_0_rlast,
