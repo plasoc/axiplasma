@@ -152,45 +152,45 @@ def get_formatted_assignments(slave_names,master_names):
 			'\tm_axi_rresp <= std_logic_vector(to_unsigned(0,0))',''.join([' & '+master_name + '_m_axi_rresp' for master_name in master_names][::-1]),';\n',\
 			'\tm_axi_rlast <= std_logic_vector(to_unsigned(0,0))',''.join([' & '+master_name + '_m_axi_rlast' for master_name in master_names][::-1]),';\n',\
 			'\tm_axi_rvalid <= std_logic_vector(to_unsigned(0,0))',''.join([' & '+master_name + '_m_axi_rvalid' for master_name in master_names][::-1]),';\n',\
-			''.join(['\t'+slave_name+'_s_axi_awready <= s_axi_awready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_wready <= s_axi_wready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_bid <= s_axi_bid((1+'+repr(index)+')*axi_slave_id_width-1 downto '+repr(index)+'*axi_slave_id_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_bresp <= s_axi_bresp((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_bvalid <= s_axi_bvalid('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_arready <= s_axi_arready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_rid <= s_axi_rid((1+'+repr(index)+')*axi_slave_id_width-1 downto '+repr(index)+'*axi_slave_id_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_rdata <= s_axi_rdata((1+'+repr(index)+')*axi_data_width-1 downto '+repr(index)+'*axi_data_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_rresp <= s_axi_rresp((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_rlast <= s_axi_rlast('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+slave_name+'_s_axi_rvalid <= s_axi_rvalid('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awid <= m_axi_awid((1+'+repr(index)+')*axi_master_id_width-1 downto '+repr(index)+'*axi_master_id_width);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awaddr <= m_axi_awaddr((1+'+repr(index)+')*axi_address_width-1 downto '+repr(index)+'*axi_address_width);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awlen <= m_axi_awlen((1+'+repr(index)+')*8-1 downto '+repr(index)+'*8);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awsize <= m_axi_awsize((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awburst <= m_axi_awburst((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awlock <= m_axi_awlock('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awcache <= m_axi_awcache((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awprot <= m_axi_awprot((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awqos <= m_axi_awqos((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awregion <= m_axi_awregion((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_awvalid <= m_axi_awvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_wdata <= m_axi_wdata((1+'+repr(index)+')*axi_data_width-1 downto '+repr(index)+'*axi_data_width);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_wstrb <= m_axi_wstrb((1+'+repr(index)+')*axi_data_width/8-1 downto '+repr(index)+'*axi_data_width/8);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_wlast <= m_axi_wlast('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_wvalid <= m_axi_wvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_bready <= m_axi_bready('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arid <= m_axi_arid((1+'+repr(index)+')*axi_master_id_width-1 downto '+repr(index)+'*axi_master_id_width);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_araddr <= m_axi_araddr((1+'+repr(index)+')*axi_address_width-1 downto '+repr(index)+'*axi_address_width);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arlen <= m_axi_arlen((1+'+repr(index)+')*8-1 downto '+repr(index)+'*8);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arsize <= m_axi_arsize((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arburst <= m_axi_arburst((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arlock <= m_axi_arlock('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arcache <= m_axi_arcache((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arprot <= m_axi_arprot((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arqos <= m_axi_arqos((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arregion <= m_axi_arregion((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_arvalid <= m_axi_arvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
-			''.join(['\t'+master_name+'_m_axi_rready <= m_axi_rready('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)])\
+			''.join(['\t'+slave_name+'_s_axi_awready <= \'0\' when s_address_write_connected('+repr(index)+')=\'0\' else s_axi_awready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_wready <= \'0\' when s_data_write_connected('+repr(index)+')=\'0\' else s_axi_wready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_bid <= (others=>\'0\') when s_response_write_connected('+repr(index)+')=\'0\' else s_axi_bid((1+'+repr(index)+')*axi_slave_id_width-1 downto '+repr(index)+'*axi_slave_id_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_bresp <= (others=>\'0\') when s_response_write_connected('+repr(index)+')=\'0\' else s_axi_bresp((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_bvalid <= \'0\' when s_response_write_connected('+repr(index)+')=\'0\' else s_axi_bvalid('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_arready <= \'0\' when s_address_read_connected('+repr(index)+')=\'0\' else s_axi_arready('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_rid <= (others=>\'0\') when s_data_read_connected('+repr(index)+')=\'0\' else s_axi_rid((1+'+repr(index)+')*axi_slave_id_width-1 downto '+repr(index)+'*axi_slave_id_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_rdata <= (others=>\'0\') when s_data_read_connected('+repr(index)+')=\'0\' else s_axi_rdata((1+'+repr(index)+')*axi_data_width-1 downto '+repr(index)+'*axi_data_width);\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_rresp <= (others=>\'0\') when s_data_read_connected('+repr(index)+')=\'0\' else s_axi_rresp((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_rlast <= \'0\' when s_data_read_connected('+repr(index)+')=\'0\' else s_axi_rlast('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+slave_name+'_s_axi_rvalid <= \'0\' when s_data_read_connected('+repr(index)+')=\'0\' else s_axi_rvalid('+repr(index)+');\n'for (index,slave_name) in enumerate(slave_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awid <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awid((1+'+repr(index)+')*axi_master_id_width-1 downto '+repr(index)+'*axi_master_id_width);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awaddr <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awaddr((1+'+repr(index)+')*axi_address_width-1 downto '+repr(index)+'*axi_address_width);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awlen <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awlen((1+'+repr(index)+')*8-1 downto '+repr(index)+'*8);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awsize <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awsize((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awburst <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awburst((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awlock <= \'0\' when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awlock('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awcache <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awcache((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awprot <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awprot((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awqos <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awqos((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awregion <= (others=>\'0\') when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awregion((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_awvalid <= \'0\' when m_address_write_connected('+repr(index)+')=\'0\' else m_axi_awvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_wdata <= (others=>\'0\') when m_data_write_connected('+repr(index)+')=\'0\' else m_axi_wdata((1+'+repr(index)+')*axi_data_width-1 downto '+repr(index)+'*axi_data_width);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_wstrb <= (others=>\'0\') when m_data_write_connected('+repr(index)+')=\'0\' else m_axi_wstrb((1+'+repr(index)+')*axi_data_width/8-1 downto '+repr(index)+'*axi_data_width/8);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_wlast <= \'0\' when m_data_write_connected('+repr(index)+')=\'0\' else m_axi_wlast('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_wvalid <= \'0\' when m_data_write_connected('+repr(index)+')=\'0\' else m_axi_wvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_bready <= \'0\' when m_response_write_connected('+repr(index)+')=\'0\' else m_axi_bready('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arid <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arid((1+'+repr(index)+')*axi_master_id_width-1 downto '+repr(index)+'*axi_master_id_width);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_araddr <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_araddr((1+'+repr(index)+')*axi_address_width-1 downto '+repr(index)+'*axi_address_width);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arlen <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arlen((1+'+repr(index)+')*8-1 downto '+repr(index)+'*8);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arsize <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arsize((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arburst <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arburst((1+'+repr(index)+')*2-1 downto '+repr(index)+'*2);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arlock <= \'0\' when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arlock('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arcache <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arcache((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arprot <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arprot((1+'+repr(index)+')*3-1 downto '+repr(index)+'*3);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arqos <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arqos((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arregion <= (others=>\'0\') when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arregion((1+'+repr(index)+')*4-1 downto '+repr(index)+'*4);\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_arvalid <= \'0\' when m_address_read_connected('+repr(index)+')=\'0\' else m_axi_arvalid('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)]),\
+			''.join(['\t'+master_name+'_m_axi_rready <= \'0\' when m_data_read_connected('+repr(index)+')=\'0\' else m_axi_rready('+repr(index)+');\n'for (index,master_name) in enumerate(master_names)])\
 		]
 	lines2 = []
 	lines2.extend(lines)
