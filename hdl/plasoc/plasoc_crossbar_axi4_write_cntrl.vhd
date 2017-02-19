@@ -33,7 +33,6 @@ entity plasoc_crossbar_axi4_write_cntrl is
         m_axi_awready : in std_logic_vector(axi_master_amount*1-1 downto 0);
         m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);
         m_axi_bvalid : in std_logic_vector(axi_master_amount*1-1 downto 0));
-        
 end plasoc_crossbar_axi4_write_cntrl;
 
 architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
@@ -90,7 +89,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
         slave_permissions := get_slave_permissions(slave_handshakes,master_connected,master_iden);
         for each_slave in 0 to axi_slave_amount-1 loop
             master_iden_buff := to_integer(unsigned(master_iden((1+each_slave)*axi_master_iden_width-1 downto each_slave*axi_master_iden_width)));
-            if slave_permissions(each_slave)='1' and master_connected(master_iden_buff)='0' then
+            if slave_permissions(each_slave)='1' then
                 enables(each_slave+master_iden_buff*axi_slave_amount) := '1';
             elsif slave_handshakes(each_slave)='0' then
                 for each_master in 0 to axi_master_amount-1 loop
@@ -150,7 +149,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
         master_permissions := get_master_permissions(master_handshakes,slave_connected,slave_iden);
         for each_master in 0 to axi_master_amount-1 loop
             slave_iden_buff := to_integer(unsigned(slave_iden((1+each_master)*axi_slave_iden_width-1 downto each_master*axi_slave_iden_width)));
-            if master_permissions(each_master)='1' and slave_connected(slave_iden_buff)='0' then
+            if master_permissions(each_master)='1' then
                 enables(each_master+slave_iden_buff*axi_master_amount) := '1';
             elsif master_handshakes(each_master)='0' then
                 for each_slave in 0 to axi_slave_amount-1 loop

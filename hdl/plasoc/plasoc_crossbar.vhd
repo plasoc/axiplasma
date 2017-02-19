@@ -7,11 +7,11 @@ use work.plasoc_crossbar_pack.all;
 
 entity plasoc_crossbar is
     generic (
-        axi_address_width : integer := 32;
+        axi_address_width : integer := 16;
         axi_data_width : integer := 32;
-        axi_master_amount : integer := 3;
+        axi_master_amount : integer := 2;
         axi_slave_id_width : integer := 2;
-        axi_slave_amount : integer := 5;
+        axi_slave_amount : integer := 4;
         axi_master_base_address : std_logic_vector := X"4000000000000000";
         axi_master_high_address : std_logic_vector := X"ffffffff3fffffff"
     );
@@ -23,7 +23,13 @@ entity plasoc_crossbar is
         s_data_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
         s_response_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
         s_address_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
-        s_data_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);             
+        s_data_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);     
+        
+        m_address_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
+        m_data_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
+        m_response_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
+        m_address_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
+        m_data_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);        
                                           
         s_axi_awid : in std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);                                           
         s_axi_awaddr : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);                            
@@ -64,12 +70,6 @@ entity plasoc_crossbar is
         s_axi_rlast : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
         s_axi_rvalid : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
         s_axi_rready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
-        
-        m_address_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_data_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_response_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_address_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_data_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
         
         m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                            
         m_axi_awaddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
@@ -128,6 +128,58 @@ architecture Behavioral of plasoc_crossbar is
             inputs : in std_logic_vector(width*input_amount-1 downto 0);
             enables : in std_logic_vector(input_amount*output_amount-1 downto 0);
             outputs : out std_logic_vector(width*output_amount-1 downto 0));
+    end component;
+    
+    component plasoc_crossbar_axi4_write_cntrl is
+        generic (
+            axi_slave_amount : integer := 2;
+            axi_master_amount : integer := 4);
+        port (
+        
+            aclk : in std_logic;                                                    
+            aresetn : in std_logic;
+            
+            axi_write_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount+1)-1 downto 0);
+            axi_write_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount+1)-1 downto 0);
+            
+            axi_address_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+            axi_data_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+            axi_response_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+            
+            m_address_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
+            m_data_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
+            s_response_write_connected : in std_logic_vector(axi_slave_amount-1 downto 0);
+            
+            s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_bready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_awready : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            m_axi_bvalid : in std_logic_vector(axi_master_amount*1-1 downto 0));
+    end component;
+    
+    component plasoc_crossbar_axi4_read_cntrl is
+        generic (
+            axi_slave_amount : integer := 2;
+            axi_master_amount : integer := 4);
+        port (
+               
+            aclk : in std_logic;                                                    
+            aresetn : in std_logic;
+            
+            axi_read_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount+1)-1 downto 0);
+            axi_read_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount+1)-1 downto 0);
+            
+            axi_address_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+            axi_data_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+            
+            m_address_read_connected : in std_logic_vector(axi_master_amount-1 downto 0);
+            s_data_read_connected : in std_logic_vector(axi_slave_amount-1 downto 0);
+            
+            s_axi_arvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_rready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            m_axi_arready : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            m_axi_rvalid : in std_logic_vector(axi_master_amount*1-1 downto 0));
     end component;
     
     function set_crossbar_enables( enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) ) return std_logic_vector is
@@ -232,7 +284,70 @@ architecture Behavioral of plasoc_crossbar is
     signal axi_data_s2m_read_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0); 
     signal axi_data_m2s_read_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
     
+    signal s_address_write_connected_buff : std_logic_vector(axi_slave_amount-1 downto 0);
+    signal s_data_write_connected_buff : std_logic_vector(axi_slave_amount-1 downto 0);
+    signal s_response_write_connected_buff : std_logic_vector(axi_slave_amount-1 downto 0);
+    signal s_address_read_connected_buff : std_logic_vector(axi_slave_amount-1 downto 0);
+    signal s_data_read_connected_buff : std_logic_vector(axi_slave_amount-1 downto 0);     
+    signal m_address_write_connected_buff : std_logic_vector(axi_master_amount-1 downto 0);
+    signal m_data_write_connected_buff : std_logic_vector(axi_master_amount-1 downto 0);
+    signal m_response_write_connected_buff : std_logic_vector(axi_master_amount-1 downto 0);
+    signal m_address_read_connected_buff : std_logic_vector(axi_master_amount-1 downto 0);
+    signal m_data_read_connected_buff : std_logic_vector(axi_master_amount-1 downto 0);   
+    
 begin
+
+    s_address_write_connected <= s_address_write_connected_buff;
+    s_data_write_connected <= s_data_write_connected_buff;
+    s_response_write_connected <= s_response_write_connected_buff;
+    s_address_read_connected <= s_address_read_connected_buff;
+    s_data_read_connected <= s_data_read_connected_buff;
+    
+    m_address_write_connected <= m_address_write_connected_buff;
+    m_data_write_connected <= m_data_write_connected_buff;
+    m_response_write_connected <= m_response_write_connected_buff;
+    m_address_read_connected <= m_address_read_connected_buff;
+    m_data_read_connected <= m_data_read_connected_buff;
+    
+    plasoc_crossbar_axi4_write_cntrl_inst : plasoc_crossbar_axi4_write_cntrl
+        generic map (
+            axi_slave_amount => axi_slave_amount,
+            axi_master_amount => axi_master_amount)
+        port map (
+            aclk => aclk,
+            aresetn => aresetn,
+            axi_write_master_iden => axi_write_master_iden,
+            axi_write_slave_iden => axi_write_slave_iden,
+            axi_address_write_enables => axi_address_write_enables,
+            axi_data_write_enables => axi_data_write_enables,
+            axi_response_write_enables => axi_response_write_enables,
+            m_address_write_connected => m_address_write_connected_buff,
+            m_data_write_connected => m_data_write_connected_buff,
+            s_response_write_connected => s_response_write_connected_buff,
+            s_axi_awvalid => s_axi_awvalid,
+            s_axi_wvalid => s_axi_wvalid,
+            s_axi_bready => s_axi_bready,
+            m_axi_awready => m_axi_awready,
+            m_axi_wready => m_axi_wready,
+            m_axi_bvalid => m_axi_bvalid);
+   
+    plasoc_crossbar_axi4_read_cntrl_inst : plasoc_crossbar_axi4_read_cntrl
+        generic map (
+            axi_slave_amount => axi_slave_amount,
+            axi_master_amount => axi_master_amount)
+        port map (
+            aclk => aclk,
+            aresetn => aresetn,
+            axi_read_master_iden => axi_read_master_iden,
+            axi_read_slave_iden => axi_read_slave_iden,
+            axi_address_read_enables => axi_address_read_enables,
+            axi_data_read_enables => axi_data_read_enables,
+            m_address_read_connected => m_address_read_connected_buff,
+            s_data_read_connected => s_data_read_connected_buff,
+            s_axi_arvalid => s_axi_arvalid,
+            s_axi_rready => s_axi_rready,
+            m_axi_arready => m_axi_arready,
+            m_axi_rvalid => m_axi_rvalid);
 
     generate_slave_idassigns:
     for each_slave in 0 to axi_slave_amount-1 generate
@@ -272,40 +387,40 @@ begin
         variable connected : std_logic_vector(connected_width-1 downto 0);
     begin
         connected := set_connected(axi_address_write_enables);
-        s_address_write_connected <= connected(axi_slave_amount-1 downto 0);
-        m_address_write_connected <= connected(connected_width-1 downto axi_slave_amount);
+        s_address_write_connected_buff <= connected(axi_slave_amount-1 downto 0);
+        m_address_write_connected_buff <= connected(connected_width-1 downto axi_slave_amount);
     end process;
     process (axi_data_write_enables)
         constant connected_width : integer := axi_slave_amount+axi_master_amount; 
         variable connected : std_logic_vector(connected_width-1 downto 0);
     begin
         connected := set_connected(axi_data_write_enables);
-        s_data_write_connected <= connected(axi_slave_amount-1 downto 0);
-        m_data_write_connected <= connected(connected_width-1 downto axi_slave_amount);
+        s_data_write_connected_buff <= connected(axi_slave_amount-1 downto 0);
+        m_data_write_connected_buff <= connected(connected_width-1 downto axi_slave_amount);
     end process;
     process (axi_response_write_enables)
         constant connected_width : integer := axi_slave_amount+axi_master_amount; 
         variable connected : std_logic_vector(connected_width-1 downto 0);
     begin
         connected := set_connected(axi_response_write_enables);
-        s_response_write_connected <= connected(axi_slave_amount-1 downto 0);
-        m_response_write_connected <= connected(connected_width-1 downto axi_slave_amount);
+        s_response_write_connected_buff <= connected(axi_slave_amount-1 downto 0);
+        m_response_write_connected_buff <= connected(connected_width-1 downto axi_slave_amount);
     end process;
     process (axi_address_read_enables)
         constant connected_width : integer := axi_slave_amount+axi_master_amount; 
         variable connected : std_logic_vector(connected_width-1 downto 0);
     begin
         connected := set_connected(axi_address_read_enables);
-        s_address_read_connected <= connected(axi_slave_amount-1 downto 0);
-        m_address_read_connected <= connected(connected_width-1 downto axi_slave_amount);
+        s_address_read_connected_buff <= connected(axi_slave_amount-1 downto 0);
+        m_address_read_connected_buff <= connected(connected_width-1 downto axi_slave_amount);
     end process;
     process (axi_data_read_enables)
         constant connected_width : integer := axi_slave_amount+axi_master_amount; 
         variable connected : std_logic_vector(connected_width-1 downto 0);
     begin
         connected := set_connected(axi_data_read_enables);
-        s_data_read_connected <= connected(axi_slave_amount-1 downto 0);
-        m_data_read_connected <= connected(connected_width-1 downto axi_slave_amount);
+        s_data_read_connected_buff <= connected(axi_slave_amount-1 downto 0);
+        m_data_read_connected_buff <= connected(connected_width-1 downto axi_slave_amount);
     end process;
 
     process (axi_address_write_enables)
