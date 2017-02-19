@@ -9,9 +9,9 @@ entity plasoc_crossbar is
     generic (
         axi_address_width : integer := 32;
         axi_data_width : integer := 32;
-        axi_master_amount : integer := 2;
+        axi_master_amount : integer := 3;
         axi_slave_id_width : integer := 2;
-        axi_slave_amount : integer := 2;
+        axi_slave_amount : integer := 5;
         axi_master_base_address : std_logic_vector := X"4000000000000000";
         axi_master_high_address : std_logic_vector := X"ffffffff3fffffff"
     );
@@ -71,7 +71,7 @@ entity plasoc_crossbar is
         m_address_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
         m_data_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
         
-        m_axi_awid : out std_logic_vector(axi_slave_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                            
+        m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                            
         m_axi_awaddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
         m_axi_awlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                            
         m_axi_awsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                            
@@ -88,11 +88,11 @@ entity plasoc_crossbar is
         m_axi_wlast : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                
         m_axi_wvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                               
         m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                                
-        m_axi_bid : in std_logic_vector(axi_slave_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+        m_axi_bid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
         m_axi_bresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
         m_axi_bvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
         m_axi_bready : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                     
-        m_axi_arid : out std_logic_vector(axi_slave_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                              
+        m_axi_arid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                              
         m_axi_araddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
         m_axi_arlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                             
         m_axi_arsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                           
@@ -104,7 +104,7 @@ entity plasoc_crossbar is
         m_axi_arregion : out std_logic_vector(axi_master_amount*4-1 downto 0);                        
         m_axi_arvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                          
         m_axi_arready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                              
-        m_axi_rid : in std_logic_vector(axi_slave_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+        m_axi_rid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
         m_axi_rdata : in std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);                            
         m_axi_rresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
         m_axi_rlast : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
@@ -219,7 +219,7 @@ architecture Behavioral of plasoc_crossbar is
     signal axi_address_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
     signal axi_address_s2m_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0); 
     signal axi_address_m2s_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
-    signal axi_data_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0); 
+    signal axi_data_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0); 
     signal axi_data_s2m_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0); 
     signal axi_data_m2s_write_enables : std_logic_vector(axi_master_amount*axi_slave_amount-1 downto 0);
     signal axi_response_write_enables : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
