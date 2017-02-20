@@ -205,8 +205,8 @@ architecture Behavioral of axiplasma_wrapper is
     END component;
     constant axi_address_width : integer := 32;
     constant axi_data_width : integer := 32;
-    constant axi_master_amount : integer := 2;
-    constant axi_slave_amount : integer := 5;
+    constant axi_master_amount : integer := 5;
+    constant axi_slave_amount : integer := 2;
     constant axi_slave_id_width : integer := 0;
     constant axi_master_id_width : integer := clogb2(axi_slave_amount+1)+axi_slave_id_width;
     constant axi_lite_address_width : integer := 16;
@@ -859,45 +859,45 @@ begin
             gpio_m_axi_rlast => gpio_axi_full_rlast,
             gpio_m_axi_rvalid => gpio_axi_full_rvalid,
             gpio_m_axi_rready => gpio_axi_full_rready,
-            cdma_m_axi_awid => cdma_axi_full_awid,
-            cdma_m_axi_awaddr => cdma_axi_full_awaddr,
-            cdma_m_axi_awlen => cdma_axi_full_awlen,
-            cdma_m_axi_awsize => cdma_axi_full_awsize,
-            cdma_m_axi_awburst => cdma_axi_full_awburst,
-            cdma_m_axi_awlock => cdma_axi_full_awlock,
-            cdma_m_axi_awcache => cdma_axi_full_awcache,
-            cdma_m_axi_awprot => cdma_axi_full_awprot,
-            cdma_m_axi_awqos => cdma_axi_full_awqos,
-            cdma_m_axi_awregion => cdma_axi_full_awregion,
-            cdma_m_axi_awvalid => cdma_axi_full_awvalid,
-            cdma_m_axi_awready => cdma_axi_full_awready,
-            cdma_m_axi_wdata => cdma_axi_full_wdata,
-            cdma_m_axi_wstrb => cdma_axi_full_wstrb,
-            cdma_m_axi_wlast => cdma_axi_full_wlast,
-            cdma_m_axi_wvalid => cdma_axi_full_wvalid,
-            cdma_m_axi_wready => cdma_axi_full_wready,
-            cdma_m_axi_bid => cdma_axi_full_bid,
-            cdma_m_axi_bresp => cdma_axi_full_bresp,
-            cdma_m_axi_bvalid => cdma_axi_full_bvalid,
-            cdma_m_axi_bready => cdma_axi_full_bready,
-            cdma_m_axi_arid => cdma_axi_full_arid,
-            cdma_m_axi_araddr => cdma_axi_full_araddr,
-            cdma_m_axi_arlen => cdma_axi_full_arlen,
-            cdma_m_axi_arsize => cdma_axi_full_arsize,
-            cdma_m_axi_arburst => cdma_axi_full_arburst,
-            cdma_m_axi_arlock => cdma_axi_full_arlock,
-            cdma_m_axi_arcache => cdma_axi_full_arcache,
-            cdma_m_axi_arprot => cdma_axi_full_arprot,
-            cdma_m_axi_arqos => cdma_axi_full_arqos,
-            cdma_m_axi_arregion => cdma_axi_full_arregion,
-            cdma_m_axi_arvalid => cdma_axi_full_arvalid,
-            cdma_m_axi_arready => cdma_axi_full_arready,
-            cdma_m_axi_rid => cdma_axi_full_rid,
-            cdma_m_axi_rdata => cdma_axi_full_rdata,
-            cdma_m_axi_rresp => cdma_axi_full_rresp,
-            cdma_m_axi_rlast => cdma_axi_full_rlast,
-            cdma_m_axi_rvalid => cdma_axi_full_rvalid,
-            cdma_m_axi_rready => cdma_axi_full_rready,
+            cdma_m_axi_awid => cdmareg_axi_full_awid,
+            cdma_m_axi_awaddr => cdmareg_axi_full_awaddr,
+            cdma_m_axi_awlen => cdmareg_axi_full_awlen,
+            cdma_m_axi_awsize => cdmareg_axi_full_awsize,
+            cdma_m_axi_awburst => cdmareg_axi_full_awburst,
+            cdma_m_axi_awlock => cdmareg_axi_full_awlock,
+            cdma_m_axi_awcache => cdmareg_axi_full_awcache,
+            cdma_m_axi_awprot => cdmareg_axi_full_awprot,
+            cdma_m_axi_awqos => cdmareg_axi_full_awqos,
+            cdma_m_axi_awregion => cdmareg_axi_full_awregion,
+            cdma_m_axi_awvalid => cdmareg_axi_full_awvalid,
+            cdma_m_axi_awready => cdmareg_axi_full_awready,
+            cdma_m_axi_wdata => cdmareg_axi_full_wdata,
+            cdma_m_axi_wstrb => cdmareg_axi_full_wstrb,
+            cdma_m_axi_wlast => cdmareg_axi_full_wlast,
+            cdma_m_axi_wvalid => cdmareg_axi_full_wvalid,
+            cdma_m_axi_wready => cdmareg_axi_full_wready,
+            cdma_m_axi_bid => cdmareg_axi_full_bid,
+            cdma_m_axi_bresp => cdmareg_axi_full_bresp,
+            cdma_m_axi_bvalid => cdmareg_axi_full_bvalid,
+            cdma_m_axi_bready => cdmareg_axi_full_bready,
+            cdma_m_axi_arid => cdmareg_axi_full_arid,
+            cdma_m_axi_araddr => cdmareg_axi_full_araddr,
+            cdma_m_axi_arlen => cdmareg_axi_full_arlen,
+            cdma_m_axi_arsize => cdmareg_axi_full_arsize,
+            cdma_m_axi_arburst => cdmareg_axi_full_arburst,
+            cdma_m_axi_arlock => cdmareg_axi_full_arlock,
+            cdma_m_axi_arcache => cdmareg_axi_full_arcache,
+            cdma_m_axi_arprot => cdmareg_axi_full_arprot,
+            cdma_m_axi_arqos => cdmareg_axi_full_arqos,
+            cdma_m_axi_arregion => cdmareg_axi_full_arregion,
+            cdma_m_axi_arvalid => cdmareg_axi_full_arvalid,
+            cdma_m_axi_arready => cdmareg_axi_full_arready,
+            cdma_m_axi_rid => cdmareg_axi_full_rid,
+            cdma_m_axi_rdata => cdmareg_axi_full_rdata,
+            cdma_m_axi_rresp => cdmareg_axi_full_rresp,
+            cdma_m_axi_rlast => cdmareg_axi_full_rlast,
+            cdma_m_axi_rvalid => cdmareg_axi_full_rvalid,
+            cdma_m_axi_rready => cdmareg_axi_full_rready,
             aclk => aclk,
             aresetn => aresetn(0));
         
@@ -948,7 +948,7 @@ begin
             
     int_full2lite_inst : plasoc_axi4_full2lite
         generic map (
-            axi_slave_id_width => axi_slave_id_width,
+            axi_slave_id_width => axi_master_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
@@ -1015,7 +1015,7 @@ begin
             
     timer_full2lite_inst : plasoc_axi4_full2lite
         generic map (
-            axi_slave_id_width => axi_slave_id_width,
+            axi_slave_id_width => axi_master_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
@@ -1082,7 +1082,7 @@ begin
     
     gpio_full2lite_inst : plasoc_axi4_full2lite
         generic map (
-            axi_slave_id_width => axi_slave_id_width,
+            axi_slave_id_width => axi_master_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
@@ -1149,7 +1149,7 @@ begin
             
     cdmareg_full2lite_inst : plasoc_axi4_full2lite
         generic map (
-            axi_slave_id_width => axi_slave_id_width,
+            axi_slave_id_width => axi_master_id_width,
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)
         port map (
@@ -1216,13 +1216,13 @@ begin
             
     ram_address_cntrl_inst : axi_bram_address_cntrl
         generic map (
-            axi_id_width => axi_slave_id_width,
+            axi_id_width => axi_master_id_width,
             axi_address_width => axi_lite_address_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),
             s_axi_awid => ram_axi_full_awid,
-            s_axi_awaddr => ram_axi_full_awaddr,
+            s_axi_awaddr => ram_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => ram_axi_full_awlen,
             s_axi_awsize => ram_axi_full_awsize,
             s_axi_awburst => ram_axi_full_awburst,
@@ -1242,7 +1242,7 @@ begin
             m_axi_awvalid => ram_axi_full_1_awvalid,
             m_axi_awready => ram_axi_full_1_awready,
             s_axi_arid => ram_axi_full_arid,
-            s_axi_araddr => ram_axi_full_araddr,
+            s_axi_araddr => ram_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => ram_axi_full_arlen,
             s_axi_arsize => ram_axi_full_arsize,
             s_axi_arburst => ram_axi_full_arburst,

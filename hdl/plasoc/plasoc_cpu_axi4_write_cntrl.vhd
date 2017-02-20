@@ -85,6 +85,8 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     constant cache_words_per_line : integer := 2**cache_offset_width/cpu_bytes_per_word;
     constant axi_burst_len_noncacheable : integer := 0;
     constant axi_burst_len_cacheable : integer := cache_words_per_line-1;
+    constant fifo_index_width : integer := 3;
+    
     type state_type is (state_wait,state_write,state_response,state_error);
     signal state : state_type := state_wait;
     signal counter : integer range 0 to cache_words_per_line;
@@ -94,6 +96,13 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     signal axi_wlast_buff : std_logic := '0';
     signal mem_write_ready_buff : std_logic := '0';
     signal axi_bready_buff : std_logic := '0';
+    
+    type fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector(cpu_data_width-1 downto 0);
+    type cntrl_fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector((cpu_data_width/8+1)-1 downto 0);
+    signal fifo : fifo_type := (others=>(others=>'0'));
+    signal cntrl_fifo : cntrl_fifo_type := (others=>(others=>'0'));
+    signal m_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
+    signal s_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
 begin
 
     axi_awid <= (others=>'0');
@@ -112,12 +121,14 @@ begin
     mem_write_ready <= mem_write_ready_buff;
     axi_bready <= axi_bready_buff;
     axi_wuser <= (others=>'0');
+    
+    axi_wdata <= fifo(m_ptr);
+    axi_wstrb <= cntrl_fifo(m_ptr)(cpu_data_width/8-1 downto 0);
+    axi_wlast_buff <= cntrl_fifo(m_ptr)(cpu_data_width/8);
 
     process (clock)
         variable burst_len : integer range 0 to 2**axi_awlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
-        variable mem_handshake : boolean;
-        variable axi_handshake : boolean;
         variable finished : boolean;
     begin
         if rising_edge(clock) then
@@ -141,6 +152,10 @@ begin
                         axi_awlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_awlen'length));
                         -- Set counter to keep track the number of words written to the axi write interface.
                         counter <= 0;
+                        m_ptr <= 0;
+                        s_ptr <= 0;
+                        cntrl_fifo <= (others=>(others=>'0'));
+                        finished := False;
                         -- Wait until handshake before writing data.
                         if axi_awvalid_buff='1' and axi_awready='1' then
                             axi_awvalid_buff <= '0';
@@ -152,49 +167,65 @@ begin
                     end if;
                 -- WRITE mode.
                 when state_write=>
-                    mem_handshake := mem_write_valid='1' and mem_write_ready_buff='1';
-                    axi_handshake := axi_wvalid_buff='1' and axi_wready='1';
-                    if mem_handshake then
-                        axi_wdata <= mem_write_data;
-                        axi_wstrb <= mem_write_strobe;
-                    end if;
-                    if axi_handshake and axi_wlast_buff='1' then
-                        mem_write_ready_buff <= '0';
-                    elsif axi_wready='1' then
-                        mem_write_ready_buff <= '1';
-                    elsif mem_handshake then
-                        mem_write_ready_buff <= '0';
-                    end if;
-                    if mem_handshake then
-                        axi_wvalid_buff <= '1';
-                    elsif axi_handshake then
-                        axi_wvalid_buff <= '0';
-                    end if;
-                    if mem_handshake and counter/=axi_awlen_buff then
-                        counter <= counter+1;
-                    end if;
-                    if counter=axi_awlen_buff then
-                        if mem_handshake then
-                            axi_wlast_buff <= '1';
-                        elsif axi_handshake then 
-                            axi_wlast_buff <= '0';
+                
+                    
+                    if mem_write_valid='1' and mem_write_ready_buff='1' then
+                        fifo(s_ptr) <= mem_write_data;
+                        cntrl_fifo(s_ptr)(cpu_data_width/8-1 downto 0) <= mem_write_strobe;
+                        if counter=axi_awlen_buff then
+                            cntrl_fifo(s_ptr)(cpu_data_width/8) <= '1';
+                        else
+                            cntrl_fifo(s_ptr)(cpu_data_width/8) <= '0';
                         end if;
                     end if;
-                    if axi_handshake and axi_wlast_buff='1' then
+                
+                    if axi_wvalid_buff='1' and axi_wready='1' then
+                        if m_ptr=2**fifo_index_width-1 then
+                            m_ptr <= 0;
+                        else
+                            m_ptr <= m_ptr+1;
+                        end if;
+                    end if;
+                    if mem_write_valid='1' and mem_write_ready_buff='1' then
+                        if s_ptr=2**fifo_index_width-1 then
+                            s_ptr <= 0;
+                        else
+                            s_ptr <= s_ptr+1;
+                        end if;
+                    end if;
+                    if mem_write_valid='1' and mem_write_ready_buff='1' and counter/=axi_awlen_buff then
+                        counter <= counter+1;
+                    end if;
+                    
+                    if mem_write_valid='1' and mem_write_ready_buff='1' and counter=axi_awlen_buff then
+                        finished := True;
+                    end if;
+                    
+                    if (mem_write_valid='1' and mem_write_ready_buff='1' and counter=axi_awlen_buff) or finished then
+                        mem_write_ready_buff <= '0';
+                    elsif ((s_ptr+1)mod 2**fifo_index_width)/=m_ptr then
+                        mem_write_ready_buff <= '1';
+                    else
+                        mem_write_ready_buff <= '0';
+                    end if;
+                    if axi_wvalid_buff='1' and axi_wready='1' and axi_wlast_buff='1' then
+                        axi_wvalid_buff <= '0';
+                    elsif s_ptr/=m_ptr then
+                        axi_wvalid_buff <= '1';
+                    else
+                        axi_wvalid_buff <= '0';
+                    end if;
+                
+                    if axi_wvalid_buff='1' and axi_wready='1' and axi_wlast_buff='1' then
                         axi_bready_buff <= '1';
                         state <= state_response;
                     end if;
-                -- RESPONSE mode.
+                
                 when state_response=>
-                    -- Wait until handshake before reading the response.
                     if axi_bvalid='1' and axi_bready_buff='1' then
-                        -- The response channel should no longer be ready once the response has been acquired.
                         axi_bready_buff <= '0';
-                        -- Check if an error occurred.
                         if axi_bresp/=axi_resp_okay then
-                            -- Block on error.
                             state <= state_error;
-                            -- Determine error code.
                             if axi_bresp=axi_resp_exokay then
                                 error_data(error_axi_read_exokay) <= '1';
                             elsif axi_bresp=axi_resp_slverr then
@@ -203,7 +234,6 @@ begin
                                 error_data(error_axi_read_decerr) <= '1';
                             end if;
                         else
-                            -- If an error didn't occur, begin waiting for the next memory write request.
                             state <= state_wait;
                         end if;  
                     end if;

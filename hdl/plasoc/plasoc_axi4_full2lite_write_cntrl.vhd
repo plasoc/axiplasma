@@ -87,6 +87,10 @@ architecture Behavioral of plasoc_axi4_full2lite_write_cntrl is
 begin
     s_axi_awready <= s_axi_awready_buff;
     m_axi_awvalid <= m_axi_awvalid_buff;
+    s_axi_wready <= s_axi_wready_buff;
+    m_axi_wvalid <= m_axi_wvalid_buff;
+    s_axi_bvalid <= s_axi_bvalid_buff;
+    m_axi_bready <= m_axi_bready_buff;
     process (aclk)
     begin
         if rising_edge (aclk) then
