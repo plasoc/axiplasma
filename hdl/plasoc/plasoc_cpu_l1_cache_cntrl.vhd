@@ -474,20 +474,17 @@ begin
                         if cache_in_validset(cache_way_replace)='1' then
                             -- Set memory write operation control signals for line retrieval operation.
                             mem_write_needed <= True;
-                            mem_write_counter <= 1;
+                            mem_write_counter <= 0;
                             mem_out_strobe <= (others=>'1');
                             mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
                             mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
                                 cache_in_tagset(cache_way_replace) & cache_index;
                             mem_out_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                            -- Ensure the first word is ready to be written, immediately.
-                            mem_out_data <= cache_in_blockset(cache_way_replace)(0);
                         end if;
                     end if;
                 when cache_state_mem=>
                     -- Memory write block.
                     if mem_write_needed then
-                        -- Point to next word on successful handshake.
                         if mem_out_valid_buff='1' and mem_out_ready='1' then 
                             if mem_write_counter/=2**cache_word_offset_width then
                                 if not cache_noncacheable then
@@ -499,6 +496,10 @@ begin
                                 mem_out_valid_buff <= '0';
                             end if;
                         else
+                            if mem_write_counter=0 then
+                                mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
+                                mem_write_counter <= mem_write_counter+1;
+                            end if;
                             mem_out_valid_buff <= '1';
                         end if;
                     end if;   
@@ -542,12 +543,13 @@ begin
                             mem_in_ready_buff <= '0';
                         -- If memory write is needed, then write operation should always precede
                         -- the read operation.
-                        elsif mem_write_needed and mem_write_counter=mem_read_counter then
+                        elsif mem_write_needed and mem_write_counter/=mem_read_counter then
                             mem_in_ready_buff <= '0';
                         -- By default, the ready signal should always be high, signaling the memory input data
                         -- is ready to accept more data.
                         else
                             mem_in_ready_buff <= '1';
+                        end if;rt "stop";
                         end if;
                     end if;
                     -- If both operations are finished, return cache back to 

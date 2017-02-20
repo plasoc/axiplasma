@@ -85,7 +85,7 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     constant cache_words_per_line : integer := 2**cache_offset_width/cpu_bytes_per_word;
     constant axi_burst_len_noncacheable : integer := 0;
     constant axi_burst_len_cacheable : integer := cache_words_per_line-1;
-    constant fifo_index_width : integer := 3;
+    
     
     type state_type is (state_wait,state_write,state_response,state_error);
     signal state : state_type := state_wait;
@@ -96,7 +96,9 @@ architecture Behavioral of plasoc_cpu_axi4_write_cntrl is
     signal axi_wlast_buff : std_logic := '0';
     signal mem_write_ready_buff : std_logic := '0';
     signal axi_bready_buff : std_logic := '0';
+    signal finished : boolean;
     
+    constant fifo_index_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
     type fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector(cpu_data_width-1 downto 0);
     type cntrl_fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector((cpu_data_width/8+1)-1 downto 0);
     signal fifo : fifo_type := (others=>(others=>'0'));
@@ -129,7 +131,6 @@ begin
     process (clock)
         variable burst_len : integer range 0 to 2**axi_awlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
-        variable finished : boolean;
     begin
         if rising_edge(clock) then
             if nreset='0' then
@@ -155,7 +156,7 @@ begin
                         m_ptr <= 0;
                         s_ptr <= 0;
                         cntrl_fifo <= (others=>(others=>'0'));
-                        finished := False;
+                        finished <= False;
                         -- Wait until handshake before writing data.
                         if axi_awvalid_buff='1' and axi_awready='1' then
                             axi_awvalid_buff <= '0';
@@ -179,14 +180,14 @@ begin
                         end if;
                     end if;
                 
-                    if axi_wvalid_buff='1' and axi_wready='1' then
+                    if s_ptr/=m_ptr and axi_wvalid_buff='1' and axi_wready='1' then
                         if m_ptr=2**fifo_index_width-1 then
                             m_ptr <= 0;
                         else
                             m_ptr <= m_ptr+1;
                         end if;
                     end if;
-                    if mem_write_valid='1' and mem_write_ready_buff='1' then
+                    if mem_write_valid='1' and mem_write_ready_buff='1' and ((s_ptr+1)mod 2**fifo_index_width)/=m_ptr then
                         if s_ptr=2**fifo_index_width-1 then
                             s_ptr <= 0;
                         else
@@ -198,7 +199,7 @@ begin
                     end if;
                     
                     if mem_write_valid='1' and mem_write_ready_buff='1' and counter=axi_awlen_buff then
-                        finished := True;
+                        finished <= True;
                     end if;
                     
                     if (mem_write_valid='1' and mem_write_ready_buff='1' and counter=axi_awlen_buff) or finished then

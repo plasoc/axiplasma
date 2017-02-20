@@ -11,7 +11,6 @@ use work.plasoc_gpio_pack.default_data_in_width;
 use work.plasoc_0_crossbar_wrap_pack.plasoc_0_crossbar_wrap; 
 use work.plasoc_0_crossbar_wrap_pack.clogb2;
 use work.plasoc_axi4_full2lite_pack.plasoc_axi4_full2lite;
-use work.plasoc_axi4_full2full_pack.plasoc_axi4_full2full;
 
 entity axiplasma_wrapper is
     port( 

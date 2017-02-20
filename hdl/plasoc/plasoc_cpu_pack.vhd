@@ -9,13 +9,14 @@ package plasoc_cpu_pack is
 	-- though, some parameter combinations are incompatible. If these parameters are 
 	-- modified, though, modifications will also be necessary for the corresponding header file 
 	-- for the CPU. 
+	-- default_cache_offset_width must be 4 or higher due to the nature of how the cache is implemented.
     constant default_cpu_mult_type       : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cpu_alu_type        : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
     constant default_cache_address_width : integer := 12;								--! Defines the default address width of the cacheable addresses.
     constant default_cache_way_width : integer := 0; 									--! Associativity = 2^default_cache_way_width.	
     constant default_cache_index_width : integer := 4;									--! Cache Size (rows) = 2^default_cache_index_width.
-    constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
+    constant default_cache_offset_width : integer := 4;									--! Line Size (bytes) = 2^default_cache_offset_width.
     constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
     constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
     constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	

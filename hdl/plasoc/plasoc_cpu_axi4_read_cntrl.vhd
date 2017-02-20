@@ -87,6 +87,12 @@ architecture Behavioral of plasoc_cpu_axi4_read_cntrl is
     signal axi_arvalid_buff : std_logic := '0';
     signal axi_rready_buff : std_logic  := '0';
     signal mem_read_valid_buff : std_logic  := '0';
+    
+    constant fifo_index_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
+    type fifo_type is array(0 to 2**fifo_index_width-1) of std_logic_vector(cpu_data_width-1 downto 0);
+    signal fifo : fifo_type := (others=>(others=>'0'));
+    signal m_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
+    signal s_ptr : integer range 0 to 2**fifo_index_width-1 := 0;
 begin
 
     axi_arid <= (others=>'0');
@@ -103,10 +109,11 @@ begin
     axi_rready <= axi_rready_buff;
     mem_read_valid <= mem_read_valid_buff;
     
+    mem_read_data <= fifo(s_ptr);
+    
     process (clock)
         variable burst_len : integer range 0 to 2**axi_arlen'length-1;
         variable error_data_buff : error_data_type := (others=>'0');
-        variable handshake : boolean;
     begin
         if rising_edge(clock) then
             if nreset='0' then
@@ -133,11 +140,14 @@ begin
                         axi_arlen_buff <= std_logic_vector(to_unsigned(burst_len,axi_arlen'length));
                         -- Set counter to keep track the number of words read from the burst.
                         counter <= 0;
+                        s_ptr <= 0;
+                        m_ptr <= 0;
                         -- Reset finish indicator.
                         axi_finished <= False;
                         -- Wait until handshake before reading data.
                         if axi_arvalid_buff='1' and axi_arready='1' then
                             axi_arvalid_buff <= '0';
+                            axi_rready_buff <= '1';
                             state <= state_read;
                         else
                             axi_arvalid_buff <= '1';
@@ -145,24 +155,48 @@ begin
                     end if;
                 -- READ mode.
                 when state_read=>
+                
                     if axi_rvalid='1' and axi_rready_buff='1' then
-                        mem_read_data <= axi_rdata;
+                        fifo(m_ptr) <= axi_rdata;
                     end if;
-                    if axi_rvalid='1' and axi_rready_buff='1' then
-                        mem_read_valid_buff <= '1';
-                    elsif mem_read_valid_buff='1' and mem_read_ready='1' then
-                        mem_read_valid_buff <= '0';
+                    
+                    if m_ptr/=s_ptr and mem_read_valid_buff='1' and mem_read_ready='1' then
+                        if s_ptr=2**fifo_index_width-1 then
+                            s_ptr <= 0;
+                        else
+                            s_ptr <= s_ptr+1;
+                        end if;
                     end if;
-                    if mem_read_valid_buff='1' and mem_read_ready='1' and counter=axi_arlen_buff then
-                        axi_rready_buff <= '0';
-                    elsif mem_read_ready='1' then
-                        axi_rready_buff <= '1';
-                    elsif axi_rvalid='1' and axi_rready_buff='1' then
-                        axi_rready_buff <= '0';
+                    if axi_rvalid='1' and axi_rready_buff='1' and ((m_ptr+1) mod 2**fifo_index_width)/=s_ptr then
+                        if m_ptr=2**fifo_index_width-1 then
+                            m_ptr <= 0;
+                        else
+                            m_ptr <= m_ptr+1;
+                        end if;
                     end if;
                     if mem_read_valid_buff='1' and mem_read_ready='1' and counter/=axi_arlen_buff then
                         counter <= counter+1;
                     end if;
+                    
+                    if axi_rvalid='1' and axi_rready_buff='1' and axi_rlast='1' then
+                        axi_finished <= True;
+                    end if;
+                    
+                    if (axi_rvalid='1' and axi_rready_buff='1' and axi_rlast='1') or axi_finished then
+                        axi_rready_buff <= '0';
+                    elsif ((m_ptr+1) mod 2**fifo_index_width)/=s_ptr then
+                        axi_rready_buff <= '1';
+                    else
+                        axi_rready_buff <= '0';
+                    end if;
+                    if mem_read_valid_buff='1' and mem_read_ready='1' and counter=axi_arlen_buff then
+                        mem_read_valid_buff <= '0';
+                    elsif m_ptr/=s_ptr then
+                        mem_read_valid_buff <= '1';
+                    else
+                        mem_read_valid_buff <= '0';
+                    end if; 
+                
                     if mem_read_valid_buff='1' and mem_read_ready='1' and counter=axi_arlen_buff then
                         state <= state_wait;
                     end if;
