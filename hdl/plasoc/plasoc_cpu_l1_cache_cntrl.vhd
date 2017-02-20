@@ -549,7 +549,6 @@ begin
                         -- is ready to accept more data.
                         else
                             mem_in_ready_buff <= '1';
-                        end if;rt "stop";
                         end if;
                     end if;
                     -- If both operations are finished, return cache back to 
