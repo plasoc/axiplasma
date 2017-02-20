@@ -53,14 +53,31 @@ int main()
 	/* Configure the interrupt controller. */
 	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
 
+<<<<<<< HEAD
 	/* Configure the gpio. */
 	plasoc_gpio_setup(&gpio_obj,PLASOC_GPIO_BASE_ADDRESS);
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_GPIO_ID,gpio_isr,0);
+=======
+	/* Configure output gpio. */
+	xgpio_setup(&xgpio_output_obj,XGPIO_OUTPUT_BASE_ADDRESS);
+	xgpio_set_direction(&xgpio_output_obj,XGPIO_OUTPUTS);
+	
+	/* Configure input gpio. */
+	xgpio_setup(&xgpio_input_obj,XGPIO_INPUT_BASE_ADDRESS);
+	xgpio_set_direction(&xgpio_input_obj,XGPIO_INPUTS);
+	xgpio_enable_global_interrupt(&xgpio_input_obj);
+	xgpio_enable_channel_interrupt(&xgpio_input_obj,1);
+	plasoc_int_attach_isr(&int_obj,INT_XGPIO_INPUT_ID,timer_isr,0);
+>>>>>>> d8a1d608fdc6e9b50cc6a0924088dcec1559fd4a
 
 	/* Configure the timer. */
 	plasoc_timer_setup(&timer_obj,PLASOC_TIMER_BASE_ADDRESS);
 	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_HALF_SECOND_CYCLES);
+<<<<<<< HEAD
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,timer_isr,0);
+=======
+	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,input_gpio_isr,0);
+>>>>>>> d8a1d608fdc6e9b50cc6a0924088dcec1559fd4a
 
 	/* Configure the interrupts of the CPU. */
 	OS_AsmInterruptEnable(1);
