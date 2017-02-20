@@ -1,3 +1,5 @@
+#include "FreeRTOS.h"
+#include "task.h"
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
@@ -20,15 +22,12 @@ volatile unsigned input_value;
 volatile unsigned update_flag = 1;
 volatile unsigned led_state = 0;
 
-/* The following functions are defined in the boot loader assembly.
- They are necessary to initialize the interrupt of the CPU. */
-extern void OS_AsmInterruptEnable(unsigned enable_flag);
+void vAssertCalled(const char*, int);
 
-/* Define the CPU's service routine such that it calls the
- interrupt controller's service method. */
-extern void OS_InterruptServiceRoutine()
+
+
+extern void FreeRTOS_UserISR()
 {
-	plasoc_int_service_interrupts(&int_obj);
 }
 
 /* Service the timer. */
@@ -48,28 +47,15 @@ void gpio_isr(void* ptr)
 	plasoc_gpio_enable_int(&gpio_obj,1);
 }
 
-int main()
+void tasksecondary()
 {
-	/* Configure the interrupt controller. */
-	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
+	while (1)
+	{
+	}
+}
 
-	/* Configure the gpio. */
-	plasoc_gpio_setup(&gpio_obj,PLASOC_GPIO_BASE_ADDRESS);
-	plasoc_int_attach_isr(&int_obj,INT_PLASOC_GPIO_ID,gpio_isr,0);
-
-	/* Configure the timer. */
-	plasoc_timer_setup(&timer_obj,PLASOC_TIMER_BASE_ADDRESS);
-	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_HALF_SECOND_CYCLES);
-	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,timer_isr,0);
-
-	/* Configure the interrupts of the CPU. */
-	OS_AsmInterruptEnable(1);
-	
-	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */
-	plasoc_int_enable_all(&int_obj);
-	plasoc_timer_reload_start(&timer_obj,0);
-	plasoc_gpio_enable_int(&gpio_obj,0);
-
+void taskmain()
+{
 	/* Run application's main loop. */
 	while (1) 
 	{
@@ -84,8 +70,36 @@ int main()
 			plasoc_int_enable_all(&int_obj);
 		}
 	}
+}
 
+int main()
+{
+	/* Configure the interrupt controller. */
+	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
+
+	/* Configure the gpio. */
+	plasoc_gpio_setup(&gpio_obj,PLASOC_GPIO_BASE_ADDRESS);
+	plasoc_int_attach_isr(&int_obj,INT_PLASOC_GPIO_ID,gpio_isr,0);
+
+	/* Configure the timer. */
+	plasoc_timer_setup(&timer_obj,PLASOC_TIMER_BASE_ADDRESS);
+	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_HALF_SECOND_CYCLES);
+	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,timer_isr,0);
+	
+	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */
+	plasoc_int_enable_all(&int_obj);
+	plasoc_timer_reload_start(&timer_obj,0);
+	plasoc_gpio_enable_int(&gpio_obj,0);
+
+	/* Create the tasks. */
+	xTaskCreate(taskmain,"taskmain",configMINIMAL_STACK_SIZE,0,0,0);
+
+	/* Start the scheduler. */
+	vTaskStartScheduler();
 	return 0;
 }
 
+void vAssertCalled(const char* str, int val)
+{
+}
 

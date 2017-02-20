@@ -12,8 +12,6 @@ extern "C"
 {
 #endif
 
-	#define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
-
 	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
 	#define PLASOC_INT_INTERRUPT_TOTAL		(8)
 	#define PLASOC_INT_INTERRUPT_MASK		((1<<PLASOC_INT_INTERRUPT_TOTAL)-1)	
@@ -52,10 +50,10 @@ extern "C"
 	 * @param base_address Address of the Interrupt Controller's registers.
 	 */
 	static inline __attribute__ ((always_inline))
-	void plasoc_int_setup(plasoc_int* obj)
+	void plasoc_int_setup(plasoc_int* obj,unsigned base_address)
 	{
 		/* Store base address of interrupt controller.*/
-		obj->base_address = PLASOC_INT_BASE_ADDRESS;
+		obj->base_address = base_address;
 
 		/* Clear the vector table.*/
 		{

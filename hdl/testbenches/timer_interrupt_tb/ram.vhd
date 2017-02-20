@@ -18,8 +18,8 @@ entity ram is
 end ram;
 
 architecture Behavioral of ram is
-    constant binary_name : string := "";
-    constant hex_name : string := "FreeRTOS_Demo.hex";
+    constant binary_name : string := "main.bin";
+    constant hex_name : string := "main.hex";
     constant cpu_width : integer := 32;
     constant bytes_per_word : integer := (cpu_width/8);
     constant ram_address_width : integer := 16;

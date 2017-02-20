@@ -14,14 +14,13 @@ extern "C"
 {
 #endif
 
-	#define INT_XGPIO_INPUT_ID		(0)
 	#define XGPIO_GPIO_DATA_OFFSET	(0x0000)
 	#define XGPIO_GPIO_TRI_OFFSET	(0x0004)
-	#define XGPIO_GIER_OFFSET		(0x011c)
-	#define XGPIO_IP_IER_OFFSET		(0x0128)
-	#define XGPIO_IP_ISR_OFFSET		(0x0120)
-	#define XGPIO_OUTPUTS			(0x00000)
-	#define XGPIO_INPUTS			(0xfffff)
+	#define XGPIO_GIER_OFFSET	(0x011c)
+	#define XGPIO_IP_IER_OFFSET	(0x0128)
+	#define XGPIO_IP_ISR_OFFSET	(0x0120)
+	#define XGPIO_OUTPUTS		(0x00000)
+	#define XGPIO_INPUTS		(0xfffff)
 	#define XGPIO_GIER_ENABLE_MASK	(1<<31)
 
 	typedef struct 
