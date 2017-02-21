@@ -293,7 +293,16 @@ architecture Behavioral of plasoc_cpu is
     attribute keep of cpu_address_next : signal is true;
     attribute keep of cpu_strobe_next : signal is true;
     attribute keep of cpu_pause : signal is true;
+    
+    -- debug
+    signal debug_0 : Boolean;
+    signal debug_1 : Boolean;
+    signal debug_2 : Boolean;
 begin
+    debug_0 <= True when X"000002bc"=cpu_address_next else False;
+    debug_1 <= True when X"00000350"=cpu_address_next else False;
+    debug_2 <= True when X"00000420"=cpu_address_next else False;
+
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.
     mlite_cpu_inst:  

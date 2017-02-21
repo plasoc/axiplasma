@@ -25,44 +25,6 @@ OS_InterruptServiceRoutine:
 	.end	OS_InterruptServiceRoutine
 	.size	OS_InterruptServiceRoutine, .-OS_InterruptServiceRoutine
 	.align	2
-	.globl	pxPortInitialiseStack
-	.set	nomips16
-	.set	nomicromips
-	.ent	pxPortInitialiseStack
-	.type	pxPortInitialiseStack, @function
-pxPortInitialiseStack:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
-	.fmask	0x00000000,0
-	.set	noreorder
-	.set	nomacro
-	jr	$31
-	move	$2,$0
-
-	.set	macro
-	.set	reorder
-	.end	pxPortInitialiseStack
-	.size	pxPortInitialiseStack, .-pxPortInitialiseStack
-	.align	2
-	.globl	vPortStartFirstTask
-	.set	nomips16
-	.set	nomicromips
-	.ent	vPortStartFirstTask
-	.type	vPortStartFirstTask, @function
-vPortStartFirstTask:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
-	.fmask	0x00000000,0
-	.set	noreorder
-	.set	nomacro
-	jr	$31
-	nop
-
-	.set	macro
-	.set	reorder
-	.end	vPortStartFirstTask
-	.size	vPortStartFirstTask, .-vPortStartFirstTask
-	.align	2
 	.globl	xPortStartScheduler
 	.set	nomips16
 	.set	nomicromips
@@ -79,11 +41,14 @@ xPortStartScheduler:
 	jal	FreeRTOS_AsmInterruptInit
 	nop
 
+	jal	vPortStartFirstTask
+	nop
+
 	jal	OS_AsmInterruptEnable
 	move	$4,$0
 
-$L5:
-	b	$L5
+$L3:
+	b	$L3
 	nop
 
 	.set	macro
@@ -108,7 +73,7 @@ vPortEndScheduler:
 	.set	noreorder
 	.set	nomacro
 	lui	$4,%hi($LC0)
-	li	$5,113			# 0x71
+	li	$5,105			# 0x69
 	j	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 

@@ -6,28 +6,6 @@
 	.module	nooddspreg
 	.text
 	.align	2
-	.globl	timer_isr
-	.set	nomips16
-	.set	nomicromips
-	.ent	timer_isr
-	.type	timer_isr, @function
-timer_isr:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
-	.fmask	0x00000000,0
-	lw	$2,%gp_rel(led_state)($28)
-	#nop
-	sltu	$2,$2,1
-	sw	$2,%gp_rel(led_state)($28)
-	li	$2,1			# 0x1
-	sw	$2,%gp_rel(update_flag)($28)
-	lw	$2,%gp_rel(timer_obj)($28)
-	li	$3,7			# 0x7
-	sw	$3,0($2)
-	jr	$31
-	.end	timer_isr
-	.size	timer_isr, .-timer_isr
-	.align	2
 	.globl	gpio_isr
 	.set	nomips16
 	.set	nomicromips
@@ -42,9 +20,6 @@ gpio_isr:
 	lw	$2,4($2)
 	#nop
 	sw	$2,%gp_rel(input_value)($28)
-	li	$2,1			# 0x1
-	sw	$2,%gp_rel(led_state)($28)
-	sw	$2,%gp_rel(update_flag)($28)
 	lw	$2,%gp_rel(gpio_obj)($28)
 	li	$3,3			# 0x3
 	sw	$3,0($2)
@@ -61,49 +36,95 @@ taskmain:
 	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
 	.mask	0x00000000,0
 	.fmask	0x00000000,0
-	lui	$3,%hi(int_obj)
-	li	$4,255			# 0xff
-$L4:
-	lw	$2,%gp_rel(update_flag)($28)
-	#nop
-	beq	$2,$0,$L4
-	lw	$2,%lo(int_obj)($3)
-	#nop
-	sw	$0,0($2)
-	sw	$0,%gp_rel(update_flag)($28)
-	lw	$2,%gp_rel(input_value)($28)
-	lw	$5,%gp_rel(led_state)($28)
-	#nop
-	mult	$2,$5
-	lw	$5,%gp_rel(gpio_obj)($28)
-	mflo	$2
-	sw	$2,8($5)
-	lw	$2,%lo(int_obj)($3)
-	#nop
-	sw	$4,0($2)
-	b	$L4
-	.end	taskmain
-	.size	taskmain, .-taskmain
-	.align	2
-	.globl	tasksecondary
-	.set	nomips16
-	.set	nomicromips
-	.ent	tasksecondary
-	.type	tasksecondary, @function
-tasksecondary:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
-	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-$L9:
-	b	$L9
+$L3:
+	lw	$3,%gp_rel(input_value)($28)
+	lw	$2,%gp_rel(gpio_obj)($28)
+	nop
+	sw	$3,8($2)
+	b	$L3
 	nop
 
 	.set	macro
 	.set	reorder
-	.end	tasksecondary
-	.size	tasksecondary, .-tasksecondary
+	.end	taskmain
+	.size	taskmain, .-taskmain
+	.align	2
+	.globl	FreeRTOS_TickISR
+	.set	nomips16
+	.set	nomicromips
+	.ent	FreeRTOS_TickISR
+	.type	FreeRTOS_TickISR, @function
+FreeRTOS_TickISR:
+	.frame	$sp,24,$31		# vars= 0, regs= 1/0, args= 16, gp= 0
+	.mask	0x80000000,-4
+	.fmask	0x00000000,0
+	addiu	$sp,$sp,-24
+	sw	$31,20($sp)
+	jal	xTaskIncrementTick
+	jal	vTaskSwitchContext
+	lw	$31,20($sp)
+	lw	$2,%gp_rel(timer_obj)($28)
+	li	$3,7			# 0x7
+	sw	$3,0($2)
+	.set	noreorder
+	.set	nomacro
+	jr	$31
+	addiu	$sp,$sp,24
+	.set	macro
+	.set	reorder
+
+	.end	FreeRTOS_TickISR
+	.size	FreeRTOS_TickISR, .-FreeRTOS_TickISR
+	.align	2
+	.globl	FreeRTOS_UserISR
+	.set	nomips16
+	.set	nomicromips
+	.ent	FreeRTOS_UserISR
+	.type	FreeRTOS_UserISR, @function
+FreeRTOS_UserISR:
+	.frame	$sp,32,$31		# vars= 0, regs= 3/0, args= 16, gp= 0
+	.mask	0x80030000,-4
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	lui	$3,%hi(int_obj)
+	lw	$2,%lo(int_obj)($3)
+	addiu	$sp,$sp,-32
+	lw	$2,4($2)
+	sw	$17,24($sp)
+	lui	$17,%hi(int_obj+4)
+	sw	$16,20($sp)
+	sw	$31,28($sp)
+	move	$16,$3
+	addiu	$17,$17,%lo(int_obj+4)
+$L7:
+	sll	$2,$2,3
+	addu	$2,$17,$2
+	lw	$3,0($2)
+	lw	$4,4($2)
+	jalr	$3
+	nop
+
+	lw	$2,%lo(int_obj)($16)
+	nop
+	lw	$2,4($2)
+	nop
+	sltu	$3,$2,8
+	bne	$3,$0,$L7
+	nop
+
+	lw	$31,28($sp)
+	lw	$17,24($sp)
+	lw	$16,20($sp)
+	jr	$31
+	addiu	$sp,$sp,32
+
+	.set	macro
+	.set	reorder
+	.end	FreeRTOS_UserISR
+	.size	FreeRTOS_UserISR, .-FreeRTOS_UserISR
 	.section	.rodata.str1.4,"aMS",@progbits,1
 	.align	2
 $LC0:
@@ -143,14 +164,13 @@ $L11:
 	addiu	$4,$4,%lo(gpio_isr)
 	addiu	$2,$3,%lo(int_obj)
 	sw	$4,12($2)
-	li	$4,24969216			# 0x17d0000
-	li	$5,1151401984			# 0x44a10000
-	addiu	$4,$4,30784
+	li	$5,50000			# 0xc350
+	li	$4,1151401984			# 0x44a10000
+	sw	$4,%gp_rel(timer_obj)($28)
 	sw	$0,16($2)
-	sw	$5,%gp_rel(timer_obj)($28)
-	sw	$4,4($5)
-	lui	$4,%hi(timer_isr)
-	addiu	$4,$4,%lo(timer_isr)
+	sw	$5,4($4)
+	lui	$4,%hi(FreeRTOS_TickISR)
+	addiu	$4,$4,%lo(FreeRTOS_TickISR)
 	sw	$4,4($2)
 	sw	$0,8($2)
 	lw	$2,%lo(int_obj)($3)
@@ -201,6 +221,17 @@ vAssertCalled:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
+	bne	$5,$0,$L17
+	nop
+
+	lw	$2,%gp_rel(gpio_obj)($28)
+	li	$3,65535			# 0xffff
+	sw	$3,8($2)
+$L16:
+	b	$L16
+	nop
+
+$L17:
 	jr	$31
 	nop
 

@@ -12,9 +12,9 @@ pxPortInitialiseStack:
    	.set noat
 
 	addi	$2,	$4,	-104  	# Determine next stack pointer.
-	sw	$5,	88($2)		# Store the program counter of the task.
+	sw	$5,	88($4)		# Store the program counter of the task.
 	jr	$31
-	sw	$6,	28($2)		# Store the parameter pointer.
+	sw	$6,	28($4)		# Store the parameter pointer.
 
 	.set reorder
 	.set at
