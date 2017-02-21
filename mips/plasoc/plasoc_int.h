@@ -192,7 +192,9 @@ extern "C"
 
 		/* Acquire id of the active interrupt with the highest priority. */
 		id = plasoc_int_get_id(obj);
-		do 
+		
+		/* Keep servicing interrupts until every interrupt has been serviced. */
+		while (id<PLASOC_INT_INTERRUPT_TOTAL) 
 		{
 			/* Execute the corresponding service routine. */
 			entry = vector_table+id;
@@ -200,10 +202,7 @@ extern "C"
 
 			/* Check for another interrupt. */
 			id = plasoc_int_get_id(obj);
-
-		/* Keep servicing interrupts until every interrupt has been serviced. */
 		}
-		while (id<PLASOC_INT_INTERRUPT_TOTAL);
 	}
 
 #ifdef __cplusplus

@@ -1845,7 +1845,7 @@ vTaskStartScheduler:
 	move	$7,$0
 	sw	$2,20($sp)
 	sw	$0,16($sp)
-	li	$6,128			# 0x80
+	li	$6,256			# 0x100
 	addiu	$5,$5,%lo($LC1)
 	sw	$16,24($sp)
 	sw	$31,28($sp)

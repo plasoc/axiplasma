@@ -4,25 +4,8 @@
 	.extern InitStack
 
 	.text
-
-	.global	pxPortInitialiseStack
-	.ent	pxPortInitialiseStack
-pxPortInitialiseStack:
-	.set noreorder
-   	.set noat
-
-	addi	$2,	$4,	-104  	# Determine next stack pointer.
-	sw	$5,	88($4)		# Store the program counter of the task.
-	jr	$31
-	sw	$6,	28($4)		# Store the parameter pointer.
-
-	.set reorder
-	.set at
-	.end pxPortInitialiseStack
-
-	.global	portSAVE_CONTEXT
-	.ent	portSAVE_CONTEXT
-portSAVE_CONTEXT:
+	
+	.macro	portSAVE_CONTEXT
 	.set noreorder
    	.set noat
 
@@ -56,65 +39,88 @@ portSAVE_CONTEXT:
 
 	# FreeRTOS: Store the state of the current task.
 	lui	$26,	%hi(pxCurrentTCB)	# Load the pointer to the current TCB.
-	addi	$26,	%lo(pxCurrentTCB) 
+	ori	$26,	%lo(pxCurrentTCB) 
 	sw	$29,	0($26)			# Store the current task's stack pointer.
 
 	# FreeRTOS: Load the stack pointer for the CPU.
 	lui	$26,	%hi(InitStack)		# Load the pointer to the CPU stack.
-	addi	$26,	%lo(InitStack) 
-	jr	$31				# Prepare to return to calling function.
+	ori	$26,	%lo(InitStack) 
 	lw	$29,	0($26)			# Load the CPU stack pointer.
 
 	.set reorder
 	.set at
-	.end portSAVE_CONTEXT
+	.endm
 
-	.global	portRESTORE_CONTEXT
-	.ent	portRESTORE_CONTEXT
-portRESTORE_CONTEXT:
+	.macro portRESTORE_CONTEXT
 	.set noreorder
    	.set noat
 	
 	# FreeRTOS: Save the stack pointer for the CPU.
 	lui	$26,	%hi(InitStack)		# Load the pointer to the CPU stack.
-	addi	$26,	%lo(InitStack) 
+	ori	$26,	%lo(InitStack) 
 	sw	$29,	0($26)			# Store the CPU stack pointer.
 
 	# FreeRTOS: Load the stack pointer for the current task.
 	lui	$26,	%hi(pxCurrentTCB)	# Load the pointer to the current TCB.
-	addi	$26,	%lo(pxCurrentTCB)
+	ori	$26,	%lo(pxCurrentTCB)
 	lw	$29,	0($26)			# Load the stack pointer from the current TCB.
 	
 	# Resore the state of the CPU with context of task.
-	lw    $1,  16($29)    #at	
-	lw    $2,  20($29)    #v0	
-	lw    $3,  24($29)    #v1
-	lw    $4,  28($29)    #a0	
-	lw    $5,  32($29)    #a1
-	lw    $6,  36($29)    #a2	
-	lw    $7,  40($29)    #a3
-	lw    $8,  44($29)    #t0	
-	lw    $9,  48($29)    #t1
-	lw    $10, 52($29)    #t2	
-	lw    $11, 56($29)    #t3
-	lw    $12, 60($29)    #t4	
-	lw    $13, 64($29)    #t5
-	lw    $14, 68($29)    #t6	
-	lw    $15, 72($29)    #t7
-	lw    $24, 76($29)    #t8	
-	lw    $25, 80($29)    #t9
-	lw    $31, 84($29)    #lr	
-	lw    $26, 88($29)    #pc
-	lw    $27, 92($29)    #hi	
-	mthi  $27
-	lw    $27, 96($29)    #lo	
-	mtlo  $27
-	jr    $31
-	addi  $29, $29, 104   #adjust	sp
+	lw	$1,	16($29)    #at	
+	lw	$2,	20($29)    #v0	
+	lw	$3,	24($29)    #v1
+	lw	$4,	28($29)    #a0	
+	lw	$5,	32($29)    #a1
+	lw	$6,	36($29)    #a2	
+	lw	$7,	40($29)    #a3
+	lw	$8,	44($29)    #t0	
+	lw	$9,	48($29)    #t1
+	lw	$10,	52($29)    #t2	
+	lw	$11,	56($29)    #t3
+	lw	$12,	60($29)    #t4	
+	lw	$13,	64($29)    #t5
+	lw	$14,	68($29)    #t6	
+	lw	$15,	72($29)    #t7
+	lw	$24,	76($29)    #t8	
+	lw	$25,	80($29)    #t9
+	lw	$31,	84($29)    #lr	
+	lw	$26,	88($29)    #pc
+	lw	$27,	92($29)    #hi	
+	mthi	$27
+	lw	$27,	96($29)    #lo	
+	mtlo	$27
+	
+	# The following statements were used for debugging purposes.
+	#lui	$16,	0x44A2
+	#ori	$16,	0x0008
+	#lw	$17,	84($29)
+	#sw	$17,	0($16)
+
+	addi	$29,	$29, 104   #adjust sp
+	
+	# FreeRTOS: Enable the CPU interrupt.
+   	ori   $27, $0, 	0x1    #re-enable interrupts
+   	jr    $26
+   	mtc0  $27, $12        #STATUS=1; enable interrupts
 
 	.set reorder
 	.set at
-	.end portRESTORE_CONTEXT
+	.endm
+
+	.global	pxPortInitialiseStack
+	.ent	pxPortInitialiseStack
+pxPortInitialiseStack:
+	.set noreorder
+   	.set noat
+
+	addi	$2,	$4,	-104  	# Determine next stack pointer.
+	sw	$5,	92($4)		# Store the program counter of the task.
+	jr	$31
+	sw	$6,	32($4)		# Store the parameter pointer.
+
+	.set reorder
+	.set at
+	.end pxPortInitialiseStack
 
 	.global	FreeRTOS_ISR
    	.ent 	FreeRTOS_ISR	
@@ -123,17 +129,10 @@ FreeRTOS_ISR:
    	.set 	noat
 
 	# Perform interrupt-related operations.
-	jal	portSAVE_CONTEXT	# Save the context of the current task.
-	nop
+	portSAVE_CONTEXT		# Save the context of the current task.
 	jal	FreeRTOS_UserISR	# Jump to user-defined ISR.
+	portRESTORE_CONTEXT		# Restore context. The PC should be on register 26.
 	nop
-	jal	portRESTORE_CONTEXT	# Restore context. The PC should be on register 26.
-	nop
-
-	# Re-enables interrupts and return to restored state.
-	addiu	$27, $0, 1		# Prepare status mask.		
-	jr	$26			# Prepare to return to restored task.
-	mtc0	$27, $12		# Enable interrupts.
 
 	.set 	reorder
 	.set	at
@@ -156,7 +155,7 @@ FreeRTOS_AsmInterruptInit:
 
 FreeRTOS_AsmPatchValue:
 	lui	$26,	%hi(FreeRTOS_ISR)
-	addi	$26,	%lo(FreeRTOS_ISR)
+	ori	$26,	%lo(FreeRTOS_ISR)
 	jr	$26 
 	nop
 
@@ -169,13 +168,7 @@ vPortStartFirstTask:
 	.set 	noreorder
 
 	# Set the context to the current task.
-	jal	portRESTORE_CONTEXT	# Restore context. The PC should be on register 26.
-	nop
-
-	# Re-enables interrupts and return to restored state.
-	addiu	$27, $0, 1		# Prepare status mask.		
-	jr	$26			# Prepare to return to restored task.
-	mtc0	$27, $12		# Enable interrupts.
+	portRESTORE_CONTEXT	# Restore context. The PC should be on register 26.
 
 	.set 	reorder
 	.end 	vPortStartFirstTask

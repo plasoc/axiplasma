@@ -102,7 +102,18 @@ FreeRTOS_UserISR:
 	sw	$31,28($sp)
 	move	$16,$3
 	addiu	$17,$17,%lo(int_obj+4)
-$L8:
+	sltu	$3,$2,8
+$L11:
+	bne	$3,$0,$L9
+	nop
+
+	lw	$31,28($sp)
+	lw	$17,24($sp)
+	lw	$16,20($sp)
+	jr	$31
+	addiu	$sp,$sp,32
+
+$L9:
 	sll	$2,$2,3
 	addu	$2,$17,$2
 	lw	$3,0($2)
@@ -113,16 +124,8 @@ $L8:
 	lw	$2,%lo(int_obj)($16)
 	nop
 	lw	$2,4($2)
-	nop
+	b	$L11
 	sltu	$3,$2,8
-	bne	$3,$0,$L8
-	nop
-
-	lw	$31,28($sp)
-	lw	$17,24($sp)
-	lw	$16,20($sp)
-	jr	$31
-	addiu	$sp,$sp,32
 
 	.set	macro
 	.set	reorder
@@ -174,17 +177,17 @@ vAssertCalled:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$5,$0,$L16
+	bne	$5,$0,$L17
 	nop
 
 	lw	$2,%gp_rel(gpio_obj)($28)
 	li	$3,65535			# 0xffff
 	sw	$3,8($2)
-$L15:
-	b	$L15
+$L16:
+	b	$L16
 	nop
 
-$L16:
+$L17:
 	jr	$31
 	nop
 
@@ -223,11 +226,11 @@ main:
 	lui	$3,%hi(int_obj+4)
 	addiu	$3,$3,%lo(int_obj+4)
 	addiu	$4,$4,%lo(int_obj+68)
-$L18:
+$L19:
 	addiu	$3,$3,8
 	.set	noreorder
 	.set	nomacro
-	bne	$3,$4,$L18
+	bne	$3,$4,$L19
 	sw	$0,-8($3)
 	.set	macro
 	.set	reorder
@@ -252,7 +255,7 @@ $L18:
 	move	$7,$0
 	sw	$0,20($sp)
 	sw	$0,16($sp)
-	li	$6,128			# 0x80
+	li	$6,256			# 0x100
 	addiu	$5,$5,%lo($LC0)
 	.set	noreorder
 	.set	nomacro
