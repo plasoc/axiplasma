@@ -43,12 +43,12 @@ typedef unsigned TickType_t;
 #define portNOP()			{__asm__ __volatile__ ("nop":::"memory");}
 
 #define portCRITICAL_NESTING_IN_TCB	(1)
-#define portENTER_CRITICAL()		vTaskEnterCritical()
-#define portEXIT_CRITICAL()		vTaskExitCritical()
+#define portENTER_CRITICAL()		{vTaskEnterCritical();}
+#define portEXIT_CRITICAL()		{vTaskExitCritical();}
 #define portYIELD()			{OS_Syscall();}
 
-#define portDISABLE_INTERRUPTS()	{OS_AsmInterruptEnable(0);}
-#define portENABLE_INTERRUPTS()		{OS_AsmInterruptEnable(1);}	
+#define portDISABLE_INTERRUPTS()	{FreeRTOS_DisableInterrupts();}
+#define portENABLE_INTERRUPTS()		{FreeRTOS_EnableInterrupts();}	
 
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) 	void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) 		void vFunction( void *pvParameters )
@@ -56,6 +56,8 @@ typedef unsigned TickType_t;
 void vTaskEnterCritical( void );
 void vTaskExitCritical( void );
 void vAssertCalled(const char*, int);
+void FreeRTOS_EnableInterrupts();
+void FreeRTOS_DisableInterrupts();
 
 #ifdef __cplusplus
 }

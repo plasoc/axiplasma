@@ -124,8 +124,11 @@ FreeRTOS_ISR:
 
 	# Perform interrupt-related operations.
 	jal	portSAVE_CONTEXT	# Save the context of the current task.
+	nop
 	jal	FreeRTOS_UserISR	# Jump to user-defined ISR.
+	nop
 	jal	portRESTORE_CONTEXT	# Restore context. The PC should be on register 26.
+	nop
 
 	# Re-enables interrupts and return to restored state.
 	addiu	$27, $0, 1		# Prepare status mask.		
@@ -140,16 +143,16 @@ FreeRTOS_ISR:
 	.ent	FreeRTOS_AsmInterruptInit
 FreeRTOS_AsmInterruptInit:
 	.set 	noreorder
-	la	$5,	FreeRTOS_AsmPatchValue
-	lw	$6,	0($5)
-	sw	$6,	0x3c($0)
-	lw	$6,	4($5)
-	sw	$6,	0x40($0)
-	lw	$6,	8($5)
-	sw	$6,	0x44($0)
-	lw	$6,	12($5)
+	la	$8,	FreeRTOS_AsmPatchValue
+	lw	$9,	0($8)
+	sw	$9,	0x3c($0)
+	lw	$9,	4($8)
+	sw	$9,	0x40($0)
+	lw	$9,	8($8)
+	sw	$9,	0x44($0)
+	lw	$9,	12($8)
 	jr	$31
-	sw	$6,	0x48($0)
+	sw	$9,	0x48($0)
 
 FreeRTOS_AsmPatchValue:
 	lui	$26,	%hi(FreeRTOS_ISR)
@@ -167,6 +170,7 @@ vPortStartFirstTask:
 
 	# Set the context to the current task.
 	jal	portRESTORE_CONTEXT	# Restore context. The PC should be on register 26.
+	nop
 
 	# Re-enables interrupts and return to restored state.
 	addiu	$27, $0, 1		# Prepare status mask.		

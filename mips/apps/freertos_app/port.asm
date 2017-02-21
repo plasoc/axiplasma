@@ -44,8 +44,8 @@ xPortStartScheduler:
 	jal	vPortStartFirstTask
 	nop
 
-	jal	OS_AsmInterruptEnable
-	move	$4,$0
+	jal	FreeRTOS_DisableInterrupts
+	nop
 
 $L3:
 	b	$L3

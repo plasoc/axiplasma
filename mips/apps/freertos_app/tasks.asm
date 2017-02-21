@@ -379,8 +379,8 @@ vTaskEndScheduler:
 	.set	nomacro
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
-	jal	OS_AsmInterruptEnable
-	move	$4,$0
+	jal	FreeRTOS_DisableInterrupts
+	nop
 
 	lw	$31,20($sp)
 	addiu	$sp,$sp,24
@@ -1494,8 +1494,8 @@ vTaskEnterCritical:
 	.set	nomacro
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
-	jal	OS_AsmInterruptEnable
-	move	$4,$0
+	jal	FreeRTOS_DisableInterrupts
+	nop
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
@@ -1556,8 +1556,8 @@ vTaskExitCritical:
 	bne	$2,$0,$L183
 	nop
 
-	j	OS_AsmInterruptEnable
-	li	$4,1			# 0x1
+	j	FreeRTOS_EnableInterrupts
+	nop
 
 $L183:
 	jr	$31
@@ -1857,8 +1857,8 @@ vTaskStartScheduler:
 	bne	$16,$2,$L210
 	li	$2,-1			# 0xffffffffffffffff
 
-	jal	OS_AsmInterruptEnable
-	move	$4,$0
+	jal	FreeRTOS_DisableInterrupts
+	nop
 
 	li	$2,-1			# 0xffffffffffffffff
 	sw	$2,%gp_rel(xNextTaskUnblockTime)($28)

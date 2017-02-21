@@ -63,7 +63,10 @@ FreeRTOS_TickISR:
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
 	jal	xTaskIncrementTick
+	li	$3,1			# 0x1
+	bne	$2,$3,$L5
 	jal	vTaskSwitchContext
+$L5:
 	lw	$31,20($sp)
 	lw	$2,%gp_rel(timer_obj)($28)
 	li	$3,7			# 0x7
@@ -99,7 +102,7 @@ FreeRTOS_UserISR:
 	sw	$31,28($sp)
 	move	$16,$3
 	addiu	$17,$17,%lo(int_obj+4)
-$L7:
+$L8:
 	sll	$2,$2,3
 	addu	$2,$17,$2
 	lw	$3,0($2)
@@ -112,7 +115,7 @@ $L7:
 	lw	$2,4($2)
 	nop
 	sltu	$3,$2,8
-	bne	$3,$0,$L7
+	bne	$3,$0,$L8
 	nop
 
 	lw	$31,28($sp)
@@ -125,6 +128,70 @@ $L7:
 	.set	reorder
 	.end	FreeRTOS_UserISR
 	.size	FreeRTOS_UserISR, .-FreeRTOS_UserISR
+	.align	2
+	.globl	FreeRTOS_EnableInterrupts
+	.set	nomips16
+	.set	nomicromips
+	.ent	FreeRTOS_EnableInterrupts
+	.type	FreeRTOS_EnableInterrupts, @function
+FreeRTOS_EnableInterrupts:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+	lui	$2,%hi(int_obj)
+	lw	$2,%lo(int_obj)($2)
+	li	$3,255			# 0xff
+	sw	$3,0($2)
+	jr	$31
+	.end	FreeRTOS_EnableInterrupts
+	.size	FreeRTOS_EnableInterrupts, .-FreeRTOS_EnableInterrupts
+	.align	2
+	.globl	FreeRTOS_DisableInterrupts
+	.set	nomips16
+	.set	nomicromips
+	.ent	FreeRTOS_DisableInterrupts
+	.type	FreeRTOS_DisableInterrupts, @function
+FreeRTOS_DisableInterrupts:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+	lui	$2,%hi(int_obj)
+	lw	$2,%lo(int_obj)($2)
+	#nop
+	sw	$0,0($2)
+	jr	$31
+	.end	FreeRTOS_DisableInterrupts
+	.size	FreeRTOS_DisableInterrupts, .-FreeRTOS_DisableInterrupts
+	.align	2
+	.globl	vAssertCalled
+	.set	nomips16
+	.set	nomicromips
+	.ent	vAssertCalled
+	.type	vAssertCalled, @function
+vAssertCalled:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	bne	$5,$0,$L16
+	nop
+
+	lw	$2,%gp_rel(gpio_obj)($28)
+	li	$3,65535			# 0xffff
+	sw	$3,8($2)
+$L15:
+	b	$L15
+	nop
+
+$L16:
+	jr	$31
+	nop
+
+	.set	macro
+	.set	reorder
+	.end	vAssertCalled
+	.size	vAssertCalled, .-vAssertCalled
 	.section	.rodata.str1.4,"aMS",@progbits,1
 	.align	2
 $LC0:
@@ -140,50 +207,48 @@ main:
 	.frame	$sp,32,$31		# vars= 0, regs= 1/0, args= 24, gp= 0
 	.mask	0x80000000,-4
 	.fmask	0x00000000,0
-	li	$2,1151336448			# 0x44a00000
-	lui	$3,%hi(int_obj)
 	addiu	$sp,$sp,-32
-	sw	$2,%lo(int_obj)($3)
-	lui	$4,%hi(int_obj+68)
-	lui	$2,%hi(int_obj+4)
-	addiu	$2,$2,%lo(int_obj+4)
 	sw	$31,28($sp)
-	addiu	$4,$4,%lo(int_obj+68)
-$L11:
-	addiu	$2,$2,8
 	.set	noreorder
 	.set	nomacro
-	bne	$2,$4,$L11
-	sw	$0,-8($2)
+	jal	OS_AsmInterruptEnable
+	move	$4,$0
 	.set	macro
 	.set	reorder
 
-	li	$2,1151467520			# 0x44a20000
-	lui	$4,%hi(gpio_isr)
-	sw	$2,%gp_rel(gpio_obj)($28)
-	addiu	$4,$4,%lo(gpio_isr)
-	addiu	$2,$3,%lo(int_obj)
-	sw	$4,12($2)
-	li	$5,50000			# 0xc350
-	li	$4,1151401984			# 0x44a10000
-	sw	$4,%gp_rel(timer_obj)($28)
+	li	$3,1151336448			# 0x44a00000
+	lui	$2,%hi(int_obj)
+	sw	$3,%lo(int_obj)($2)
+	lui	$4,%hi(int_obj+68)
+	lui	$3,%hi(int_obj+4)
+	addiu	$3,$3,%lo(int_obj+4)
+	addiu	$4,$4,%lo(int_obj+68)
+$L18:
+	addiu	$3,$3,8
+	.set	noreorder
+	.set	nomacro
+	bne	$3,$4,$L18
+	sw	$0,-8($3)
+	.set	macro
+	.set	reorder
+
+	li	$3,1151467520			# 0x44a20000
+	sw	$3,%gp_rel(gpio_obj)($28)
+	lui	$3,%hi(gpio_isr)
+	addiu	$2,$2,%lo(int_obj)
+	addiu	$3,$3,%lo(gpio_isr)
+	sw	$3,12($2)
+	li	$4,50000			# 0xc350
+	li	$3,1151401984			# 0x44a10000
 	sw	$0,16($2)
-	sw	$5,4($4)
-	lui	$4,%hi(FreeRTOS_TickISR)
-	addiu	$4,$4,%lo(FreeRTOS_TickISR)
-	sw	$4,4($2)
-	sw	$0,8($2)
-	lw	$2,%lo(int_obj)($3)
-	li	$3,255			# 0xff
-	sw	$3,0($2)
-	lw	$2,%gp_rel(timer_obj)($28)
-	li	$3,3			# 0x3
-	sw	$3,0($2)
-	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,1			# 0x1
+	sw	$3,%gp_rel(timer_obj)($28)
+	sw	$4,4($3)
+	lui	$3,%hi(FreeRTOS_TickISR)
+	addiu	$3,$3,%lo(FreeRTOS_TickISR)
 	lui	$5,%hi($LC0)
 	lui	$4,%hi(taskmain)
-	sw	$3,0($2)
+	sw	$3,4($2)
+	sw	$0,8($2)
 	move	$7,$0
 	sw	$0,20($sp)
 	sw	$0,16($sp)
@@ -196,6 +261,12 @@ $L11:
 	.set	macro
 	.set	reorder
 
+	lw	$2,%gp_rel(timer_obj)($28)
+	li	$3,3			# 0x3
+	sw	$3,0($2)
+	lw	$2,%gp_rel(gpio_obj)($28)
+	li	$3,1			# 0x1
+	sw	$3,0($2)
 	jal	vTaskStartScheduler
 	lw	$31,28($sp)
 	move	$2,$0
@@ -208,37 +279,6 @@ $L11:
 
 	.end	main
 	.size	main, .-main
-	.text
-	.align	2
-	.globl	vAssertCalled
-	.set	nomips16
-	.set	nomicromips
-	.ent	vAssertCalled
-	.type	vAssertCalled, @function
-vAssertCalled:
-	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
-	.mask	0x00000000,0
-	.fmask	0x00000000,0
-	.set	noreorder
-	.set	nomacro
-	bne	$5,$0,$L17
-	nop
-
-	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,65535			# 0xffff
-	sw	$3,8($2)
-$L16:
-	b	$L16
-	nop
-
-$L17:
-	jr	$31
-	nop
-
-	.set	macro
-	.set	reorder
-	.end	vAssertCalled
-	.size	vAssertCalled, .-vAssertCalled
 	.globl	led_state
 	.section	.sbss,"aw",@nobits
 	.align	2

@@ -295,13 +295,25 @@ architecture Behavioral of plasoc_cpu is
     attribute keep of cpu_pause : signal is true;
     
     -- debug
-    signal debug_0 : Boolean;
-    signal debug_1 : Boolean;
-    signal debug_2 : Boolean;
+    signal debug_pxPortInitialiseStack : Boolean;
+    signal debug_portRESTORE_CONTEXT : Boolean;
+    signal debug_vPortStartFirstTask: Boolean;
+    signal debug_portSAVE_CONTEXT : Boolean;
+    signal debug_interrupt_service_routine : Boolean;
+    signal debug_taskmain : Boolean;
+    signal debug_FreeRTOS_ISR : Boolean;
+    signal debug_OS_Syscall : Boolean; 
+    signal debug_input_value : Boolean;               
 begin
-    debug_0 <= True when X"000002bc"=cpu_address_next else False;
-    debug_1 <= True when X"00000350"=cpu_address_next else False;
-    debug_2 <= True when X"00000420"=cpu_address_next else False;
+    debug_pxPortInitialiseStack <= True when X"000002b4"=cpu_address_next else False;
+    debug_portRESTORE_CONTEXT <= True when X"00000348"=cpu_address_next else False;
+    debug_vPortStartFirstTask <= True when X"00000424"=cpu_address_next else False;
+    debug_portSAVE_CONTEXT <= True when X"000002c4"=cpu_address_next else False; 
+    debug_taskmain <= True when X"0000045c"=cpu_address_next else False;
+    debug_interrupt_service_routine <= True when X"0000003c"=cpu_address_next else False;
+    debug_FreeRTOS_ISR <= True when X"000003c4"=cpu_address_next else False;
+    debug_OS_Syscall <= True when X"000001e4"=cpu_address_next else False;
+    debug_input_value <= True when X"00004334"=cpu_address_next else False;
 
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.
