@@ -298,21 +298,27 @@ architecture Behavioral of plasoc_cpu is
     signal debug_pxPortInitialiseStack : Boolean;
     signal debug_FreeRTOS_AsmInterruptInit : Boolean;
     signal debug_vPortStartFirstTask: Boolean;
-    signal debug_portSAVE_CONTEXT : Boolean;
+    signal debug_pxCurrentTCB : Boolean;
     signal debug_interrupt_service_routine : Boolean;
     signal debug_taskmain : Boolean;
     signal debug_FreeRTOS_ISR : Boolean;
     signal debug_OS_Syscall : Boolean; 
-    signal debug_input_value : Boolean;               
+    signal debug_input_value : Boolean;     
+    signal debug_reset_occurred : Boolean;   
+    signal debug_timer_obj : Boolean;          
 begin
-    debug_pxPortInitialiseStack <= True when X"000002b4"=cpu_address_next else False;
-    debug_FreeRTOS_AsmInterruptInit <= True when X"00000124"=cpu_address_next else False;
-    debug_vPortStartFirstTask <= True when X"00000410"=cpu_address_next else False;
-    debug_taskmain <= True when X"000004b8"=cpu_address_next else False;
+    debug_pxPortInitialiseStack <= True when X"000002c0"=cpu_address_next else False;
+    debug_FreeRTOS_AsmInterruptInit <= True when X"000003e0"=cpu_address_next else False;
+    debug_vPortStartFirstTask <= True when X"0000041c"=cpu_address_next else False;
+    debug_taskmain <= True when X"000004c4"=cpu_address_next else False;
     debug_interrupt_service_routine <= True when X"0000003c"=cpu_address_next else False;
-    debug_FreeRTOS_ISR <= True when X"000002c4"=cpu_address_next else False;
+    debug_FreeRTOS_ISR <= True when X"000002d0"=cpu_address_next else False;
     debug_OS_Syscall <= True when X"000001e4"=cpu_address_next else False;
-    debug_input_value <= True when X"0000439c"=cpu_address_next else False;
+    debug_input_value <= True when X"00004e34"=cpu_address_next else False;
+    debug_pxCurrentTCB <= True when X"00004dd4"=cpu_address_next else False;
+    debug_reset_occurred <= True when X"00000000"=cpu_address_next else False;
+    debug_timer_obj <= True when X"00004e2c"=cpu_address_next else False;
+    
 
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.

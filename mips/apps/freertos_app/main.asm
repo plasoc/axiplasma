@@ -63,8 +63,7 @@ FreeRTOS_TickISR:
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
 	jal	xTaskIncrementTick
-	li	$3,1			# 0x1
-	bne	$2,$3,$L5
+	beq	$2,$0,$L5
 	jal	vTaskSwitchContext
 $L5:
 	lw	$31,20($sp)
@@ -103,8 +102,8 @@ FreeRTOS_UserISR:
 	move	$16,$3
 	addiu	$17,$17,%lo(int_obj+4)
 	sltu	$3,$2,8
-$L11:
-	bne	$3,$0,$L9
+$L14:
+	bne	$3,$0,$L12
 	nop
 
 	lw	$31,28($sp)
@@ -113,7 +112,7 @@ $L11:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L9:
+$L12:
 	sll	$2,$2,3
 	addu	$2,$17,$2
 	lw	$3,0($2)
@@ -124,7 +123,7 @@ $L9:
 	lw	$2,%lo(int_obj)($16)
 	nop
 	lw	$2,4($2)
-	b	$L11
+	b	$L14
 	sltu	$3,$2,8
 
 	.set	macro
@@ -177,17 +176,17 @@ vAssertCalled:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$5,$0,$L17
+	bne	$5,$0,$L20
 	nop
 
 	lw	$2,%gp_rel(gpio_obj)($28)
 	li	$3,65535			# 0xffff
 	sw	$3,8($2)
-$L16:
-	b	$L16
+$L19:
+	b	$L19
 	nop
 
-$L17:
+$L20:
 	jr	$31
 	nop
 
@@ -207,15 +206,16 @@ $LC0:
 	.ent	main
 	.type	main, @function
 main:
-	.frame	$sp,32,$31		# vars= 0, regs= 1/0, args= 24, gp= 0
-	.mask	0x80000000,-4
+	.frame	$sp,32,$31		# vars= 0, regs= 2/0, args= 24, gp= 0
+	.mask	0x80010000,-4
 	.fmask	0x00000000,0
 	addiu	$sp,$sp,-32
+	move	$4,$0
 	sw	$31,28($sp)
 	.set	noreorder
 	.set	nomacro
 	jal	OS_AsmInterruptEnable
-	move	$4,$0
+	sw	$16,24($sp)
 	.set	macro
 	.set	reorder
 
@@ -226,11 +226,11 @@ main:
 	lui	$3,%hi(int_obj+4)
 	addiu	$3,$3,%lo(int_obj+4)
 	addiu	$4,$4,%lo(int_obj+68)
-$L19:
+$L22:
 	addiu	$3,$3,8
 	.set	noreorder
 	.set	nomacro
-	bne	$3,$4,$L19
+	bne	$3,$4,$L22
 	sw	$0,-8($3)
 	.set	macro
 	.set	reorder
@@ -241,21 +241,22 @@ $L19:
 	addiu	$2,$2,%lo(int_obj)
 	addiu	$3,$3,%lo(gpio_isr)
 	sw	$3,12($2)
-	li	$4,50000			# 0xc350
+	li	$4,5000			# 0x1388
 	li	$3,1151401984			# 0x44a10000
 	sw	$0,16($2)
 	sw	$3,%gp_rel(timer_obj)($28)
 	sw	$4,4($3)
 	lui	$3,%hi(FreeRTOS_TickISR)
 	addiu	$3,$3,%lo(FreeRTOS_TickISR)
+	li	$16,3			# 0x3
 	lui	$5,%hi($LC0)
 	lui	$4,%hi(taskmain)
 	sw	$3,4($2)
-	sw	$0,8($2)
 	move	$7,$0
-	sw	$0,20($sp)
-	sw	$0,16($sp)
+	sw	$0,8($2)
 	li	$6,256			# 0x100
+	sw	$0,20($sp)
+	sw	$16,16($sp)
 	addiu	$5,$5,%lo($LC0)
 	.set	noreorder
 	.set	nomacro
@@ -265,13 +266,14 @@ $L19:
 	.set	reorder
 
 	lw	$2,%gp_rel(timer_obj)($28)
-	li	$3,3			# 0x3
-	sw	$3,0($2)
+	#nop
+	sw	$16,0($2)
 	lw	$2,%gp_rel(gpio_obj)($28)
 	li	$3,1			# 0x1
 	sw	$3,0($2)
 	jal	vTaskStartScheduler
 	lw	$31,28($sp)
+	lw	$16,24($sp)
 	move	$2,$0
 	.set	noreorder
 	.set	nomacro

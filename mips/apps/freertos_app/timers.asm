@@ -173,7 +173,7 @@ $L18:
 	lui	$4,%hi(prvTimerTask)
 	sw	$2,16($sp)
 	move	$7,$0
-	li	$6,128			# 0x80
+	li	$6,256			# 0x100
 	addiu	$5,$5,%lo($LC2)
 	jal	xTaskCreate
 	addiu	$4,$4,%lo(prvTimerTask)
@@ -467,7 +467,7 @@ $L50:
 	nop
 
 	move	$21,$2
-	lw	$2,%gp_rel(xLastTime.2678)($28)
+	lw	$2,%gp_rel(xLastTime.2680)($28)
 	nop
 	sltu	$2,$21,$2
 	beq	$2,$0,$L51
@@ -479,7 +479,7 @@ $L50:
 	li	$3,1			# 0x1
 $L51:
 	bne	$3,$0,$L52
-	sw	$21,%gp_rel(xLastTime.2678)($28)
+	sw	$21,%gp_rel(xLastTime.2680)($28)
 
 	beq	$16,$0,$L53
 	sltu	$2,$21,$17
@@ -573,7 +573,7 @@ $L62:
 	nop
 
 	move	$17,$2
-	lw	$2,%gp_rel(xLastTime.2678)($28)
+	lw	$2,%gp_rel(xLastTime.2680)($28)
 	nop
 	sltu	$2,$17,$2
 	beq	$2,$0,$L63
@@ -587,7 +587,7 @@ $L63:
 	nop
 	sltu	$2,$3,10
 	beq	$2,$0,$L61
-	sw	$17,%gp_rel(xLastTime.2678)($28)
+	sw	$17,%gp_rel(xLastTime.2680)($28)
 
 	sll	$3,$19,$3
 	andi	$2,$3,0x210
@@ -1044,8 +1044,8 @@ $L111:
 	.set	reorder
 	.end	xTimerPendFunctionCall
 	.size	xTimerPendFunctionCall, .-xTimerPendFunctionCall
-	.local	xLastTime.2678
-	.comm	xLastTime.2678,4,4
+	.local	xLastTime.2680
+	.comm	xLastTime.2680,4,4
 	.local	xTimerTaskHandle
 	.comm	xTimerTaskHandle,4,4
 	.local	xTimerQueue

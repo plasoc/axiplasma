@@ -909,6 +909,57 @@ $L100:
 	.end	vTaskPlaceOnUnorderedEventList
 	.size	vTaskPlaceOnUnorderedEventList, .-vTaskPlaceOnUnorderedEventList
 	.align	2
+	.globl	vTaskPlaceOnEventListRestricted
+	.set	nomips16
+	.set	nomicromips
+	.ent	vTaskPlaceOnEventListRestricted
+	.type	vTaskPlaceOnEventListRestricted, @function
+vTaskPlaceOnEventListRestricted:
+	.frame	$sp,32,$31		# vars= 0, regs= 4/0, args= 16, gp= 0
+	.mask	0x80070000,-4
+	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
+	addiu	$sp,$sp,-32
+	sw	$18,24($sp)
+	sw	$17,20($sp)
+	sw	$16,16($sp)
+	sw	$31,28($sp)
+	move	$18,$4
+	move	$16,$5
+	bne	$4,$0,$L103
+	move	$17,$6
+
+	lui	$4,%hi($LC0)
+	li	$5,2865			# 0xb31
+	jal	vAssertCalled
+	addiu	$4,$4,%lo($LC0)
+
+$L103:
+	lw	$5,%gp_rel(pxCurrentTCB)($28)
+	move	$4,$18
+	jal	vListInsertEnd
+	addiu	$5,$5,24
+
+	beq	$17,$0,$L104
+	nop
+
+	li	$16,-1			# 0xffffffffffffffff
+$L104:
+	lw	$31,28($sp)
+	lw	$18,24($sp)
+	move	$5,$17
+	move	$4,$16
+	lw	$17,20($sp)
+	lw	$16,16($sp)
+	j	prvAddCurrentTaskToDelayedList
+	addiu	$sp,$sp,32
+
+	.set	macro
+	.set	reorder
+	.end	vTaskPlaceOnEventListRestricted
+	.size	vTaskPlaceOnEventListRestricted, .-vTaskPlaceOnEventListRestricted
+	.align	2
 	.globl	xTaskRemoveFromEventList
 	.set	nomips16
 	.set	nomicromips
@@ -925,7 +976,7 @@ xTaskRemoveFromEventList:
 	sw	$16,20($sp)
 	lw	$16,12($2)
 	sw	$31,28($sp)
-	bne	$16,$0,$L103
+	bne	$16,$0,$L110
 	sw	$17,24($sp)
 
 	lui	$4,%hi($LC0)
@@ -933,14 +984,14 @@ xTaskRemoveFromEventList:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L103:
+$L110:
 	addiu	$17,$16,24
 	jal	uxListRemove
 	move	$4,$17
 
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	bne	$2,$0,$L104
+	bne	$2,$0,$L111
 	lui	$4,%hi(xPendingReadyList)
 
 	addiu	$17,$16,4
@@ -951,11 +1002,11 @@ $L103:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L105
+	beq	$2,$0,$L112
 	nop
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
-$L105:
+$L112:
 	sll	$2,$4,2
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
@@ -963,7 +1014,7 @@ $L105:
 	addiu	$4,$4,%lo(pxReadyTasksLists)
 	move	$5,$17
 	addu	$4,$4,$2
-$L110:
+$L117:
 	jal	vListInsertEnd
 	nop
 
@@ -972,21 +1023,21 @@ $L110:
 	lw	$2,44($2)
 	nop
 	sltu	$3,$2,$3
-	beq	$3,$0,$L102
+	beq	$3,$0,$L109
 	move	$2,$0
 
 	li	$2,1			# 0x1
 	sw	$2,%gp_rel(xYieldPending)($28)
-$L102:
+$L109:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L104:
+$L111:
 	move	$5,$17
-	b	$L110
+	b	$L117
 	addiu	$4,$4,%lo(xPendingReadyList)
 
 	.set	macro
@@ -1011,7 +1062,7 @@ xTaskRemoveFromUnorderedEventList:
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	move	$17,$4
-	bne	$2,$0,$L112
+	bne	$2,$0,$L119
 	move	$16,$5
 
 	lui	$4,%hi($LC0)
@@ -1019,20 +1070,20 @@ xTaskRemoveFromUnorderedEventList:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L112:
+$L119:
 	li	$2,-2147483648			# 0xffffffff80000000
 	or	$16,$16,$2
 	sw	$16,0($17)
 	lw	$16,12($17)
 	nop
-	bne	$16,$0,$L113
+	bne	$16,$0,$L120
 	li	$5,2977			# 0xba1
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L113:
+$L120:
 	move	$4,$17
 	jal	uxListRemove
 	addiu	$17,$16,4
@@ -1044,11 +1095,11 @@ $L113:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L114
+	beq	$2,$0,$L121
 	nop
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
-$L114:
+$L121:
 	sll	$2,$4,2
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
@@ -1063,12 +1114,12 @@ $L114:
 	lw	$2,44($2)
 	nop
 	sltu	$3,$2,$3
-	beq	$3,$0,$L111
+	beq	$3,$0,$L118
 	move	$2,$0
 
 	li	$2,1			# 0x1
 	sw	$2,%gp_rel(xYieldPending)($28)
-$L111:
+$L118:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
@@ -1094,7 +1145,7 @@ vTaskSetTimeOutState:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L119
+	bne	$4,$0,$L126
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1102,7 +1153,7 @@ vTaskSetTimeOutState:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L119:
+$L126:
 	lw	$2,%gp_rel(xNumOfOverflows)($28)
 	lw	$31,20($sp)
 	sw	$2,0($16)
@@ -1151,19 +1202,19 @@ vTaskSetThreadLocalStoragePointer:
 	.set	noreorder
 	.set	nomacro
 	slt	$2,$5,5
-	beq	$2,$0,$L126
+	beq	$2,$0,$L133
 	nop
 
-	bne	$4,$0,$L124
+	bne	$4,$0,$L131
 	nop
 
 	lw	$4,%gp_rel(pxCurrentTCB)($28)
-$L124:
+$L131:
 	addiu	$5,$5,20
 	sll	$5,$5,2
 	addu	$4,$4,$5
 	sw	$6,0($4)
-$L126:
+$L133:
 	jr	$31
 	nop
 
@@ -1184,19 +1235,19 @@ pvTaskGetThreadLocalStoragePointer:
 	.set	noreorder
 	.set	nomacro
 	slt	$3,$5,5
-	beq	$3,$0,$L132
+	beq	$3,$0,$L139
 	move	$2,$0
 
-	bne	$4,$0,$L129
+	bne	$4,$0,$L136
 	nop
 
 	lw	$4,%gp_rel(pxCurrentTCB)($28)
-$L129:
+$L136:
 	addiu	$5,$5,20
 	sll	$5,$5,2
 	addu	$4,$4,$5
 	lw	$2,0($4)
-$L132:
+$L139:
 	jr	$31
 	nop
 
@@ -1216,27 +1267,27 @@ uxTaskGetStackHighWaterMark:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$4,$0,$L134
+	bne	$4,$0,$L141
 	nop
 
 	lw	$4,%gp_rel(pxCurrentTCB)($28)
 	nop
-$L134:
+$L141:
 	lw	$4,48($4)
 	li	$5,165			# 0xa5
 	move	$3,$4
-$L135:
+$L142:
 	lbu	$6,0($3)
 	nop
-	beq	$6,$5,$L136
+	beq	$6,$5,$L143
 	subu	$2,$3,$4
 
 	srl	$2,$2,2
 	jr	$31
 	andi	$2,$2,0xffff
 
-$L136:
-	b	$L135
+$L143:
+	b	$L142
 	addiu	$3,$3,1
 
 	.set	macro
@@ -1277,14 +1328,14 @@ xTaskGetSchedulerState:
 	.set	nomacro
 	lw	$3,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$3,$0,$L144
+	beq	$3,$0,$L151
 	li	$2,1			# 0x1
 
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
 	sltu	$2,$2,1
 	sll	$2,$2,1
-$L144:
+$L151:
 	jr	$31
 	nop
 
@@ -1304,7 +1355,7 @@ vTaskPriorityInherit:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	beq	$4,$0,$L157
+	beq	$4,$0,$L164
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -1315,12 +1366,12 @@ vTaskPriorityInherit:
 	sw	$31,28($sp)
 	sw	$18,24($sp)
 	sw	$17,20($sp)
-	beq	$2,$0,$L145
+	beq	$2,$0,$L152
 	sw	$16,16($sp)
 
 	lw	$2,24($4)
 	nop
-	bltz	$2,$L158
+	bltz	$2,$L165
 	sll	$2,$3,2
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -1330,14 +1381,14 @@ vTaskPriorityInherit:
 	subu	$2,$2,$5
 	sw	$2,24($4)
 	sll	$2,$3,2
-$L158:
+$L165:
 	addu	$2,$2,$3
 	lui	$17,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
 	addiu	$17,$17,%lo(pxReadyTasksLists)
 	lw	$3,20($4)
 	addu	$2,$17,$2
-	bne	$3,$2,$L148
+	bne	$3,$2,$L155
 	addiu	$18,$4,4
 
 	move	$16,$4
@@ -1349,11 +1400,11 @@ $L158:
 	lw	$2,44($2)
 	nop
 	sltu	$3,$3,$2
-	beq	$3,$0,$L149
+	beq	$3,$0,$L156
 	sw	$2,44($16)
 
 	sw	$2,%gp_rel(uxTopReadyPriority)($28)
-$L149:
+$L156:
 	sll	$4,$2,2
 	addu	$4,$4,$2
 	sll	$4,$4,2
@@ -1366,19 +1417,19 @@ $L149:
 	j	vListInsertEnd
 	addiu	$sp,$sp,32
 
-$L148:
+$L155:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
 	lw	$2,44($2)
 	nop
 	sw	$2,44($4)
-$L145:
+$L152:
 	lw	$31,28($sp)
 	lw	$18,24($sp)
 	lw	$17,20($sp)
 	lw	$16,16($sp)
 	addiu	$sp,$sp,32
-$L157:
+$L164:
 	jr	$31
 	nop
 
@@ -1398,28 +1449,28 @@ xTaskPriorityDisinherit:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$4,$0,$L160
+	bne	$4,$0,$L167
 	move	$2,$0
 
 	jr	$31
 	nop
 
-$L164:
+$L171:
 	move	$2,$0
-$L159:
+$L166:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L160:
+$L167:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	addiu	$sp,$sp,-32
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	sw	$17,24($sp)
-	beq	$4,$2,$L162
+	beq	$4,$2,$L169
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1427,10 +1478,10 @@ $L160:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L162:
+$L169:
 	lw	$2,76($16)
 	nop
-	bne	$2,$0,$L169
+	bne	$2,$0,$L176
 	lui	$4,%hi($LC0)
 
 	li	$5,3785			# 0xec9
@@ -1438,14 +1489,14 @@ $L162:
 	addiu	$4,$4,%lo($LC0)
 
 	lw	$2,76($16)
-$L169:
+$L176:
 	lw	$4,44($16)
 	lw	$3,72($16)
 	addiu	$2,$2,-1
-	beq	$4,$3,$L164
+	beq	$4,$3,$L171
 	sw	$2,76($16)
 
-	bne	$2,$0,$L159
+	bne	$2,$0,$L166
 	move	$2,$0
 
 	addiu	$17,$16,4
@@ -1459,11 +1510,11 @@ $L169:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L165
+	beq	$2,$0,$L172
 	sw	$4,44($16)
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
-$L165:
+$L172:
 	sll	$2,$4,2
 	addu	$4,$2,$4
 	lui	$2,%hi(pxReadyTasksLists)
@@ -1473,7 +1524,7 @@ $L165:
 	jal	vListInsertEnd
 	move	$5,$17
 
-	b	$L159
+	b	$L166
 	li	$2,1			# 0x1
 
 	.set	macro
@@ -1499,7 +1550,7 @@ vTaskEnterCritical:
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L170
+	beq	$2,$0,$L177
 	nop
 
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
@@ -1509,7 +1560,7 @@ vTaskEnterCritical:
 	addiu	$2,$2,1
 	sw	$2,68($3)
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
-$L170:
+$L177:
 	lw	$31,20($sp)
 	nop
 	jr	$31
@@ -1533,14 +1584,14 @@ vTaskExitCritical:
 	.set	nomacro
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L183
+	beq	$2,$0,$L190
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
 	lw	$2,68($2)
 	nop
-	beq	$2,$0,$L183
+	beq	$2,$0,$L190
 	nop
 
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
@@ -1553,13 +1604,13 @@ vTaskExitCritical:
 	nop
 	lw	$2,68($2)
 	nop
-	bne	$2,$0,$L183
+	bne	$2,$0,$L190
 	nop
 
 	j	FreeRTOS_EnableInterrupts
 	nop
 
-$L183:
+$L190:
 	jr	$31
 	nop
 
@@ -1597,14 +1648,14 @@ xTaskCreate:
 	jal	pvPortMalloc
 	move	$21,$7
 
-	beq	$2,$0,$L184
+	beq	$2,$0,$L191
 	li	$23,-1			# 0xffffffffffffffff
 
 	li	$4,108			# 0x6c
 	jal	pvPortMalloc
 	move	$22,$2
 
-	beq	$2,$0,$L186
+	beq	$2,$0,$L193
 	move	$16,$2
 
 	move	$6,$18
@@ -1621,27 +1672,27 @@ xTaskCreate:
 	and	$18,$18,$2
 	addiu	$3,$17,16
 	addiu	$2,$16,52
-$L187:
+$L194:
 	lb	$4,0($5)
 	nop
 	sb	$4,0($2)
 	lb	$4,0($5)
 	nop
-	beq	$4,$0,$L188
+	beq	$4,$0,$L195
 	addiu	$5,$5,1
 
-	bne	$3,$5,$L187
+	bne	$3,$5,$L194
 	addiu	$2,$2,1
 
-$L188:
+$L195:
 	lw	$22,72($sp)
 	nop
 	sltu	$2,$22,5
-	bne	$2,$0,$L189
+	bne	$2,$0,$L196
 	sb	$0,67($16)
 
 	li	$22,4			# 0x4
-$L189:
+$L196:
 	addiu	$17,$16,4
 	sw	$22,44($16)
 	sw	$22,72($16)
@@ -1671,11 +1722,11 @@ $L189:
 	jal	pxPortInitialiseStack
 	move	$4,$18
 
-	beq	$19,$0,$L190
+	beq	$19,$0,$L197
 	sw	$2,0($16)
 
 	sw	$16,0($19)
-$L190:
+$L197:
 	jal	vTaskEnterCritical
 	nop
 
@@ -1685,13 +1736,13 @@ $L190:
 	sw	$2,%gp_rel(uxCurrentNumberOfTasks)($28)
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
-	bne	$2,$0,$L191
+	bne	$2,$0,$L198
 	nop
 
 	sw	$16,%gp_rel(pxCurrentTCB)($28)
 	lw	$3,%gp_rel(uxCurrentNumberOfTasks)($28)
 	li	$2,1			# 0x1
-	bne	$3,$2,$L193
+	bne	$3,$2,$L200
 	nop
 
 	jal	vListInitialise
@@ -1737,7 +1788,7 @@ $L190:
 
 	sw	$20,%gp_rel(pxDelayedTaskList)($28)
 	sw	$19,%gp_rel(pxOverflowDelayedTaskList)($28)
-$L193:
+$L200:
 	lw	$2,%gp_rel(uxTaskNumber)($28)
 	lw	$4,44($16)
 	addiu	$2,$2,1
@@ -1745,12 +1796,12 @@ $L193:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L208
+	beq	$2,$0,$L215
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L208:
+$L215:
 	addu	$2,$2,$4
 	sll	$2,$2,2
 	addiu	$4,$18,%lo(pxReadyTasksLists)
@@ -1763,7 +1814,7 @@ $L208:
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L184
+	beq	$2,$0,$L191
 	li	$23,1			# 0x1
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -1771,21 +1822,21 @@ $L208:
 	lw	$2,44($2)
 	nop
 	sltu	$2,$2,$3
-	beq	$2,$0,$L184
+	beq	$2,$0,$L191
 	nop
 
 	jal	OS_Syscall
 	nop
 
-	b	$L184
+	b	$L191
 	nop
 
-$L186:
+$L193:
 	jal	vPortFree
 	move	$4,$22
 
 	li	$23,-1			# 0xffffffffffffffff
-$L184:
+$L191:
 	lw	$31,52($sp)
 	move	$2,$23
 	lw	$22,44($sp)
@@ -1799,10 +1850,10 @@ $L184:
 	jr	$31
 	addiu	$sp,$sp,56
 
-$L191:
+$L198:
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	bne	$2,$0,$L193
+	bne	$2,$0,$L200
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -1810,11 +1861,11 @@ $L191:
 	lw	$2,44($2)
 	nop
 	sltu	$2,$3,$2
-	bne	$2,$0,$L193
+	bne	$2,$0,$L200
 	nop
 
 	sw	$16,%gp_rel(pxCurrentTCB)($28)
-	b	$L193
+	b	$L200
 	nop
 
 	.set	macro
@@ -1833,12 +1884,12 @@ $LC1:
 	.ent	vTaskStartScheduler
 	.type	vTaskStartScheduler, @function
 vTaskStartScheduler:
-	.frame	$sp,32,$31		# vars= 0, regs= 2/0, args= 24, gp= 0
+	.frame	$sp,40,$31		# vars= 8, regs= 2/0, args= 24, gp= 0
 	.mask	0x80010000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-32
+	addiu	$sp,$sp,-40
 	addiu	$2,$28,%gp_rel(xIdleTaskHandle)
 	lui	$5,%hi($LC1)
 	lui	$4,%hi(prvIdleTask)
@@ -1847,45 +1898,52 @@ vTaskStartScheduler:
 	sw	$0,16($sp)
 	li	$6,256			# 0x100
 	addiu	$5,$5,%lo($LC1)
-	sw	$16,24($sp)
-	sw	$31,28($sp)
-	jal	xTaskCreate
 	addiu	$4,$4,%lo(prvIdleTask)
+	sw	$16,32($sp)
+	sw	$31,36($sp)
+	jal	xTaskCreate
+	li	$16,1			# 0x1
 
-	move	$16,$2
-	li	$2,1			# 0x1
-	bne	$16,$2,$L210
-	li	$2,-1			# 0xffffffffffffffff
+	bne	$2,$16,$L220
+	li	$3,-1			# 0xffffffffffffffff
 
-	jal	FreeRTOS_DisableInterrupts
+	jal	xTimerCreateTimerTask
 	nop
 
-	li	$2,-1			# 0xffffffffffffffff
-	sw	$2,%gp_rel(xNextTaskUnblockTime)($28)
-	lw	$31,28($sp)
-	sw	$16,%gp_rel(xSchedulerRunning)($28)
-	lw	$16,24($sp)
-	addiu	$sp,$sp,32
+	bne	$2,$16,$L217
+	li	$3,-1			# 0xffffffffffffffff
+
+	jal	FreeRTOS_DisableInterrupts
+	sw	$2,24($sp)
+
+	lw	$2,24($sp)
+	lw	$31,36($sp)
+	lw	$16,32($sp)
+	li	$3,-1			# 0xffffffffffffffff
+	addiu	$sp,$sp,40
+	sw	$3,%gp_rel(xNextTaskUnblockTime)($28)
+	sw	$2,%gp_rel(xSchedulerRunning)($28)
 	sw	$0,%gp_rel(xTickCount)($28)
 	j	xPortStartScheduler
 	nop
 
-$L210:
-	bne	$16,$2,$L209
+$L217:
+$L220:
+	bne	$2,$3,$L216
 	lui	$4,%hi($LC0)
 
-	lw	$31,28($sp)
-	lw	$16,24($sp)
+	lw	$31,36($sp)
+	lw	$16,32($sp)
 	li	$5,1924			# 0x784
 	addiu	$4,$4,%lo($LC0)
 	j	vAssertCalled
-	addiu	$sp,$sp,32
+	addiu	$sp,$sp,40
 
-$L209:
-	lw	$31,28($sp)
-	lw	$16,24($sp)
+$L216:
+	lw	$31,36($sp)
+	lw	$16,32($sp)
 	jr	$31
-	addiu	$sp,$sp,32
+	addiu	$sp,$sp,40
 
 	.set	macro
 	.set	reorder
@@ -1910,32 +1968,32 @@ vTaskDelete:
 	jal	vTaskEnterCritical
 	sw	$17,24($sp)
 
-	bne	$16,$0,$L231
+	bne	$16,$0,$L239
 	addiu	$17,$16,4
 
 	lw	$16,%gp_rel(pxCurrentTCB)($28)
 	nop
 	addiu	$17,$16,4
-$L231:
+$L239:
 	jal	uxListRemove
 	move	$4,$17
 
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L215
+	beq	$2,$0,$L223
 	nop
 
 	jal	uxListRemove
 	addiu	$4,$16,24
 
-$L215:
+$L223:
 	lw	$2,%gp_rel(uxTaskNumber)($28)
 	nop
 	addiu	$2,$2,1
 	sw	$2,%gp_rel(uxTaskNumber)($28)
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
-	bne	$16,$2,$L216
+	bne	$16,$2,$L224
 	move	$5,$17
 
 	lui	$4,%hi(xTasksWaitingTermination)
@@ -1946,37 +2004,37 @@ $L215:
 	nop
 	addiu	$2,$2,1
 	sw	$2,%gp_rel(uxDeletedTasksWaitingCleanUp)($28)
-$L217:
+$L225:
 	jal	vTaskExitCritical
 	nop
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L213
+	beq	$2,$0,$L221
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
-	bne	$16,$2,$L213
+	bne	$16,$2,$L221
 	nop
 
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	beq	$2,$0,$L219
+	beq	$2,$0,$L227
 	li	$5,1125			# 0x465
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L219:
+$L227:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	j	OS_Syscall
 	addiu	$sp,$sp,32
 
-$L216:
+$L224:
 	lw	$2,%gp_rel(uxCurrentNumberOfTasks)($28)
 	lw	$4,48($16)
 	addiu	$2,$2,-1
@@ -1990,10 +2048,10 @@ $L216:
 	jal	prvResetNextTaskUnblockTime
 	nop
 
-	b	$L217
+	b	$L225
 	nop
 
-$L213:
+$L221:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
@@ -2020,7 +2078,7 @@ eTaskGetState:
 	sw	$17,24($sp)
 	sw	$31,28($sp)
 	sw	$16,20($sp)
-	bne	$4,$0,$L233
+	bne	$4,$0,$L241
 	move	$17,$4
 
 	lui	$4,%hi($LC0)
@@ -2028,10 +2086,10 @@ eTaskGetState:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L233:
+$L241:
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
 	nop
-	beq	$17,$3,$L232
+	beq	$17,$3,$L240
 	move	$2,$0
 
 	jal	vTaskEnterCritical
@@ -2043,39 +2101,39 @@ $L233:
 
 	lw	$3,%gp_rel(pxDelayedTaskList)($28)
 	nop
-	beq	$16,$3,$L232
+	beq	$16,$3,$L240
 	li	$2,2			# 0x2
 
 	lw	$3,%gp_rel(pxOverflowDelayedTaskList)($28)
 	nop
-	beq	$16,$3,$L232
+	beq	$16,$3,$L240
 	nop
 
 	lui	$2,%hi(xSuspendedTaskList)
 	addiu	$2,$2,%lo(xSuspendedTaskList)
-	bne	$16,$2,$L235
+	bne	$16,$2,$L243
 	lui	$3,%hi(xTasksWaitingTermination)
 
 	lw	$2,40($17)
 	nop
 	sltu	$2,$2,1
 	addiu	$2,$2,2
-$L232:
+$L240:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L235:
+$L243:
 	addiu	$3,$3,%lo(xTasksWaitingTermination)
-	beq	$16,$3,$L232
+	beq	$16,$3,$L240
 	li	$2,4			# 0x4
 
-	beq	$16,$0,$L232
+	beq	$16,$0,$L240
 	nop
 
-	b	$L232
+	b	$L240
 	li	$2,1			# 0x1
 
 	.set	macro
@@ -2100,12 +2158,12 @@ uxTaskPriorityGet:
 	jal	vTaskEnterCritical
 	move	$16,$4
 
-	bne	$16,$0,$L244
+	bne	$16,$0,$L252
 	move	$4,$16
 
 	lw	$4,%gp_rel(pxCurrentTCB)($28)
 	nop
-$L244:
+$L252:
 	lw	$16,44($4)
 	jal	vTaskExitCritical
 	nop
@@ -2140,7 +2198,7 @@ vTaskPrioritySet:
 	sw	$19,32($sp)
 	sw	$17,24($sp)
 	move	$16,$4
-	bne	$2,$0,$L249
+	bne	$2,$0,$L257
 	move	$18,$5
 
 	lui	$4,%hi($LC0)
@@ -2149,27 +2207,27 @@ vTaskPrioritySet:
 	addiu	$4,$4,%lo($LC0)
 
 	li	$18,4			# 0x4
-$L249:
+$L257:
 	jal	vTaskEnterCritical
 	nop
 
-	bne	$16,$0,$L250
+	bne	$16,$0,$L258
 	nop
 
 	lw	$16,%gp_rel(pxCurrentTCB)($28)
 	nop
-$L250:
+$L258:
 	lw	$2,72($16)
 	nop
-	beq	$18,$2,$L252
+	beq	$18,$2,$L260
 	sltu	$3,$2,$18
 
-	beq	$3,$0,$L253
+	beq	$3,$0,$L261
 	nop
 
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
 	nop
-	beq	$16,$3,$L254
+	beq	$16,$3,$L262
 	move	$17,$0
 
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
@@ -2178,23 +2236,23 @@ $L250:
 	nop
 	sltu	$17,$18,$17
 	xori	$17,$17,0x1
-$L254:
+$L262:
 	lw	$3,44($16)
 	nop
-	bne	$2,$3,$L255
+	bne	$2,$3,$L263
 	nop
 
 	sw	$18,44($16)
-$L255:
+$L263:
 	lw	$2,24($16)
 	nop
-	bltz	$2,$L256
+	bltz	$2,$L264
 	sw	$18,72($16)
 
 	li	$5,5			# 0x5
 	subu	$18,$5,$18
 	sw	$18,24($16)
-$L256:
+$L264:
 	sll	$2,$3,2
 	addu	$2,$2,$3
 	lui	$18,%hi(pxReadyTasksLists)
@@ -2202,7 +2260,7 @@ $L256:
 	addiu	$18,$18,%lo(pxReadyTasksLists)
 	lw	$3,20($16)
 	addu	$2,$18,$2
-	bne	$3,$2,$L257
+	bne	$3,$2,$L265
 	addiu	$19,$16,4
 
 	jal	uxListRemove
@@ -2212,11 +2270,11 @@ $L256:
 	lw	$3,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$3,$3,$2
-	beq	$3,$0,$L258
+	beq	$3,$0,$L266
 	nop
 
 	sw	$2,%gp_rel(uxTopReadyPriority)($28)
-$L258:
+$L266:
 	sll	$4,$2,2
 	addu	$4,$4,$2
 	sll	$4,$4,2
@@ -2224,14 +2282,14 @@ $L258:
 	jal	vListInsertEnd
 	addu	$4,$18,$4
 
-$L257:
-	beq	$17,$0,$L252
+$L265:
+	beq	$17,$0,$L260
 	nop
 
 	jal	OS_Syscall
 	nop
 
-$L252:
+$L260:
 	lw	$31,36($sp)
 	lw	$19,32($sp)
 	lw	$18,28($sp)
@@ -2240,11 +2298,11 @@ $L252:
 	j	vTaskExitCritical
 	addiu	$sp,$sp,40
 
-$L253:
+$L261:
 	lw	$17,%gp_rel(pxCurrentTCB)($28)
 	nop
 	xor	$17,$16,$17
-	b	$L254
+	b	$L262
 	sltu	$17,$17,1
 
 	.set	macro
@@ -2270,26 +2328,26 @@ vTaskSuspend:
 	jal	vTaskEnterCritical
 	sw	$17,24($sp)
 
-	bne	$16,$0,$L286
+	bne	$16,$0,$L294
 	addiu	$17,$16,4
 
 	lw	$16,%gp_rel(pxCurrentTCB)($28)
 	nop
 	addiu	$17,$16,4
-$L286:
+$L294:
 	jal	uxListRemove
 	move	$4,$17
 
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L287
+	beq	$2,$0,$L295
 	move	$5,$17
 
 	jal	uxListRemove
 	addiu	$4,$16,24
 
 	move	$5,$17
-$L287:
+$L295:
 	lui	$17,%hi(xSuspendedTaskList)
 	jal	vListInsertEnd
 	addiu	$4,$17,%lo(xSuspendedTaskList)
@@ -2299,7 +2357,7 @@ $L287:
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L270
+	beq	$2,$0,$L278
 	nop
 
 	jal	vTaskEnterCritical
@@ -2311,49 +2369,49 @@ $L287:
 	jal	vTaskExitCritical
 	nop
 
-$L270:
+$L278:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
-	bne	$16,$2,$L267
+	bne	$16,$2,$L275
 	nop
 
 	lw	$2,%gp_rel(xSchedulerRunning)($28)
 	nop
-	beq	$2,$0,$L272
+	beq	$2,$0,$L280
 	nop
 
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	beq	$2,$0,$L273
+	beq	$2,$0,$L281
 	lui	$4,%hi($LC0)
 
 	li	$5,1623			# 0x657
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L273:
+$L281:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	j	OS_Syscall
 	addiu	$sp,$sp,32
 
-$L272:
+$L280:
 	lw	$2,%gp_rel(uxCurrentNumberOfTasks)($28)
 	lw	$3,%lo(xSuspendedTaskList)($17)
 	nop
-	bne	$3,$2,$L274
+	bne	$3,$2,$L282
 	nop
 
 	sw	$0,%gp_rel(pxCurrentTCB)($28)
-$L267:
+$L275:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L274:
+$L282:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
@@ -2376,21 +2434,21 @@ vTaskResume:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$4,$0,$L289
+	bne	$4,$0,$L297
 	li	$5,1707			# 0x6ab
 
 	lui	$4,%hi($LC0)
 	j	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L294:
+$L302:
 	jal	vTaskEnterCritical
 	move	$16,$4
 
 	jal	prvTaskIsTaskSuspended
 	move	$4,$16
 
-	beq	$2,$0,$L291
+	beq	$2,$0,$L299
 	addiu	$17,$16,4
 
 	jal	uxListRemove
@@ -2400,12 +2458,12 @@ $L294:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L298
+	beq	$2,$0,$L306
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L298:
+$L306:
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
@@ -2419,25 +2477,25 @@ $L298:
 	lw	$3,44($3)
 	nop
 	sltu	$2,$2,$3
-	bne	$2,$0,$L291
+	bne	$2,$0,$L299
 	nop
 
 	jal	OS_Syscall
 	nop
 
-$L291:
+$L299:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	j	vTaskExitCritical
 	addiu	$sp,$sp,32
 
-$L289:
+$L297:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	addiu	$sp,$sp,-32
 	sw	$31,28($sp)
 	sw	$17,24($sp)
-	bne	$4,$2,$L294
+	bne	$4,$2,$L302
 	sw	$16,20($sp)
 
 	lw	$31,28($sp)
@@ -2470,7 +2528,7 @@ xTaskResumeAll:
 	sw	$19,32($sp)
 	sw	$18,28($sp)
 	sw	$17,24($sp)
-	bne	$2,$0,$L300
+	bne	$2,$0,$L308
 	sw	$16,20($sp)
 
 	lui	$4,%hi($LC0)
@@ -2478,7 +2536,7 @@ xTaskResumeAll:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L300:
+$L308:
 	jal	vTaskEnterCritical
 	nop
 
@@ -2488,12 +2546,12 @@ $L300:
 	sw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	beq	$2,$0,$L301
+	beq	$2,$0,$L309
 	nop
 
-$L303:
+$L311:
 	move	$16,$0
-$L302:
+$L310:
 	jal	vTaskExitCritical
 	nop
 
@@ -2508,10 +2566,10 @@ $L302:
 	jr	$31
 	addiu	$sp,$sp,48
 
-$L301:
+$L309:
 	lw	$2,%gp_rel(uxCurrentNumberOfTasks)($28)
 	nop
-	beq	$2,$0,$L303
+	beq	$2,$0,$L311
 	lui	$20,%hi(xPendingReadyList)
 
 	lui	$17,%hi(pxReadyTasksLists)
@@ -2519,51 +2577,51 @@ $L301:
 	addiu	$18,$20,%lo(xPendingReadyList)
 	addiu	$17,$17,%lo(pxReadyTasksLists)
 	li	$19,1			# 0x1
-$L304:
+$L312:
 	lw	$2,%lo(xPendingReadyList)($20)
 	nop
-	bne	$2,$0,$L307
+	bne	$2,$0,$L315
 	nop
 
-	beq	$16,$0,$L308
+	beq	$16,$0,$L316
 	nop
 
 	jal	prvResetNextTaskUnblockTime
 	nop
 
-$L308:
+$L316:
 	lw	$16,%gp_rel(uxPendedTicks)($28)
 	nop
-	beq	$16,$0,$L309
+	beq	$16,$0,$L317
 	li	$17,1			# 0x1
 
-$L311:
+$L319:
 	jal	xTaskIncrementTick
 	nop
 
-	beq	$2,$0,$L310
+	beq	$2,$0,$L318
 	nop
 
 	sw	$17,%gp_rel(xYieldPending)($28)
-$L310:
+$L318:
 	addiu	$16,$16,-1
-	bne	$16,$0,$L311
+	bne	$16,$0,$L319
 	nop
 
 	sw	$0,%gp_rel(uxPendedTicks)($28)
-$L309:
+$L317:
 	lw	$2,%gp_rel(xYieldPending)($28)
 	nop
-	beq	$2,$0,$L303
+	beq	$2,$0,$L311
 	nop
 
 	jal	OS_Syscall
 	li	$16,1			# 0x1
 
-	b	$L302
+	b	$L310
 	nop
 
-$L307:
+$L315:
 	lw	$2,12($18)
 	nop
 	lw	$16,12($2)
@@ -2579,11 +2637,11 @@ $L307:
 	lw	$3,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$3,$3,$2
-	beq	$3,$0,$L305
+	beq	$3,$0,$L313
 	nop
 
 	sw	$2,%gp_rel(uxTopReadyPriority)($28)
-$L305:
+$L313:
 	sll	$4,$2,2
 	addu	$4,$4,$2
 	sll	$4,$4,2
@@ -2596,11 +2654,11 @@ $L305:
 	lw	$3,44($3)
 	nop
 	sltu	$2,$2,$3
-	bne	$2,$0,$L304
+	bne	$2,$0,$L312
 	nop
 
 	sw	$19,%gp_rel(xYieldPending)($28)
-	b	$L304
+	b	$L312
 	nop
 
 	.set	macro
@@ -2624,7 +2682,7 @@ vTaskDelayUntil:
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	move	$17,$4
-	bne	$4,$0,$L330
+	bne	$4,$0,$L338
 	move	$16,$5
 
 	lui	$4,%hi($LC0)
@@ -2632,25 +2690,25 @@ vTaskDelayUntil:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L330:
-	bne	$16,$0,$L331
+$L338:
+	bne	$16,$0,$L339
 	li	$5,1146			# 0x47a
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L331:
+$L339:
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	beq	$2,$0,$L332
+	beq	$2,$0,$L340
 	lui	$4,%hi($LC0)
 
 	li	$5,1147			# 0x47b
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L332:
+$L340:
 	jal	vTaskSuspendAll
 	nop
 
@@ -2658,33 +2716,33 @@ $L332:
 	lw	$4,%gp_rel(xTickCount)($28)
 	addu	$16,$16,$3
 	sltu	$5,$4,$3
-	beq	$5,$0,$L333
+	beq	$5,$0,$L341
 	sltu	$3,$16,$3
 
-	beq	$3,$0,$L334
+	beq	$3,$0,$L342
 	move	$5,$0
 
-$L347:
-	b	$L334
+$L355:
+	b	$L342
 	sltu	$5,$4,$16
 
-$L333:
-	beq	$3,$0,$L347
+$L341:
+	beq	$3,$0,$L355
 	li	$5,1			# 0x1
 
-$L334:
-	beq	$5,$0,$L335
+$L342:
+	beq	$5,$0,$L343
 	sw	$16,0($17)
 
 	move	$5,$0
 	jal	prvAddCurrentTaskToDelayedList
 	subu	$4,$16,$4
 
-$L335:
+$L343:
 	jal	xTaskResumeAll
 	nop
 
-	bne	$2,$0,$L329
+	bne	$2,$0,$L337
 	nop
 
 	lw	$31,28($sp)
@@ -2693,7 +2751,7 @@ $L335:
 	j	OS_Syscall
 	addiu	$sp,$sp,32
 
-$L329:
+$L337:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
@@ -2716,25 +2774,25 @@ vTaskDelay:
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	bne	$4,$0,$L349
+	bne	$4,$0,$L357
 	nop
 
-$L359:
+$L367:
 	j	OS_Syscall
 	nop
 
-$L351:
+$L359:
 	lw	$31,20($sp)
 	lw	$16,16($sp)
-	b	$L359
+	b	$L367
 	addiu	$sp,$sp,24
 
-$L349:
+$L357:
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	beq	$2,$0,$L350
+	beq	$2,$0,$L358
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -2742,7 +2800,7 @@ $L349:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L350:
+$L358:
 	jal	vTaskSuspendAll
 	move	$5,$0
 
@@ -2752,7 +2810,7 @@ $L350:
 	jal	xTaskResumeAll
 	nop
 
-	beq	$2,$0,$L351
+	beq	$2,$0,$L359
 	nop
 
 	lw	$31,20($sp)
@@ -2784,14 +2842,14 @@ xTaskGetHandle:
 	move	$17,$4
 
 	sltu	$2,$2,16
-	bne	$2,$0,$L362
+	bne	$2,$0,$L370
 	li	$5,2262			# 0x8d6
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L362:
+$L370:
 	jal	vTaskSuspendAll
 	lui	$13,%hi(pxReadyTasksLists)
 
@@ -2799,30 +2857,30 @@ $L362:
 	addiu	$13,$13,%lo(pxReadyTasksLists)
 	li	$14,-100			# 0xffffffffffffff9c
 	addiu	$4,$12,80
-$L371:
+$L379:
 	move	$5,$17
 	jal	prvSearchForNameWithinSingleList
 	addu	$4,$13,$4
 
-	bne	$2,$0,$L363
+	bne	$2,$0,$L371
 	move	$16,$2
 
 	addiu	$12,$12,-20
-	bne	$12,$14,$L371
+	bne	$12,$14,$L379
 	addiu	$4,$12,80
 
 	lw	$4,%gp_rel(pxDelayedTaskList)($28)
 	jal	prvSearchForNameWithinSingleList
 	move	$5,$17
 
-	bne	$2,$0,$L363
+	bne	$2,$0,$L371
 	move	$16,$2
 
 	lw	$4,%gp_rel(pxOverflowDelayedTaskList)($28)
 	jal	prvSearchForNameWithinSingleList
 	move	$5,$17
 
-	bne	$2,$0,$L363
+	bne	$2,$0,$L371
 	move	$16,$2
 
 	lui	$4,%hi(xSuspendedTaskList)
@@ -2830,7 +2888,7 @@ $L371:
 	jal	prvSearchForNameWithinSingleList
 	addiu	$4,$4,%lo(xSuspendedTaskList)
 
-	bne	$2,$0,$L363
+	bne	$2,$0,$L371
 	move	$16,$2
 
 	lui	$4,%hi(xTasksWaitingTermination)
@@ -2839,7 +2897,7 @@ $L371:
 	addiu	$4,$4,%lo(xTasksWaitingTermination)
 
 	move	$16,$2
-$L363:
+$L371:
 	jal	xTaskResumeAll
 	nop
 
@@ -2860,39 +2918,24 @@ $L363:
 	.ent	prvIdleTask
 	.type	prvIdleTask, @function
 prvIdleTask:
-	.frame	$sp,40,$31		# vars= 0, regs= 5/0, args= 16, gp= 0
-	.mask	0x800f0000,-4
+	.frame	$sp,32,$31		# vars= 0, regs= 4/0, args= 16, gp= 0
+	.mask	0x80070000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-40
-	sw	$17,24($sp)
+	addiu	$sp,$sp,-32
+	sw	$17,20($sp)
 	lui	$17,%hi(xTasksWaitingTermination)
-	sw	$19,32($sp)
-	sw	$18,28($sp)
-	sw	$31,36($sp)
-	sw	$16,20($sp)
-	addiu	$19,$17,%lo(xTasksWaitingTermination)
-	lui	$18,%hi(pxReadyTasksLists)
-$L374:
+	sw	$18,24($sp)
+	sw	$31,28($sp)
+	sw	$16,16($sp)
+	addiu	$18,$17,%lo(xTasksWaitingTermination)
+$L382:
 	lw	$2,%gp_rel(uxDeletedTasksWaitingCleanUp)($28)
 	nop
-	bne	$2,$0,$L375
+	beq	$2,$0,$L382
 	nop
 
-	lw	$2,%lo(pxReadyTasksLists)($18)
-	nop
-	sltu	$2,$2,2
-	bne	$2,$0,$L374
-	nop
-
-	jal	OS_Syscall
-	nop
-
-	b	$L374
-	nop
-
-$L375:
 	jal	vTaskSuspendAll
 	nop
 
@@ -2900,13 +2943,13 @@ $L375:
 	jal	xTaskResumeAll
 	nop
 
-	beq	$16,$0,$L374
+	beq	$16,$0,$L382
 	nop
 
 	jal	vTaskEnterCritical
 	nop
 
-	lw	$2,12($19)
+	lw	$2,12($18)
 	nop
 	lw	$16,12($2)
 	jal	uxListRemove
@@ -2930,7 +2973,7 @@ $L375:
 	jal	vPortFree
 	move	$4,$16
 
-	b	$L374
+	b	$L382
 	nop
 
 	.set	macro
@@ -2953,7 +2996,7 @@ xTaskAbortDelay:
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	sw	$17,24($sp)
-	bne	$4,$0,$L383
+	bne	$4,$0,$L389
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -2961,7 +3004,7 @@ xTaskAbortDelay:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L383:
+$L389:
 	jal	vTaskSuspendAll
 	move	$4,$16
 
@@ -2969,7 +3012,7 @@ $L383:
 	nop
 
 	li	$3,2			# 0x2
-	bne	$2,$3,$L385
+	bne	$2,$3,$L391
 	addiu	$17,$16,4
 
 	jal	uxListRemove
@@ -2980,7 +3023,7 @@ $L383:
 
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L386
+	beq	$2,$0,$L392
 	nop
 
 	jal	uxListRemove
@@ -2988,7 +3031,7 @@ $L383:
 
 	li	$2,1			# 0x1
 	sb	$2,105($16)
-$L386:
+$L392:
 	jal	vTaskExitCritical
 	nop
 
@@ -2996,12 +3039,12 @@ $L386:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L393
+	beq	$2,$0,$L399
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L393:
+$L399:
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
@@ -3015,11 +3058,11 @@ $L393:
 	lw	$3,44($3)
 	nop
 	sltu	$2,$3,$2
-	beq	$2,$0,$L385
+	beq	$2,$0,$L391
 	li	$2,1			# 0x1
 
 	sw	$2,%gp_rel(xYieldPending)($28)
-$L385:
+$L391:
 	jal	xTaskResumeAll
 	nop
 
@@ -3052,7 +3095,7 @@ xTaskCheckForTimeOut:
 	sw	$31,28($sp)
 	sw	$16,16($sp)
 	move	$17,$4
-	bne	$4,$0,$L395
+	bne	$4,$0,$L401
 	move	$18,$5
 
 	lui	$4,%hi($LC0)
@@ -3060,15 +3103,15 @@ xTaskCheckForTimeOut:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L395:
-	bne	$18,$0,$L396
+$L401:
+	bne	$18,$0,$L402
 	lui	$4,%hi($LC0)
 
 	li	$5,3020			# 0xbcc
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L396:
+$L402:
 	jal	vTaskEnterCritical
 	nop
 
@@ -3077,13 +3120,13 @@ $L396:
 	nop
 	lbu	$2,105($2)
 	nop
-	beq	$2,$0,$L397
+	beq	$2,$0,$L403
 	li	$2,-1			# 0xffffffffffffffff
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	li	$16,1			# 0x1
 	sb	$0,105($2)
-$L398:
+$L404:
 	jal	vTaskExitCritical
 	nop
 
@@ -3095,25 +3138,25 @@ $L398:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L397:
+$L403:
 	lw	$3,0($18)
 	nop
-	beq	$3,$2,$L398
+	beq	$3,$2,$L404
 	move	$16,$0
 
 	lw	$5,%gp_rel(xNumOfOverflows)($28)
 	lw	$6,0($17)
 	lw	$2,4($17)
-	beq	$6,$5,$L399
+	beq	$6,$5,$L405
 	sltu	$5,$4,$2
 
-	beq	$5,$0,$L398
+	beq	$5,$0,$L404
 	li	$16,1			# 0x1
 
-$L399:
+$L405:
 	subu	$5,$4,$2
 	sltu	$5,$5,$3
-	beq	$5,$0,$L398
+	beq	$5,$0,$L404
 	li	$16,1			# 0x1
 
 	subu	$3,$3,$4
@@ -3122,7 +3165,7 @@ $L399:
 	jal	vTaskSetTimeOutState
 	move	$4,$17
 
-	b	$L398
+	b	$L404
 	move	$16,$0
 
 	.set	macro
@@ -3169,7 +3212,7 @@ pvTaskIncrementMutexHeldCount:
 	.set	nomacro
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
-	beq	$2,$0,$L406
+	beq	$2,$0,$L412
 	nop
 
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
@@ -3178,7 +3221,7 @@ pvTaskIncrementMutexHeldCount:
 	nop
 	addiu	$2,$2,1
 	sw	$2,76($3)
-$L406:
+$L412:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	jr	$31
 	nop
@@ -3211,13 +3254,13 @@ ulTaskNotifyTake:
 	nop
 	lw	$2,100($2)
 	nop
-	bne	$2,$0,$L412
+	bne	$2,$0,$L418
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	li	$3,1			# 0x1
 	sb	$3,104($2)
-	beq	$16,$0,$L412
+	beq	$16,$0,$L418
 	li	$5,1			# 0x1
 
 	jal	prvAddCurrentTaskToDelayedList
@@ -3226,7 +3269,7 @@ ulTaskNotifyTake:
 	jal	OS_Syscall
 	nop
 
-$L412:
+$L418:
 	jal	vTaskExitCritical
 	nop
 
@@ -3237,15 +3280,15 @@ $L412:
 	nop
 	lw	$16,100($2)
 	nop
-	beq	$16,$0,$L414
+	beq	$16,$0,$L420
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
-	beq	$17,$0,$L415
+	beq	$17,$0,$L421
 	addiu	$3,$16,-1
 
 	sw	$0,100($2)
-$L414:
+$L420:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
 	sb	$0,104($2)
@@ -3259,9 +3302,9 @@ $L414:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L415:
+$L421:
 	sw	$3,100($2)
-	b	$L414
+	b	$L420
 	nop
 
 	.set	macro
@@ -3297,7 +3340,7 @@ xTaskNotifyWait:
 	lbu	$2,104($2)
 	nop
 	andi	$2,$2,0x00ff
-	beq	$2,$3,$L425
+	beq	$2,$3,$L431
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -3309,7 +3352,7 @@ xTaskNotifyWait:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
 	sb	$3,104($2)
-	beq	$19,$0,$L425
+	beq	$19,$0,$L431
 	li	$5,1			# 0x1
 
 	jal	prvAddCurrentTaskToDelayedList
@@ -3318,14 +3361,14 @@ xTaskNotifyWait:
 	jal	OS_Syscall
 	nop
 
-$L425:
+$L431:
 	jal	vTaskExitCritical
 	nop
 
 	jal	vTaskEnterCritical
 	nop
 
-	beq	$18,$0,$L427
+	beq	$18,$0,$L433
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -3333,13 +3376,13 @@ $L425:
 	lw	$2,100($2)
 	nop
 	sw	$2,0($18)
-$L427:
+$L433:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	move	$17,$0
 	lbu	$3,104($2)
 	li	$2,1			# 0x1
 	andi	$3,$3,0x00ff
-	beq	$3,$2,$L428
+	beq	$3,$2,$L434
 	nop
 
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
@@ -3348,7 +3391,7 @@ $L427:
 	li	$17,1			# 0x1
 	and	$16,$16,$3
 	sw	$16,100($2)
-$L428:
+$L434:
 	lw	$2,%gp_rel(pxCurrentTCB)($28)
 	nop
 	sb	$0,104($2)
@@ -3389,7 +3432,7 @@ xTaskGenericNotify:
 	move	$16,$4
 	move	$18,$5
 	move	$17,$6
-	bne	$4,$0,$L438
+	bne	$4,$0,$L444
 	move	$19,$7
 
 	lui	$4,%hi($LC0)
@@ -3397,54 +3440,54 @@ xTaskGenericNotify:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L438:
+$L444:
 	jal	vTaskEnterCritical
 	nop
 
-	beq	$19,$0,$L439
+	beq	$19,$0,$L445
 	nop
 
 	lw	$2,100($16)
 	nop
 	sw	$2,0($19)
-$L439:
+$L445:
 	lbu	$3,104($16)
 	li	$2,2			# 0x2
 	sb	$2,104($16)
 	li	$2,2			# 0x2
-	beq	$17,$2,$L441
+	beq	$17,$2,$L447
 	andi	$3,$3,0x00ff
 
 	sltu	$4,$17,3
-	beq	$4,$0,$L442
+	beq	$4,$0,$L448
 	nop
 
 	li	$2,1			# 0x1
-	beq	$17,$2,$L443
+	beq	$17,$2,$L449
 	nop
-
-$L440:
-	li	$2,1			# 0x1
-$L462:
-	beq	$3,$2,$L447
-	nop
-
-$L460:
-	b	$L446
-	li	$17,1			# 0x1
-
-$L442:
-	li	$4,3			# 0x3
-	beq	$17,$4,$L459
-	li	$4,4			# 0x4
-
-	bne	$17,$4,$L440
-	nop
-
-	bne	$3,$2,$L459
-	move	$17,$0
 
 $L446:
+	li	$2,1			# 0x1
+$L468:
+	beq	$3,$2,$L453
+	nop
+
+$L466:
+	b	$L452
+	li	$17,1			# 0x1
+
+$L448:
+	li	$4,3			# 0x3
+	beq	$17,$4,$L465
+	li	$4,4			# 0x4
+
+	bne	$17,$4,$L446
+	nop
+
+	bne	$3,$2,$L465
+	move	$17,$0
+
+$L452:
 	jal	vTaskExitCritical
 	nop
 
@@ -3457,24 +3500,24 @@ $L446:
 	jr	$31
 	addiu	$sp,$sp,40
 
-$L443:
+$L449:
 	lw	$2,100($16)
 	nop
 	or	$18,$2,$18
-$L459:
+$L465:
 	sw	$18,100($16)
-	b	$L462
+	b	$L468
 	li	$2,1			# 0x1
 
-$L441:
+$L447:
 	lw	$2,100($16)
 	nop
 	addiu	$2,$2,1
 	sw	$2,100($16)
-	b	$L462
+	b	$L468
 	li	$2,1			# 0x1
 
-$L447:
+$L453:
 	addiu	$17,$16,4
 	jal	uxListRemove
 	move	$4,$17
@@ -3483,12 +3526,12 @@ $L447:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L463
+	beq	$2,$0,$L469
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L463:
+$L469:
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
@@ -3499,26 +3542,26 @@ $L463:
 
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L449
+	beq	$2,$0,$L455
 	lui	$4,%hi($LC0)
 
 	li	$5,4405			# 0x1135
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L449:
+$L455:
 	lw	$3,%gp_rel(pxCurrentTCB)($28)
 	lw	$2,44($16)
 	lw	$3,44($3)
 	nop
 	sltu	$2,$3,$2
-	beq	$2,$0,$L460
+	beq	$2,$0,$L466
 	nop
 
 	jal	OS_Syscall
 	li	$17,1			# 0x1
 
-	b	$L446
+	b	$L452
 	nop
 
 	.set	macro
@@ -3548,7 +3591,7 @@ xTaskGenericNotifyFromISR:
 	move	$19,$5
 	move	$17,$6
 	lw	$18,56($sp)
-	bne	$4,$0,$L465
+	bne	$4,$0,$L471
 	move	$20,$7
 
 	lui	$4,%hi($LC0)
@@ -3556,52 +3599,52 @@ xTaskGenericNotifyFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L465:
-	beq	$20,$0,$L466
+$L471:
+	beq	$20,$0,$L472
 	nop
 
 	lw	$2,100($16)
 	nop
 	sw	$2,0($20)
-$L466:
+$L472:
 	lbu	$3,104($16)
 	li	$2,2			# 0x2
 	li	$4,2			# 0x2
 	andi	$3,$3,0x00ff
 	sb	$2,104($16)
-	beq	$17,$4,$L468
+	beq	$17,$4,$L474
 	nop
 
 	sltu	$2,$17,3
-	beq	$2,$0,$L469
+	beq	$2,$0,$L475
 	li	$2,3			# 0x3
 
 	li	$2,1			# 0x1
-	beq	$17,$2,$L470
+	beq	$17,$2,$L476
 	nop
 
-$L467:
+$L473:
 	li	$2,1			# 0x1
-$L491:
-	beq	$3,$2,$L474
+$L497:
+	beq	$3,$2,$L480
 	nop
 
-$L479:
-	b	$L464
+$L485:
+	b	$L470
 	li	$2,1			# 0x1
 
-$L469:
-	beq	$17,$2,$L489
+$L475:
+	beq	$17,$2,$L495
 	nop
 
 	li	$2,4			# 0x4
-	bne	$17,$2,$L467
+	bne	$17,$2,$L473
 	nop
 
-	bne	$3,$4,$L489
+	bne	$3,$4,$L495
 	move	$2,$0
 
-$L464:
+$L470:
 	lw	$31,36($sp)
 	lw	$20,32($sp)
 	lw	$19,28($sp)
@@ -3611,37 +3654,37 @@ $L464:
 	jr	$31
 	addiu	$sp,$sp,40
 
-$L470:
+$L476:
 	lw	$2,100($16)
 	nop
 	or	$19,$2,$19
-$L489:
+$L495:
 	sw	$19,100($16)
-	b	$L491
+	b	$L497
 	li	$2,1			# 0x1
 
-$L468:
+$L474:
 	lw	$2,100($16)
 	nop
 	addiu	$2,$2,1
 	sw	$2,100($16)
-	b	$L491
+	b	$L497
 	li	$2,1			# 0x1
 
-$L474:
+$L480:
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L475
+	beq	$2,$0,$L481
 	li	$5,4527			# 0x11af
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L475:
+$L481:
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	bne	$2,$0,$L476
+	bne	$2,$0,$L482
 	lui	$4,%hi(xPendingReadyList)
 
 	addiu	$17,$16,4
@@ -3652,19 +3695,19 @@ $L475:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L492
+	beq	$2,$0,$L498
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L492:
+$L498:
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
 	addiu	$4,$4,%lo(pxReadyTasksLists)
 	move	$5,$17
 	addu	$4,$4,$2
-$L490:
+$L496:
 	jal	vListInsertEnd
 	nop
 
@@ -3673,23 +3716,23 @@ $L490:
 	lw	$3,44($3)
 	nop
 	sltu	$2,$3,$2
-	beq	$2,$0,$L479
+	beq	$2,$0,$L485
 	nop
 
-	beq	$18,$0,$L480
+	beq	$18,$0,$L486
 	li	$2,1			# 0x1
 
-	b	$L464
+	b	$L470
 	sw	$2,0($18)
 
-$L476:
+$L482:
 	addiu	$5,$16,24
-	b	$L490
+	b	$L496
 	addiu	$4,$4,%lo(xPendingReadyList)
 
-$L480:
+$L486:
 	sw	$2,%gp_rel(xYieldPending)($28)
-	b	$L464
+	b	$L470
 	nop
 
 	.set	macro
@@ -3714,7 +3757,7 @@ vTaskNotifyGiveFromISR:
 	sw	$31,28($sp)
 	sw	$18,24($sp)
 	move	$16,$4
-	bne	$4,$0,$L494
+	bne	$4,$0,$L500
 	move	$17,$5
 
 	lui	$4,%hi($LC0)
@@ -3722,7 +3765,7 @@ vTaskNotifyGiveFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L494:
+$L500:
 	li	$3,2			# 0x2
 	lbu	$2,104($16)
 	sb	$3,104($16)
@@ -3731,22 +3774,22 @@ $L494:
 	addiu	$3,$3,1
 	sw	$3,100($16)
 	li	$3,1			# 0x1
-	bne	$2,$3,$L493
+	bne	$2,$3,$L499
 	nop
 
 	lw	$2,40($16)
 	nop
-	beq	$2,$0,$L497
+	beq	$2,$0,$L503
 	li	$5,4617			# 0x1209
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L497:
+$L503:
 	lw	$2,%gp_rel(uxSchedulerSuspended)($28)
 	nop
-	bne	$2,$0,$L498
+	bne	$2,$0,$L504
 	lui	$4,%hi(xPendingReadyList)
 
 	addiu	$18,$16,4
@@ -3757,19 +3800,19 @@ $L497:
 	lw	$2,%gp_rel(uxTopReadyPriority)($28)
 	nop
 	sltu	$2,$2,$4
-	beq	$2,$0,$L508
+	beq	$2,$0,$L514
 	sll	$2,$4,2
 
 	sw	$4,%gp_rel(uxTopReadyPriority)($28)
 	sll	$2,$4,2
-$L508:
+$L514:
 	addu	$2,$2,$4
 	lui	$4,%hi(pxReadyTasksLists)
 	sll	$2,$2,2
 	addiu	$4,$4,%lo(pxReadyTasksLists)
 	move	$5,$18
 	addu	$4,$4,$2
-$L507:
+$L513:
 	jal	vListInsertEnd
 	nop
 
@@ -3778,14 +3821,14 @@ $L507:
 	lw	$3,44($3)
 	nop
 	sltu	$2,$3,$2
-	beq	$2,$0,$L493
+	beq	$2,$0,$L499
 	nop
 
-	beq	$17,$0,$L502
+	beq	$17,$0,$L508
 	li	$2,1			# 0x1
 
 	sw	$2,0($17)
-$L493:
+$L499:
 	lw	$31,28($sp)
 	lw	$18,24($sp)
 	lw	$17,20($sp)
@@ -3793,14 +3836,14 @@ $L493:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L498:
+$L504:
 	addiu	$5,$16,24
-	b	$L507
+	b	$L513
 	addiu	$4,$4,%lo(xPendingReadyList)
 
-$L502:
+$L508:
 	sw	$2,%gp_rel(xYieldPending)($28)
-	b	$L493
+	b	$L499
 	nop
 
 	.set	macro
@@ -3823,23 +3866,23 @@ xTaskNotifyStateClear:
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	sw	$17,24($sp)
-	bne	$4,$0,$L510
+	bne	$4,$0,$L516
 	move	$16,$4
 
 	lw	$16,%gp_rel(pxCurrentTCB)($28)
-$L510:
+$L516:
 	jal	vTaskEnterCritical
 	nop
 
 	lbu	$3,104($16)
 	li	$2,2			# 0x2
 	andi	$3,$3,0x00ff
-	bne	$3,$2,$L511
+	bne	$3,$2,$L517
 	move	$17,$0
 
 	sb	$0,104($16)
 	li	$17,1			# 0x1
-$L511:
+$L517:
 	jal	vTaskExitCritical
 	nop
 

@@ -8,7 +8,7 @@
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
-#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
+#define PLASOC_TIMER_MILLISECOND_CYCLES		(5000)
 
 #define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
@@ -23,7 +23,7 @@ volatile unsigned led_state = 0;
 
 void FreeRTOS_TickISR()
 {
-	if (xTaskIncrementTick()==pdTRUE)
+	if (xTaskIncrementTick()!=pdFALSE)
 		vTaskSwitchContext();
 	plasoc_timer_reload_start(&timer_obj,1);
 }
@@ -77,7 +77,7 @@ int main()
 
 	/* Create the tasks. */
 	{
-		BaseType_t xReturned = xTaskCreate(taskmain,"taskmain",configMINIMAL_STACK_SIZE,0,0,0);
+		BaseType_t xReturned = xTaskCreate(taskmain,"taskmain",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT( xReturned==pdPASS );
 	}
 
