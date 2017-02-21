@@ -296,7 +296,7 @@ architecture Behavioral of plasoc_cpu is
     
     -- debug
     signal debug_pxPortInitialiseStack : Boolean;
-    signal debug_portRESTORE_CONTEXT : Boolean;
+    signal debug_FreeRTOS_AsmInterruptInit : Boolean;
     signal debug_vPortStartFirstTask: Boolean;
     signal debug_portSAVE_CONTEXT : Boolean;
     signal debug_interrupt_service_routine : Boolean;
@@ -306,12 +306,13 @@ architecture Behavioral of plasoc_cpu is
     signal debug_input_value : Boolean;               
 begin
     debug_pxPortInitialiseStack <= True when X"000002b4"=cpu_address_next else False;
+    debug_FreeRTOS_AsmInterruptInit <= True when X"00000124"=cpu_address_next else False;
     debug_vPortStartFirstTask <= True when X"00000410"=cpu_address_next else False;
     debug_taskmain <= True when X"000004b8"=cpu_address_next else False;
     debug_interrupt_service_routine <= True when X"0000003c"=cpu_address_next else False;
     debug_FreeRTOS_ISR <= True when X"000002c4"=cpu_address_next else False;
     debug_OS_Syscall <= True when X"000001e4"=cpu_address_next else False;
-    debug_input_value <= True when X"00004394"=cpu_address_next else False;
+    debug_input_value <= True when X"0000439c"=cpu_address_next else False;
 
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.

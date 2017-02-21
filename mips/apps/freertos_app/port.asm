@@ -41,6 +41,9 @@ xPortStartScheduler:
 	jal	FreeRTOS_AsmInterruptInit
 	nop
 
+	jal	FreeRTOS_EnableInterrupts
+	nop
+
 	jal	vPortStartFirstTask
 	nop
 
@@ -73,7 +76,7 @@ vPortEndScheduler:
 	.set	noreorder
 	.set	nomacro
 	lui	$4,%hi($LC0)
-	li	$5,105			# 0x69
+	li	$5,110			# 0x6e
 	j	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 

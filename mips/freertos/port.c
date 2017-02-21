@@ -89,6 +89,11 @@ BaseType_t xPortStartScheduler( void )
 
 	/* Patch the vector so that the FreeRTOS ISR is called. */
 	FreeRTOS_AsmInterruptInit();
+
+	/* Enable the external interrupt controller's interrupts. 
+	 The vPortStartFirskTask function will enable
+	 the CPU interrupt. */
+	portENABLE_INTERRUPTS();
 	
 	/* Start the first task. */
 	vPortStartFirstTask();
