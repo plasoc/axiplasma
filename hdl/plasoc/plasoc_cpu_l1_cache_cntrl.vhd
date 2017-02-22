@@ -28,15 +28,15 @@ entity plasoc_cpu_l1_cache_cntrl is
         cpu_next_address : in std_logic_vector(cpu_address_width-1 downto 0);
         cpu_write_data : in std_logic_vector(cpu_data_width-1 downto 0);
         cpu_write_enables : in std_logic_vector(cpu_data_width/8-1 downto 0);
-        cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+        cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
         cpu_pause : out std_logic;
-        memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0);
-        memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0);
+        memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
+        memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
         memory_write_enable : out std_logic;
-        memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0);
+        memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
         memory_write_valid : out std_logic;
         memory_write_ready : in std_logic;
-        memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0);
+        memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
         memory_read_enable : out std_logic;
         memory_read_data: in std_logic_vector(cpu_data_width-1 downto 0);
         memory_read_valid : in std_logic;
@@ -61,7 +61,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
         return result;
     end; 
     
-    type block_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*cache_offset_width*8-1 downto 0);
+    type block_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*2**cache_offset_width*8-1 downto 0);
     type tag_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*tag_width-1 downto 0);
     type valid_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width-1 downto 0);
     type plru_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(plru_width-1 downto 0);
@@ -77,10 +77,13 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal cpu_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal cpu_hit : Boolean := False;
     signal cpu_cacheable : Boolean := False;
+    signal cpu_pause_buff : std_logic := '0';
     signal replace_plru : std_logic_vector(plru_width-1 downto 0);
     signal replace_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal replace_write_enables : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
     signal replace_write_data : std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+    signal replace_offset : integer range 0 to 2**cache_index_width-1 := 0;
+    signal memory_prepared : Boolean := False;
     signal memory_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal memory_access_needed : Boolean := False;
     signal memory_access_mode : memory_access_mode_type := msm_read_block;
@@ -93,7 +96,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
 begin
 
-    cpu_pause <= '1' when memory_access_needed else '0';
+    cpu_pause <= cpu_pause_buff;
     cpu_tag <= cpu_next_address(cache_cacheable_width-1 downto cache_offset_width+cache_index_width);
     cpu_index <= to_integer(unsigned(cpu_next_address(cache_offset_width+cache_index_width-1 downto cache_offset_width)));
     cpu_offset <= to_integer(unsigned(cpu_next_address(cache_offset_width-1 downto 0)));
@@ -162,6 +165,9 @@ begin
                 end if;
                 replace_way <= this_bit;
                 replace_plru <= plru_buff;
+            else
+                replace_way <= 0;
+                replace_plru <= (others=>'0');
             end if;
         end process;
         process (clock)
@@ -169,7 +175,7 @@ begin
             if rising_edge(clock) then
                 if resetn='0' then
                     plru_rows <= (others=>(others=>'0'));
-                elsif not memory_access_needed and cpu_cacheable and not cpu_hit then
+                elsif not memory_access_needed and cpu_cacheable and not cpu_hit and memory_prepared then
                     plru_rows(cpu_index) <= replace_plru;
                 end if;
             end if;
@@ -181,57 +187,59 @@ begin
         variable memory_write_handshake : Boolean;
         variable memory_read_handshake : Boolean;
         variable memory_access_block : Boolean;
+        variable memory_access_word : Boolean;
     begin
         if rising_edge(clock) then
             if resetn='0' then
+                memory_prepared <= False;
                 memory_access_needed <= False;
                 memory_write_enable_buff <= '0';
                 memory_write_valid_buff <= '0';
                 memory_read_ready_buff <= '0';
                 memory_read_enable_buff <= '0';
+                cpu_pause_buff <= '0';
+                valid_rows <= (others=>(others=>'0'));
             else
                 if memory_access_needed then
                 
                     memory_write_handshake := memory_write_valid_buff='1' and memory_write_ready='1';
                     memory_read_handshake := memory_read_valid='1' and memory_read_ready_buff='1';
                     memory_access_block := memory_access_mode=msm_read_block or memory_access_mode=msm_exchange_block;
+                    memory_access_word := memory_access_mode=msm_read_word or memory_access_mode=msm_write_word;
                 
-                    if memory_write_handshake and 
-                            memory_access_mode=msm_exchange_block then
+                    if memory_write_handshake and memory_access_mode=msm_exchange_block and memory_write_counter/=2**block_word_width-1 then
                         memory_write_data <= 
-                            block_rows(memory_index)(memory_way*cache_offset_width+(memory_write_counter+1)*cpu_data_width-1 downto 
-                            memory_way*cache_offset_width+memory_write_counter*cpu_data_width);
+                            block_rows(memory_index)(
+                            memory_way*2**cache_offset_width*8+(memory_write_counter+2)*cpu_data_width-1 downto 
+                            memory_way*2**cache_offset_width*8+(memory_write_counter+1)*cpu_data_width);
                     end if;
                     if memory_read_handshake and memory_access_block then
-                        block_rows(memory_index)(memory_way*cache_offset_width+(memory_read_counter+1)*cpu_data_width-1 downto 
-                            memory_way*cache_offset_width+memory_read_counter*cpu_data_width) <=
+                        block_rows(memory_index)(
+                            memory_way*2**cache_offset_width*8+(memory_read_counter+1)*cpu_data_width-1 downto 
+                            memory_way*2**cache_offset_width*8+memory_read_counter*cpu_data_width) <=
                             memory_read_data;
                     end if;
                     if memory_read_handshake and memory_access_mode=msm_read_word then
                         cpu_read_data <= memory_read_data;
                     end if;
                     
-                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**cpu_data_width-1) or
-                            (memory_access_mode=msm_write_word and memory_write_counter/=1) then
-                        memory_write_enable_buff <= '1';
-                    else
+                    if (memory_access_mode=msm_exchange_block and memory_write_counter=2**block_word_width-1) or 
+                            (memory_access_mode=msm_write_word and memory_write_handshake) then
                         memory_write_enable_buff <= '0';
                     end if;
-                    if (memory_access_block and memory_read_counter/=2**cpu_data_width-1) or
-                            (memory_access_mode=msm_read_word and memory_read_counter/=1) then
-                        memory_read_enable_buff <= '1';
-                    else
+                    if (memory_access_block and memory_read_counter=2**block_word_width-1) or
+                            (memory_access_mode=msm_read_word and memory_read_handshake) then
                         memory_read_enable_buff <= '0';
                     end if;
                     
-                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**cpu_data_width-1) or 
-                            (memory_access_mode=msm_write_word and memory_write_counter/=1) then
+                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**block_word_width-1) or 
+                            (memory_access_mode=msm_write_word and not memory_write_handshake) then
                         memory_write_valid_buff <= '1';
                     else
                         memory_write_valid_buff <= '0';
                     end if;
-                    if ((memory_access_mode=msm_read_block or (memory_access_mode=msm_exchange_block and memory_read_counter/=memory_write_counter)) and memory_read_counter/=2**cpu_data_width-1) or
-                            (memory_access_mode=msm_read_word and memory_read_counter/=1) then
+                    if ((memory_access_mode=msm_read_block or (memory_access_mode=msm_exchange_block and memory_read_counter/=memory_write_counter)) and memory_read_counter/=2**block_word_width-1) or
+                            (memory_access_mode=msm_read_word and not memory_read_handshake) then
                         memory_read_ready_buff <= '1';
                     else
                         memory_read_ready_buff <= '0';
@@ -239,87 +247,109 @@ begin
                     
                     if memory_access_mode=msm_exchange_block and
                             memory_write_handshake and
-                            ((memory_access_block and memory_write_counter/=2**cpu_data_width-1) or
-                            (memory_access_mode=msm_write_word and memory_write_counter/=1)) then
+                            memory_write_counter/=2**block_word_width-1 then
                         memory_write_counter <= memory_write_counter+1;
                     end if;
                     if (memory_access_mode=msm_read_block or (memory_access_mode=msm_exchange_block and memory_read_counter/=memory_write_counter)) and 
                             memory_read_handshake and
-                            ((memory_access_block and memory_read_counter/=2**cpu_data_width-1) or
-                            (memory_access_mode=msm_read_word and memory_read_counter/=1))then
+                            memory_read_counter/=2**block_word_width-1 then
                         memory_read_counter <= memory_read_counter+1;
                     end if;
                     
-                    if memory_access_block and memory_read_counter=2**cpu_data_width-1 then
+                    if memory_access_block and memory_read_counter=2**block_word_width-1 then
                         for each_byte in 0 to cpu_data_width/8-1 loop
                             if or_reduce(replace_write_enables)='1' then
                                 if replace_write_enables(each_byte)='1' then
-                                    block_rows(memory_index)(memory_way*cache_offset_width+(each_byte+1)*8-1 downto memory_way*cache_offset_width+each_byte*8) <=
+                                    block_rows(memory_index)(
+                                        memory_way*2**cache_offset_width*8+replace_offset*8+(each_byte+1)*8-1 downto 
+                                        memory_way*2**cache_offset_width*8+replace_offset*8+each_byte*8) <=
                                         replace_write_data(7+each_byte*8 downto 0+each_byte*8);
                                 end if;
                             else
                                 cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
-                                    block_rows(memory_index)(memory_way*cache_offset_width+(each_byte+1)*8-1 downto memory_way*cache_offset_width+each_byte*8);
+                                    block_rows(memory_index)(
+                                    memory_way*2**cache_offset_width*8+replace_offset*8+(each_byte+1)*8-1 downto 
+                                    memory_way*2**cache_offset_width*8+replace_offset*8+each_byte*8);
                             end if;
                         end loop;
                     end if;
-                    if memory_write_valid_buff='0' and memory_read_enable_buff='0' then
+                    if (memory_access_block and memory_write_valid_buff='0' and memory_read_enable_buff='0') or
+                            (memory_access_word and (memory_write_handshake or memory_read_handshake)) then
                         memory_access_needed <= False;
+                        cpu_pause_buff <= '0';
                     end if;
-                    
                 elsif not cpu_cacheable then
+                    cpu_pause_buff <= '1';
                     memory_access_needed <= True;
+                    memory_cacheable <= '0';
                     if or_reduce(cpu_write_enables)='1' then
                         memory_access_mode <= msm_write_word;
                         memory_write_address <= cpu_next_address;
                         memory_write_enables <= cpu_write_enables;
                         memory_write_data <= cpu_write_data;
                         memory_write_counter <= 0;
+                        memory_write_enable_buff <= '1';
                     else
                         memory_access_mode <= msm_read_word;
                         memory_read_address <= cpu_next_address;
                         memory_read_counter <= 0;
+                        memory_read_enable_buff <= '1';
                     end if;
-                    
                 elsif cpu_hit then
                     for each_byte in 0 to cpu_data_width/8-1 loop
                         if or_reduce(cpu_write_enables)='1' then
                             if cpu_write_enables(each_byte)='1' then
-                                block_rows(cpu_index)(cpu_way*cache_offset_width+(each_byte+1)*8-1 downto cpu_way*cache_offset_width+each_byte*8) <=
+                                block_rows(cpu_index)(
+                                    cpu_way*2**cache_offset_width*8+cpu_offset*8+(each_byte+1)*8-1 downto 
+                                    cpu_way*2**cache_offset_width*8+cpu_offset*8+each_byte*8) <=
                                     cpu_write_data(7+each_byte*8 downto 0+each_byte*8);
                             end if;
                         else
                             cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
-                                block_rows(cpu_index)(cpu_way*cache_offset_width+(each_byte+1)*8-1 downto cpu_way*cache_offset_width+each_byte*8);
+                                block_rows(cpu_index)(
+                                cpu_way*2**cache_offset_width*8+cpu_offset*8+(each_byte+1)*8-1 downto 
+                                cpu_way*2**cache_offset_width*8+cpu_offset*8+each_byte*8);
                         end if;
                     end loop;
-                    
-                else
-                    memory_access_needed <= True;
-                    memory_way <= replace_way;
-                    replace_write_enables <= cpu_write_enables;
-                    replace_write_data <= cpu_write_data;
-                    tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) <= cpu_tag;
-                    memory_index <= cpu_index;
-                    if valid_rows(cpu_index)(replace_way)='1' then
-                        memory_access_mode <= msm_exchange_block;
-                        memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
-                            tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) & 
-                            std_logic_vector(to_unsigned(cpu_index,cache_index_width));
-                        memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                        memory_write_counter <= 0;
-                        memory_write_enables <= (others=>'1');
-                        memory_write_data <= 
-                            block_rows(cpu_index)(replace_way*cache_offset_width+cpu_data_width-1 downto 
-                            replace_way*cache_offset_width);
+                elsif not cpu_hit then
+                    cpu_pause_buff <= '1';
+                    if not memory_prepared then
+                        memory_prepared <= True;
+                        replace_write_enables <= cpu_write_enables;
                     else
-                        valid_rows(cpu_index)(replace_way) <='1';
-                        memory_access_mode <= msm_read_block;
+                        memory_access_needed <= True;
+                        memory_prepared <= False;
+                        memory_way <= replace_way;
+                        memory_cacheable <= '1';
+                        replace_write_data <= cpu_write_data;
+                        replace_offset <= cpu_offset;
+                        tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) <= cpu_tag;
+                        memory_index <= cpu_index;
+                        if valid_rows(cpu_index)(replace_way)='1' then
+                            memory_access_mode <= msm_exchange_block;
+                            memory_write_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
+                            memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                                tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) & 
+                                std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                            memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                            memory_write_counter <= 0;
+                            memory_write_enables <= (others=>'1');
+                            memory_write_enable_buff <= '1';
+                            memory_write_data <= 
+                                block_rows(cpu_index)(
+                                replace_way*2**cache_offset_width*8+cpu_data_width-1 downto 
+                                replace_way*2**cache_offset_width*8);
+                        else
+                            valid_rows(cpu_index)(replace_way) <='1';
+                            memory_access_mode <= msm_read_block;
+                        end if;
+                        memory_read_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
+                        memory_read_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                            cpu_tag & std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                        memory_read_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                        memory_read_counter <= 0;
+                        memory_read_enable_buff <= '1';
                     end if;
-                    memory_read_address(cache_cacheable_width-1 downto cache_offset_width) <=
-                        cpu_tag & std_logic_vector(to_unsigned(cpu_index,cache_index_width));
-                    memory_read_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                    memory_read_counter <= 0;
                 end if;
             end if;
         end if;

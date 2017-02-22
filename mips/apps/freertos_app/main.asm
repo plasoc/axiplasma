@@ -252,11 +252,11 @@ $L22:
 	lui	$5,%hi($LC0)
 	lui	$4,%hi(taskmain)
 	sw	$3,4($2)
-	move	$7,$0
 	sw	$0,8($2)
-	li	$6,256			# 0x100
+	move	$7,$0
 	sw	$0,20($sp)
 	sw	$16,16($sp)
+	li	$6,256			# 0x100
 	addiu	$5,$5,%lo($LC0)
 	.set	noreorder
 	.set	nomacro

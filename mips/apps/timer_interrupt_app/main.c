@@ -20,10 +20,6 @@ volatile unsigned input_value;
 volatile unsigned update_flag = 1;
 volatile unsigned led_state = 0;
 
-/* The following functions are defined in the boot loader assembly.
- They are necessary to initialize the interrupt of the CPU. */
-extern void OS_AsmInterruptEnable(unsigned enable_flag);
-
 /* Define the CPU's service routine such that it calls the
  interrupt controller's service method. */
 extern void OS_InterruptServiceRoutine()

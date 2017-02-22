@@ -91,56 +91,33 @@ architecture Behavioral of plasoc_cpu is
     -- Component declarations.
     component plasoc_cpu_l1_cache_cntrl is
         generic (
-            cpu_address_width : integer := 16;
+            cpu_address_width : integer := 32;
             cpu_data_width : integer := 32;
-            cache_address_width : integer := 10;
-            cache_way_width : integer := 1; 
+            cache_cacheable_width : integer := 16;
+            cache_way_width : integer := 1;
             cache_index_width : integer := 4;
-            cache_offset_width : integer := 4;
-            cache_replace_strat : string := "plru";
-            cache_base_address : std_logic_vector := X"0000" ); 
+            cache_offset_width : integer := 5;
+            cache_policy : string := "plru"); 
         port ( 
-            clock : in std_logic; 
-            resetn : in std_logic;
-            cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 
-            cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
-            cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-            cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);
-            cpu_pause : out std_logic;
-            cache_cacheable : out std_logic;
-            cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);
-            cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-            cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);
-            cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0);
-            cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);
-            cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-            mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-            mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);
-            mem_in_enable : out std_logic;
-            mem_in_valid : in std_logic;
-            mem_in_ready : out std_logic;
-            mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-            mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-            mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0);
-            mem_out_enable : out std_logic;
-            mem_out_valid : out std_logic;
-            mem_out_ready : in std_logic); 
-    end component;
-    component plasoc_cpu_l1_cache_buff is
-        generic (
-            glb_data_width : integer := 32;
-            cache_tag_width : integer := 22;
-            cache_index_width : integer := 5;
-            cache_offset_width : integer := 4;
-            cache_way_width : integer := 2 );
-        port(
             clock : in std_logic;
-            cache_in_data : in std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-            cache_in_index : in std_logic_vector(cache_index_width-1 downto 0);
-            cache_in_tag_enable : in std_logic_vector(2**cache_way_width-1 downto 0);
-            cache_in_offset_enable : in std_logic_vector(2**cache_way_width*2**cache_offset_width/(glb_data_width/8)-1 downto 0);
-            cache_out_data : out std_logic_vector((cache_tag_width+8*2**cache_offset_width)*2**cache_way_width-1 downto 0);
-            cache_out_index : in std_logic_vector(cache_index_width-1 downto 0));
+            resetn : in std_logic;
+            cpu_next_address : in std_logic_vector(cpu_address_width-1 downto 0);
+            cpu_write_data : in std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_write_enables : in std_logic_vector(cpu_data_width/8-1 downto 0);
+            cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+            cpu_pause : out std_logic;
+            memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0);
+            memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0);
+            memory_write_enable : out std_logic;
+            memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0);
+            memory_write_valid : out std_logic;
+            memory_write_ready : in std_logic;
+            memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0);
+            memory_read_enable : out std_logic;
+            memory_read_data: in std_logic_vector(cpu_data_width-1 downto 0);
+            memory_read_valid : in std_logic;
+            memory_read_ready : out std_logic;
+            memory_cacheable : out std_logic); 
     end component;
     component plasoc_cpu_mem_cntrl is
         generic (
@@ -305,7 +282,8 @@ architecture Behavioral of plasoc_cpu is
     signal debug_OS_Syscall : Boolean; 
     signal debug_input_value : Boolean;     
     signal debug_reset_occurred : Boolean;   
-    signal debug_timer_obj : Boolean;          
+    signal debug_timer_obj : Boolean;   
+    signal debug_gpio_base_address : Boolean;       
 begin
     debug_pxPortInitialiseStack <= True when X"000002c0"=cpu_address_next else False;
     debug_FreeRTOS_AsmInterruptInit <= True when X"000003e0"=cpu_address_next else False;
@@ -318,6 +296,7 @@ begin
     debug_pxCurrentTCB <= True when X"00004dd4"=cpu_address_next else False;
     debug_reset_occurred <= True when X"00000000"=cpu_address_next else False;
     debug_timer_obj <= True when X"00004e2c"=cpu_address_next else False;
+    debug_gpio_base_address <= True when X"44a20000"=cpu_address_next else False;
     
 
     cpu_address_next(1 downto 0) <= "00";
@@ -345,60 +324,36 @@ begin
     gen_cache :
     if cache_enable=True generate
         -- Cache controller instantiation.
-        plasoc_cpu_l1_cache_cntrl_inst: 
+        plasoc_cpu_l1_cache_cntrl_inst : 
         plasoc_cpu_l1_cache_cntrl 
             generic map (
                 cpu_address_width => cpu_width,
                 cpu_data_width => cpu_width,
-                cache_address_width => cache_address_width,
-                cache_way_width => cache_way_width, 
+                cache_cacheable_width => cache_address_width,
+                cache_way_width => cache_way_width,
                 cache_index_width => cache_index_width,
                 cache_offset_width => cache_offset_width,
-                cache_replace_strat => cache_replace_strat,
-                cache_base_address => cache_base_address)
-             port map ( 
+                cache_policy => cache_replace_strat)
+            port map ( 
                 clock => aclk,
                 resetn => aresetn,
-                cpu_address => cpu_address_next,
-                cpu_in_data => cpu_write_data,
-                cpu_out_data => cpu_read_data,
-                cpu_strobe => cpu_strobe_next,
+                cpu_next_address => cpu_address_next,
+                cpu_write_data => cpu_write_data,
+                cpu_write_enables => cpu_strobe_next,
+                cpu_read_data => cpu_read_data,
                 cpu_pause => cpu_pause,
-                cache_cacheable => cache_cacheable,
-                cache_out_address => cache_write_index,
-                cache_out_data => cache_write_data,
-                cache_out_tag_enable => cache_write_tag_enable,
-                cache_out_block_enable => cache_write_block_enable,
-                cache_in_address => cache_read_index,
-                cache_in_data => cache_read_data,
-                mem_in_address => mem_in_address,
-                mem_in_data => mem_in_data,
-                mem_in_enable => mem_in_enable,
-                mem_in_valid => mem_in_valid,
-                mem_in_ready => mem_in_ready,
-                mem_out_address => mem_out_address,
-                mem_out_data => mem_out_data,
-                mem_out_strobe => mem_out_strobe,
-                mem_out_enable => mem_out_enable,
-                mem_out_valid => mem_out_valid,
-                mem_out_ready => mem_out_ready);
-        -- Cache buffer instantiation.
-        plasoc_cpu_l1_cache_buff_inst : 
-        plasoc_cpu_l1_cache_buff 
-            generic map (
-                glb_data_width => cpu_width,
-                cache_tag_width => cache_tag_width,
-                cache_index_width => cache_index_width,
-                cache_offset_width => cache_offset_width,
-                cache_way_width => cache_way_width )
-            port map (
-                clock => aclk,
-                cache_in_data => cache_write_data,
-                cache_in_index => cache_write_index,
-                cache_in_tag_enable => cache_write_tag_enable,
-                cache_in_offset_enable => cache_write_block_enable,
-                cache_out_data => cache_read_data,
-                cache_out_index => cache_read_index);
+                memory_write_address => mem_out_address,
+                memory_write_data => mem_out_data,
+                memory_write_enable => mem_out_enable,
+                memory_write_enables => mem_out_strobe,
+                memory_write_valid => mem_out_valid,
+                memory_write_ready => mem_out_ready,
+                memory_read_address => mem_in_address,
+                memory_read_enable => mem_in_enable,
+                memory_read_data => mem_in_data,
+                memory_read_valid => mem_in_valid,
+                memory_read_ready => mem_in_ready,
+                memory_cacheable => cache_cacheable); 
     end generate;
     -- If cache is disabled, instantiate memory controller.
     gen_no_cache :

@@ -3,8 +3,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
-use ieee.std_logic_textio.all;
-use std.textio.all;
+use work.bram_pack.all;
 
 entity ram is
     port(
@@ -18,31 +17,8 @@ entity ram is
 end ram;
 
 architecture Behavioral of ram is
-    constant binary_name : string := "main.bin";
-    constant hex_name : string := "main.hex";
     constant cpu_width : integer := 32;
     constant bytes_per_word : integer := (cpu_width/8);
-    constant ram_address_width : integer := 16;
-    constant ram_size : integer := 2**ram_address_width/bytes_per_word;
-    subtype word_type is std_logic_vector(cpu_width-1 downto 0);
-    type ram_type is array(0 to ram_size-1) of word_type;
-    -- Unfortunately, the vhdl read function for binary loading doesn't appear to work, statically. 
-    -- So, the hex equivalent has to be used instead.
-    function load_hex return ram_type is
-        file load_file : text open read_mode is hex_name;
-        variable line_buff : line;
-        variable word_buff : word_type; 
-        variable index : integer := 0;
-        variable ram_buffer : ram_type;
-    begin
-        while not endfile(load_file) and index<ram_size loop
-            readline(load_file,line_buff);
-            hread(line_buff,word_buff);
-            ram_buffer(index) := word_buff;
-            index := index+1;
-        end loop;
-        return ram_buffer;
-    end;
     signal base_index : integer;
     signal ram_buffer : ram_type := load_hex;
 begin
