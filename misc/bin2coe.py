@@ -71,7 +71,7 @@ if __name__ == '__main__':
                 'package body bram_pack is\n'+ \
                 '\n'+ \
                 '	function load_hex return ram_type is\n'+ \
-                '		variable ram_buffer : ram_type;\n'+ \
+                '		variable ram_buffer : ram_type := (others=>(others=>\'0\'));\n'+ \
                 '	begin\n')
 
         # Acquire the binary file and determine the number of words in the file.

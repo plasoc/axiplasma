@@ -15,7 +15,7 @@ PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 16384
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192
 
 # No user editing or variables below this line
 

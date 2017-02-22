@@ -14,9 +14,9 @@ LDFLAGS = -L$(LD_DIR) -static -lc
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
-C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/timers.c $(FREERTOS_DIR)/heap_1.c
+C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_1.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --plain_hex --word_count 16384
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 
 
 # No user editing or variables below this line
 
@@ -47,7 +47,7 @@ else
 		$(notdir $(OBJECTS:=.o)) -lc
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
-	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).hex
+	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).vhdl
 
 
 $(C_OBJECTS):%:%.c
@@ -63,7 +63,7 @@ $(ASM_OBJECTS):%:%.asm
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
-	install -c $(EXEC_NAME).hex $(INSTALL_DIR)
+	install -c $(EXEC_NAME).vhdl $(INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif

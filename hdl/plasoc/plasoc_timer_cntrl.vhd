@@ -34,7 +34,7 @@ end plasoc_timer_cntrl;
 
 architecture Behavioral of plasoc_timer_cntrl is
     signal trig_value_buff : integer;
-    signal tick_counter : integer;
+    signal tick_counter : integer; 
 begin
 
     -- Output the current tick value.

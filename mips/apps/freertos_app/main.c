@@ -8,7 +8,7 @@
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
-#define PLASOC_TIMER_MILLISECOND_CYCLES		(5000)
+#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
 
 #define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
@@ -57,6 +57,8 @@ void taskmain()
 		plasoc_gpio_set_data_out(&gpio_obj,input_value);
 	}
 }
+
+
 
 int main()
 {
