@@ -73,7 +73,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal plru_rows : plru_rows_type := (others=>(others=>'0'));
     signal cpu_tag : std_logic_vector(tag_width-1 downto 0) := (others=>'0');
     signal cpu_index : integer range 0 to 2**cache_index_width-1 := 0;
-    signal cpu_offset : integer range 0 to 2**cache_index_width-1 := 0;
+    signal cpu_offset : integer range 0 to 2**cache_offset_width-1 := 0;
     signal cpu_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal cpu_hit : Boolean := False;
     signal cpu_cacheable : Boolean := False;
@@ -96,10 +96,10 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
     
     attribute keep : boolean;
+    attribute keep of cpu_next_address : signal is true;
     attribute keep of cpu_write_data : signal is true;
     attribute keep of cpu_write_enables : signal is true;
     attribute keep of cpu_read_data : signal is true;
-    
     attribute keep of cpu_tag : signal is true;
     attribute keep of cpu_index : signal is true;
     attribute keep of cpu_offset : signal is true;
