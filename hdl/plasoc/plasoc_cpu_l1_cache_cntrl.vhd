@@ -12,63 +12,46 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.plasoc_cpu_pack.all;
 
---! The cache controller is designed to implement the write-back
---! caching technique, however other parameters such as assocaivity 
---! and size are configurable so long as there are no inconsistencies. It 
---! should be noted that the CPU naturally processes an instruction per 
---! rising edge of the global clock, unless intentionally stalled.
---!
---! In future revisions on this documentation, more information on the 
---! replacement policies will be included. 
+
 entity plasoc_cpu_l1_cache_cntrl is
     generic (
-        -- CPU parameters.
-        cpu_address_width : integer := 16;						--! Defines the address width of the CPU. This should normally be equal to the CPU's width.			
-        cpu_data_width : integer := 32;							--! Defines the data width of the CPU. This should normally be equal to the CPU's width.	
-        -- Cache parameters.
-        cache_address_width : integer := 10;					--! Defines the cacheable address width, starting from the base address of 0. 
-        cache_way_width : integer := 1; 						--! Associativity = 2^cache_way_width.
-        cache_index_width : integer := 4;						--! Cache Size (rows) = 2^cache_index_width.
-        cache_offset_width : integer := 4;						--! Line Size (bytes) = 2^cache_offset_width.
-        cache_replace_strat : string := "plru";					--! Defines the replacement strategy in case of miss. Only "plru" is available.
-        cache_base_address : std_logic_vector := X"0000" 		--! Defines the base address of the cache controller registers.
-	); 
+        cpu_address_width : integer := 32;
+        cpu_data_width : integer := 32;
+        cache_cacheable_width : integer := 16;
+        cache_way_width : integer := 1;
+        cache_index_width : integer := 4;
+        cache_offset_width : integer := 5;
+        cache_policy : string := "plru"); 
     port ( 
-        -- Global interface.
-        clock : in std_logic; 																--! Clock. Tested with 50 MHz.
-        resetn : in std_logic;																--! Reset on low.	
-        -- CPU interface.
-        cpu_address : in std_logic_vector(cpu_address_width-1 downto 0); 					--! The requested address of the next word to either be written to or read from memory.
-        cpu_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The word that the CPU is writing.
-        cpu_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The word that is written to the CPU.
-        cpu_strobe : in std_logic_vector(cpu_data_width/8-1 downto 0);						--! Determines whether a the CPU is writing or reading a word. Each bit that is high enables writing for the corresponding byte in cpu_out_data.
-        cpu_pause : out std_logic;															--! Stalls the CPU.
-        -- Cache interface.
-        cache_cacheable : out std_logic;													--! Indicates whether the requested address of the CPU is cacheable or noncacheable.
-        cache_out_address: out std_logic_vector(cache_index_width-1 downto 0);				--! The requested cache index when writing to the cache buffer. 
-        cache_out_data : out std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when writing to the cache buffer.
-        cache_out_tag_enable : out std_logic_vector(2**cache_way_width-1 downto 0);			--! Enables the writing of a new tag for a specified way. Each bit refers to a corresponding way.
-        cache_out_block_enable : out std_logic_vector(2**cache_way_width*2**cache_offset_width/(cpu_data_width/8)-1 downto 0); --! Enables the writing of a word for a specifided way and offset. Each bit refers a corresponding way and offset.
-        cache_in_address : out std_logic_vector(cache_index_width-1 downto 0);				--! The requested cache index when reading from the cache buffer. 
-        cache_in_data : in std_logic_vector(((cache_address_width-cache_index_width-cache_offset_width)+8*2**cache_offset_width)*2**cache_way_width-1 downto 0); --! The cache data when reading from the cache buffer.
-        -- Memory interface.
-        mem_in_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0'); --! The requested address sent to the read memory controller.
-        mem_in_data : in std_logic_vector(cpu_data_width-1 downto 0);						--! The word read from the read memory controller.
-        mem_in_enable : out std_logic;														--! Enables the operation of the read memory controller.
-        mem_in_valid : in std_logic;														--! Indicates the read memory controller has a valid word on mem_in_data.
-        mem_in_ready : out std_logic;														--! Indicates the cache is ready to sample a word from mem_in_data. 
-        mem_out_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0'); --! The requested address sent to the write memory controller.
-        mem_out_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');	--! The word written to the write memory controller.
-        mem_out_strobe : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');--! Each bit that is high enables writing for the corresponding byte in mem_out_data.
-        mem_out_enable : out std_logic;														--! Enables the operation of the write memory controller.						
-        mem_out_valid : out std_logic;														--! Indicates the cache has a valid word on mem_out_data.
-        mem_out_ready : in std_logic														--! Indicates the read memory controller is ready to sample a word from mem_out_data.
-	); 
+        clock : in std_logic;
+        resetn : in std_logic;
+        cpu_next_address : in std_logic_vector(cpu_address_width-1 downto 0);
+        cpu_write_data : in std_logic_vector(cpu_data_width-1 downto 0);
+        cpu_write_enables : in std_logic_vector(cpu_data_width/8-1 downto 0);
+        cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0);
+        cpu_pause : out std_logic;
+        memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0);
+        memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0);
+        memory_write_enable : out std_logic;
+        memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0);
+        memory_write_valid : out std_logic;
+        memory_write_ready : in std_logic;
+        memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0);
+        memory_read_enable : out std_logic;
+        memory_read_data: in std_logic_vector(cpu_data_width-1 downto 0);
+        memory_read_valid : in std_logic;
+        memory_read_ready : out std_logic;
+        memory_cacheable : out std_logic); 
 end plasoc_cpu_l1_cache_cntrl;
 
 architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
-    function cache_plru_width return integer is
-    	variable result : integer := 0;
+
+    constant tag_width : integer := cache_cacheable_width-cache_index_width-cache_offset_width;
+    constant block_col_width : integer := tag_width+cache_offset_width;
+    constant block_word_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
+    
+    function plru_width return integer is
+        variable result : integer := 0;
     begin
         if cache_way_width/=0 then
             for each_way in 1 to 2**cache_way_width/2 loop
@@ -77,195 +60,74 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
         end if;
         return result;
     end; 
-    function is_cacheable( address : in std_logic_vector ) return boolean is
-        variable result : boolean;
-    begin
-        if or_reduce(address(cpu_address_width-1 downto cache_address_width))='1' then
-            return False;
-        else 
-            return True;
-        end if;
-    end;
-    constant cache_word_offset_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
-    constant cache_tag_width : integer := cache_address_width-cache_index_width-cache_offset_width;
-    constant cache_line_width : integer := cache_tag_width+8*2**cache_offset_width;
-    constant cache_lineset_width : integer := cache_line_width*2**cache_way_width;
-    constant cache_write_zeros : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
-    constant cache_invalidate_offset : integer := 0;
-    constant cache_flush_offset : integer := 4;
-    constant cache_invalidate_address : std_logic_vector := add_offset2base(cache_base_address,cache_invalidate_offset);
-    constant cache_flush_address : std_logic_vector := add_offset2base(cache_base_address,cache_flush_offset);
-    subtype byte_type is std_logic_vector(7 downto 0);
-    subtype word_type is std_logic_vector(cpu_data_width-1 downto 0);
-    subtype cache_tag_type is std_logic_vector(cache_tag_width-1 downto 0);
-    subtype cache_index_type is std_logic_vector(cache_index_width-1 downto 0);
-    subtype cache_offset_type is std_logic_vector(cache_offset_width-1 downto 0);
-    subtype cache_word_offset_type is std_logic_vector(cache_word_offset_width-1 downto 0);
-    subtype cache_valid_type is std_logic;
-    subtype cache_plruset_type is std_logic_vector(cache_plru_width-1 downto 0);
-    subtype cache_line_type is std_logic_vector(cache_line_width-1 downto 0);
-    subtype cache_way_type is integer range 0 to 2**cache_way_width-1;
-    subtype cache_valid_enable_type is std_logic_vector(2**cache_way_width-1 downto 0);
-    subtype cache_plru_enable_type is std_logic;
-    subtype cache_tag_enable_type is std_logic_vector(2**cache_way_width-1 downto 0);
-    subtype cache_block_enable_type is std_logic_vector(2**cache_way_width*2**cache_word_offset_width-1 downto 0);
-    type cache_tagset_type is array(0 to 2**cache_way_width-1) of cache_tag_type;
-    type cache_block_type is array(0 to 2**cache_word_offset_width-1) of word_type;
-    type cache_blockset_type is array(0 to 2**cache_way_width-1) of cache_block_type;
-    type cache_validset_type is array(0 to 2**cache_way_width-1) of cache_valid_type;
-    type cache_validsets_type is array(0 to 2**cache_index_width-1) of cache_validset_type;
-    type cache_plrusets_type is array(0 to 2**cache_index_width-1) of cache_plruset_type;
-    type cache_state_type is (cache_state_run,cache_state_mem);
-    signal cpu_pause_buff : std_logic := '0';
-    signal cpu_pause_buff_0 : std_logic := '0';
-    signal cpu_pause_delayed : boolean;
-    signal cpu_access_write : boolean;
-    signal cache_noncacheable : boolean;
-    signal cache_tag : cache_tag_type;
-    signal cache_index : cache_index_type;
-    signal cache_word_offset : cache_word_offset_type;
-    signal cache_in_tagset : cache_tagset_type := (others=>(others=>'0'));
-    signal cache_in_blockset : cache_blockset_type := (others=>(others=>(others=>'0')));
-    signal cache_in_validset : cache_validset_type := (others=>'0');
-    signal cache_in_plruset : cache_plruset_type := (others=>'0');
-    signal cache_out_tagset : cache_tagset_type := (others=>(others=>'0'));
-    signal cache_out_blockset : cache_blockset_type := (others=>(others=>(others=>'0')));
-    signal cache_out_validset : cache_validset_type := (others=>'0');
-    signal cache_out_plruset : cache_plruset_type := (others=>'0');
-    signal cache_out_valid_enable : cache_valid_enable_type := (others=>'0');
-    signal cache_out_plru_enable : cache_plru_enable_type := '0';
-    signal cache_validsets : cache_validsets_type := (others=>(others=>'0'));
-    signal cache_plrusets : cache_plrusets_type := (others=>(others=>'0'));
-    signal cache_hit : boolean;
-    signal cache_invalidate : boolean;
-    signal cache_invalidate_enable : boolean := False;
-    signal cache_flush : boolean;
-    signal cache_flush_enable : boolean := False;
-    signal cache_oper_tag : cache_tag_type := (others=>'0');
-    signal cache_oper_index : cache_index_type := (others=>'0');
-    signal cache_oper : boolean;
-    signal cache_way : cache_way_type;
-    signal cache_way_replace : cache_way_type;
-    signal cache_plruset_replace : cache_plruset_type;
-    signal cache_strobe_replace : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
-    signal cache_state : cache_state_type := cache_state_run;
-    signal mem_in_ready_buff : std_logic := '0';
-    signal mem_out_valid_buff : std_logic := '0';
-    signal mem_write_needed : boolean;
-    signal mem_read_needed : boolean;
-    signal mem_write_counter : integer range 0 to 2**cache_offset_width;
-    signal mem_read_counter : integer range 0 to 2**cache_offset_width;
-    signal mem_way_replace : cache_way_type;
-    signal mem_tag_replace : cache_tag_type;
+    
+    type block_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*cache_offset_width*8-1 downto 0);
+    type tag_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*tag_width-1 downto 0);
+    type valid_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width-1 downto 0);
+    type plru_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(plru_width-1 downto 0);
+    type memory_access_mode_type is (msm_read_block,msm_exchange_block,msm_write_word,msm_read_word);
+    
+    signal block_rows : block_rows_type := (others=>(others=>'0'));
+    signal tag_rows : tag_rows_type := (others=>(others=>'0'));
+    signal valid_rows : valid_rows_type := (others=>(others=>'0'));
+    signal plru_rows : plru_rows_type := (others=>(others=>'0'));
+    signal cpu_tag : std_logic_vector(tag_width-1 downto 0) := (others=>'0');
+    signal cpu_index : integer range 0 to 2**cache_index_width-1 := 0;
+    signal cpu_offset : integer range 0 to 2**cache_index_width-1 := 0;
+    signal cpu_way : integer range 0 to 2**cache_way_width-1 := 0;
+    signal cpu_hit : Boolean := False;
+    signal cpu_cacheable : Boolean := False;
+    signal replace_plru : std_logic_vector(plru_width-1 downto 0);
+    signal replace_way : integer range 0 to 2**cache_way_width-1 := 0;
+    signal replace_write_enables : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
+    signal replace_write_data : std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
+    signal memory_way : integer range 0 to 2**cache_way_width-1 := 0;
+    signal memory_access_needed : Boolean := False;
+    signal memory_access_mode : memory_access_mode_type := msm_read_block;
+    signal memory_write_counter : integer range 0 to 2**block_word_width-1 := 0;
+    signal memory_read_counter : integer range 0 to 2**block_word_width-1 := 0;
+    signal memory_write_enable_buff : std_logic := '0';
+    signal memory_read_enable_buff : std_logic := '0';
+    signal memory_write_valid_buff : std_logic := '0';
+    signal memory_read_ready_buff : std_logic := '0';
+    signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
 begin
-    -- Set CPU pause signal to stall CPU when necessary.
-    cpu_pause <= cpu_pause_buff;
-    -- Set input cache lineset based on current index.
-    cache_in_address <= cache_index;
-    -- Acquire cache look-up control information from CPU address.
-    cache_tag <= cpu_address(cache_address_width-1 downto cache_address_width-cache_tag_width);
-    cache_index <= cpu_address(cache_address_width-cache_tag_width-1 downto cache_offset_width);
-    cache_word_offset <= cpu_address(cache_offset_width-1 downto clogb2(cpu_data_width/8));
-    -- Set cache operation control signals.
-    cache_invalidate <= True when cpu_address=cache_invalidate_address else False;
-    cache_flush <= True when cpu_address=cache_flush_address else False;
-    cache_oper <= True when (cache_oper_tag=cache_tag and cache_oper_index=cache_index) and (cache_flush_enable or cache_invalidate_enable) else False;
-    -- Determine whether or not the memory access is cacheable.
-    cache_noncacheable <= not is_cacheable(cpu_address);
-    cache_cacheable <= '1' when is_cacheable(cpu_address) else '0';
-    -- Determine whether or not the memory access from the CPU is write or read.
-    cpu_access_write <= True when or_reduce(cpu_strobe)='1' else False;
-    -- Set main memory access control signals.
-    mem_in_enable <= '1' when mem_read_needed else '0';
-    mem_in_ready <= mem_in_ready_buff;
-    mem_out_enable <= '1' when mem_write_needed else '0';
-    mem_out_valid <= mem_out_valid_buff;
-    -- Validset storage.
-    cache_in_validset <= cache_validsets(to_integer(unsigned(cache_index)));
-    process (clock)
-        variable index : integer range 0 to 2**cache_index_width-1;
+
+    cpu_pause <= '1' when memory_access_needed else '0';
+    cpu_tag <= cpu_next_address(cache_cacheable_width-1 downto cache_offset_width+cache_index_width);
+    cpu_index <= to_integer(unsigned(cpu_next_address(cache_offset_width+cache_index_width-1 downto cache_offset_width)));
+    cpu_offset <= to_integer(unsigned(cpu_next_address(cache_offset_width-1 downto 0)));
+    cpu_cacheable <= True when or_reduce(cpu_next_address(cpu_address_width-1 downto cache_cacheable_width))='0' else False;
+    
+    memory_write_enable <= memory_write_enable_buff;
+    memory_write_valid <= memory_write_valid_buff;
+    memory_read_ready <= memory_read_ready_buff;
+    memory_read_enable <= memory_read_enable_buff;
+    
+    process(cpu_index,cpu_tag,tag_rows,valid_rows)
+        variable cpu_hit_buff : Boolean;
+        variable cpu_way_buff : integer range 0 to 2**cache_way_width-1 := 0;
+        variable tag_buff : std_logic_vector(tag_width-1 downto 0);
     begin
-        if rising_edge(clock) then
-            if resetn='0' then
-                cache_validsets <= (others=>(others=>'0'));
-            else
-                index := to_integer(unsigned(cache_index));
-                for each_way in 0 to 2**cache_way_width-1 loop
-                    if cache_out_valid_enable(each_way)='1' then
-                        cache_validsets(index)(each_way) <= cache_out_validset(each_way);
-                    end if;
-                end loop;
-            end if;
-        end if;
-    end process;
-    -- Get cache input.
-    process (cache_in_data)
-        variable cache_line : cache_line_type;
-        variable cache_block : cache_block_type;
-    begin
+        cpu_hit_buff := False;
+        cpu_way_buff := 0;
         for each_way in 0 to 2**cache_way_width-1 loop
-            cache_line := cache_in_data((1+each_way)*cache_line_width-1 downto each_way*cache_line_width);
-            cache_in_tagset(each_way) <= cache_line(cache_line_width-1 downto cache_line_width-cache_tag_width);
-            for each_word in 0 to 2**cache_word_offset_width-1 loop
-                cache_block(each_word) := cache_line((1+each_word)*cpu_data_width-1 downto each_word*cpu_data_width);
-            end loop;
-            cache_in_blockset(each_way) <= cache_block;
-        end loop;
-    end process;
-    -- Set cache output.
-    process (cache_out_tagset,cache_out_blockset)
-        variable cache_line : cache_line_type;
-        variable cache_block : cache_block_type;
-    begin
-        for each_way in 0 to 2**cache_way_width-1 loop
-            cache_line(cache_line_width-1 downto cache_line_width-cache_tag_width) := cache_out_tagset(each_way);
-            cache_block := cache_out_blockset(each_way);
-            for each_word in 0 to 2**cache_word_offset_width-1 loop
-                cache_line((1+each_word)*cpu_data_width-1 downto 
-                    each_word*cpu_data_width) := cache_block(each_word);
-            end loop;
-            cache_out_data((1+each_way)*cache_line_width-1 downto each_way*cache_line_width) <= cache_line;
-        end loop;
-    end process;
-    -- Determine cache hit and way.
-    process (cache_in_tagset,cache_in_validset,cache_tag)
-        variable hit : boolean;
-        variable way : cache_way_type;
-    begin
-        hit := False;
-        way := 0;
-        for each_way in 0 to 2**cache_way_width-1 loop
-            if cache_in_tagset(each_way)=cache_tag and cache_in_validset(each_way)='1' then
-                hit := True;
-                way := each_way;
+            tag_buff := tag_rows(cpu_index)((each_way+1)*tag_width-1 downto each_way*tag_width);
+            if tag_buff=cpu_tag and valid_rows(cpu_index)(each_way)='1' then
+                cpu_hit_buff := True;
+                cpu_way_buff := each_way;
+                exit;
             end if;
         end loop;
-        cache_hit <= hit;
-        cache_way <= way;
-    end process;
-    -- Replacement Strategy: Pseudo Least Recently Used.
-    gen_plru : 
-    if cache_replace_strat="plru" generate
-        -- Plru storage.
-        cache_in_plruset <= cache_plrusets(to_integer(unsigned(cache_index)));
-        process (clock)
-            variable index : integer range 0 to 2**cache_index_width-1;
-        begin
-            if rising_edge(clock) then
-                if resetn='0' then
-                    cache_plrusets <= (others=>(others=>'0'));
-                else
-                    if cache_out_plru_enable='1' then
-                        index := to_integer(unsigned(cache_index));
-                        cache_plrusets(index) <= cache_out_plruset;
-                    end if;
-                end if;
-            end if;
-        end process;
-        -- Pseudo Least Recently Used Implementation.
-        process (cache_in_plruset)
-            subtype int_type is integer range 0 to cache_plru_width;
-            variable plruset : cache_plruset_type;
+        cpu_hit <= cpu_hit_buff;
+        cpu_way <= cpu_way_buff;
+    end process; 
+    
+    generate_policy_plru:
+    if cache_policy= "plru" generate
+        process (plru_rows,cpu_index)
+            subtype int_type is integer range 0 to plru_width; 
+            variable plru_buff : std_logic_vector(plru_width-1 downto 0);   
             variable this_bit : int_type;
             variable left_bit : int_type;
             variable right_bit : int_type;
@@ -273,296 +135,195 @@ begin
             variable replace_bit : int_type;
         begin
             if cache_way_width/=0 then
-                plruset := cache_in_plruset;
+                plru_buff := plru_rows(cpu_index);
                 this_bit := 0;
                 row_width := 0;
                 for each_row in 1 to 2**cache_way_width/2-1 loop
                     row_width := row_width+1;
                     left_bit := row_width+this_bit;
                     right_bit := left_bit+1;
-                    if plruset(this_bit)='0' then
-                        plruset(this_bit) := '1';
+                    if plru_buff(this_bit)='0' then
+                        plru_buff(this_bit) := '1';
                         this_bit := left_bit;
                     else
-                        plruset(this_bit) := '0';
+                        plru_buff(this_bit) := '0';
                         this_bit := right_bit;
                     end if;
                 end loop;
                 replace_bit := this_bit-row_width;
                 left_bit := replace_bit*2;
                 right_bit := left_bit+1;
-                if plruset(this_bit)='0' then
-                    plruset(this_bit) := '1';
+                if plru_buff(this_bit)='0' then
+                    plru_buff(this_bit) := '1';
                     this_bit := left_bit;
                 else
-                    plruset(this_bit) := '0';
+                    plru_buff(this_bit) := '0';
                     this_bit := right_bit;
                 end if;
-                cache_way_replace <= this_bit;
-                cache_plruset_replace <= plruset;
-            else
-                cache_way_replace <= 0;
+                replace_way <= this_bit;
+                replace_plru <= plru_buff;
             end if;
         end process;
-    end generate;
-    -- Drive cache state machine.
+        process (clock)
+        begin
+            if rising_edge(clock) then
+                if resetn='0' then
+                    plru_rows <= (others=>(others=>'0'));
+                elsif not memory_access_needed and cpu_cacheable and not cpu_hit then
+                    plru_rows(cpu_index) <= replace_plru;
+                end if;
+            end if;
+        end process;
+    end generate 
+    generate_policy_plru;
+
     process (clock)
-        variable word_offset : integer range 0 to 2**cache_word_offset_width-1;
-        variable blockset : cache_blockset_type;
-        variable tagset : cache_tagset_type;
-        variable validset : cache_validset_type;
-        variable out_valid_enable : cache_valid_enable_type;
-        variable out_plru_enable : cache_plru_enable_type;
-        variable out_tag_enable : cache_tag_enable_type;
-        variable out_block_enable : cache_block_enable_type;
+        variable memory_write_handshake : Boolean;
+        variable memory_read_handshake : Boolean;
+        variable memory_access_block : Boolean;
     begin
         if rising_edge(clock) then
-            -- Reset control signals upon reset.
             if resetn='0' then
-                cache_out_valid_enable <= (others=>'0');
-                cache_out_plru_enable <= '0';
-                cache_out_tag_enable <= (others=>'0');
-                cache_out_block_enable <= (others=>'0');
-                cache_flush_enable <= False;
-                cache_invalidate_enable <= False;
-                cpu_pause_buff <= '0';
-                cpu_pause_delayed <= False;
-                cache_state <= cache_state_run;
+                memory_access_needed <= False;
+                memory_write_enable_buff <= '0';
+                memory_write_valid_buff <= '0';
+                memory_read_ready_buff <= '0';
+                memory_read_enable_buff <= '0';
             else
-                -- Ensure the default value of all the enables are zero.
-                out_valid_enable := (others=>'0');
-                out_plru_enable := '0';
-                out_tag_enable := (others=>'0');
-                out_block_enable := (others=>'0');
-                -- Main State Machine.
-                case cache_state is
-                when cache_state_run=>
-                    -- Check for the start of a cache operation.
-                    if cache_flush or cache_invalidate then
-                        -- Of course, the specified address must be a cacheable address. 
-                        if is_cacheable(cpu_in_data) then
-                            -- Set flag corresponding to the appropriate cache operation.
-                            if cache_flush then
-                                cache_flush_enable <= True;
-                            elsif cache_invalidate then
-                                cache_invalidate_enable <= True;
-                            end if;
-                            -- Store cache operation information.
-                            cache_oper_tag <= cpu_in_data(cache_address_width-1 downto cache_address_width-cache_tag_width);
-                            cache_oper_index <= cpu_in_data(cache_address_width-cache_tag_width-1 downto cache_offset_width);
-                        end if;
-                    -- Check for cache operation.
-                    elsif cache_oper then
-                        -- Check for hit and then check to see which operation is enabled.
-                        if cache_hit then
-                            -- Make sure the CPU is installed if the operation is started.
-                            cpu_pause_delayed <= True;
-                            cpu_pause_buff <= '1';
-                            -- If flush is enabled, check and see if the 
-                            -- requested tag and index are actually valid in the cache. If
-                            -- they are, flush cache line. 
-                            if cache_flush_enable then
-                                cache_state <= cache_state_mem;
-                                mem_way_replace <= cache_way;
-                                mem_write_needed <= True;
-                                mem_write_counter <= 1;
-                                mem_out_strobe <= (others=>'1');
-                                mem_out_data <= cache_in_blockset(cache_way)(0);
-                                mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
-                                mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
-                                    cache_in_tagset(cache_way) & cache_index;
-                                mem_out_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                            -- If invalidation is enabled, check and see if the 
-                            -- requested tag and index are actually valid in the cache. If
-                            -- they are, invalidate cache line. 
-                            elsif cache_invalidate_enable then
-                                out_valid_enable(cache_way_replace) := '1';
-                                cache_out_validset(cache_way_replace) <= '0';
-                            end if;
-                        end if;
-                        -- Make sure operation is disabled once started.
-                        cache_flush_enable <= False;
-                        cache_invalidate_enable <= False;
-                    -- Check for noncachebale memory access
-                    elsif cache_noncacheable then
-                        -- If the CPU is not already pauses, the current memory access
-                        -- must not have been serviced yet.
-                        if cpu_pause_buff='0' then
-                            -- Immediately stall the CPU.
-                            cpu_pause_buff <= '1';
-                            -- Switch the cache into memory access mode.
-                            cache_state <= cache_state_mem;
-                            -- Check to see if the cpu is requesting a write or read operation.
-                            -- If write, perform the following operations.
-                            if cpu_access_write then
-                                -- Enable the memory write interface for only a single word.
-                                mem_write_needed <= True;
-                                mem_write_counter <= 2**cache_word_offset_width;
-                                -- Set memory out control information.
-                                mem_out_strobe <= cpu_strobe;
-                                mem_out_address <= cpu_address;
-                                -- Set memory out data.
-                                mem_out_data <= cpu_in_data;
-                            -- If read, perform the following operations.
-                            else
-                                -- Enable the memory read interface for only a single word.
-                                mem_read_needed <= True;
-                                mem_read_counter <= 2**cache_word_offset_width-1;
-                                -- Set memory out control information.
-                                mem_in_address <= cpu_address;
-                                -- Force noop.
-                                cpu_out_data <= (others=>'0');
-                            end if;
-                        -- If the CPU is already paused, the direct memory access was
-                        -- already serviced. Return the cache back to its normal mode
-                        -- of operation.
-                        else
-                            cpu_pause_delayed <= True;
-                            cpu_pause_buff <= '0';
-                        end if;
-                    -- Check for cache hit
-                    elsif cache_hit then
-                         -- A delay before resuming CPU is needed
-                         -- for when data needs to be transferred to
-                         -- the CPU.
-                        if not cpu_pause_delayed then
-                            cpu_pause_delayed <= True;
-                        -- Once the delay passes, resume the CPU and ensure the
-                        -- buffer for the strobe is set to zero to prevent accidental reads.
-                        else
-                            cpu_pause_buff <= '0';
-                            cache_strobe_replace <= (others=>'0');
-                        end if;
-                        -- Acquire word offset.
-                        word_offset := to_integer(unsigned(cache_word_offset));
-                        -- Perform the write operation to cache from CPU. Only the specified bytes
-                        -- of the word are written into the cache.
+                if memory_access_needed then
+                
+                    memory_write_handshake := memory_write_valid_buff='1' and memory_write_ready='1';
+                    memory_read_handshake := memory_read_valid='1' and memory_read_ready_buff='1';
+                    memory_access_block := memory_access_mode=msm_read_block or memory_access_mode=msm_exchange_block;
+                
+                    if memory_write_handshake and 
+                            memory_access_mode=msm_exchange_block then
+                        memory_write_data <= 
+                            block_rows(memory_index)(memory_way*cache_offset_width+(memory_write_counter+1)*cpu_data_width-1 downto 
+                            memory_way*cache_offset_width+memory_write_counter*cpu_data_width);
+                    end if;
+                    if memory_read_handshake and memory_access_block then
+                        block_rows(memory_index)(memory_way*cache_offset_width+(memory_read_counter+1)*cpu_data_width-1 downto 
+                            memory_way*cache_offset_width+memory_read_counter*cpu_data_width) <=
+                            memory_read_data;
+                    end if;
+                    if memory_read_handshake and memory_access_mode=msm_read_word then
+                        cpu_read_data <= memory_read_data;
+                    end if;
+                    
+                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**cpu_data_width-1) or
+                            (memory_access_mode=msm_write_word and memory_write_counter/=1) then
+                        memory_write_enable_buff <= '1';
+                    else
+                        memory_write_enable_buff <= '0';
+                    end if;
+                    if (memory_access_block and memory_read_counter/=2**cpu_data_width-1) or
+                            (memory_access_mode=msm_read_word and memory_read_counter/=1) then
+                        memory_read_enable_buff <= '1';
+                    else
+                        memory_read_enable_buff <= '0';
+                    end if;
+                    
+                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**cpu_data_width-1) or 
+                            (memory_access_mode=msm_write_word and memory_write_counter/=1) then
+                        memory_write_valid_buff <= '1';
+                    else
+                        memory_write_valid_buff <= '0';
+                    end if;
+                    if ((memory_access_mode=msm_read_block or (memory_access_mode=msm_exchange_block and memory_read_counter/=memory_write_counter)) and memory_read_counter/=2**cpu_data_width-1) or
+                            (memory_access_mode=msm_read_word and memory_read_counter/=1) then
+                        memory_read_ready_buff <= '1';
+                    else
+                        memory_read_ready_buff <= '0';
+                    end if;
+                    
+                    if memory_access_mode=msm_exchange_block and
+                            memory_write_handshake and
+                            ((memory_access_block and memory_write_counter/=2**cpu_data_width-1) or
+                            (memory_access_mode=msm_write_word and memory_write_counter/=1)) then
+                        memory_write_counter <= memory_write_counter+1;
+                    end if;
+                    if (memory_access_mode=msm_read_block or (memory_access_mode=msm_exchange_block and memory_read_counter/=memory_write_counter)) and 
+                            memory_read_handshake and
+                            ((memory_access_block and memory_read_counter/=2**cpu_data_width-1) or
+                            (memory_access_mode=msm_read_word and memory_read_counter/=1))then
+                        memory_read_counter <= memory_read_counter+1;
+                    end if;
+                    
+                    if memory_access_block and memory_read_counter=2**cpu_data_width-1 then
                         for each_byte in 0 to cpu_data_width/8-1 loop
-                            if (cpu_pause_buff='0' and cpu_strobe(each_byte)='1') or 
-                                    (cpu_pause_buff='1' and cache_strobe_replace(each_byte)='1') then
-                                cache_out_address <= cache_index;
-                                out_block_enable(cache_way*2**cache_word_offset_width+word_offset) := '1';
-                                cache_out_blockset(cache_way)(word_offset)
-                                    (7+each_byte*8 downto each_byte*8) <=
-                                    cpu_in_data(7+each_byte*8 downto each_byte*8);
+                            if or_reduce(replace_write_enables)='1' then
+                                if replace_write_enables(each_byte)='1' then
+                                    block_rows(memory_index)(memory_way*cache_offset_width+(each_byte+1)*8-1 downto memory_way*cache_offset_width+each_byte*8) <=
+                                        replace_write_data(7+each_byte*8 downto 0+each_byte*8);
+                                end if;
+                            else
+                                cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
+                                    block_rows(memory_index)(memory_way*cache_offset_width+(each_byte+1)*8-1 downto memory_way*cache_offset_width+each_byte*8);
                             end if;
                         end loop;
-                        -- Perform read operation from cache to CPU.
-                        cpu_out_data <= cache_in_blockset(cache_way)(word_offset);
-                    -- If miss, begin line retrieval operation.
+                    end if;
+                    if memory_write_valid_buff='0' and memory_read_enable_buff='0' then
+                        memory_access_needed <= False;
+                    end if;
+                    
+                elsif not cpu_cacheable then
+                    memory_access_needed <= True;
+                    if or_reduce(cpu_write_enables)='1' then
+                        memory_access_mode <= msm_write_word;
+                        memory_write_address <= cpu_next_address;
+                        memory_write_enables <= cpu_write_enables;
+                        memory_write_data <= cpu_write_data;
+                        memory_write_counter <= 0;
                     else
-                        -- A delay is needed once the cache line retrieval operation is finished.
-                        cpu_pause_delayed <= False;
-                        -- Stall the CPU until cache line retrieval is completed.
-                        cpu_pause_buff <= '1';
-                        -- Store the strobe since it's needed for after the line retrieval operation is completed.
-                        cache_strobe_replace <= cpu_strobe;
-                        -- Switch the mode of the cache to memory access.
-                        cache_state <= cache_state_mem;
-                        -- Store which line and tag needs to be replaced at the current index of the cache.
-                        mem_way_replace <= cache_way_replace;
-                        mem_tag_replace <= cache_tag;
-                        -- Set memory read operation control signals for line retrieval operation.
-                        mem_read_needed <= True;
-                        mem_read_counter <= 0;
-                        mem_in_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
-                        mem_in_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width) 
-                            <= cache_tag & cache_index;
-                        mem_in_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                        -- If a valid line already exists at the chosen replacement line, the contents must be written back
-                        -- to main memory.
-                        if cache_in_validset(cache_way_replace)='1' then
-                            -- Set memory write operation control signals for line retrieval operation.
-                            mem_write_needed <= True;
-                            mem_write_counter <= 0;
-                            mem_out_strobe <= (others=>'1');
-                            mem_out_address(cpu_address_width-1 downto cache_address_width) <= (others=>'0');
-                            mem_out_address(cache_address_width-1 downto cache_address_width-cache_tag_width-cache_index_width)  <= 
-                                cache_in_tagset(cache_way_replace) & cache_index;
-                            mem_out_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                        end if;
+                        memory_access_mode <= msm_read_word;
+                        memory_read_address <= cpu_next_address;
+                        memory_read_counter <= 0;
                     end if;
-                when cache_state_mem=>
-                    -- Memory write block.
-                    if mem_write_needed then
-                        if mem_out_valid_buff='1' and mem_out_ready='1' then 
-                            if mem_write_counter/=2**cache_word_offset_width then
-                                if not cache_noncacheable then
-                                    mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
-                                end if;
-                                mem_write_counter <= mem_write_counter+1;
-                            else
-                                mem_write_needed <= False;
-                                mem_out_valid_buff <= '0';
+                    
+                elsif cpu_hit then
+                    for each_byte in 0 to cpu_data_width/8-1 loop
+                        if or_reduce(cpu_write_enables)='1' then
+                            if cpu_write_enables(each_byte)='1' then
+                                block_rows(cpu_index)(cpu_way*cache_offset_width+(each_byte+1)*8-1 downto cpu_way*cache_offset_width+each_byte*8) <=
+                                    cpu_write_data(7+each_byte*8 downto 0+each_byte*8);
                             end if;
                         else
-                            if mem_write_counter=0 then
-                                mem_out_data <= cache_in_blockset(mem_way_replace)(mem_write_counter);
-                                mem_write_counter <= mem_write_counter+1;
-                            end if;
-                            mem_out_valid_buff <= '1';
+                            cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
+                                block_rows(cpu_index)(cpu_way*cache_offset_width+(each_byte+1)*8-1 downto cpu_way*cache_offset_width+each_byte*8);
                         end if;
-                    end if;   
-                    -- Memory read block.
-                    if mem_read_needed then
-                        -- Perform read operation on handshake.
-                        if mem_in_valid='1' and mem_in_ready_buff='1' then
-                            -- If the memory access was cacheable, store the data in cache.
-                            if not cache_noncacheable then
-                                -- Set the corresponding control information.
-                                cache_out_address <= cache_index;
-                                out_block_enable(mem_way_replace*2**cache_word_offset_width+mem_read_counter) := '1';
-                                -- Store the newly acquired word.
-                                cache_out_blockset(mem_way_replace)(mem_read_counter) <= mem_in_data;
-                            -- If a nonecacheable memory access was performed, write directly to CPU.
-                            else
-                                cpu_out_data <= mem_in_data;
-                            end if;
-                            -- On completion, shut down read operation.
-                            if mem_read_counter=2**cache_word_offset_width-1 then
-                                mem_read_needed <= False;
-                                -- If the memory access was cacheable, store the control information.
-                                if not cache_noncacheable then
-                                    -- Set tag and valid flag.
-                                    out_valid_enable(mem_way_replace) := '1';
-                                    out_tag_enable(mem_way_replace) := '1';
-                                    if cache_replace_strat="plru" then
-                                        out_plru_enable := '1';
-                                        cache_out_plruset <= cache_plruset_replace;
-                                    end if;
-                                    cache_out_validset(mem_way_replace) <= '1';
-                                    cache_out_tagset(mem_way_replace) <= mem_tag_replace;
-                                end if;
-                            -- Continue to increment counter until completion.
-                            else
-                                mem_read_counter <= mem_read_counter+1;
-                            end if;
-                        end if;
-                        -- The ready signal should be set to low once the read operation is finished.
-                        if mem_in_valid='1' and mem_in_ready_buff='1' and mem_read_counter=2**cache_word_offset_width-1 then
-                            mem_in_ready_buff <= '0';
-                        -- If memory write is needed, then write operation should always precede
-                        -- the read operation.
-                        elsif mem_write_needed and mem_write_counter/=mem_read_counter then
-                            mem_in_ready_buff <= '0';
-                        -- By default, the ready signal should always be high, signaling the memory input data
-                        -- is ready to accept more data.
-                        else
-                            mem_in_ready_buff <= '1';
-                        end if;
+                    end loop;
+                    
+                else
+                    memory_access_needed <= True;
+                    memory_way <= replace_way;
+                    replace_write_enables <= cpu_write_enables;
+                    replace_write_data <= cpu_write_data;
+                    tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) <= cpu_tag;
+                    memory_index <= cpu_index;
+                    if valid_rows(cpu_index)(replace_way)='1' then
+                        memory_access_mode <= msm_exchange_block;
+                        memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                            tag_rows(cpu_index)((1+replace_way)*tag_width-1 downto replace_way*tag_width) & 
+                            std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                        memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                        memory_write_counter <= 0;
+                        memory_write_enables <= (others=>'1');
+                        memory_write_data <= 
+                            block_rows(cpu_index)(replace_way*cache_offset_width+cpu_data_width-1 downto 
+                            replace_way*cache_offset_width);
+                    else
+                        valid_rows(cpu_index)(replace_way) <='1';
+                        memory_access_mode <= msm_read_block;
                     end if;
-                    -- If both operations are finished, return cache back to 
-                    -- its original state.
-                    if not mem_write_needed and not mem_read_needed then
-                        cache_state <= cache_state_run;
-                    end if;
-                end case;
-                -- Set enable values.
-                cache_out_valid_enable <= out_valid_enable;
-                cache_out_plru_enable <= out_plru_enable;
-                cache_out_tag_enable <= out_tag_enable;
-                cache_out_block_enable <= out_block_enable;
+                    memory_read_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                        cpu_tag & std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                    memory_read_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                    memory_read_counter <= 0;
+                end if;
             end if;
         end if;
     end process;
+    
+
 end Behavioral;
