@@ -264,12 +264,12 @@ architecture Behavioral of plasoc_cpu is
     signal mem_out_valid : std_logic;
     signal mem_out_ready : std_logic;
     -- Attributes.
-    attribute keep : boolean;
-    attribute keep of cpu_write_data : signal is true;
-    attribute keep of cpu_read_data : signal is true;
-    attribute keep of cpu_address_next : signal is true;
-    attribute keep of cpu_strobe_next : signal is true;
-    attribute keep of cpu_pause : signal is true;
+--    attribute keep : boolean;
+--    attribute keep of cpu_write_data : signal is true;
+--    attribute keep of cpu_read_data : signal is true;
+--    attribute keep of cpu_address_next : signal is true;
+--    attribute keep of cpu_strobe_next : signal is true;
+--    attribute keep of cpu_pause : signal is true;
     
     -- debug
 --    signal debug_pxPortInitialiseStack : Boolean;

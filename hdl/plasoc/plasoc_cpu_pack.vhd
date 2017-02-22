@@ -19,7 +19,7 @@ package plasoc_cpu_pack is
     constant default_cache_offset_width : integer := 5;									--! Line Size (bytes) = 2^default_cache_offset_width.
     constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
     constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
-    constant default_cache_enable : boolean := False;									--! Defines whether or not the cache is enabled by default. 	
+    constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
     
     -- AXI4-Full error constants.
     constant error_axi_read_exokay : integer := 0;

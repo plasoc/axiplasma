@@ -94,6 +94,28 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal memory_write_valid_buff : std_logic := '0';
     signal memory_read_ready_buff : std_logic := '0';
     signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
+    
+    attribute keep : boolean;
+    attribute keep of cpu_write_data : signal is true;
+    attribute keep of cpu_write_enables : signal is true;
+    attribute keep of cpu_read_data : signal is true;
+    
+    attribute keep of cpu_tag : signal is true;
+    attribute keep of cpu_index : signal is true;
+    attribute keep of cpu_offset : signal is true;
+    attribute keep of cpu_way : signal is true;
+--    attribute keep of memory_write_enable : signal is true;
+--    attribute keep of memory_write_enables : signal is true;
+--    attribute keep of memory_write_valid : signal is true;
+--    attribute keep of memory_write_ready : signal is true;
+--    attribute keep of memory_read_address : signal is true;
+--    attribute keep of memory_read_enable : signal is true;
+--    attribute keep of memory_read_data : signal is true;
+--    attribute keep of memory_read_valid : signal is true;
+--    attribute keep of memory_read_ready : signal is true;
+--    attribute keep of memory_cacheable : signal is true;
+    
+
 begin
 
     cpu_pause <= cpu_pause_buff;
