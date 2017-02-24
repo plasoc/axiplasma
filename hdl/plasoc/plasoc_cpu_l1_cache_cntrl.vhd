@@ -47,7 +47,6 @@ end plasoc_cpu_l1_cache_cntrl;
 architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
 
     constant tag_width : integer := cache_cacheable_width-cache_index_width-cache_offset_width;
-    constant block_col_width : integer := tag_width+cache_offset_width;
     constant block_word_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
     
     function plru_width return integer is
@@ -82,7 +81,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal replace_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal replace_write_enables : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
     signal replace_write_data : std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-    signal replace_offset : integer range 0 to 2**cache_index_width-1 := 0;
+    signal replace_offset : integer range 0 to 2**cache_offset_width-1 := 0;
     signal memory_prepared : Boolean := False;
     signal memory_way : integer range 0 to 2**cache_way_width-1 := 0;
     signal memory_access_needed : Boolean := False;
@@ -95,27 +94,15 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal memory_read_ready_buff : std_logic := '0';
     signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
     
-    attribute keep : boolean;
-    attribute keep of cpu_next_address : signal is true;
-    attribute keep of cpu_write_data : signal is true;
-    attribute keep of cpu_write_enables : signal is true;
-    attribute keep of cpu_read_data : signal is true;
-    attribute keep of cpu_tag : signal is true;
-    attribute keep of cpu_index : signal is true;
-    attribute keep of cpu_offset : signal is true;
-    attribute keep of cpu_way : signal is true;
---    attribute keep of memory_write_enable : signal is true;
---    attribute keep of memory_write_enables : signal is true;
---    attribute keep of memory_write_valid : signal is true;
---    attribute keep of memory_write_ready : signal is true;
---    attribute keep of memory_read_address : signal is true;
---    attribute keep of memory_read_enable : signal is true;
---    attribute keep of memory_read_data : signal is true;
---    attribute keep of memory_read_valid : signal is true;
---    attribute keep of memory_read_ready : signal is true;
---    attribute keep of memory_cacheable : signal is true;
-    
-
+--    attribute keep : boolean;
+--    attribute keep of cpu_next_address : signal is true;
+--    attribute keep of cpu_write_data : signal is true;
+--    attribute keep of cpu_write_enables : signal is true;
+--    attribute keep of cpu_read_data : signal is true;
+--    attribute keep of cpu_tag : signal is true;
+--    attribute keep of cpu_index : signal is true;
+--    attribute keep of cpu_offset : signal is true;
+--    attribute keep of cpu_way : signal is true;
 begin
 
     cpu_pause <= cpu_pause_buff;

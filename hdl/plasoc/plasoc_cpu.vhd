@@ -270,6 +270,18 @@ architecture Behavioral of plasoc_cpu is
 --    attribute keep of cpu_address_next : signal is true;
 --    attribute keep of cpu_strobe_next : signal is true;
 --    attribute keep of cpu_pause : signal is true;
+--    attribute keep of cache_cacheable : signal is true;
+--    attribute keep of mem_in_address : signal is true;
+--    attribute keep of mem_in_data : signal is true;
+--    attribute keep of mem_in_enable : signal is true;
+--    attribute keep of mem_in_valid : signal is true;
+--    attribute keep of mem_in_ready : signal is true;
+--    attribute keep of mem_out_address : signal is true;
+--    attribute keep of mem_out_data : signal is true;
+--    attribute keep of mem_out_strobe : signal is true;
+--    attribute keep of mem_out_enable : signal is true;
+--    attribute keep of mem_out_valid : signal is true;
+--    attribute keep of mem_out_ready : signal is true;
     
     -- debug
 --    signal debug_pxPortInitialiseStack : Boolean;

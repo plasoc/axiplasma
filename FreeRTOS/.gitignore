@@ -1,8 +1,0 @@
-.project
-*.s
-*.o
-*.bin
-*.hex
-*.axf
-*.lst
-*.map
