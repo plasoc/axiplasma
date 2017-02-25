@@ -292,9 +292,9 @@ architecture Behavioral of plasoc_cpu is
 begin
 --    debug_pxPortInitialiseStack <= True when X"000002c0"=cpu_address_next else False;
 --    debug_FreeRTOS_AsmInterruptInit <= True when X"000003e0"=cpu_address_next else False;
-    debug_task_input_code <= True when X"00000664"<=cpu_address_next and X"000006a0">cpu_address_next else False;
-    debug_task_time_code <= True when X"000006a0"<=cpu_address_next and X"000006dc">cpu_address_next else False;
-    debug_task_main_code <= True when X"000006dc"<=cpu_address_next and X"000007f8">cpu_address_next else False; 
+    debug_task_input_code <= True when X"0000065c"<=cpu_address_next and X"00000698">cpu_address_next else False;
+    debug_task_time_code <= True when X"00000698"<=cpu_address_next and X"000006d4">cpu_address_next else False;
+    debug_task_main_code <= True when X"000006d4"<=cpu_address_next and X"000007f0">cpu_address_next else False; 
     debug_pxCurrentTCB <= True when X"0000465c"=cpu_address_next else False;
     debug_write <= True when X"000054ec"=cpu_write_data else False;
 

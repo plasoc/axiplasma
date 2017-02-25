@@ -11,7 +11,7 @@
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
-#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
+#define PLASOC_TIMER_MILLISECOND_CYCLES		(10000)	// Inentionally set to a low number for debugging purposes.
 
 #define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
@@ -19,7 +19,7 @@
 
 #define GPIO_AMOUNT				(16)
 #define TICK_THRESHOLD				(25)
-#define TIMER_THRESHOLD				(1)
+#define TIMER_THRESHOLD				(4)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
 
@@ -42,14 +42,17 @@ void FreeRTOS_TickISR()
 
 extern void FreeRTOS_UserISR() 
 { 
+	extern void *pxCurrentTCB;
 	plasoc_int_service_interrupts(&int_obj); 
 
 	/* The yieldfromisr_flag flag is defined in portmacro. This flag is needed
 	 to force context switches from system and interrupt calls. */
 	if (FreeRTOS_Yield)
 	{
+		plasoc_gpio_set_data_out(&gpio_obj,(unsigned)pxCurrentTCB); // Print out address of current TCB for debugging purposes.
 		FreeRTOS_Yield = 0;
 		vTaskSwitchContext();
+		plasoc_gpio_set_data_out(&gpio_obj,(unsigned)pxCurrentTCB); // Print out address of current TCB for debugging purposes.
 	}
 }
 

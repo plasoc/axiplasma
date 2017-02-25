@@ -46,7 +46,7 @@ typedef unsigned TickType_t;
 #define portENTER_CRITICAL()		{vTaskEnterCritical();}
 #define portEXIT_CRITICAL()		{vTaskExitCritical();}
 #define portYIELD()			{FreeRTOS_Yield=1; OS_Syscall();}
-#define portYIELD_FROM_ISR(x)		{if ((x)==pdTRUE) FreeRTOS_Yield=1;}
+#define portYIELD_FROM_ISR(x)		{if ((x)!=pdFALSE) FreeRTOS_Yield=1;}
 
 #define portDISABLE_INTERRUPTS()	{FreeRTOS_DisableInterrupts();}
 #define portENABLE_INTERRUPTS()		{FreeRTOS_EnableInterrupts();}	

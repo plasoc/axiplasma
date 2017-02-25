@@ -18,8 +18,13 @@ FreeRTOS_TickISR:
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
 	jal	xTaskIncrementTick
-	li	$3,1			# 0x1
-	bne	$2,$3,$L2
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L2
+	li	$2,1			# 0x1
+	.set	macro
+	.set	reorder
+
 	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
 $L2:
 	lw	$31,20($sp)
@@ -60,10 +65,16 @@ gpio_isr:
 	.set	reorder
 
 	lw	$2,16($sp)
-	li	$3,1			# 0x1
-	bne	$2,$3,$L4
+	#nop
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L7
+	li	$2,1			# 0x1
+	.set	macro
+	.set	reorder
+
 	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
-$L4:
+$L7:
 	lw	$31,28($sp)
 	#nop
 	.set	noreorder
@@ -90,7 +101,7 @@ task_input_code:
 	addiu	$sp,$sp,-32
 	sw	$31,28($sp)
 	li	$5,-1			# 0xffffffffffffffff
-$L10:
+$L16:
 	jal	ulTaskNotifyTake
 	li	$4,1			# 0x1
 
@@ -103,7 +114,7 @@ $L10:
 	jal	xQueueGenericSend
 	sw	$2,16($sp)
 
-	b	$L10
+	b	$L16
 	li	$5,-1			# 0xffffffffffffffff
 
 	.set	macro
@@ -129,9 +140,9 @@ task_time_code:
 
 	sw	$2,16($sp)
 	addiu	$4,$sp,16
-$L14:
+$L20:
 	jal	vTaskDelayUntil
-	li	$5,1			# 0x1
+	li	$5,4			# 0x4
 
 	lw	$4,%gp_rel(sem_time_obj)($28)
 	move	$7,$0
@@ -139,7 +150,7 @@ $L14:
 	jal	xQueueGenericSend
 	move	$5,$0
 
-	b	$L14
+	b	$L20
 	addiu	$4,$sp,16
 
 	.set	macro
@@ -169,14 +180,14 @@ task_main_code:
 	move	$19,$0
 	li	$18,1			# 0x1
 	addiu	$17,$17,%lo(ticks_ary)
-$L25:
+$L31:
 	lw	$4,%gp_rel(queue_input_obj)($28)
 	move	$7,$0
 	move	$6,$0
 	jal	xQueueGenericReceive
 	addiu	$5,$sp,16
 
-	bne	$2,$18,$L16
+	bne	$2,$18,$L22
 	move	$2,$0
 
 	lw	$19,16($sp)
@@ -184,72 +195,72 @@ $L25:
 	nor	$5,$0,$19
 	li	$4,16			# 0x10
 	sll	$3,$18,$2
-$L33:
+$L39:
 	and	$3,$3,$5
-	beq	$3,$0,$L17
+	beq	$3,$0,$L23
 	sll	$3,$2,2
 
 	addu	$3,$3,$17
 	sw	$0,0($3)
-$L17:
+$L23:
 	addiu	$2,$2,1
-	bne	$2,$4,$L33
+	bne	$2,$4,$L39
 	sll	$3,$18,$2
 
-$L16:
+$L22:
 	lw	$4,%gp_rel(sem_time_obj)($28)
 	move	$7,$0
 	move	$6,$0
 	jal	xQueueGenericReceive
 	move	$5,$0
 
-	bne	$2,$18,$L25
+	bne	$2,$18,$L31
 	move	$4,$0
 
 	li	$6,24			# 0x18
 	li	$5,16			# 0x10
 	sll	$2,$18,$4
-$L34:
+$L40:
 	and	$3,$19,$2
-	beq	$3,$0,$L20
+	beq	$3,$0,$L26
 	sll	$3,$4,2
 
 	addu	$3,$3,$17
 	lw	$7,0($3)
 	nop
-	bne	$7,$6,$L21
+	bne	$7,$6,$L27
 	nop
 
 	sw	$0,0($3)
 	and	$3,$2,$16
-	beq	$3,$0,$L22
+	beq	$3,$0,$L28
 	nop
 
-$L20:
+$L26:
 	nor	$2,$0,$2
-	b	$L23
+	b	$L29
 	and	$16,$16,$2
 
-$L22:
+$L28:
 	or	$16,$16,$2
-$L23:
+$L29:
 	addiu	$4,$4,1
-$L32:
-	bne	$4,$5,$L34
+$L38:
+	bne	$4,$5,$L40
 	sll	$2,$18,$4
 
 	lw	$2,%gp_rel(gpio_obj)($28)
 	nop
 	sw	$16,8($2)
-	b	$L25
+	b	$L31
 	nop
 
-$L21:
+$L27:
 	lw	$2,0($3)
 	nop
 	addiu	$2,$2,1
 	sw	$2,0($3)
-	b	$L32
+	b	$L38
 	addiu	$4,$4,1
 
 	.set	macro
@@ -279,24 +290,35 @@ FreeRTOS_UserISR:
 	move	$16,$3
 	addiu	$17,$17,%lo(int_obj+4)
 	sltu	$3,$2,8
-$L40:
-	bne	$3,$0,$L37
+$L49:
+	bne	$3,$0,$L43
 	sll	$2,$2,3
 
 	lw	$2,%gp_rel(FreeRTOS_Yield)($28)
 	nop
-	beq	$2,$0,$L35
+	beq	$2,$0,$L41
 	nop
 
+	lw	$2,%gp_rel(gpio_obj)($28)
+	lw	$3,%gp_rel(pxCurrentTCB)($28)
+	nop
+	sw	$3,8($2)
+	sw	$0,%gp_rel(FreeRTOS_Yield)($28)
+	jal	vTaskSwitchContext
+	nop
+
+	lw	$2,%gp_rel(gpio_obj)($28)
+	lw	$3,%gp_rel(pxCurrentTCB)($28)
+	nop
+	sw	$3,8($2)
+$L41:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
+	jr	$31
 	addiu	$sp,$sp,32
-	sw	$0,%gp_rel(FreeRTOS_Yield)($28)
-	j	vTaskSwitchContext
-	nop
 
-$L37:
+$L43:
 	addu	$2,$17,$2
 	lw	$3,0($2)
 	lw	$4,4($2)
@@ -306,15 +328,8 @@ $L37:
 	lw	$2,%lo(int_obj)($16)
 	nop
 	lw	$2,4($2)
-	b	$L40
+	b	$L49
 	sltu	$3,$2,8
-
-$L35:
-	lw	$31,28($sp)
-	lw	$17,24($sp)
-	lw	$16,20($sp)
-	jr	$31
-	addiu	$sp,$sp,32
 
 	.set	macro
 	.set	reorder
@@ -369,8 +384,8 @@ vAssertCalled:
 	lw	$2,%gp_rel(gpio_obj)($28)
 	nop
 	sw	$5,8($2)
-$L44:
-	b	$L44
+$L53:
+	b	$L53
 	nop
 
 	.set	macro
@@ -418,11 +433,11 @@ main:
 	lui	$2,%hi(int_obj+4)
 	addiu	$2,$2,%lo(int_obj+4)
 	addiu	$3,$3,%lo(int_obj+68)
-$L46:
+$L55:
 	addiu	$2,$2,8
 	.set	noreorder
 	.set	nomacro
-	bne	$2,$3,$L46
+	bne	$2,$3,$L55
 	sw	$0,-8($2)
 	.set	macro
 	.set	reorder
@@ -433,7 +448,7 @@ $L46:
 	addiu	$3,$3,%lo(gpio_isr)
 	addiu	$2,$16,%lo(int_obj)
 	sw	$3,12($2)
-	li	$4,50000			# 0xc350
+	li	$4,10000			# 0x2710
 	li	$3,1151401984			# 0x44a10000
 	sw	$3,%gp_rel(timer_obj)($28)
 	sw	$0,16($2)
@@ -463,17 +478,17 @@ $L46:
 
 	.set	noreorder
 	.set	nomacro
-	bne	$2,$0,$L47
+	bne	$2,$0,$L56
 	sw	$2,%gp_rel(queue_input_obj)($28)
 	.set	macro
 	.set	reorder
 
 	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,174			# 0xae
+	li	$3,177			# 0xb1
 	sw	$3,8($2)
-$L48:
-	b	$L48
-$L47:
+$L57:
+	b	$L57
+$L56:
 	move	$5,$0
 	.set	noreorder
 	.set	nomacro
@@ -484,17 +499,17 @@ $L47:
 
 	.set	noreorder
 	.set	nomacro
-	bne	$2,$0,$L49
+	bne	$2,$0,$L58
 	sw	$2,%gp_rel(sem_time_obj)($28)
 	.set	macro
 	.set	reorder
 
 	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,176			# 0xb0
+	li	$3,179			# 0xb3
 	sw	$3,8($2)
-$L50:
-	b	$L50
-$L49:
+$L59:
+	b	$L59
+$L58:
 	li	$17,3			# 0x3
 	lui	$5,%hi($LC0)
 	lui	$4,%hi(task_main_code)
@@ -514,17 +529,17 @@ $L49:
 	li	$2,1			# 0x1
 	.set	noreorder
 	.set	nomacro
-	beq	$19,$2,$L51
-	li	$3,178			# 0xb2
+	beq	$19,$2,$L60
+	li	$3,181			# 0xb5
 	.set	macro
 	.set	reorder
 
 	lw	$2,%gp_rel(gpio_obj)($28)
 	#nop
 	sw	$3,8($2)
-$L52:
-	b	$L52
-$L51:
+$L61:
+	b	$L61
+$L60:
 	addiu	$2,$28,%gp_rel(task_input_obj)
 	lui	$5,%hi($LC1)
 	lui	$4,%hi(task_input_code)
@@ -542,17 +557,17 @@ $L51:
 
 	.set	noreorder
 	.set	nomacro
-	beq	$2,$19,$L53
+	beq	$2,$19,$L62
 	move	$18,$2
 	.set	macro
 	.set	reorder
 
 	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,180			# 0xb4
+	li	$3,183			# 0xb7
 	sw	$3,8($2)
-$L54:
-	b	$L54
-$L53:
+$L63:
+	b	$L63
+$L62:
 	lui	$5,%hi($LC2)
 	lui	$4,%hi(task_time_code)
 	sw	$0,20($sp)
@@ -569,17 +584,17 @@ $L53:
 
 	.set	noreorder
 	.set	nomacro
-	beq	$2,$18,$L55
-	li	$3,182			# 0xb6
+	beq	$2,$18,$L64
+	li	$3,185			# 0xb9
 	.set	macro
 	.set	reorder
 
 	lw	$2,%gp_rel(gpio_obj)($28)
 	#nop
 	sw	$3,8($2)
-$L56:
-	b	$L56
-$L55:
+$L65:
+	b	$L65
+$L64:
 	lw	$3,%lo(int_obj)($16)
 	li	$4,255			# 0xff
 	sw	$4,0($3)
@@ -591,10 +606,10 @@ $L55:
 	sw	$2,0($3)
 	jal	vTaskStartScheduler
 	lw	$2,%gp_rel(gpio_obj)($28)
-	li	$3,194			# 0xc2
+	li	$3,197			# 0xc5
 	sw	$3,8($2)
-$L57:
-	b	$L57
+$L66:
+	b	$L66
 	.end	main
 	.size	main, .-main
 
