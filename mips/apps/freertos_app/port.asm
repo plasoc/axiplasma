@@ -76,7 +76,7 @@ vPortEndScheduler:
 	.set	noreorder
 	.set	nomacro
 	lui	$4,%hi($LC0)
-	li	$5,110			# 0x6e
+	li	$5,112			# 0x70
 	j	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
@@ -84,4 +84,11 @@ vPortEndScheduler:
 	.set	reorder
 	.end	vPortEndScheduler
 	.size	vPortEndScheduler, .-vPortEndScheduler
+	.globl	FreeRTOS_Yield
+	.section	.sbss,"aw",@nobits
+	.align	2
+	.type	FreeRTOS_Yield, @object
+	.size	FreeRTOS_Yield, 4
+FreeRTOS_Yield:
+	.space	4
 	.ident	"GCC: (GNU) 6.3.0"

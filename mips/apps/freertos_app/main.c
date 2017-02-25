@@ -19,7 +19,7 @@
 
 #define GPIO_AMOUNT				(16)
 #define TICK_THRESHOLD				(25)
-#define TIMER_THRESHOLD				(20)
+#define TIMER_THRESHOLD				(1)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
 
@@ -30,39 +30,46 @@ QueueHandle_t queue_input_obj;
 SemaphoreHandle_t sem_time_obj;
 TaskHandle_t task_input_obj;
 volatile unsigned ticks_ary[GPIO_AMOUNT];
-volatile unsigned yieldfromisr_flag = 0;
 
 /* This ISR is necessary to ensure FreeRTOS runs in preemptive mode with
   time slices. */
 void FreeRTOS_TickISR()
 {
-	if ((xTaskIncrementTick()!=pdFALSE)||(yieldfromisr_flag))
+	portYIELD_FROM_ISR(xTaskIncrementTick());
+	plasoc_timer_reload_start(&timer_obj,1);
+}
+
+
+extern void FreeRTOS_UserISR() 
+{ 
+	plasoc_int_service_interrupts(&int_obj); 
+
+	/* The yieldfromisr_flag flag is defined in portmacro. This flag is needed
+	 to force context switches from system and interrupt calls. */
+	if (FreeRTOS_Yield)
 	{
-		yieldfromisr_flag = 0;
+		FreeRTOS_Yield = 0;
 		vTaskSwitchContext();
 	}
-	plasoc_timer_reload_start(&timer_obj,1);
 }
 
 /* So, I think it's best not to let FreeRTOS have control over the CPU's interrupt
   due to the fact the ISR already has the job of enabling the CPU's int. */
-extern void FreeRTOS_UserISR() { plasoc_int_service_interrupts(&int_obj); }
 extern void FreeRTOS_EnableInterrupts() { plasoc_int_enable_all(&int_obj); }
 extern void FreeRTOS_DisableInterrupts() { plasoc_int_disable_all(&int_obj); }
 
 extern void vAssertCalled(const char* str, int val)
 {
-	if (val==0)
-	{
-		plasoc_gpio_set_data_out(&gpio_obj,0xffff);
-		while (1);
-	}
+	plasoc_gpio_set_data_out(&gpio_obj,(unsigned)val);
+	while (1);
 }
 
 void gpio_isr(void* ptr)
 {
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 	plasoc_gpio_enable_int(&gpio_obj,1);
-	vTaskNotifyGiveFromISR(task_input_obj,&yieldfromisr_flag);
+	vTaskNotifyGiveFromISR(task_input_obj,&xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 void task_input_code()
@@ -158,7 +165,7 @@ int main()
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,FreeRTOS_TickISR,0);
 
 	/* Clear timer values. */
-	memset(ticks_ary,0,sizeof(ticks_ary));
+	memset((void*)ticks_ary,0,sizeof(ticks_ary));
 
 	/* Create FreeRTOS objects tasks. */
 	{
@@ -169,18 +176,22 @@ int main()
 		configASSERT(sem_time_obj!=0);
 		xReturned = xTaskCreate(task_main_code,"main",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,5,&task_input_obj);
+		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,3,&task_input_obj);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,5,0);
+		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT(xReturned==pdPASS);
 	}
 
 	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */
+	plasoc_int_enable_all(&int_obj);
 	plasoc_timer_reload_start(&timer_obj,0);
 	plasoc_gpio_enable_int(&gpio_obj,0);
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
+
+	/* This point should never be reached. */
+	configASSERT(0);
 	return 0;
 }
 

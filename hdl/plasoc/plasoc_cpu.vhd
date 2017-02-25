@@ -284,32 +284,20 @@ architecture Behavioral of plasoc_cpu is
 --    attribute keep of mem_out_ready : signal is true;
     
     -- debug
---    signal debug_pxPortInitialiseStack : Boolean;
---    signal debug_FreeRTOS_AsmInterruptInit : Boolean;
---    signal debug_vPortStartFirstTask: Boolean;
---    signal debug_pxCurrentTCB : Boolean;
---    signal debug_interrupt_service_routine : Boolean;
---    signal debug_taskmain : Boolean;
---    signal debug_FreeRTOS_ISR : Boolean;
---    signal debug_OS_Syscall : Boolean; 
---    signal debug_input_value : Boolean;     
---    signal debug_reset_occurred : Boolean;   
---    signal debug_timer_obj : Boolean;   
---    signal debug_gpio_base_address : Boolean;       
+    signal debug_task_main_code : Boolean;
+    signal debug_task_input_code : Boolean;
+    signal debug_task_time_code : Boolean;  
+    signal debug_pxCurrentTCB : Boolean;   
+    signal debug_write : Boolean;
 begin
 --    debug_pxPortInitialiseStack <= True when X"000002c0"=cpu_address_next else False;
 --    debug_FreeRTOS_AsmInterruptInit <= True when X"000003e0"=cpu_address_next else False;
---    debug_vPortStartFirstTask <= True when X"0000041c"=cpu_address_next else False;
---    debug_taskmain <= True when X"000004c4"=cpu_address_next else False;
---    debug_interrupt_service_routine <= True when X"0000003c"=cpu_address_next else False;
---    debug_FreeRTOS_ISR <= True when X"000002d0"=cpu_address_next else False;
---    debug_OS_Syscall <= True when X"000001e4"=cpu_address_next else False;
---    debug_input_value <= True when X"00004e34"=cpu_address_next else False;
---    debug_pxCurrentTCB <= True when X"00004dd4"=cpu_address_next else False;
---    debug_reset_occurred <= True when X"00000000"=cpu_address_next else False;
---    debug_timer_obj <= True when X"00004e2c"=cpu_address_next else False;
---    debug_gpio_base_address <= True when X"44a20000"=cpu_address_next else False;
-    
+    debug_task_input_code <= True when X"00000664"<=cpu_address_next and X"000006a0">cpu_address_next else False;
+    debug_task_time_code <= True when X"000006a0"<=cpu_address_next and X"000006dc">cpu_address_next else False;
+    debug_task_main_code <= True when X"000006dc"<=cpu_address_next and X"000007f8">cpu_address_next else False; 
+    debug_pxCurrentTCB <= True when X"0000465c"=cpu_address_next else False;
+    debug_write <= True when X"000054ec"=cpu_write_data else False;
+
 
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.

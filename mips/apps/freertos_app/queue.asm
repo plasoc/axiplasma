@@ -302,8 +302,9 @@ $L41:
 	addiu	$4,$16,16
 
 	beq	$2,$0,$L44
-	nop
+	li	$2,1			# 0x1
 
+	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
 	jal	OS_Syscall
 	nop
 
@@ -486,7 +487,7 @@ xQueueGenericSend:
 	addiu	$4,$4,%lo($LC0)
 
 $L69:
-	bne	$19,$0,$L98
+	bne	$19,$0,$L102
 	li	$2,2			# 0x2
 
 	lw	$2,64($16)
@@ -495,7 +496,7 @@ $L69:
 	li	$5,730			# 0x2da
 
 	li	$2,2			# 0x2
-$L98:
+$L102:
 	bne	$17,$2,$L72
 	li	$2,1			# 0x1
 
@@ -508,12 +509,12 @@ $L72:
 	jal	xTaskGetSchedulerState
 	nop
 
-	bne	$2,$0,$L99
+	bne	$2,$0,$L103
 	move	$22,$0
 
 	lw	$2,72($sp)
 	nop
-	beq	$2,$0,$L99
+	beq	$2,$0,$L103
 	lui	$4,%hi($LC0)
 
 	li	$5,734			# 0x2de
@@ -521,7 +522,7 @@ $L72:
 	addiu	$4,$4,%lo($LC0)
 
 	move	$22,$0
-$L99:
+$L103:
 	li	$21,2			# 0x2
 	li	$18,-1			# 0xffffffffffffffff
 	b	$L90
@@ -608,8 +609,10 @@ $L86:
 	bne	$2,$0,$L90
 	li	$22,1			# 0x1
 
+	li	$2,1			# 0x1
+	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
 	jal	OS_Syscall
-	nop
+	li	$22,1			# 0x1
 
 $L90:
 	jal	vTaskEnterCritical
@@ -619,29 +622,30 @@ $L90:
 	lw	$3,60($16)
 	nop
 	sltu	$2,$2,$3
-	bne	$2,$0,$L100
+	bne	$2,$0,$L104
 	move	$6,$17
 
 	bne	$17,$21,$L77
 	nop
 
-$L100:
+$L104:
 	move	$5,$19
 	jal	prvCopyDataToQueue
 	move	$4,$16
 
 	lw	$3,36($16)
 	nop
-	beq	$3,$0,$L96
+	beq	$3,$0,$L78
 	nop
 
 	jal	xTaskRemoveFromEventList
 	addiu	$4,$16,36
 
-$L96:
+$L78:
 	beq	$2,$0,$L80
-	nop
+	li	$2,1			# 0x1
 
+	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
 	jal	OS_Syscall
 	nop
 
@@ -688,7 +692,7 @@ $L71:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L98
+	b	$L102
 	li	$2,2			# 0x2
 
 $L73:
@@ -723,7 +727,7 @@ xQueueCreateMutex:
 	jal	xQueueGenericCreate
 	li	$4,1			# 0x1
 
-	beq	$2,$0,$L102
+	beq	$2,$0,$L106
 	move	$16,$2
 
 	sw	$0,4($2)
@@ -735,7 +739,7 @@ xQueueCreateMutex:
 	jal	xQueueGenericSend
 	move	$4,$2
 
-$L102:
+$L106:
 	lw	$31,20($sp)
 	move	$2,$16
 	lw	$16,16($sp)
@@ -763,7 +767,7 @@ xQueueGiveMutexRecursive:
 	sw	$31,28($sp)
 	sw	$18,24($sp)
 	sw	$17,20($sp)
-	bne	$4,$0,$L108
+	bne	$4,$0,$L112
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -771,18 +775,18 @@ xQueueGiveMutexRecursive:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L108:
+$L112:
 	lw	$18,4($16)
 	jal	xTaskGetCurrentTaskHandle
 	move	$17,$0
 
-	bne	$18,$2,$L107
+	bne	$18,$2,$L111
 	nop
 
 	lw	$2,12($16)
 	li	$17,1			# 0x1
 	addiu	$2,$2,-1
-	bne	$2,$0,$L107
+	bne	$2,$0,$L111
 	sw	$2,12($16)
 
 	move	$7,$0
@@ -791,7 +795,7 @@ $L108:
 	jal	xQueueGenericSend
 	move	$4,$16
 
-$L107:
+$L111:
 	lw	$31,28($sp)
 	move	$2,$17
 	lw	$18,24($sp)
@@ -827,7 +831,7 @@ xQueueGenericSendFromISR:
 	move	$16,$4
 	move	$19,$5
 	move	$20,$6
-	bne	$4,$0,$L114
+	bne	$4,$0,$L118
 	move	$18,$7
 
 	lui	$4,%hi($LC0)
@@ -835,37 +839,37 @@ xQueueGenericSendFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L114:
-	bne	$19,$0,$L133
+$L118:
+	bne	$19,$0,$L137
 	li	$2,2			# 0x2
 
 	lw	$2,64($16)
 	nop
-	bne	$2,$0,$L116
+	bne	$2,$0,$L120
 	li	$5,928			# 0x3a0
 
 	li	$2,2			# 0x2
-$L133:
-	bne	$18,$2,$L117
+$L137:
+	bne	$18,$2,$L121
 	li	$2,1			# 0x1
 
 	lw	$3,60($16)
 	nop
-	bne	$3,$2,$L118
+	bne	$3,$2,$L122
 	li	$5,929			# 0x3a1
 
-$L117:
+$L121:
 	lw	$2,56($16)
 	lw	$3,60($16)
 	nop
 	sltu	$2,$2,$3
-	bne	$2,$0,$L119
+	bne	$2,$0,$L123
 	li	$3,2			# 0x2
 
-	bne	$18,$3,$L113
+	bne	$18,$3,$L117
 	nop
 
-$L119:
+$L123:
 	lbu	$17,69($16)
 	move	$6,$18
 	sll	$21,$17,24
@@ -875,30 +879,30 @@ $L119:
 
 	sra	$21,$21,24
 	li	$2,-1			# 0xffffffffffffffff
-	bne	$21,$2,$L121
+	bne	$21,$2,$L125
 	nop
 
 	lw	$2,36($16)
 	nop
-	bne	$2,$0,$L122
+	bne	$2,$0,$L126
 	nop
 
-$L132:
-	b	$L113
+$L136:
+	b	$L117
 	li	$2,1			# 0x1
 
-$L122:
+$L126:
 	jal	xTaskRemoveFromEventList
 	addiu	$4,$16,36
 
-	beq	$2,$0,$L132
+	beq	$2,$0,$L136
 	nop
 
-	beq	$20,$0,$L113
+	beq	$20,$0,$L117
 	li	$2,1			# 0x1
 
 	sw	$2,0($20)
-$L113:
+$L117:
 	lw	$31,44($sp)
 	lw	$21,40($sp)
 	lw	$20,36($sp)
@@ -909,28 +913,28 @@ $L113:
 	jr	$31
 	addiu	$sp,$sp,48
 
-$L121:
+$L125:
 	addiu	$17,$17,1
 	sll	$17,$17,24
 	sra	$17,$17,24
 	sb	$17,69($16)
-	b	$L113
+	b	$L117
 	li	$2,1			# 0x1
 
-$L116:
+$L120:
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L133
+	b	$L137
 	li	$2,2			# 0x2
 
-$L118:
+$L122:
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L117
+	b	$L121
 	nop
 
 	.set	macro
@@ -954,7 +958,7 @@ xQueueGiveFromISR:
 	sw	$16,20($sp)
 	sw	$31,28($sp)
 	move	$16,$4
-	bne	$4,$0,$L135
+	bne	$4,$0,$L139
 	move	$17,$5
 
 	lui	$4,%hi($LC0)
@@ -962,33 +966,33 @@ xQueueGiveFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L135:
+$L139:
 	lw	$2,64($16)
 	nop
-	beq	$2,$0,$L136
+	beq	$2,$0,$L140
 	li	$5,1088			# 0x440
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L136:
+$L140:
 	lw	$2,0($16)
 	nop
-	bne	$2,$0,$L137
+	bne	$2,$0,$L141
 	nop
 
 	lw	$2,4($16)
 	nop
-	bne	$2,$0,$L138
+	bne	$2,$0,$L142
 	lui	$4,%hi($LC0)
 
-$L137:
+$L141:
 	lw	$3,56($16)
 	lw	$4,60($16)
 	nop
 	sltu	$4,$3,$4
-	beq	$4,$0,$L134
+	beq	$4,$0,$L138
 	move	$2,$0
 
 	lbu	$2,69($16)
@@ -997,49 +1001,49 @@ $L137:
 	sw	$3,56($16)
 	sra	$4,$4,24
 	li	$3,-1			# 0xffffffffffffffff
-	bne	$4,$3,$L140
+	bne	$4,$3,$L144
 	addiu	$2,$2,1
 
 	lw	$2,36($16)
 	nop
-	bne	$2,$0,$L141
+	bne	$2,$0,$L145
 	nop
 
-$L154:
-	b	$L134
+$L158:
+	b	$L138
 	li	$2,1			# 0x1
 
-$L141:
+$L145:
 	jal	xTaskRemoveFromEventList
 	addiu	$4,$16,36
 
-	beq	$2,$0,$L154
+	beq	$2,$0,$L158
 	nop
 
-	beq	$17,$0,$L134
+	beq	$17,$0,$L138
 	li	$2,1			# 0x1
 
 	sw	$2,0($17)
-$L134:
+$L138:
 	lw	$31,28($sp)
 	lw	$17,24($sp)
 	lw	$16,20($sp)
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L140:
+$L144:
 	sll	$2,$2,24
 	sra	$2,$2,24
 	sb	$2,69($16)
-	b	$L134
+	b	$L138
 	li	$2,1			# 0x1
 
-$L138:
+$L142:
 	li	$5,1093			# 0x445
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L137
+	b	$L141
 	nop
 
 	.set	macro
@@ -1053,91 +1057,105 @@ $L138:
 	.ent	xQueueGenericReceive
 	.type	xQueueGenericReceive, @function
 xQueueGenericReceive:
-	.frame	$sp,56,$31		# vars= 8, regs= 8/0, args= 16, gp= 0
-	.mask	0x807f0000,-4
+	.frame	$sp,64,$31		# vars= 8, regs= 9/0, args= 16, gp= 0
+	.mask	0x80ff0000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
-	addiu	$sp,$sp,-56
-	sw	$21,44($sp)
-	sw	$19,36($sp)
-	sw	$16,24($sp)
-	sw	$31,52($sp)
-	sw	$22,48($sp)
-	sw	$20,40($sp)
-	sw	$18,32($sp)
-	sw	$17,28($sp)
+	addiu	$sp,$sp,-64
+	sw	$22,52($sp)
+	sw	$19,40($sp)
+	sw	$16,28($sp)
+	sw	$31,60($sp)
+	sw	$23,56($sp)
+	sw	$21,48($sp)
+	sw	$20,44($sp)
+	sw	$18,36($sp)
+	sw	$17,32($sp)
 	move	$16,$4
 	move	$19,$5
-	sw	$6,64($sp)
-	bne	$4,$0,$L156
-	move	$21,$7
+	sw	$6,72($sp)
+	bne	$4,$0,$L160
+	move	$22,$7
 
 	lui	$4,%hi($LC0)
 	li	$5,1244			# 0x4dc
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L156:
-	bne	$19,$0,$L157
+$L160:
+	bne	$19,$0,$L161
 	nop
 
 	lw	$2,64($16)
 	nop
-	bne	$2,$0,$L158
+	bne	$2,$0,$L162
 	lui	$4,%hi($LC0)
 
-$L157:
+$L161:
 	jal	xTaskGetSchedulerState
 	nop
 
-	bne	$2,$0,$L192
-	move	$22,$0
+	bne	$2,$0,$L200
+	move	$23,$0
 
-	lw	$2,64($sp)
+	lw	$2,72($sp)
 	nop
-	beq	$2,$0,$L192
+	beq	$2,$0,$L200
 	lui	$4,%hi($LC0)
 
 	li	$5,1248			# 0x4e0
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	move	$22,$0
-$L192:
+	move	$23,$0
+$L200:
 	li	$18,-1			# 0xffffffffffffffff
-	b	$L178
-	addiu	$20,$16,36
+	addiu	$21,$16,36
+	b	$L181
+	li	$20,1			# 0x1
 
-$L162:
+$L166:
 	lw	$2,36($16)
+	nop
+	beq	$2,$0,$L169
 	sw	$18,12($16)
-	beq	$2,$0,$L165
+
 	addiu	$4,$16,36
-
-	b	$L190
+$L199:
+	jal	xTaskRemoveFromEventList
 	nop
 
-$L161:
-	lw	$2,64($sp)
+	beq	$2,$0,$L169
+	li	$2,1			# 0x1
+
+	sw	$2,%gp_rel(FreeRTOS_Yield)($28)
+	jal	OS_Syscall
 	nop
-	bne	$2,$0,$L169
+
+	b	$L169
+	nop
+
+$L165:
+	lw	$2,72($sp)
+	nop
+	bne	$2,$0,$L172
 	nop
 
 	jal	vTaskExitCritical
 	nop
 
-	b	$L155
+	b	$L159
 	move	$2,$0
 
-$L169:
-	bne	$22,$0,$L170
+$L172:
+	bne	$23,$0,$L173
 	nop
 
 	jal	vTaskSetTimeOutState
 	addiu	$4,$sp,16
 
-$L170:
+$L173:
 	jal	vTaskExitCritical
 	nop
 
@@ -1151,28 +1169,28 @@ $L170:
 	nop
 	sll	$2,$2,24
 	sra	$2,$2,24
-	bne	$2,$18,$L171
+	bne	$2,$18,$L174
 	nop
 
 	sb	$0,68($16)
-$L171:
+$L174:
 	lbu	$2,69($16)
 	nop
 	sll	$2,$2,24
 	sra	$2,$2,24
-	bne	$2,$18,$L172
+	bne	$2,$18,$L175
 	nop
 
 	sb	$0,69($16)
-$L172:
+$L175:
 	jal	vTaskExitCritical
 	nop
 
-	addiu	$5,$sp,64
+	addiu	$5,$sp,72
 	jal	xTaskCheckForTimeOut
 	addiu	$4,$sp,16
 
-	bne	$2,$0,$L173
+	bne	$2,$0,$L176
 	nop
 
 	jal	vTaskEnterCritical
@@ -1182,12 +1200,12 @@ $L172:
 	jal	vTaskExitCritical
 	nop
 
-	bne	$17,$0,$L174
+	bne	$17,$0,$L177
 	nop
 
 	lw	$2,0($16)
 	nop
-	bne	$2,$0,$L175
+	bne	$2,$0,$L178
 	nop
 
 	jal	vTaskEnterCritical
@@ -1200,10 +1218,10 @@ $L172:
 	jal	vTaskExitCritical
 	nop
 
-$L175:
-	lw	$5,64($sp)
+$L178:
+	lw	$5,72($sp)
 	jal	vTaskPlaceOnEventList
-	move	$4,$20
+	move	$4,$21
 
 	jal	prvUnlockQueue
 	move	$4,$16
@@ -1211,81 +1229,73 @@ $L175:
 	jal	xTaskResumeAll
 	nop
 
-	bne	$2,$0,$L178
-	li	$22,1			# 0x1
+	bne	$2,$0,$L181
+	li	$23,1			# 0x1
 
+	sw	$20,%gp_rel(FreeRTOS_Yield)($28)
 	jal	OS_Syscall
-	nop
+	li	$23,1			# 0x1
 
-$L178:
+$L181:
 	jal	vTaskEnterCritical
 	nop
 
 	lw	$17,56($16)
 	nop
-	beq	$17,$0,$L161
+	beq	$17,$0,$L165
 	move	$5,$19
 
 	lw	$18,12($16)
 	jal	prvCopyDataFromQueue
 	move	$4,$16
 
-	bne	$21,$0,$L162
+	bne	$22,$0,$L166
 	addiu	$17,$17,-1
 
 	lw	$2,0($16)
 	sw	$17,56($16)
-	bne	$2,$0,$L163
+	bne	$2,$0,$L167
 	nop
 
 	jal	pvTaskIncrementMutexHeldCount
 	nop
 
 	sw	$2,4($16)
-$L163:
+$L167:
 	lw	$2,16($16)
 	nop
-	beq	$2,$0,$L165
+	bne	$2,$0,$L199
 	addiu	$4,$16,16
 
-$L190:
-	jal	xTaskRemoveFromEventList
-	nop
-
-	beq	$2,$0,$L165
-	nop
-
-	jal	OS_Syscall
-	nop
-
-$L165:
+$L169:
 	jal	vTaskExitCritical
 	nop
 
 	li	$2,1			# 0x1
-$L155:
-	lw	$31,52($sp)
-	lw	$22,48($sp)
-	lw	$21,44($sp)
-	lw	$20,40($sp)
-	lw	$19,36($sp)
-	lw	$18,32($sp)
-	lw	$17,28($sp)
-	lw	$16,24($sp)
+$L159:
+	lw	$31,60($sp)
+	lw	$23,56($sp)
+	lw	$22,52($sp)
+	lw	$21,48($sp)
+	lw	$20,44($sp)
+	lw	$19,40($sp)
+	lw	$18,36($sp)
+	lw	$17,32($sp)
+	lw	$16,28($sp)
 	jr	$31
-	addiu	$sp,$sp,56
+	addiu	$sp,$sp,64
 
-$L174:
+$L177:
 	jal	prvUnlockQueue
 	move	$4,$16
 
 	jal	xTaskResumeAll
-	li	$22,1			# 0x1
+	li	$23,1			# 0x1
 
-	b	$L178
+	b	$L181
 	nop
 
-$L173:
+$L176:
 	jal	prvUnlockQueue
 	move	$4,$16
 
@@ -1299,18 +1309,18 @@ $L173:
 	jal	vTaskExitCritical
 	nop
 
-	bne	$17,$0,$L178
-	li	$22,1			# 0x1
+	bne	$17,$0,$L181
+	li	$23,1			# 0x1
 
-	b	$L155
+	b	$L159
 	move	$2,$0
 
-$L158:
+$L162:
 	li	$5,1245			# 0x4dd
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L157
+	b	$L161
 	nop
 
 	.set	macro
@@ -1335,7 +1345,7 @@ xQueueTakeMutexRecursive:
 	sw	$31,28($sp)
 	sw	$18,24($sp)
 	move	$16,$4
-	bne	$4,$0,$L194
+	bne	$4,$0,$L202
 	move	$17,$5
 
 	lui	$4,%hi($LC0)
@@ -1343,12 +1353,12 @@ xQueueTakeMutexRecursive:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L194:
+$L202:
 	lw	$18,4($16)
 	jal	xTaskGetCurrentTaskHandle
 	nop
 
-	bne	$18,$2,$L195
+	bne	$18,$2,$L203
 	move	$7,$0
 
 	lw	$2,12($16)
@@ -1356,7 +1366,7 @@ $L194:
 	addiu	$2,$2,1
 	sw	$2,12($16)
 	li	$2,1			# 0x1
-$L193:
+$L201:
 	lw	$31,28($sp)
 	lw	$18,24($sp)
 	lw	$17,20($sp)
@@ -1364,19 +1374,19 @@ $L193:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L195:
+$L203:
 	move	$6,$17
 	move	$5,$0
 	jal	xQueueGenericReceive
 	move	$4,$16
 
-	beq	$2,$0,$L193
+	beq	$2,$0,$L201
 	nop
 
 	lw	$3,12($16)
 	nop
 	addiu	$3,$3,1
-	b	$L193
+	b	$L201
 	sw	$3,12($16)
 
 	.set	macro
@@ -1405,7 +1415,7 @@ xQueueReceiveFromISR:
 	sw	$17,24($sp)
 	move	$16,$4
 	move	$19,$5
-	bne	$4,$0,$L202
+	bne	$4,$0,$L210
 	move	$20,$6
 
 	lui	$4,%hi($LC0)
@@ -1413,19 +1423,19 @@ xQueueReceiveFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L202:
-	bne	$19,$0,$L203
+$L210:
+	bne	$19,$0,$L211
 	nop
 
 	lw	$2,64($16)
 	nop
-	bne	$2,$0,$L204
+	bne	$2,$0,$L212
 	li	$5,1441			# 0x5a1
 
-$L203:
+$L211:
 	lw	$18,56($16)
 	nop
-	beq	$18,$0,$L201
+	beq	$18,$0,$L209
 	move	$2,$0
 
 	lbu	$17,68($16)
@@ -1438,30 +1448,30 @@ $L203:
 	sra	$21,$21,24
 	li	$2,-1			# 0xffffffffffffffff
 	sw	$18,56($16)
-	bne	$21,$2,$L206
+	bne	$21,$2,$L214
 	nop
 
 	lw	$2,16($16)
 	nop
-	bne	$2,$0,$L207
+	bne	$2,$0,$L215
 	nop
 
-$L218:
-	b	$L201
+$L226:
+	b	$L209
 	li	$2,1			# 0x1
 
-$L207:
+$L215:
 	jal	xTaskRemoveFromEventList
 	addiu	$4,$16,16
 
-	beq	$2,$0,$L218
+	beq	$2,$0,$L226
 	nop
 
-	beq	$20,$0,$L201
+	beq	$20,$0,$L209
 	li	$2,1			# 0x1
 
 	sw	$2,0($20)
-$L201:
+$L209:
 	lw	$31,44($sp)
 	lw	$21,40($sp)
 	lw	$20,36($sp)
@@ -1472,20 +1482,20 @@ $L201:
 	jr	$31
 	addiu	$sp,$sp,48
 
-$L206:
+$L214:
 	addiu	$17,$17,1
 	sll	$17,$17,24
 	sra	$17,$17,24
 	sb	$17,68($16)
-	b	$L201
+	b	$L209
 	li	$2,1			# 0x1
 
-$L204:
+$L212:
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L203
+	b	$L211
 	nop
 
 	.set	macro
@@ -1510,7 +1520,7 @@ xQueuePeekFromISR:
 	sw	$31,28($sp)
 	sw	$18,24($sp)
 	move	$16,$4
-	bne	$4,$0,$L220
+	bne	$4,$0,$L228
 	move	$17,$5
 
 	lui	$4,%hi($LC0)
@@ -1518,29 +1528,29 @@ xQueuePeekFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L220:
-	bne	$17,$0,$L221
+$L228:
+	bne	$17,$0,$L229
 	nop
 
 	lw	$2,64($16)
 	nop
-	bne	$2,$0,$L222
+	bne	$2,$0,$L230
 	li	$5,1533			# 0x5fd
 
-$L221:
+$L229:
 	lw	$2,64($16)
 	nop
-	bne	$2,$0,$L223
+	bne	$2,$0,$L231
 	li	$5,1534			# 0x5fe
 
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L223:
+$L231:
 	lw	$3,56($16)
 	nop
-	beq	$3,$0,$L219
+	beq	$3,$0,$L227
 	move	$2,$0
 
 	lw	$18,12($16)
@@ -1550,7 +1560,7 @@ $L223:
 
 	sw	$18,12($16)
 	li	$2,1			# 0x1
-$L219:
+$L227:
 	lw	$31,28($sp)
 	lw	$18,24($sp)
 	lw	$17,20($sp)
@@ -1558,12 +1568,12 @@ $L219:
 	jr	$31
 	addiu	$sp,$sp,32
 
-$L222:
+$L230:
 	lui	$4,%hi($LC0)
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-	b	$L221
+	b	$L229
 	nop
 
 	.set	macro
@@ -1585,7 +1595,7 @@ uxQueueMessagesWaiting:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L229
+	bne	$4,$0,$L237
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1593,7 +1603,7 @@ uxQueueMessagesWaiting:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L229:
+$L237:
 	jal	vTaskEnterCritical
 	nop
 
@@ -1627,7 +1637,7 @@ uxQueueSpacesAvailable:
 	sw	$17,24($sp)
 	sw	$31,28($sp)
 	sw	$16,20($sp)
-	bne	$4,$0,$L232
+	bne	$4,$0,$L240
 	move	$17,$4
 
 	lui	$4,%hi($LC0)
@@ -1635,7 +1645,7 @@ uxQueueSpacesAvailable:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L232:
+$L240:
 	jal	vTaskEnterCritical
 	nop
 
@@ -1670,7 +1680,7 @@ uxQueueMessagesWaitingFromISR:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L235
+	bne	$4,$0,$L243
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1678,7 +1688,7 @@ uxQueueMessagesWaitingFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L235:
+$L243:
 	lw	$31,20($sp)
 	lw	$2,56($16)
 	lw	$16,16($sp)
@@ -1704,7 +1714,7 @@ xQueueIsQueueEmptyFromISR:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L238
+	bne	$4,$0,$L246
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1712,7 +1722,7 @@ xQueueIsQueueEmptyFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L238:
+$L246:
 	lw	$2,56($16)
 	lw	$31,20($sp)
 	lw	$16,16($sp)
@@ -1739,7 +1749,7 @@ xQueueIsQueueFullFromISR:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L241
+	bne	$4,$0,$L249
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1747,7 +1757,7 @@ xQueueIsQueueFullFromISR:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L241:
+$L249:
 	lw	$3,56($16)
 	lw	$2,60($16)
 	lw	$31,20($sp)
@@ -1778,10 +1788,10 @@ vQueueAddToRegistry:
 	move	$2,$0
 	move	$6,$3
 	li	$7,10			# 0xa
-$L246:
+$L254:
 	lw	$8,0($3)
 	nop
-	bne	$8,$0,$L244
+	bne	$8,$0,$L252
 	addiu	$2,$2,1
 
 	addiu	$2,$2,-1
@@ -1791,8 +1801,8 @@ $L246:
 	jr	$31
 	sw	$4,4($2)
 
-$L244:
-	bne	$2,$7,$L246
+$L252:
+	bne	$2,$7,$L254
 	addiu	$3,$3,8
 
 	jr	$31
@@ -1819,10 +1829,10 @@ pcQueueGetName:
 	move	$2,$0
 	move	$5,$3
 	li	$6,10			# 0xa
-$L251:
+$L259:
 	lw	$7,4($3)
 	nop
-	bne	$7,$4,$L249
+	bne	$7,$4,$L257
 	addiu	$2,$2,1
 
 	addiu	$2,$2,-1
@@ -1832,8 +1842,8 @@ $L251:
 	jr	$31
 	nop
 
-$L249:
-	bne	$2,$6,$L251
+$L257:
+	bne	$2,$6,$L259
 	addiu	$3,$3,8
 
 	jr	$31
@@ -1860,10 +1870,10 @@ vQueueUnregisterQueue:
 	move	$2,$0
 	move	$5,$3
 	li	$6,10			# 0xa
-$L256:
+$L264:
 	lw	$7,4($3)
 	nop
-	bne	$7,$4,$L254
+	bne	$7,$4,$L262
 	addiu	$2,$2,1
 
 	addiu	$2,$2,-1
@@ -1873,8 +1883,8 @@ $L256:
 	jr	$31
 	sw	$0,4($2)
 
-$L254:
-	bne	$2,$6,$L256
+$L262:
+	bne	$2,$6,$L264
 	addiu	$3,$3,8
 
 	jr	$31
@@ -1899,7 +1909,7 @@ vQueueDelete:
 	addiu	$sp,$sp,-24
 	sw	$16,16($sp)
 	sw	$31,20($sp)
-	bne	$4,$0,$L259
+	bne	$4,$0,$L267
 	move	$16,$4
 
 	lui	$4,%hi($LC0)
@@ -1907,7 +1917,7 @@ vQueueDelete:
 	jal	vAssertCalled
 	addiu	$4,$4,%lo($LC0)
 
-$L259:
+$L267:
 	jal	vQueueUnregisterQueue
 	move	$4,$16
 

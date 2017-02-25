@@ -45,7 +45,8 @@ typedef unsigned TickType_t;
 #define portCRITICAL_NESTING_IN_TCB	(1)
 #define portENTER_CRITICAL()		{vTaskEnterCritical();}
 #define portEXIT_CRITICAL()		{vTaskExitCritical();}
-#define portYIELD()			{OS_Syscall();}
+#define portYIELD()			{FreeRTOS_Yield=1; OS_Syscall();}
+#define portYIELD_FROM_ISR(x)		{if ((x)==pdTRUE) FreeRTOS_Yield=1;}
 
 #define portDISABLE_INTERRUPTS()	{FreeRTOS_DisableInterrupts();}
 #define portENABLE_INTERRUPTS()		{FreeRTOS_EnableInterrupts();}	
@@ -53,6 +54,7 @@ typedef unsigned TickType_t;
 #define portTASK_FUNCTION_PROTO( vFunction, pvParameters ) 	void vFunction( void *pvParameters )
 #define portTASK_FUNCTION( vFunction, pvParameters ) 		void vFunction( void *pvParameters )
 
+extern volatile unsigned FreeRTOS_Yield;
 void vTaskEnterCritical( void );
 void vTaskExitCritical( void );
 void vAssertCalled(const char*, int);

@@ -32,7 +32,7 @@ $L2:
 	jal	vTaskSuspendAll
 	nop
 
-	lw	$2,%gp_rel(pucAlignedHeap.2396)($28)
+	lw	$2,%gp_rel(pucAlignedHeap.2397)($28)
 	nop
 	bne	$2,$0,$L3
 	lui	$2,%hi(ucHeap+4)
@@ -40,12 +40,12 @@ $L2:
 	li	$3,-4			# 0xfffffffffffffffc
 	addiu	$2,$2,%lo(ucHeap+4)
 	and	$2,$2,$3
-	sw	$2,%gp_rel(pucAlignedHeap.2396)($28)
+	sw	$2,%gp_rel(pucAlignedHeap.2397)($28)
 $L3:
 	lw	$2,%gp_rel(xNextFreeByte)($28)
 	nop
 	addu	$16,$16,$2
-	sltu	$3,$16,4092
+	sltu	$3,$16,8188
 	beq	$3,$0,$L4
 	move	$17,$0
 
@@ -53,7 +53,7 @@ $L3:
 	beq	$3,$0,$L4
 	nop
 
-	lw	$17,%gp_rel(pucAlignedHeap.2396)($28)
+	lw	$17,%gp_rel(pucAlignedHeap.2397)($28)
 	sw	$16,%gp_rel(xNextFreeByte)($28)
 	addu	$17,$17,$2
 $L4:
@@ -135,7 +135,7 @@ xPortGetFreeHeapSize:
 	.set	noreorder
 	.set	nomacro
 	lw	$2,%gp_rel(xNextFreeByte)($28)
-	li	$3,4092			# 0xffc
+	li	$3,8188			# 0x1ffc
 	jr	$31
 	subu	$2,$3,$2
 
@@ -143,10 +143,10 @@ xPortGetFreeHeapSize:
 	.set	reorder
 	.end	xPortGetFreeHeapSize
 	.size	xPortGetFreeHeapSize, .-xPortGetFreeHeapSize
-	.local	pucAlignedHeap.2396
-	.comm	pucAlignedHeap.2396,4,4
+	.local	pucAlignedHeap.2397
+	.comm	pucAlignedHeap.2397,4,4
 	.local	xNextFreeByte
 	.comm	xNextFreeByte,4,4
 	.local	ucHeap
-	.comm	ucHeap,4096,4
+	.comm	ucHeap,8192,4
 	.ident	"GCC: (GNU) 6.3.0"

@@ -38,12 +38,18 @@
 	sw	$27,	96($29)    #lo
 
 	# FreeRTOS: Store the state of the current task.
-	lui	$26,	%hi(pxCurrentTCB)	# Load the pointer to the current TCB.
+	lui	$26,	%hi(pxCurrentTCB)	# Load the address to the current TCB pointer.
 	ori	$26,	%lo(pxCurrentTCB) 
-	sw	$29,	0($26)			# Store the current task's stack pointer.
+	lw	$26,	0($26)			# Load the current TCB pointer.
+	sw	$29,	0($26)			# Store the current task's stack pointer in its TCB.
+
+	# The following statements were used for debugging purposes.
+	#lui	$26,	0x44A2
+	#ori	$26,	0x0008
+	#sw	$29,	0($26)
 
 	# FreeRTOS: Load the stack pointer for the CPU.
-	lui	$26,	%hi(InitStack)		# Load the pointer to the CPU stack.
+	lui	$26,	%hi(InitStack)		# Load the address of the CPU stack pointer.
 	ori	$26,	%lo(InitStack) 
 	lw	$29,	0($26)			# Load the CPU stack pointer.
 
@@ -56,14 +62,20 @@
    	.set noat
 	
 	# FreeRTOS: Save the stack pointer for the CPU.
-	lui	$26,	%hi(InitStack)		# Load the pointer to the CPU stack.
+	lui	$26,	%hi(InitStack)		# Load the address of the CPU stack pointer.
 	ori	$26,	%lo(InitStack) 
 	sw	$29,	0($26)			# Store the CPU stack pointer.
 
 	# FreeRTOS: Load the stack pointer for the current task.
-	lui	$26,	%hi(pxCurrentTCB)	# Load the pointer to the current TCB.
+	lui	$26,	%hi(pxCurrentTCB)	# Load the address to the current TCB pointer.
 	ori	$26,	%lo(pxCurrentTCB)
-	lw	$29,	0($26)			# Load the stack pointer from the current TCB.
+	lw	$26,	0($26)			# Load the current TCB pointer.
+	lw	$29,	0($26)			# Load the current task's stack pointer from its TCB.
+
+	# The following statements were used for debugging purposes.
+	#lui	$26,	0x44A2
+	#ori	$26,	0x0008
+	#sw	$29,	0($26)
 	
 	# Resore the state of the CPU with context of task.
 	lw	$1,	16($29)    #at	
@@ -113,10 +125,16 @@ pxPortInitialiseStack:
 	.set noreorder
    	.set noat
 
+	# The following statements were used for debugging purposes.
+	#lui	$26,	0x44A2
+	#ori	$26,	0x0008
+	#addu	$27,	$0,	$4
+	#sw	$27,	0($26)
+
 	addi	$2,	$4,	-104  	# Determine next stack pointer.
-	sw	$5,	92($4)		# Store the program counter of the task.
+	sw	$5,	88($2)		# Store the program counter of the task.
 	jr	$31
-	sw	$6,	32($4)		# Store the parameter pointer.
+	sw	$6,	28($2)		# Store the parameter pointer.
 
 	.set reorder
 	.set at

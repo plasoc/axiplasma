@@ -70,6 +70,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+volatile unsigned FreeRTOS_Yield=0;
+
 static void prvTaskExitError( void )
 {
 	portDISABLE_INTERRUPTS();

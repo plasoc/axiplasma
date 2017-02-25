@@ -90,7 +90,7 @@ begin
         -- Let's wait for the reset to be disabled before starting anything.
         wait until raw_nreset='1';
         -- Let's wait a WHOLE BUNCH of clock cycles until the boot loader finishes its thang.
-        wait for 2**16*clock_period;
+        wait for 2**18*clock_period;
         -- Perform the following operation for all bits in gpio input.
         for each_bit in gpio_input'low to gpio_input'high loop
             set_gpio_input(each_bit);
