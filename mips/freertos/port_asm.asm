@@ -6,6 +6,7 @@
 
 	.data
 
+	.align 2
 	.globl	FreeRTOS_SysCall
 	.comm	FreeRTOS_SysCall,4,0
 

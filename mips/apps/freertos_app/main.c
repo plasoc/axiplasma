@@ -18,7 +18,7 @@
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
-#define TICK_THRESHOLD				(250)
+#define TICK_THRESHOLD				(2) // 250
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
@@ -79,9 +79,9 @@ void task_input_code()
 	unsigned input_value;
 	while (1)
 	{
-		ulTaskNotifyTake(pdTRUE,portMAX_DELAY);
 		input_value = plasoc_gpio_get_data_in(&gpio_obj);
 		xQueueSend(queue_input_obj,&input_value,portMAX_DELAY);
+		ulTaskNotifyTake(pdTRUE,portMAX_DELAY);		
 	}
 }
 
@@ -110,7 +110,6 @@ void task_main_code()
 				if ((~new_value)&(1<<each_sw))
 					ticks_ary[each_sw] = 0;
 			cur_value = new_value;
-			//plasoc_gpio_set_data_out(&gpio_obj,0xaa);
 		}
 		if (xSemaphoreTake(sem_time_obj,0)==pdTRUE)
 		{
@@ -143,7 +142,6 @@ void task_main_code()
 					led_value &= ~led_mask;
 				}
 			}
-			//plasoc_gpio_set_data_out(&gpio_obj,0xcc);
 			plasoc_gpio_set_data_out(&gpio_obj,led_value);
 		}
 	}
@@ -180,9 +178,9 @@ int main()
 		configASSERT(sem_time_obj!=0);
 		xReturned = xTaskCreate(task_main_code,"main",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,3,&task_input_obj);
+		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,5,&task_input_obj);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,3,0);
+		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,5,0);
 		configASSERT(xReturned==pdPASS);
 	}
 
@@ -190,6 +188,9 @@ int main()
 	plasoc_int_enable_all(&int_obj);
 	plasoc_timer_reload_start(&timer_obj,0);
 	plasoc_gpio_enable_int(&gpio_obj,0);
+
+	/* Let the test bench know it's about to go down! */
+	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();
