@@ -95,9 +95,9 @@ begin
         gpio_input <= X"00f3" after input_delay;
         wait for 2 ms;
         while True loop
-            gpio_input <= X"0001" after input_delay;
+            gpio_input <= X"00f1" after input_delay;
             wait for 500 us;
-            gpio_input <= X"0000" after input_delay;
+            gpio_input <= X"00f0" after input_delay;
             wait for 500 us;
         end loop;
         wait;

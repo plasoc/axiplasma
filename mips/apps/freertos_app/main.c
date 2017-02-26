@@ -11,14 +11,14 @@
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
-#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)	// Inentionally set to a low number for debugging purposes.
+#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
 
 #define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
-#define TICK_THRESHOLD				(2) // 250
+#define TICK_THRESHOLD				(250)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
@@ -39,14 +39,14 @@ void FreeRTOS_TickISR()
 	plasoc_timer_reload_start(&timer_obj,1);
 }
 
-
+/* This ISR is necessary to check for interrupts and execute context switches with FreeRTOS. */
 extern void FreeRTOS_UserISR() 
 { 
 	/* Interrupts should be serviced before the kernel 
 	 needs to perform its services. */
 	plasoc_int_service_interrupts(&int_obj); 
 
-	/* The yieldfromisr_flag flag is defined in portmacro. This flag is needed
+	/* The FreeRTOS_Yield flag is defined in portmacro. This flag is needed
 	 to force context switches from system and interrupt calls. */
 	if (FreeRTOS_Yield)
 	{
