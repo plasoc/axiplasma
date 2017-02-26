@@ -1186,6 +1186,13 @@ static void prvAddNewTaskToReadyList( TCB_t *pxNewTCB )
 				}
 			}
 
+			/* DEBUG STATEMENT */
+			//*((volatile unsigned*)0x44a20008) = 0xc;
+			//*((volatile unsigned*)0x44a20008) = pxCurrentTCB;
+			//*((volatile unsigned*)0x44a20008) = *pxPreviousWakeTime;
+			//*((volatile unsigned*)0x44a20008) = xTimeToWake;
+			//*((volatile unsigned*)0x44a20008) = xConstTickCount;
+
 			/* Update the wake time ready for the next call. */
 			*pxPreviousWakeTime = xTimeToWake;
 
@@ -2516,6 +2523,10 @@ BaseType_t xSwitchRequired = pdFALSE;
 		delayed lists if it wraps to 0. */
 		xTickCount = xConstTickCount;
 
+		/* DEBUG STATEMENT */
+		//*((volatile unsigned*)0x44a20008) = 0xb;
+		//*((volatile unsigned*)0x44a20008) = xTickCount;
+
 		if( xConstTickCount == ( TickType_t ) 0U )
 		{
 			taskSWITCH_DELAYED_LISTS();
@@ -2580,6 +2591,10 @@ BaseType_t xSwitchRequired = pdFALSE;
 					{
 						mtCOVERAGE_TEST_MARKER();
 					}
+
+					/* DEBUG STATEMENT */
+					//*((volatile unsigned*)0x44a20008) = 0xa;
+					//*((volatile unsigned*)0x44a20008) = pxTCB;
 
 					/* Place the unblocked task into the appropriate ready
 					list. */

@@ -11,7 +11,7 @@
 #define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
-#define PLASOC_TIMER_MILLISECOND_CYCLES		(10000)	// Inentionally set to a low number for debugging purposes.
+#define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)	// Inentionally set to a low number for debugging purposes.
 
 #define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
@@ -19,7 +19,7 @@
 
 #define GPIO_AMOUNT				(16)
 #define TICK_THRESHOLD				(25)
-#define TIMER_THRESHOLD				(4)
+#define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
 
@@ -49,10 +49,8 @@ extern void FreeRTOS_UserISR()
 	 to force context switches from system and interrupt calls. */
 	if (FreeRTOS_Yield)
 	{
-		plasoc_gpio_set_data_out(&gpio_obj,(unsigned)pxCurrentTCB); // Print out address of current TCB for debugging purposes.
 		FreeRTOS_Yield = 0;
 		vTaskSwitchContext();
-		plasoc_gpio_set_data_out(&gpio_obj,(unsigned)pxCurrentTCB); // Print out address of current TCB for debugging purposes.
 	}
 }
 
@@ -80,9 +78,11 @@ void task_input_code()
 	unsigned input_value;
 	while (1)
 	{
+		/*
 		ulTaskNotifyTake(pdTRUE,portMAX_DELAY);
 		input_value = plasoc_gpio_get_data_out(&gpio_obj);
 		xQueueSend(queue_input_obj,&input_value,portMAX_DELAY);
+		*/
 	}
 }
 
@@ -93,7 +93,8 @@ void task_time_code()
 	while (1)
 	{
 		vTaskDelayUntil(&xLastWakeTime,TIMER_THRESHOLD);
-		xSemaphoreGive(sem_time_obj);
+		//xSemaphoreGive(sem_time_obj);
+		plasoc_gpio_set_data_out(&gpio_obj,plasoc_gpio_get_data_out(&gpio_obj)+1);
 	}
 }
 

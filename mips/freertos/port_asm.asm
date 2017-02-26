@@ -2,6 +2,12 @@
 	.extern FreeRTOS_UserISR
 	.extern	pxCurrentTCB
 	.extern InitStack
+	.extern FreeRTOS_Yield
+
+	.data
+
+	.globl	FreeRTOS_SysCall
+	.comm	FreeRTOS_SysCall,4,0
 
 	.text
 	
@@ -9,44 +15,56 @@
 	.set noreorder
    	.set noat
 
+	# FreeRTOS: Load source of interrupt and reset it.
+	lui	$26,	%hi(FreeRTOS_SysCall)
+	ori	$26,	%lo(FreeRTOS_SysCall)
+	lw	$27,	0($26)
+	sw	$0,	0($26)
+
 	# Store the state of the CPU.
-	addi	$29,	$29, -104  #adjust sp	
-	sw	$1,	16($29)    #at	
-	sw	$2,	20($29)    #v0
-	sw	$3,	24($29)    #v1	
-	sw	$4,	28($29)    #a0
-	sw	$5,	32($29)    #a1	
-	sw	$6,	36($29)    #a2
-	sw	$7,	40($29)    #a3	
-	sw	$8,	44($29)    #t0
-	sw	$9,	48($29)    #t1	
-	sw	$10,	52($29)    #t2
-	sw	$11,	56($29)    #t3	
-	sw	$12,	60($29)    #t4
-	sw	$13,	64($29)    #t5	
-	sw	$14,	68($29)    #t6
-	sw	$15,	72($29)    #t7	
-	sw	$24,	76($29)    #t8
-	sw	$25,	80($29)    #t9	
-	sw	$31,	84($29)    #lr
-	mfc0	$26,	$14        #C0_EPC=14 (Exception PC)	
-	addi	$26,	$26, -4    #Backup one opcode
-	sw	$26,	88($29)    #pc	
+	addi	$29,	$29, 	-104			#adjust sp	
+	sw	$1,	16($29)				#at	
+	sw	$2,	20($29)				#v0
+	sw	$3,	24($29)				#v1	
+	sw	$4,	28($29)				#a0
+	sw	$5,	32($29)				#a1	
+	sw	$6,	36($29)				#a2
+	sw	$7,	40($29)				#a3	
+	sw	$8,	44($29)				#t0
+	sw	$9,	48($29)				#t1	
+	sw	$10,	52($29)				#t2
+	sw	$11,	56($29)				#t3	
+	sw	$12,	60($29)				#t4
+	sw	$13,	64($29)				#t5	
+	sw	$14,	68($29)				#t6
+	sw	$15,	72($29)				#t7	
+	sw	$24,	76($29)				#t8
+	sw	$25,	80($29)				#t9	
+	sw	$31,	84($29)				#lr
+	mfc0	$26,	$14				#C0_EPC=14 (Exception PC)
+	bne	$27,	$0,	portSAVE_CONTEXT_0	#Check if a system call occurred
+	addi	$26,	$26, 	-4			#Backup one opcode on external interrupt
+	j	portSAVE_CONTEXT_1
+	nop		
+portSAVE_CONTEXT_0:
+	addi	$26,	$26,	4			#Skip to next opcode on system call
+portSAVE_CONTEXT_1:	
+	sw	$26,	88($29)				#pc	
 	mfhi	$27
-	sw	$27,	92($29)    #hi	
+	sw	$27,	92($29)				#hi	
 	mflo	$27
-	sw	$27,	96($29)    #lo
+	sw	$27,	96($29)				#lo
+
+	# The following statements were used for debugging purposes.
+	#lui	$27,	0x44A2
+	#ori	$27,	0x0008
+	#sw	$26,	0($27)
 
 	# FreeRTOS: Store the state of the current task.
 	lui	$26,	%hi(pxCurrentTCB)	# Load the address to the current TCB pointer.
 	ori	$26,	%lo(pxCurrentTCB) 
 	lw	$26,	0($26)			# Load the current TCB pointer.
 	sw	$29,	0($26)			# Store the current task's stack pointer in its TCB.
-
-	# The following statements were used for debugging purposes.
-	#lui	$26,	0x44A2
-	#ori	$26,	0x0008
-	#sw	$29,	0($26)
 
 	# FreeRTOS: Load the stack pointer for the CPU.
 	lui	$26,	%hi(InitStack)		# Load the address of the CPU stack pointer.
@@ -71,11 +89,6 @@
 	ori	$26,	%lo(pxCurrentTCB)
 	lw	$26,	0($26)			# Load the current TCB pointer.
 	lw	$29,	0($26)			# Load the current task's stack pointer from its TCB.
-
-	# The following statements were used for debugging purposes.
-	#lui	$26,	0x44A2
-	#ori	$26,	0x0008
-	#sw	$29,	0($26)
 	
 	# Resore the state of the CPU with context of task.
 	lw	$1,	16($29)    #at	
@@ -101,14 +114,12 @@
 	mthi	$27
 	lw	$27,	96($29)    #lo	
 	mtlo	$27
-	
-	# The following statements were used for debugging purposes.
-	#lui	$16,	0x44A2
-	#ori	$16,	0x0008
-	#lw	$17,	84($29)
-	#sw	$17,	0($16)
-
 	addi	$29,	$29, 104   #adjust sp
+
+	# The following statements were used for debugging purposes.
+	#lui	$27,	0x44A2
+	#ori	$27,	0x0008
+	#sw	$26,	0($27)
 	
 	# FreeRTOS: Enable the CPU interrupt.
    	ori   $27, $0, 	0x1    #re-enable interrupts
@@ -125,12 +136,6 @@ pxPortInitialiseStack:
 	.set noreorder
    	.set noat
 
-	# The following statements were used for debugging purposes.
-	#lui	$26,	0x44A2
-	#ori	$26,	0x0008
-	#addu	$27,	$0,	$4
-	#sw	$27,	0($26)
-
 	addi	$2,	$4,	-104  	# Determine next stack pointer.
 	sw	$5,	88($2)		# Store the program counter of the task.
 	jr	$31
@@ -146,6 +151,11 @@ FreeRTOS_ISR:
 	.set 	noreorder
    	.set 	noat
 
+	# The following statements were used for debugging purposes.
+	#lui	$26,	0x44A2
+	#ori	$26,	0x0008	
+	#sw	$2,	0($26)
+	
 	# Perform interrupt-related operations.
 	portSAVE_CONTEXT		# Save the context of the current task.
 	jal	FreeRTOS_UserISR	# Jump to user-defined ISR.
@@ -190,6 +200,35 @@ vPortStartFirstTask:
 
 	.set 	reorder
 	.end 	vPortStartFirstTask
+
+	.global	vPortYield
+	.ent	vPortYield
+vPortYield:
+	.set 	noreorder
+	
+	# Disable CPU interrupt.
+	mtc0	$0,	$12	
+	addi	$9,	$0,	1
+
+	# Load source of interrupt and set it.
+	lui	$8,	%hi(FreeRTOS_SysCall)
+	ori	$8,	%lo(FreeRTOS_SysCall)	
+	sw	$9,	0($8)
+
+	# Load yield flag and set it.
+	lui	$8,	%hi(FreeRTOS_Yield)
+	ori	$8,	%lo(FreeRTOS_Yield)	
+	sw	$9,	0($8)
+
+	# Perform the system call
+	syscall
+	
+	# Return to the calling function
+	jr	$31
+	nop
+	
+	.set 	reorder
+	.end 	vPortYield
 
 
    
