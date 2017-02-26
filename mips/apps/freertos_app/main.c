@@ -18,7 +18,7 @@
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
-#define TICK_THRESHOLD				(2)
+#define TICK_THRESHOLD				(250)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
@@ -180,9 +180,9 @@ int main()
 		configASSERT(sem_time_obj!=0);
 		xReturned = xTaskCreate(task_main_code,"main",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,5,&task_input_obj);
+		xReturned = xTaskCreate(task_input_code,"input",configMINIMAL_STACK_SIZE,0,3,&task_input_obj);
 		configASSERT(xReturned==pdPASS);
-		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,5,0);
+		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,3,0);
 		configASSERT(xReturned==pdPASS);
 	}
 
