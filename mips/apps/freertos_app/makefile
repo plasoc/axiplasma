@@ -1,12 +1,13 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-
-MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
-MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
+MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
+MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
+#MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
+#MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
 LDFLAGS = -static -lc
 ASFLAGS = 
 
@@ -16,7 +17,7 @@ PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_1.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
 
 # No user editing or variables below this line
 

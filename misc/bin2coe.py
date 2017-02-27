@@ -22,6 +22,8 @@ if __name__ == '__main__':
                     help='Swaps the bytes in each word')
     parser.add_argument('--word_count',metavar='word_count',type=int,nargs=1,
                     help='Numbers of words to store in coef from the binary.')
+    parser.add_argument('--full_count',metavar='full_count',type=int,nargs=1,default=[-1],
+                    help='Size of ram in number of words.')
     parser.add_argument('--vhdl_hex',dest='vhdl_hex',action='store_const',
 					const=True,default=False,
 					help='Generates VHDL package with hex.')
@@ -34,6 +36,7 @@ if __name__ == '__main__':
     plain_hex_flag = args.plain_hex
     try: word_count_value = args.word_count[0]
     except TypeError: word_count_value = -1
+    full_count_value = args.full_count[0]
     vhdl_hex = args.vhdl_hex
     if vhdl_hex: plain_hex_flag = True
     
@@ -48,12 +51,21 @@ if __name__ == '__main__':
     radix = 16
     # First open binary for reading and the coe file for writing.
     with open(binary_name,mode='rb') as binary_file, open(coe_name,mode='w') as coe_file:
+        # Acquire the binary file and determine the number of words in the file.
+        binary_content = binary_file.read()
+        words_in_binary = len(binary_content)/bytes_per_word
+        # If a word count is specified, update if the new word count is valid.
+        if word_count_value>=0 and word_count_value<words_in_binary:
+            words_in_binary = word_count_value
         # If plain hex is disabled, then insert the necessary headers into the coe files.
         if not plain_hex_flag:
             coe_file.write('memory_initialization_radix='+repr(radix)+';\n')
             coe_file.write('memory_initialization_vector=\n')
         # If VHDL flag is set, add the header to the package file.
         if vhdl_hex:
+            # Set the full count size to word count if a full count isn't specified.
+            if full_count_value<0: full_count_value = words_in_binary
+            # Add the header.
             coe_file.write( \
                 'library ieee;\n'+ \
                 'use ieee.std_logic_1164.all;\n'+ \
@@ -61,7 +73,7 @@ if __name__ == '__main__':
                 'package bram_pack is\n'+ \
                 '\n'+ \
                 '	constant cpu_width : integer := 32;\n'+ \
-                '	constant ram_size : integer := '+repr(word_count_value)+';\n'+ \
+                '	constant ram_size : integer := '+repr(full_count_value)+';\n'+ \
                 '	subtype word_type is std_logic_vector(cpu_width-1 downto 0);\n'+ \
                 '	type ram_type is array(0 to ram_size-1) of word_type;\n'+ \
                 '	function load_hex return ram_type;\n'+ \
@@ -73,13 +85,6 @@ if __name__ == '__main__':
                 '	function load_hex return ram_type is\n'+ \
                 '		variable ram_buffer : ram_type := (others=>(others=>\'0\'));\n'+ \
                 '	begin\n')
-
-        # Acquire the binary file and determine the number of words in the file.
-        binary_content = binary_file.read()
-        words_in_binary = len(binary_content)/bytes_per_word
-        # If a word count is specified, update if the new word count is valid.
-        if word_count_value>=0 and word_count_value<words_in_binary:
-            words_in_binary = word_count_value
         # Perform the following operations for each word in the binary.
         for each_word in range(words_in_binary):
             # Acquire the word and convert it to an integer.

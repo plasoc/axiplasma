@@ -42,8 +42,7 @@ void FreeRTOS_TickISR()
 /* This ISR is necessary to check for interrupts and execute context switches with FreeRTOS. */
 extern void FreeRTOS_UserISR() 
 { 
-	/* Interrupts should be serviced before the kernel 
-	 needs to perform its services. */
+	/* Interrupts should be serviced before the kernel performs its services. */
 	plasoc_int_service_interrupts(&int_obj); 
 
 	/* The FreeRTOS_Yield flag is defined in portmacro. This flag is needed
