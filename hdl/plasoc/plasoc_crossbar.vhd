@@ -145,11 +145,7 @@ architecture Behavioral of plasoc_crossbar is
             axi_address_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             axi_data_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             axi_response_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
-            
-            m_address_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-            m_data_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-            s_response_write_connected : in std_logic_vector(axi_slave_amount-1 downto 0);
-            
+
             s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);
@@ -174,13 +170,11 @@ architecture Behavioral of plasoc_crossbar is
             axi_address_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             axi_data_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             
-            m_address_read_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-            s_data_read_connected : in std_logic_vector(axi_slave_amount-1 downto 0);
-            
             s_axi_arvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             s_axi_rready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             m_axi_arready : in std_logic_vector(axi_master_amount*1-1 downto 0);
-            m_axi_rvalid : in std_logic_vector(axi_master_amount*1-1 downto 0));
+            m_axi_rvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);
+            m_axi_rlast : in std_logic_vector(axi_master_amount*1-1 downto 0));
     end component;
     
     function set_crossbar_enables( enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) ) return std_logic_vector is
@@ -322,9 +316,6 @@ begin
             axi_address_write_enables => axi_address_write_enables,
             axi_data_write_enables => axi_data_write_enables,
             axi_response_write_enables => axi_response_write_enables,
-            m_address_write_connected => m_address_write_connected_buff,
-            m_data_write_connected => m_data_write_connected_buff,
-            s_response_write_connected => s_response_write_connected_buff,
             s_axi_awvalid => s_axi_awvalid,
             s_axi_wvalid => s_axi_wvalid,
             s_axi_wlast => s_axi_wlast,
@@ -344,12 +335,11 @@ begin
             axi_read_slave_iden => axi_read_slave_iden,
             axi_address_read_enables => axi_address_read_enables,
             axi_data_read_enables => axi_data_read_enables,
-            m_address_read_connected => m_address_read_connected_buff,
-            s_data_read_connected => s_data_read_connected_buff,
             s_axi_arvalid => s_axi_arvalid,
             s_axi_rready => s_axi_rready,
             m_axi_arready => m_axi_arready,
-            m_axi_rvalid => m_axi_rvalid);
+            m_axi_rvalid => m_axi_rvalid,
+            m_axi_rlast => m_axi_rlast);
 
     generate_slave_idassigns:
     for each_slave in 0 to axi_slave_amount-1 generate

@@ -70,6 +70,7 @@ begin
     s_axi_arready <= s_axi_arready_buff;
     m_axi_arvalid <= m_axi_arvalid_buff;
     s_axi_rvalid <= s_axi_rvalid_buff;
+    s_axi_rlast <= s_axi_rvalid_buff;
     m_axi_rready <= m_axi_rready_buff;
     process (aclk)
     begin

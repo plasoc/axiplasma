@@ -23,10 +23,6 @@ entity plasoc_crossbar_axi4_write_cntrl is
         axi_data_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
         axi_response_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
         
-        m_address_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-        m_data_write_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-        s_response_write_connected : in std_logic_vector(axi_slave_amount-1 downto 0);
-        
         s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);

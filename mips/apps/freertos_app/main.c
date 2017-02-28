@@ -23,7 +23,7 @@
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
-#define TICK_THRESHOLD				(2)
+#define TICK_THRESHOLD				(250)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
