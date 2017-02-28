@@ -220,8 +220,8 @@ int main()
 		configASSERT(xReturned==pdPASS);
 		xReturned = xTaskCreate(task_time_code,"time",configMINIMAL_STACK_SIZE,0,5,0);
 		configASSERT(xReturned==pdPASS);
-		//xReturned = xTaskCreate(task_copy_code,"copy",configMINIMAL_STACK_SIZE,0,5,&task_copy_obj);
-		//configASSERT(xReturned==pdPASS);
+		xReturned = xTaskCreate(task_copy_code,"copy",configMINIMAL_STACK_SIZE,0,5,&task_copy_obj);
+		configASSERT(xReturned==pdPASS);
 	}
 
 	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */
