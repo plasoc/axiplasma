@@ -1,8 +1,8 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
-MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
-#MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
-#MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
+#MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
+#MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
+MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
+MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
