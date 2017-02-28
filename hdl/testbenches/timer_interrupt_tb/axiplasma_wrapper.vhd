@@ -207,7 +207,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_master_amount : integer := 5;
     constant axi_slave_amount : integer := 2;
     constant axi_slave_id_width : integer := 0;
-    constant axi_master_id_width : integer := clogb2(axi_slave_amount+1)+axi_slave_id_width;
+    constant axi_master_id_width : integer := clogb2(axi_slave_amount)+axi_slave_id_width;
     constant axi_lite_address_width : integer := 16;
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
@@ -598,6 +598,9 @@ begin
     int_dev_ints(0) <= timer_int;
     int_dev_ints(1) <= gpio_int;
     int_dev_ints(2) <= cdma_int;
+    
+    cdma_axi_full_awlock <= '0';
+    cdma_axi_full_arlock <= '0';
 
     -- Clock instantiation.
      clk_wiz_inst : clk_wiz_0  

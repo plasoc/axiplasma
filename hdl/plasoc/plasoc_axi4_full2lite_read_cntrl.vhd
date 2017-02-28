@@ -50,7 +50,7 @@ entity plasoc_axi4_full2lite_read_cntrl is
         s_axi_rlast : out std_logic;                                               
         s_axi_rvalid : out std_logic;                                               
         s_axi_rready : in std_logic;   
-        m_axi_araddr : out std_logic_vector(axi_address_width-1 downto 0);                 
+        m_axi_araddr : out std_logic_vector(axi_address_width-1 downto 0) := (others=>'0');                 
         m_axi_arprot : out std_logic_vector(2 downto 0);                                   
         m_axi_arvalid : out std_logic;                                                     
         m_axi_arready : in std_logic;                                                    

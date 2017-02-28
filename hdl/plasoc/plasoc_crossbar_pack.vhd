@@ -71,7 +71,7 @@ package plasoc_crossbar_pack is
             s_axi_rvalid : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
             s_axi_rready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             
-            m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                            
+            m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                            
             m_axi_awaddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
             m_axi_awlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                            
             m_axi_awsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                            
@@ -88,11 +88,11 @@ package plasoc_crossbar_pack is
             m_axi_wlast : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                
             m_axi_wvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                               
             m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                                
-            m_axi_bid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+            m_axi_bid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                                
             m_axi_bresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
             m_axi_bvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
             m_axi_bready : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                     
-            m_axi_arid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                              
+            m_axi_arid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                              
             m_axi_araddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
             m_axi_arlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                             
             m_axi_arsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                           
@@ -104,7 +104,7 @@ package plasoc_crossbar_pack is
             m_axi_arregion : out std_logic_vector(axi_master_amount*4-1 downto 0);                        
             m_axi_arvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                          
             m_axi_arready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                              
-            m_axi_rid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+            m_axi_rid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                                
             m_axi_rdata : in std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);                            
             m_axi_rresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
             m_axi_rlast : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
@@ -117,7 +117,7 @@ end package;
 
 package body plasoc_crossbar_pack is
 
-    function clogb2(bit_depth : in natural ) return integer is
+    function flogb2(bit_depth : in natural ) return integer is
 		variable result : integer := 0;
 		variable bit_depth_buff : integer := bit_depth;
 	begin
@@ -126,6 +126,17 @@ package body plasoc_crossbar_pack is
 			result := result+1;
 		end loop; 
 		return result;
-	end; 
+	end function flogb2; 
+	
+	function clogb2 (bit_depth : in natural ) return natural is
+		variable result : integer := 0;
+	begin
+		result := flogb2(bit_depth);
+		if (bit_depth > (2**result)) then
+			return(result + 1);
+		else
+			return result;
+		end if;
+	end function clogb2;
 	
 end;

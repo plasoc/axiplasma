@@ -199,7 +199,7 @@ def get_formatted_assignments(slave_names,master_names):
 def get_formatted_cross_signals():
 	lines = \
 	[\
-		'\tconstant axi_master_id_width : integer := clogb2(axi_slave_amount+1)+axi_slave_id_width;\n',\
+		'\tconstant axi_master_id_width : integer := clogb2(axi_slave_amount)+axi_slave_id_width;\n',\
 		'\tsignal s_axi_awid : std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);\n',\
 		'\tsignal s_axi_awaddr : std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);\n',\
 		'\tsignal s_axi_awlen : std_logic_vector(axi_slave_amount*8-1 downto 0);\n',\
@@ -239,7 +239,7 @@ def get_formatted_cross_signals():
 		'\tsignal s_axi_rlast : std_logic_vector(axi_slave_amount*1-1 downto 0);\n',\
 		'\tsignal s_axi_rvalid : std_logic_vector(axi_slave_amount*1-1 downto 0);\n',\
 		'\tsignal s_axi_rready : std_logic_vector(axi_slave_amount*1-1 downto 0);\n',\
-		'\tsignal m_axi_awid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);\n',\
+		'\tsignal m_axi_awid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);\n',\
 		'\tsignal m_axi_awaddr : std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);\n',\
 		'\tsignal m_axi_awlen : std_logic_vector(axi_master_amount*8-1 downto 0);\n',\
 		'\tsignal m_axi_awsize : std_logic_vector(axi_master_amount*3-1 downto 0);\n',\
@@ -256,11 +256,11 @@ def get_formatted_cross_signals():
 		'\tsignal m_axi_wlast : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
 		'\tsignal m_axi_wvalid : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
 		'\tsignal m_axi_wready : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
-		'\tsignal m_axi_bid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);\n',\
+		'\tsignal m_axi_bid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);\n',\
 		'\tsignal m_axi_bresp : std_logic_vector(axi_master_amount*2-1 downto 0);\n',\
 		'\tsignal m_axi_bvalid : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
 		'\tsignal m_axi_bready : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
-		'\tsignal m_axi_arid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);\n',\
+		'\tsignal m_axi_arid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);\n',\
 		'\tsignal m_axi_araddr : std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);\n',\
 		'\tsignal m_axi_arlen : std_logic_vector(axi_master_amount*8-1 downto 0);\n',\
 		'\tsignal m_axi_arsize : std_logic_vector(axi_master_amount*3-1 downto 0);\n',\
@@ -272,7 +272,7 @@ def get_formatted_cross_signals():
 		'\tsignal m_axi_arregion : std_logic_vector(axi_master_amount*4-1 downto 0);\n',\
 		'\tsignal m_axi_arvalid : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
 		'\tsignal m_axi_arready : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
-		'\tsignal m_axi_rid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);\n',\
+		'\tsignal m_axi_rid : std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);\n',\
 		'\tsignal m_axi_rdata : std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);\n',\
 		'\tsignal m_axi_rresp : std_logic_vector(axi_master_amount*2-1 downto 0);\n',\
 		'\tsignal m_axi_rlast : std_logic_vector(axi_master_amount*1-1 downto 0);\n',\
@@ -296,7 +296,7 @@ def get_formatted_wrapper_signals(names,ismaster=True,ntabs=1,issignals=False):
 		f0 = '_m_'
 		f1 = ' out '
 		f2 = ' in '
-		f3 = '(clogb2(axi_slave_amount+1)+axi_slave_id_width)'
+		f3 = '(clogb2(axi_slave_amount)+axi_slave_id_width)'
 	else:
 		f0 = '_s_'
 		f1 = ' in '
@@ -456,7 +456,7 @@ if __name__ == '__main__':
 		'end component;\n\n'+\
 		'end;\n\n'+\
 		'package body '+package_full_name+' is\n\n'+\
-		'	function clogb2(bit_depth : in natural ) return integer is\n'+\
+		'	function flogb2(bit_depth : in natural ) return integer is\n'+\
 		'		variable result : integer := 0;\n'+\
 		'		variable bit_depth_buff : integer := bit_depth;\n'+\
 		'	begin\n'+\
@@ -465,7 +465,18 @@ if __name__ == '__main__':
 		'			result := result+1;\n'+\
 		'		end loop; \n'+\
 		'		return result;\n'+\
-		'	end;\n'+\
+		'	end function flogb2; \n'+\
+		'	\n'+\
+		'	function clogb2 (bit_depth : in natural ) return natural is\n'+\
+		'		variable result : integer := 0;\n'+\
+		'	begin\n'+\
+		'		result := flogb2(bit_depth);\n'+\
+		'		if (bit_depth > (2**result)) then\n'+\
+		'			return(result + 1);\n'+\
+		'		else\n'+\
+		'			return result;\n'+\
+		'		end if;\n'+\
+		'	end function clogb2;\n'+\
 		'end;\n'
 		
 	# Generate entity string.

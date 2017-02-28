@@ -71,7 +71,7 @@ entity plasoc_crossbar is
         s_axi_rvalid : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
         s_axi_rready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         
-        m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                            
+        m_axi_awid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                            
         m_axi_awaddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
         m_axi_awlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                            
         m_axi_awsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                            
@@ -88,11 +88,11 @@ entity plasoc_crossbar is
         m_axi_wlast : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                
         m_axi_wvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                               
         m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                                
-        m_axi_bid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+        m_axi_bid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                                
         m_axi_bresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
         m_axi_bvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
         m_axi_bready : out std_logic_vector(axi_master_amount*1-1 downto 0);                                                     
-        m_axi_arid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                              
+        m_axi_arid : out std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                              
         m_axi_araddr : out std_logic_vector(axi_master_amount*axi_address_width-1 downto 0);                            
         m_axi_arlen : out std_logic_vector(axi_master_amount*8-1 downto 0);                             
         m_axi_arsize : out std_logic_vector(axi_master_amount*3-1 downto 0);                           
@@ -104,7 +104,7 @@ entity plasoc_crossbar is
         m_axi_arregion : out std_logic_vector(axi_master_amount*4-1 downto 0);                        
         m_axi_arvalid : out std_logic_vector(axi_master_amount*1-1 downto 0);                                          
         m_axi_arready : in std_logic_vector(axi_master_amount*1-1 downto 0);                                              
-        m_axi_rid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);                                
+        m_axi_rid : in std_logic_vector(axi_master_amount*(clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);                                
         m_axi_rdata : in std_logic_vector(axi_master_amount*axi_data_width-1 downto 0);                            
         m_axi_rresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
         m_axi_rlast : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
@@ -115,8 +115,8 @@ end plasoc_crossbar;
 
 architecture Behavioral of plasoc_crossbar is
 
-    constant axi_slave_iden_width : integer := clogb2(axi_slave_amount+1);
-    constant axi_master_iden_width : integer := clogb2(axi_master_amount+1);
+    constant axi_slave_iden_width : integer := clogb2(axi_slave_amount);
+    constant axi_master_iden_width : integer := clogb2(axi_master_amount);
     constant axi_master_id_width : integer := axi_slave_iden_width+axi_slave_id_width;
 
     component plasoc_crossbar_base is
@@ -139,8 +139,8 @@ architecture Behavioral of plasoc_crossbar is
             aclk : in std_logic;                                                    
             aresetn : in std_logic;
             
-            axi_write_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount+1)-1 downto 0);
-            axi_write_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount+1)-1 downto 0);
+            axi_write_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount)-1 downto 0);
+            axi_write_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount)-1 downto 0);
             
             axi_address_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             axi_data_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
@@ -167,8 +167,8 @@ architecture Behavioral of plasoc_crossbar is
             aclk : in std_logic;                                                    
             aresetn : in std_logic;
             
-            axi_read_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount+1)-1 downto 0);
-            axi_read_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount+1)-1 downto 0);
+            axi_read_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount)-1 downto 0);
+            axi_read_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount)-1 downto 0);
             
             axi_address_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
             axi_data_read_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
@@ -246,7 +246,7 @@ architecture Behavioral of plasoc_crossbar is
     begin
         for each_slave in 0 to axi_slave_amount-1 loop
             slave_address := address((1+each_slave)*axi_address_width-1 downto each_slave*axi_address_width);
-            for each_master in 0 to axi_master_amount -1 loop
+            for each_master in 0 to axi_master_amount-1 loop
                 master_base_address := base_addresses((1+each_master)*axi_address_width-1 downto each_master*axi_address_width);
                 master_high_address := high_addresses((1+each_master)*axi_address_width-1 downto each_master*axi_address_width);
                 if slave_address>=master_base_address and slave_address<=master_high_address then

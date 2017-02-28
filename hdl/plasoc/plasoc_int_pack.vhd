@@ -56,7 +56,7 @@ end;
 
 package body plasoc_int_pack is
 
-    function clogb2(bit_depth : in natural ) return integer is
+    function flogb2(bit_depth : in natural ) return integer is
 		variable result : integer := 0;
 		variable bit_depth_buff : integer := bit_depth;
 	begin
@@ -65,6 +65,17 @@ package body plasoc_int_pack is
 			result := result+1;
 		end loop; 
 		return result;
-	end; 
+	end function flogb2; 
+	
+	function clogb2 (bit_depth : in natural ) return natural is
+		variable result : integer := 0;
+	begin
+		result := flogb2(bit_depth);
+		if (bit_depth > (2**result)) then
+			return(result + 1);
+		else
+			return result;
+		end if;
+	end function clogb2;
 
 end;

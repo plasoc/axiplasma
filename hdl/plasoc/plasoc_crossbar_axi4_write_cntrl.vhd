@@ -16,8 +16,8 @@ entity plasoc_crossbar_axi4_write_cntrl is
         aclk : in std_logic;                                                    
         aresetn : in std_logic;
         
-        axi_write_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount+1)-1 downto 0);
-        axi_write_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount+1)-1 downto 0);
+        axi_write_master_iden : in std_logic_vector(axi_slave_amount*clogb2(axi_master_amount)-1 downto 0);
+        axi_write_slave_iden : in std_logic_vector(axi_master_amount*clogb2(axi_slave_amount)-1 downto 0);
         
         axi_address_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
         axi_data_write_enables : out std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
@@ -37,8 +37,8 @@ end plasoc_crossbar_axi4_write_cntrl;
 
 architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
 
-    constant axi_slave_iden_width : integer := clogb2(axi_slave_amount+1);
-    constant axi_master_iden_width : integer := clogb2(axi_master_amount+1);
+    constant axi_slave_iden_width : integer := clogb2(axi_slave_amount);
+    constant axi_master_iden_width : integer := clogb2(axi_master_amount);
     
     function get_slave_handshakes ( 
         valid : in std_logic_vector(axi_slave_amount-1 downto 0);

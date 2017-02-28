@@ -99,7 +99,7 @@ component plasoc_0_crossbar_wrap is
 		cdma_s_axi_rlast :  out  std_logic;
 		cdma_s_axi_rvalid :  out  std_logic;
 		cdma_s_axi_rready :  in  std_logic;
-		ram_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		ram_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		ram_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		ram_m_axi_awlen :  out  std_logic_vector(7 downto 0);
 		ram_m_axi_awsize :  out  std_logic_vector(2 downto 0);
@@ -116,11 +116,11 @@ component plasoc_0_crossbar_wrap is
 		ram_m_axi_wlast :  out  std_logic;
 		ram_m_axi_wvalid :  out  std_logic;
 		ram_m_axi_wready :  in  std_logic;
-		ram_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		ram_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		ram_m_axi_bresp :  in  std_logic_vector(1 downto 0);
 		ram_m_axi_bvalid :  in  std_logic;
 		ram_m_axi_bready :  out  std_logic;
-		ram_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		ram_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		ram_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		ram_m_axi_arlen :  out  std_logic_vector(7 downto 0);
 		ram_m_axi_arsize :  out  std_logic_vector(2 downto 0);
@@ -132,13 +132,13 @@ component plasoc_0_crossbar_wrap is
 		ram_m_axi_arregion :  out  std_logic_vector(3 downto 0);
 		ram_m_axi_arvalid :  out  std_logic;
 		ram_m_axi_arready :  in  std_logic;
-		ram_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		ram_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		ram_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
 		ram_m_axi_rresp :  in  std_logic_vector(1 downto 0);
 		ram_m_axi_rlast :  in  std_logic;
 		ram_m_axi_rvalid :  in  std_logic;
 		ram_m_axi_rready :  out  std_logic;
-		int_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		int_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		int_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		int_m_axi_awlen :  out  std_logic_vector(7 downto 0);
 		int_m_axi_awsize :  out  std_logic_vector(2 downto 0);
@@ -155,11 +155,11 @@ component plasoc_0_crossbar_wrap is
 		int_m_axi_wlast :  out  std_logic;
 		int_m_axi_wvalid :  out  std_logic;
 		int_m_axi_wready :  in  std_logic;
-		int_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		int_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		int_m_axi_bresp :  in  std_logic_vector(1 downto 0);
 		int_m_axi_bvalid :  in  std_logic;
 		int_m_axi_bready :  out  std_logic;
-		int_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		int_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		int_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		int_m_axi_arlen :  out  std_logic_vector(7 downto 0);
 		int_m_axi_arsize :  out  std_logic_vector(2 downto 0);
@@ -171,13 +171,13 @@ component plasoc_0_crossbar_wrap is
 		int_m_axi_arregion :  out  std_logic_vector(3 downto 0);
 		int_m_axi_arvalid :  out  std_logic;
 		int_m_axi_arready :  in  std_logic;
-		int_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		int_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		int_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
 		int_m_axi_rresp :  in  std_logic_vector(1 downto 0);
 		int_m_axi_rlast :  in  std_logic;
 		int_m_axi_rvalid :  in  std_logic;
 		int_m_axi_rready :  out  std_logic;
-		timer_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		timer_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		timer_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		timer_m_axi_awlen :  out  std_logic_vector(7 downto 0);
 		timer_m_axi_awsize :  out  std_logic_vector(2 downto 0);
@@ -194,11 +194,11 @@ component plasoc_0_crossbar_wrap is
 		timer_m_axi_wlast :  out  std_logic;
 		timer_m_axi_wvalid :  out  std_logic;
 		timer_m_axi_wready :  in  std_logic;
-		timer_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		timer_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		timer_m_axi_bresp :  in  std_logic_vector(1 downto 0);
 		timer_m_axi_bvalid :  in  std_logic;
 		timer_m_axi_bready :  out  std_logic;
-		timer_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		timer_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		timer_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		timer_m_axi_arlen :  out  std_logic_vector(7 downto 0);
 		timer_m_axi_arsize :  out  std_logic_vector(2 downto 0);
@@ -210,13 +210,13 @@ component plasoc_0_crossbar_wrap is
 		timer_m_axi_arregion :  out  std_logic_vector(3 downto 0);
 		timer_m_axi_arvalid :  out  std_logic;
 		timer_m_axi_arready :  in  std_logic;
-		timer_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		timer_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		timer_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
 		timer_m_axi_rresp :  in  std_logic_vector(1 downto 0);
 		timer_m_axi_rlast :  in  std_logic;
 		timer_m_axi_rvalid :  in  std_logic;
 		timer_m_axi_rready :  out  std_logic;
-		gpio_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		gpio_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		gpio_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		gpio_m_axi_awlen :  out  std_logic_vector(7 downto 0);
 		gpio_m_axi_awsize :  out  std_logic_vector(2 downto 0);
@@ -233,11 +233,11 @@ component plasoc_0_crossbar_wrap is
 		gpio_m_axi_wlast :  out  std_logic;
 		gpio_m_axi_wvalid :  out  std_logic;
 		gpio_m_axi_wready :  in  std_logic;
-		gpio_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		gpio_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		gpio_m_axi_bresp :  in  std_logic_vector(1 downto 0);
 		gpio_m_axi_bvalid :  in  std_logic;
 		gpio_m_axi_bready :  out  std_logic;
-		gpio_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		gpio_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		gpio_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		gpio_m_axi_arlen :  out  std_logic_vector(7 downto 0);
 		gpio_m_axi_arsize :  out  std_logic_vector(2 downto 0);
@@ -249,13 +249,13 @@ component plasoc_0_crossbar_wrap is
 		gpio_m_axi_arregion :  out  std_logic_vector(3 downto 0);
 		gpio_m_axi_arvalid :  out  std_logic;
 		gpio_m_axi_arready :  in  std_logic;
-		gpio_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		gpio_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		gpio_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
 		gpio_m_axi_rresp :  in  std_logic_vector(1 downto 0);
 		gpio_m_axi_rlast :  in  std_logic;
 		gpio_m_axi_rvalid :  in  std_logic;
 		gpio_m_axi_rready :  out  std_logic;
-		cdma_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		cdma_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		cdma_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		cdma_m_axi_awlen :  out  std_logic_vector(7 downto 0);
 		cdma_m_axi_awsize :  out  std_logic_vector(2 downto 0);
@@ -272,11 +272,11 @@ component plasoc_0_crossbar_wrap is
 		cdma_m_axi_wlast :  out  std_logic;
 		cdma_m_axi_wvalid :  out  std_logic;
 		cdma_m_axi_wready :  in  std_logic;
-		cdma_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		cdma_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		cdma_m_axi_bresp :  in  std_logic_vector(1 downto 0);
 		cdma_m_axi_bvalid :  in  std_logic;
 		cdma_m_axi_bready :  out  std_logic;
-		cdma_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		cdma_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		cdma_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
 		cdma_m_axi_arlen :  out  std_logic_vector(7 downto 0);
 		cdma_m_axi_arsize :  out  std_logic_vector(2 downto 0);
@@ -288,7 +288,7 @@ component plasoc_0_crossbar_wrap is
 		cdma_m_axi_arregion :  out  std_logic_vector(3 downto 0);
 		cdma_m_axi_arvalid :  out  std_logic;
 		cdma_m_axi_arready :  in  std_logic;
-		cdma_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount+1)+axi_slave_id_width)-1 downto 0);
+		cdma_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
 		cdma_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
 		cdma_m_axi_rresp :  in  std_logic_vector(1 downto 0);
 		cdma_m_axi_rlast :  in  std_logic;
@@ -303,7 +303,7 @@ end;
 
 package body plasoc_0_crossbar_wrap_pack is
 
-	function clogb2(bit_depth : in natural ) return integer is
+	function flogb2(bit_depth : in natural ) return integer is
 		variable result : integer := 0;
 		variable bit_depth_buff : integer := bit_depth;
 	begin
@@ -312,5 +312,16 @@ package body plasoc_0_crossbar_wrap_pack is
 			result := result+1;
 		end loop; 
 		return result;
-	end;
+	end function flogb2; 
+	
+	function clogb2 (bit_depth : in natural ) return natural is
+		variable result : integer := 0;
+	begin
+		result := flogb2(bit_depth);
+		if (bit_depth > (2**result)) then
+			return(result + 1);
+		else
+			return result;
+		end if;
+	end function clogb2;
 end;

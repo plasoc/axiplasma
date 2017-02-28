@@ -186,6 +186,7 @@ begin
     
     plasoc_axi4_full2lite_write_cntrl_inst : plasoc_axi4_full2lite_write_cntrl 
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_address_width,
             axi_data_width => axi_data_width)
         port map (
@@ -226,6 +227,7 @@ begin
             
     plasoc_axi4_full2lite_read_cntrl_inst : plasoc_axi4_full2lite_read_cntrl 
         generic map (
+            axi_slave_id_width => axi_slave_id_width,
             axi_address_width => axi_address_width,
             axi_data_width => axi_data_width)
         port map (
