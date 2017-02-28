@@ -201,11 +201,7 @@ begin
                 axi_address_read_enables_buff <= (others=>'0');
                 axi_data_read_enables_buff <= (others=>'0');
             else
-                axi_address_read_enables_buff <= set_slave_enables_ff(
-                address_slave_handshakes,
-                m_address_read_connected,
-                axi_read_master_iden,
-                axi_address_read_enables_buff);
+                axi_address_read_enables_buff <= set_slave_enables_ff(address_slave_handshakes,m_address_read_connected,axi_read_master_iden,axi_address_read_enables_buff);
                 axi_data_read_enables_buff <= set_master_enables_ff(data_master_handshakes,s_data_read_connected,axi_read_slave_iden,axi_data_read_enables_buff); 
             end if;
         end if;

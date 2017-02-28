@@ -152,6 +152,7 @@ architecture Behavioral of plasoc_crossbar is
             
             s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+            s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             s_axi_bready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
             m_axi_awready : in std_logic_vector(axi_master_amount*1-1 downto 0);
             m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);
@@ -326,6 +327,7 @@ begin
             s_response_write_connected => s_response_write_connected_buff,
             s_axi_awvalid => s_axi_awvalid,
             s_axi_wvalid => s_axi_wvalid,
+            s_axi_wlast => s_axi_wlast,
             s_axi_bready => s_axi_bready,
             m_axi_awready => m_axi_awready,
             m_axi_wready => m_axi_wready,

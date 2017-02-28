@@ -29,6 +29,7 @@ entity plasoc_crossbar_axi4_write_cntrl is
         
         s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         s_axi_bready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
         m_axi_awready : in std_logic_vector(axi_master_amount*1-1 downto 0);
         m_axi_wready : in std_logic_vector(axi_master_amount*1-1 downto 0);
@@ -39,6 +40,22 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
 
     constant axi_slave_iden_width : integer := clogb2(axi_slave_amount);
     constant axi_master_iden_width : integer := clogb2(axi_master_amount);
+    
+    function reduce_enables_master(
+        enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) ) return
+        std_logic_vector is
+        variable or_reduced : std_logic;
+        variable reduce_enables : std_logic_vector(axi_master_amount-1 downto 0);
+    begin
+        for each_master in 0 to axi_master_amount-1 loop
+            or_reduced := '0';
+            for each_slave in 0 to axi_slave_amount-1 loop
+                or_reduced := or_reduced or enables(each_slave+each_master*axi_slave_amount);
+            end loop;
+            reduce_enables(each_master) := or_reduced;
+        end loop;
+        return reduce_enables;
+    end;
     
     function get_slave_handshakes ( 
         valid : in std_logic_vector(axi_slave_amount-1 downto 0);
@@ -56,19 +73,23 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
         end loop;
         return slave_handshakes;
     end;
-    
-    function get_slave_permissions (
+  
+    function get_slave_address_permissions (
         slave_handshakes : in std_logic_vector(axi_slave_amount-1 downto 0);
         master_connected : in std_logic_vector(axi_master_amount-1 downto 0);
-        master_iden : in std_logic_vector(axi_slave_amount*axi_master_iden_width-1 downto 0)) return
+        master_iden : in std_logic_vector(axi_slave_amount*axi_master_iden_width-1 downto 0);
+        data_enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) ) return
         std_logic_vector is
+        variable reduced_data_enables : std_logic_vector(axi_master_amount-1 downto 0);
         variable master_iden_buff : integer range 0 to axi_master_amount-1;
         variable slave_permissions : std_logic_vector(axi_slave_amount-1 downto 0) := (others=>'0');
     begin
+        reduced_data_enables := reduce_enables_master(data_enables);
         for each_master in 0 to axi_master_amount-1 loop
             for each_slave in 0 to axi_slave_amount-1 loop
                 master_iden_buff := to_integer(unsigned(master_iden((1+each_slave)*axi_master_iden_width-1 downto each_slave*axi_master_iden_width)));
-                if each_master=master_iden_buff and slave_handshakes(each_slave)='1' and master_connected(master_iden_buff)='0' then
+                if each_master=master_iden_buff and slave_handshakes(each_slave)='1' and master_connected(master_iden_buff)='0' and
+                        reduced_data_enables(master_iden_buff)='0' then
                     slave_permissions(each_slave) := '1';
                     exit;
                 end if;
@@ -77,28 +98,56 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
         return slave_permissions;
     end;
     
-    function set_slave_enables_ff (
+    function set_slave_address_enables_ff (
         slave_handshakes : in std_logic_vector(axi_slave_amount-1 downto 0);
         master_connected : in std_logic_vector(axi_master_amount-1 downto 0);
         master_iden : in std_logic_vector(axi_slave_amount*axi_master_iden_width-1 downto 0);
-        enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0)) return 
+        data_enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+        address_enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) ) return 
         std_logic_vector is
         variable master_iden_buff : integer range 0 to axi_master_amount-1;
         variable slave_permissions : std_logic_vector(axi_slave_amount-1 downto 0);
-        variable enables_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := enables;
+        variable address_enables_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := address_enables;
     begin
-        slave_permissions := get_slave_permissions(slave_handshakes,master_connected,master_iden);
+        slave_permissions := get_slave_address_permissions(slave_handshakes,master_connected,master_iden,data_enables);
         for each_slave in 0 to axi_slave_amount-1 loop
             master_iden_buff := to_integer(unsigned(master_iden((1+each_slave)*axi_master_iden_width-1 downto each_slave*axi_master_iden_width)));
             if slave_permissions(each_slave)='1' then
-                enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '1';
+                address_enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '1';
             elsif slave_handshakes(each_slave)='0' then
                 for each_master in 0 to axi_master_amount-1 loop
-                    enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '0';
+                    address_enables_buff(each_slave+each_master*axi_slave_amount) := '0';
                 end loop;
             end if;
         end loop;
-        return enables_buff;
+        return address_enables_buff;
+    end;
+    
+    function set_slave_data_enables_ff (
+        data_slave_handshakes : in std_logic_vector(axi_slave_amount-1 downto 0);
+        address_slave_handshakes : in std_logic_vector(axi_slave_amount-1 downto 0);
+        master_connected : in std_logic_vector(axi_master_amount-1 downto 0);
+        master_iden : in std_logic_vector(axi_slave_amount*axi_master_iden_width-1 downto 0);
+        data_enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+        address_enables : in std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0);
+        data_last : in std_logic_vector(axi_slave_amount-1 downto 0)) return 
+        std_logic_vector is
+        variable master_iden_buff : integer range 0 to axi_master_amount-1;
+        variable slave_permissions : std_logic_vector(axi_slave_amount-1 downto 0);
+        variable data_enables_buff : std_logic_vector(axi_slave_amount*axi_master_amount-1 downto 0) := data_enables;
+    begin
+        slave_permissions := get_slave_address_permissions(address_slave_handshakes,master_connected,master_iden,data_enables);
+        for each_slave in 0 to axi_slave_amount-1 loop
+            master_iden_buff := to_integer(unsigned(master_iden((1+each_slave)*axi_master_iden_width-1 downto each_slave*axi_master_iden_width)));
+            if slave_permissions(each_slave)='1' then
+                data_enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '1';
+            elsif data_slave_handshakes(each_slave)='1' and data_last(each_slave)='1' then
+                for each_master in 0 to axi_master_amount-1 loop
+                    data_enables_buff(each_slave+each_master*axi_slave_amount) := '0';
+                end loop;
+            end if;
+        end loop;
+        return data_enables_buff;
     end;
     
     function get_master_handshakes ( 
@@ -161,7 +210,7 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
         end loop;
         return enables_buff;
     end;
-        
+    
     signal address_slave_handshakes : std_logic_vector(axi_slave_amount*1-1 downto 0);
     signal data_slave_handshakes : std_logic_vector(axi_slave_amount*1-1 downto 0);
     signal response_master_handshakes : std_logic_vector(axi_master_amount*1-1 downto 0);
@@ -196,8 +245,8 @@ begin
                 axi_data_write_enables_buff <= (others=>'0');
                 axi_response_write_enables_buff <= (others=>'0');
             else
-                axi_address_write_enables_buff <= set_slave_enables_ff(address_slave_handshakes,m_address_write_connected,axi_write_master_iden,axi_address_write_enables_buff);
-                axi_data_write_enables_buff <= set_slave_enables_ff(data_slave_handshakes,m_data_write_connected,axi_write_master_iden,axi_data_write_enables_buff);
+                axi_address_write_enables_buff <= set_slave_address_enables_ff(address_slave_handshakes,m_address_write_connected,axi_write_master_iden,axi_data_write_enables_buff,axi_address_write_enables_buff);
+                axi_data_write_enables_buff <= set_slave_data_enables_ff(data_slave_handshakes,address_slave_handshakes,m_data_write_connected,axi_write_master_iden,axi_data_write_enables_buff,axi_address_write_enables_buff,s_axi_wlast);
                 axi_response_write_enables_buff <= set_master_enables_ff(response_master_handshakes,s_response_write_connected,axi_write_slave_iden,axi_response_write_enables_buff); 
             end if;
         end if;
