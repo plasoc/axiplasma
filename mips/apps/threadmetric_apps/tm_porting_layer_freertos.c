@@ -177,9 +177,10 @@ void  tm_initialize(void (*test_initialization_function)(void))
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.   */
 int  tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
 {
+	typedef void (FreeRTOSCodeType)(void*);
 	BaseType_t xReturned; 
 	UBaseType_t xFreeRTOSPriority = (TM_MAX_PRIORITY-priority)*configMAX_PRIORITIES/(TM_MAX_PRIORITY-1);
-	xReturned = xTaskCreate(entry_function,NULL,TM_FREERTOS_THREAD_STACK_SIZE,NULL,xFreeRTOSPriotiy,tm_thread_array+thread_id);
+	xReturned = xTaskCreate((FreeRTOSCodeType*)entry_function,NULL,TM_FREERTOS_THREAD_STACK_SIZE,NULL,xFreeRTOSPriority,tm_thread_array+thread_id);
 	return (xReturned==pdPASS)?TM_SUCCESS:TM_ERROR;
 }
 
@@ -236,7 +237,7 @@ int  tm_queue_create(int queue_id)
 	QueueHandle_t queue_hdl;
 	queue_hdl = xQueueCreate(TM_FREERTOS_MAX_QUEUES,TM_FREERTOS_QUEUE_BYTES_PER_ITEM);
 	tm_queue_array[queue_id] = queue_hdl;
-	return (queue_hdl!=NULL)TM_SUCCESS:TM_ERROR;
+	return (queue_hdl!=NULL)?TM_SUCCESS:TM_ERROR;
 }
 
 
@@ -285,7 +286,7 @@ int  tm_semaphore_create(int semaphore_id)
 	SemaphoreHandle_t semphr_hdl;
 	semphr_hdl = xSemaphoreCreateCounting(1,1);
 	tm_semaphore_array[semaphore_id] = semphr_hdl;
-	return (semphr_hdl!=NULL)TM_SUCCESS:TM_ERROR;
+	return (semphr_hdl!=NULL)?TM_SUCCESS:TM_ERROR;
 }
 
 
@@ -345,7 +346,7 @@ int  tm_memory_pool_allocate(int pool_id, unsigned char **memory_ptr)
 	pool_ptr = pvPortMalloc(TM_FREERTOS_MEMORY_POOL_SIZE);
 	tm_block_pool_array[pool_id] = pool_ptr;
 	*memory_ptr = (unsigned char*)pool_ptr;
-	return (semphr_hdl!=NULL)TM_SUCCESS:TM_ERROR; 
+	return (pool_ptr!=NULL)?TM_SUCCESS:TM_ERROR; 
 }
 
 

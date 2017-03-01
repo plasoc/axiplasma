@@ -122,7 +122,8 @@ int status;
         /* Force an interrupt. The underlying RTOS must see that the 
            the interrupt handler is called from the appropriate software
            interrupt or trap. */
-        asm(" svc 0\n");    /* This is Cortex-M specific.  */
+		tm_thread_relinquish(); /* This is specific to the FreeRTOS Plasma-SoC port. */
+        /*asm(" svc 0\n");*/    /* This is Cortex-M specific.  */
 
         /* We won't get back here until the interrupt processing is complete,
            including the setting of the semaphore from the interrupt 
