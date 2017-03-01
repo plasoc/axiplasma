@@ -58,8 +58,9 @@ void            tm_interrupt_thread_report(void);
 
 
 /* Define the interrupt handler.  This must be called from the RTOS.  */
-
-void            tm_interrupt_handler(void);
+/* However, for the FreeRTOS Plasma-SoC port, the tm_interrupt_preemption_handler is used instead. */
+/* void            tm_interrupt_handler(void); */
+void 			tm_interrupt_preemption_handler(void);
 
 
 /* Define the initialization prototype.  */
@@ -140,8 +141,8 @@ int status;
 }
 
 
-/* void  tm_interrupt_preemption_handler(void)  */
-void SVC_Handler(void)        /* This is Cortex-M specific  */
+void  tm_interrupt_preemption_handler(void)  /* This is specific to the FreeRTOS Plasma-SoC port. */
+/* void SVC_Handler(void) */       /* This is Cortex-M specific  */
 {
 
     tm_interrupt_handler_counter++;     /* Increment the interrupt count.  */

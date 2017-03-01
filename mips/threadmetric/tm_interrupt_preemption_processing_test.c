@@ -120,6 +120,7 @@ void  tm_interrupt_preemption_thread_0_entry(void)
 }
 
 /* Define the thread that generates the interrupt.  */
+/* Modified for the FreeRTOS Plasma-SoC port. */
 void  tm_interrupt_preemption_thread_1_entry(void)
 {
 
@@ -129,7 +130,8 @@ void  tm_interrupt_preemption_thread_1_entry(void)
         /* Force an interrupt. The underlying RTOS must see that the 
            the interrupt handler is called from the appropriate software
            interrupt or trap. */
-        asm(" svc 0\n");    /* This is Cortex-M specific.  */
+		tm_thread_relinquish(); /* This is specific to the FreeRTOS Plasma-SoC port. */
+        /* asm(" svc 0\n"); */    /* This is Cortex-M specific.  */
 
       
         /* We won't get back here until the interrupt processing is complete,
@@ -145,9 +147,9 @@ void  tm_interrupt_preemption_thread_1_entry(void)
 /* Define the interrupt handler.  This must be called from the RTOS trap handler.
    To be fair, it must behave just like a processor interrupt, i.e. it must save
    the full context of the interrupted thread during the preemption processing. */
-   
-/* void  tm_interrupt_preemption_handler(void)  */
-void SVC_Handler(void)      /* This is Cortex-M specific  */
+/* MODIFIED FOR FREERTOS Plasma-SoC Port. */
+void  tm_interrupt_preemption_handler(void) 
+/* void SVC_Handler(void) */     /* This is Cortex-M specific  */
 {
 
     tm_interrupt_preemption_handler_counter++;      /* Increment the interrupt count.  */

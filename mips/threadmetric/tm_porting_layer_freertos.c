@@ -58,17 +58,13 @@
 #define TM_FREERTOS_MAX_SEMAPHORES       	(1)
 #define TM_FREERTOS_MAX_MEMORY_POOLS     	(1)
 
-/* Define the default FreeRTOS stack size. */
 #define TM_FREERTOS_THREAD_STACK_SIZE    	(512)
-
-/* Define the default FreeRTOS queue size. */
 #define TM_FREERTOS_QUEUE_SIZE           	(200)
 #define TM_FREERTOS_QUEUE_BYTES_PER_ITEM	(16)
-
-/* Define the number of timer interrupt ticks per second.  */
 #define TM_FREERTOS_TICKS_PER_SECOND    	(100)
-
 #define TM_FREERTOS_MEMORY_POOL_SIZE		(128)
+
+#define TM_MAX_PRIORITY						(31)
 
 /* Hardware specific defines. */
 #define PLASOC_INT_BASE_ADDRESS				(0x44a00000)
@@ -84,10 +80,20 @@ QueueHandle_t tm_queue_array[TM_FREERTOS_MAX_QUEUES];
 SemaphoreHandle_t tm_semaphore_array[TM_FREERTOS_MAX_SEMAPHORES];
 void* tm_block_pool_array[TM_FREERTOS_MAX_MEMORY_POOLS];
 
+/* This flag is necessary in order to indicate to 
+  to benchmark port functions when inside an interrupt. */
+volatile unsigned FreeRTOS_InsideInt = 0;
+
 /* Define Plasma-SoC objects. */
 plasoc_int int_obj;
 plasoc_timer timer_obj;
 plasoc_gpio gpio_obj;
+
+ __attribute__ ((weak))
+void  tm_interrupt_preemption_handler(void)
+{
+	/* This function can be overloaded by threadmetric. */
+}
 
 /* This ISR is necessary to ensure FreeRTOS runs in preemptive mode with
   time slices. */
@@ -100,9 +106,15 @@ void FreeRTOS_TickISR()
 /* This ISR is necessary to check for interrupts and execute context switches with FreeRTOS. */
 extern void FreeRTOS_UserISR() 
 { 
-	/* Interrupts should be serviced before the kernel performs its services. */
+	/* Interrupts should be serviced before the kernel performs its services. The FreeRTOS_InsideInt
+	  flag is necessary to tell the threadmetric port functions when they're being called from 
+	  within a ISR. The tm_interrupt_preemption_handler is the software interrupt handler needed for
+	  threadmetric. */
+	FreeRTOS_InsideInt = 1;
 	plasoc_int_service_interrupts(&int_obj); 
-
+	tm_interrupt_preemption_handler();
+	FreeRTOS_InsideInt = 0;
+	
 	/* The FreeRTOS_Yield flag is defined in portmacro. This flag is needed
 	 to force context switches from system and interrupt calls. */
 	if (FreeRTOS_Yield)
@@ -165,8 +177,9 @@ void  tm_initialize(void (*test_initialization_function)(void))
    the function should return TM_SUCCESS. Otherwise, TM_ERROR should be returned.   */
 int  tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
 {
-	BaseType_t xReturned;
-	xReturned = xTaskCreate(entry_function,NULL,TM_FREERTOS_THREAD_STACK_SIZE,NULL,priority,tm_thread_array+thread_id);
+	BaseType_t xReturned; 
+	UBaseType_t xFreeRTOSPriority = (TM_MAX_PRIORITY-priority)*configMAX_PRIORITIES/(TM_MAX_PRIORITY-1);
+	xReturned = xTaskCreate(entry_function,NULL,TM_FREERTOS_THREAD_STACK_SIZE,NULL,xFreeRTOSPriotiy,tm_thread_array+thread_id);
 	return (xReturned==pdPASS)?TM_SUCCESS:TM_ERROR;
 }
 
@@ -175,7 +188,16 @@ int  tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
    return TM_SUCCESS. Otherwise, TM_ERROR should be returned.  */
 int  tm_thread_resume(int thread_id)
 {
-	vTaskResume(tm_thread_array[thread_id]);
+	if (FreeRTOS_InsideInt)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xHigherPriorityTaskWoken = xTaskResumeFromISR(tm_thread_array[thread_id]);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+	else
+	{
+		vTaskResume(tm_thread_array[thread_id]);
+	}
 	return TM_SUCCESS;
 }
 
@@ -202,7 +224,7 @@ void tm_thread_relinquish(void)
    Otherwise, TM_ERROR should be returned.  */
 void tm_thread_sleep(int seconds)
 {
-	const TickType_t xDelay = (1000/portTICK_PERIOD_MS)*seconds;
+	const TickType_t xDelay = 1000*seconds/portTICK_PERIOD_MS;
 	vTaskDelay(xDelay);
 }
 
@@ -223,7 +245,16 @@ int  tm_queue_create(int queue_id)
 int  tm_queue_send(int queue_id, unsigned long *message_ptr)
 {
 	BaseType_t xReturned;
-	xReturned = xQueueSend(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
+	if (FreeRTOS_InsideInt)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xReturned = xQueueSendFromISR(tm_queue_array[queue_id],message_ptr,&xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+	else
+	{
+		xReturned = xQueueSend(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
+	}
 	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
 }
 
@@ -233,7 +264,16 @@ int  tm_queue_send(int queue_id, unsigned long *message_ptr)
 int  tm_queue_receive(int queue_id, unsigned long *message_ptr)
 {
 	BaseType_t xReturned;
-	xReturned = xQueueReceive(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
+	if (FreeRTOS_InsideInt)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xReturned = xQueueReceiveFromISR(tm_queue_array[queue_id],message_ptr,&xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+	else
+	{
+		xReturned = xQueueReceive(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
+	}
 	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
 }
 
@@ -243,7 +283,7 @@ int  tm_queue_receive(int queue_id, unsigned long *message_ptr)
 int  tm_semaphore_create(int semaphore_id)
 {
 	SemaphoreHandle_t semphr_hdl;
-	semphr_hdl = xSemaphoreCreateBinary();
+	semphr_hdl = xSemaphoreCreateCounting(1,1);
 	tm_semaphore_array[semaphore_id] = semphr_hdl;
 	return (semphr_hdl!=NULL)TM_SUCCESS:TM_ERROR;
 }
@@ -254,7 +294,16 @@ int  tm_semaphore_create(int semaphore_id)
 int  tm_semaphore_get(int semaphore_id)
 {
 	BaseType_t xReturned;
-	xReturned = xSemaphoreTake(tm_semaphore_array[semaphore_id],portMAX_DELAY);
+	if (FreeRTOS_InsideInt)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xReturned = xSemaphoreTakeFromISR(tm_semaphore_array[semaphore_id],&xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+	else
+	{
+		xReturned = xSemaphoreTake(tm_semaphore_array[semaphore_id],portMAX_DELAY);
+	}
 	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
 }
 
@@ -264,7 +313,16 @@ int  tm_semaphore_get(int semaphore_id)
 int  tm_semaphore_put(int semaphore_id)
 {
 	BaseType_t xReturned;
-	xReturned = xSemaphoreGive(tm_semaphore_array[semaphore_id]);
+	if (FreeRTOS_InsideInt)
+	{
+		BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+		xReturned = xSemaphoreGiveFromISR(tm_semaphore_array[semaphore_id],&xHigherPriorityTaskWoken);
+		portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+	}
+	else
+	{
+		xReturned = xSemaphoreGive(tm_semaphore_array[semaphore_id]);
+	}
 	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
 }
 
