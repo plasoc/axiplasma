@@ -28,7 +28,6 @@ entity soc_uart_axi4_write_cntrl is
         axi_bready : in std_logic;
         axi_bresp : out std_logic_vector(1 downto 0);
         reg_control_enable_int_in_avail : out std_logic;
-        reg_in_fifo : out std_logic_vector(7 downto 0);
         reg_out_fifo : out std_logic_vector(7 downto 0);
         reg_out_fifo_valid : out std_logic;
         reg_out_fifo_ready : in std_logic);
@@ -63,7 +62,7 @@ architecture Behavioral of soc_uart_axi4_write_cntrl is
     signal axi_bvalid_buff : std_logic := '0';
     
     signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-    signal reg_in_fifo_buff : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
+    signal reg_in_fifo : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
     
     signal in_fifo : std_logic_vector(7 downto 0);
     signal in_valid : std_logic := '0';
@@ -82,7 +81,7 @@ begin
     reg_out_fifo_valid <=  not out_not_valid;
     out_ready <= not reg_out_fifo_ready;
     
-    in_fifo <= reg_in_fifo_buff(7 downto 0);
+    in_fifo <= reg_in_fifo(7 downto 0);
 
     soc_uart_fifo_inst : soc_uart_fifo 
         generic map (
@@ -107,7 +106,7 @@ begin
                 axi_wready_buff <= '0';
                 axi_bvalid_buff <= '0';
                 reg_control <= (others=>'0');
-                reg_in_fifo_buff <= (others=>'0');
+                reg_in_fifo <= (others=>'0');
                 in_valid <= '0';
                 state <= state_wait;
             else
@@ -130,7 +129,7 @@ begin
                                     reg_control(7+each_byte*8 downto each_byte*8) <=
                                         axi_wdata(7+each_byte*8 downto each_byte*8);
                                 elsif axi_awaddr_buff=reg_out_fifo_offset and in_not_ready='0' then
-                                    reg_in_fifo_buff(7+each_byte*8 downto each_byte*8) <=
+                                    reg_in_fifo(7+each_byte*8 downto each_byte*8) <=
                                         axi_wdata(7+each_byte*8 downto each_byte*8);
                                     in_valid <= '1';
                                 end if;
