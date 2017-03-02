@@ -8,9 +8,8 @@ entity soc_uart_axi4_write_cntrl is
         axi_address_width : integer := 16;
         axi_data_width : integer := 32;
         reg_control_offset : std_logic_vector := X"0000";
-        reg_control_enable_int_in_avail_bit_loc : integer := 0;
-        reg_control_status_in_avail_bit_loc : integer := 1;
-        reg_control_status_out_full_bit_loc : integer := 2;
+        reg_control_status_in_avail_bit_loc : integer := 0;
+        reg_control_status_out_avail_bit_loc : integer := 1;
         reg_in_fifo_offset : std_logic_vector := X"0004";
         reg_out_fifo_offset : std_logic_vector := X"0008");
     port (
@@ -27,10 +26,10 @@ entity soc_uart_axi4_write_cntrl is
         axi_bvalid : out std_logic;
         axi_bready : in std_logic;
         axi_bresp : out std_logic_vector(1 downto 0);
-        reg_control_enable_int_in_avail : out std_logic;
         reg_out_fifo : out std_logic_vector(7 downto 0);
         reg_out_fifo_valid : out std_logic;
-        reg_out_fifo_ready : in std_logic);
+        reg_out_fifo_ready : in std_logic;
+        reg_in_avail : out std_logic);
 end soc_uart_axi4_write_cntrl;
 
 architecture Behavioral of soc_uart_axi4_write_cntrl is
@@ -61,7 +60,6 @@ architecture Behavioral of soc_uart_axi4_write_cntrl is
     signal axi_wready_buff : std_logic := '0';
     signal axi_bvalid_buff : std_logic := '0';
     
-    signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
     signal reg_in_fifo : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
     
     signal in_fifo : std_logic_vector(7 downto 0);
@@ -76,7 +74,7 @@ begin
     axi_bvalid <= axi_bvalid_buff;
     axi_bresp <= axi_resp_okay;
     
-    reg_control_enable_int_in_avail <= reg_control(reg_control_enable_int_in_avail_bit_loc);
+    reg_in_avail <= not in_not_ready;
     reg_out_fifo <= out_fifo;
     reg_out_fifo_valid <=  not out_not_valid;
     out_ready <= not reg_out_fifo_ready;
@@ -105,7 +103,6 @@ begin
                 axi_awready_buff <= '0';
                 axi_wready_buff <= '0';
                 axi_bvalid_buff <= '0';
-                reg_control <= (others=>'0');
                 reg_in_fifo <= (others=>'0');
                 in_valid <= '0';
                 state <= state_wait;
@@ -125,10 +122,7 @@ begin
                         axi_wready_buff <= '0';
                         for each_byte in 0 to axi_data_width/8-1 loop
                             if axi_wstrb(each_byte)='1' then
-                                if axi_awaddr_buff=reg_control_offset then
-                                    reg_control(7+each_byte*8 downto each_byte*8) <=
-                                        axi_wdata(7+each_byte*8 downto each_byte*8);
-                                elsif axi_awaddr_buff=reg_out_fifo_offset and in_not_ready='0' then
+                                if axi_awaddr_buff=reg_out_fifo_offset and in_not_ready='0' then
                                     reg_in_fifo(7+each_byte*8 downto each_byte*8) <=
                                         axi_wdata(7+each_byte*8 downto each_byte*8);
                                     in_valid <= '1';

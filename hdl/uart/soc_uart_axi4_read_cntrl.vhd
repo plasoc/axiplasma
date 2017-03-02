@@ -8,9 +8,8 @@ entity soc_uart_axi4_read_cntrl is
         axi_address_width : integer := 16;
         axi_data_width : integer := 32;
         reg_control_offset : std_logic_vector := X"0000";
-        reg_control_enable_int_in_avail_bit_loc : integer := 0;
-        reg_control_status_in_avail_bit_loc : integer := 1;
-        reg_control_status_out_full_bit_loc : integer := 2;
+        reg_control_status_in_avail_bit_loc : integer := 0;
+        reg_control_status_out_avail_bit_loc : integer := 1;
         reg_in_fifo_offset : std_logic_vector := X"0004";
         reg_out_fifo_offset : std_logic_vector := X"0008");
     port (
@@ -23,11 +22,12 @@ entity soc_uart_axi4_read_cntrl is
         axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
         axi_rvalid : out std_logic;
         axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0);        
-        reg_control_enable_int_in_avail : in std_logic;  
-        reg_control_status_in_avail : in std_logic;
-        reg_control_status_out_full : in std_logic;
-        reg_in_fifo : in std_logic_vector(7 downto 0));
+        axi_rresp : out std_logic_vector(1 downto 0);
+        reg_control_status_in_avail : out std_logic;
+        reg_control_status_out_avail : in std_logic;
+        reg_in_fifo : in std_logic_vector(7 downto 0);
+        reg_in_valid : in std_logic;
+        reg_in_ready : out std_logic);
 end soc_uart_axi4_read_cntrl;
 
 architecture Behavioral of soc_uart_axi4_read_cntrl is
@@ -58,7 +58,12 @@ architecture Behavioral of soc_uart_axi4_read_cntrl is
     signal axi_araddr_buff : std_logic_vector(axi_address_width-1 downto 0);
     
     signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-    signal reg_in_fifo_buff : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
+    signal reg_out_fifo_buff : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
+    
+    signal out_fifo : std_logic_vector(7 downto 0);
+    signal out_ready : std_logic := '0';
+    signal in_not_ready : std_logic;
+    signal out_not_valid : std_logic;
     
 begin
 
@@ -66,10 +71,26 @@ begin
     axi_rvalid <= axi_rvalid_buff;
     axi_rresp <= axi_resp_okay;
     
-    reg_control(reg_control_enable_int_in_avail_bit_loc) <= reg_control_enable_int_in_avail;
-    reg_control(reg_control_status_in_avail_bit_loc) <= reg_control_status_in_avail;
-    reg_control(reg_control_status_out_full_bit_loc) <= reg_control_status_out_full;
-    reg_in_fifo_buff(7 downto 0) <= reg_in_fifo;
+    reg_control_status_in_avail <= not out_not_valid;
+    reg_control(reg_control_status_in_avail_bit_loc) <= not out_not_valid;
+    reg_control(reg_control_status_out_avail_bit_loc) <= reg_control_status_out_avail;
+    reg_out_fifo_buff(7 downto 0) <= out_fifo;
+    reg_in_ready <= not in_not_ready;
+    
+    soc_uart_fifo_inst : soc_uart_fifo
+        generic map (
+            FIFO_WIDTH => 8,
+            FIFO_DEPTH => fifo_depth)
+        port map (
+            clock => aclk,
+            nreset => aresetn,
+            write_data => reg_in_fifo,
+            read_data => out_fifo,
+            write_en => reg_in_valid,
+            read_en => out_ready,
+            full => in_not_ready,
+            empty => out_not_valid,
+            level => open);
     
     process (aclk)
     begin
@@ -77,6 +98,7 @@ begin
             if aresetn='0' then
                 axi_arready_buff <= '0';
                 axi_rvalid_buff <= '0';
+                out_ready <= '0';
                 state <= state_wait;
             else
                 case state is
@@ -96,11 +118,16 @@ begin
                         axi_rvalid_buff <= '1';
                         if axi_araddr_buff=reg_control_offset then 
                             axi_rdata <= reg_control;
-                        elsif axi_araddr_buff=reg_in_fifo_buff then
-                            axi_rdata <= reg_data_in;
+                        elsif axi_araddr_buff=reg_in_fifo_offset and out_not_valid='0' then
+                            axi_rdata <= reg_out_fifo_buff;
                         else
                             axi_rdata <= (others=>'0');
                         end if;
+                    end if;
+                    if axi_rvalid_buff='0' and axi_araddr_buff=reg_in_fifo_offset and out_not_valid='0' then
+                        out_ready <= '1';
+                    else
+                        out_ready <= '0';
                     end if;
                 end case;
             end if;
