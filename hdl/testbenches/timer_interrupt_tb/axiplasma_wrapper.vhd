@@ -208,7 +208,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_slave_amount : integer := 2;
     constant axi_slave_id_width : integer := 0;
     constant axi_master_id_width : integer := clogb2(axi_slave_amount)+axi_slave_id_width;
-    constant axi_lite_address_width : integer := 16;
+    constant axi_lite_address_width : integer := 16; -- a misnomer. 
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
     signal cross_aresetn : std_logic_vector(0 downto 0);
@@ -330,26 +330,6 @@ architecture Behavioral of axiplasma_wrapper is
     signal ram_axi_full_rlast : std_logic;
     signal ram_axi_full_rvalid : std_logic;
     signal ram_axi_full_rready : std_logic;
-    signal ram_axi_full_1_awid : std_logic_vector(axi_master_id_width-1 downto 0);
-    signal ram_axi_full_1_awaddr : std_logic_vector(axi_lite_address_width-1 downto 0);
-    signal ram_axi_full_1_awlen : std_logic_vector(7 downto 0);
-    signal ram_axi_full_1_awsize : std_logic_vector(2 downto 0);
-    signal ram_axi_full_1_awburst : std_logic_vector(1 downto 0);
-    signal ram_axi_full_1_awlock : std_logic;
-    signal ram_axi_full_1_awcache : std_logic_vector(3 downto 0);
-    signal ram_axi_full_1_awprot : std_logic_vector(2 downto 0);
-    signal ram_axi_full_1_awvalid : std_logic;
-    signal ram_axi_full_1_awready : std_logic;
-    signal ram_axi_full_1_arid : std_logic_vector(axi_master_id_width-1 downto 0);
-    signal ram_axi_full_1_araddr : std_logic_vector(axi_lite_address_width-1 downto 0);
-    signal ram_axi_full_1_arlen : std_logic_vector(7 downto 0);
-    signal ram_axi_full_1_arsize : std_logic_vector(2 downto 0);
-    signal ram_axi_full_1_arburst : std_logic_vector(1 downto 0);
-    signal ram_axi_full_1_arlock : std_logic;
-    signal ram_axi_full_1_arcache : std_logic_vector(3 downto 0);
-    signal ram_axi_full_1_arprot : std_logic_vector(2 downto 0);
-    signal ram_axi_full_1_arvalid : std_logic;
-    signal ram_axi_full_1_arready : std_logic;
     signal ram_bram_rst_a : STD_LOGIC;
     signal ram_bram_clk_a : STD_LOGIC;
     signal ram_bram_en_a : STD_LOGIC;
@@ -1216,13 +1196,10 @@ begin
             m_axi_rready => cdmareg_axi_lite_rready,
             m_axi_rresp => cdmareg_axi_lite_rresp);
             
-    ram_address_cntrl_inst : axi_bram_address_cntrl
-        generic map (
-            axi_id_width => axi_master_id_width,
-            axi_address_width => axi_lite_address_width)
+    ram_cntrl_inst : axi_bram_ctrl_0
         port map (
-            aclk => aclk,
-            aresetn => aresetn(0),
+            s_axi_aclk => aclk,
+            s_axi_aresetn => aresetn(0),
             s_axi_awid => ram_axi_full_awid,
             s_axi_awaddr => ram_axi_full_awaddr(axi_lite_address_width-1 downto 0),
             s_axi_awlen => ram_axi_full_awlen,
@@ -1233,16 +1210,15 @@ begin
             s_axi_awprot => ram_axi_full_awprot,
             s_axi_awvalid => ram_axi_full_awvalid,
             s_axi_awready => ram_axi_full_awready,
-            m_axi_awid => ram_axi_full_1_awid,
-            m_axi_awaddr => ram_axi_full_1_awaddr,
-            m_axi_awlen => ram_axi_full_1_awlen,
-            m_axi_awsize => ram_axi_full_1_awsize,
-            m_axi_awburst => ram_axi_full_1_awburst,
-            m_axi_awlock => ram_axi_full_1_awlock,
-            m_axi_awcache => ram_axi_full_1_awcache,
-            m_axi_awprot => ram_axi_full_1_awprot,
-            m_axi_awvalid => ram_axi_full_1_awvalid,
-            m_axi_awready => ram_axi_full_1_awready,
+            s_axi_wdata => ram_axi_full_wdata,
+            s_axi_wstrb => ram_axi_full_wstrb,
+            s_axi_wlast => ram_axi_full_wlast,
+            s_axi_wvalid => ram_axi_full_wvalid,
+            s_axi_wready => ram_axi_full_wready,
+            s_axi_bid => ram_axi_full_bid,
+            s_axi_bresp => ram_axi_full_bresp,
+            s_axi_bvalid => ram_axi_full_bvalid,
+            s_axi_bready => ram_axi_full_bready,
             s_axi_arid => ram_axi_full_arid,
             s_axi_araddr => ram_axi_full_araddr(axi_lite_address_width-1 downto 0),
             s_axi_arlen => ram_axi_full_arlen,
@@ -1253,50 +1229,6 @@ begin
             s_axi_arprot => ram_axi_full_arprot,
             s_axi_arvalid => ram_axi_full_arvalid,
             s_axi_arready => ram_axi_full_arready,
-            m_axi_arid => ram_axi_full_1_arid,
-            m_axi_araddr => ram_axi_full_1_araddr,
-            m_axi_arlen => ram_axi_full_1_arlen,
-            m_axi_arsize => ram_axi_full_1_arsize,
-            m_axi_arburst => ram_axi_full_1_arburst,
-            m_axi_arlock => ram_axi_full_1_arlock,
-            m_axi_arcache => ram_axi_full_1_arcache,
-            m_axi_arprot => ram_axi_full_1_arprot,
-            m_axi_arvalid => ram_axi_full_1_arvalid,
-            m_axi_arready => ram_axi_full_1_arready); 
-            
-    ram_cntrl_inst : axi_bram_ctrl_0
-        port map (
-            s_axi_aclk => aclk,
-            s_axi_aresetn => aresetn(0),
-            s_axi_awid => ram_axi_full_1_awid,
-            s_axi_awaddr => ram_axi_full_1_awaddr,
-            s_axi_awlen => ram_axi_full_1_awlen,
-            s_axi_awsize => ram_axi_full_1_awsize,
-            s_axi_awburst => ram_axi_full_1_awburst,
-            s_axi_awlock => ram_axi_full_1_awlock,
-            s_axi_awcache => ram_axi_full_1_awcache,
-            s_axi_awprot => ram_axi_full_1_awprot,
-            s_axi_awvalid => ram_axi_full_1_awvalid,
-            s_axi_awready => ram_axi_full_1_awready,
-            s_axi_wdata => ram_axi_full_wdata,
-            s_axi_wstrb => ram_axi_full_wstrb,
-            s_axi_wlast => ram_axi_full_wlast,
-            s_axi_wvalid => ram_axi_full_wvalid,
-            s_axi_wready => ram_axi_full_wready,
-            s_axi_bid => ram_axi_full_bid,
-            s_axi_bresp => ram_axi_full_bresp,
-            s_axi_bvalid => ram_axi_full_bvalid,
-            s_axi_bready => ram_axi_full_bready,
-            s_axi_arid => ram_axi_full_1_arid,
-            s_axi_araddr => ram_axi_full_1_araddr,
-            s_axi_arlen => ram_axi_full_1_arlen,
-            s_axi_arsize => ram_axi_full_1_arsize,
-            s_axi_arburst => ram_axi_full_1_arburst,
-            s_axi_arlock => ram_axi_full_1_arlock,
-            s_axi_arcache => ram_axi_full_1_arcache,
-            s_axi_arprot => ram_axi_full_1_arprot,
-            s_axi_arvalid => ram_axi_full_1_arvalid,
-            s_axi_arready => ram_axi_full_1_arready,
             s_axi_rid => ram_axi_full_rid,
             s_axi_rdata => ram_axi_full_rdata,
             s_axi_rresp => ram_axi_full_rresp,
