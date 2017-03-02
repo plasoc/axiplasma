@@ -1,6 +1,9 @@
-
+library ieee;
+use ieee.std_logic_1164.all;
 
 package soc_uart_pack is
+
+    constant axi_resp_okay : std_logic_vector := "00";
 
     function clogb2(bit_depth : in integer ) return integer;
 

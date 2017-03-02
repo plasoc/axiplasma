@@ -29,7 +29,7 @@ library ieee;
     use ieee.numeric_std.all;
     use work.soc_uart_pack.all;
 
-entity uart is
+entity soc_uart_core is
     generic (
         baud                : positive;
         clock_frequency     : positive
@@ -45,9 +45,9 @@ entity uart is
         tx                  :   out std_logic;
         rx                  :   in  std_logic
     );
-end uart;
+end soc_uart_core;
 
-architecture rtl of uart is
+architecture rtl of soc_uart_core is
     ---------------------------------------------------------------------------
     -- Baud generation constants
     ---------------------------------------------------------------------------
