@@ -86,7 +86,7 @@ architecture Behavioral of plasoc_crossbar_axi4_read_cntrl is
     end;
     
     function get_slave_permissions (
-        address_slave_handshakes : in std_logic_vector(axi_slave_amount-1 downto 0);
+        slave_valid : in std_logic_vector(axi_slave_amount-1 downto 0);
         master_iden : in std_logic_vector(axi_slave_amount*axi_master_iden_width-1 downto 0);
         reduced_address_enables : in std_logic_vector(axi_master_amount-1 downto 0) ) return
         std_logic_vector is
@@ -96,7 +96,7 @@ architecture Behavioral of plasoc_crossbar_axi4_read_cntrl is
         for each_master in 0 to axi_master_amount-1 loop
             for each_slave in 0 to axi_slave_amount-1 loop
                 master_iden_buff := to_integer(unsigned(master_iden((1+each_slave)*axi_master_iden_width-1 downto each_slave*axi_master_iden_width)));
-                if each_master=master_iden_buff and address_slave_handshakes(each_slave)='1' and reduced_address_enables(master_iden_buff)='0' then
+                if each_master=master_iden_buff and slave_valid(each_slave)='1' and reduced_address_enables(master_iden_buff)='0' then
                     slave_permissions(each_slave) := '1';
                     exit;
                 end if;
@@ -160,7 +160,7 @@ architecture Behavioral of plasoc_crossbar_axi4_read_cntrl is
     end;
     
     function get_master_permissions (
-        response_master_handshakes : in std_logic_vector(axi_master_amount-1 downto 0);
+        master_valid : in std_logic_vector(axi_master_amount-1 downto 0);
         slave_iden : in std_logic_vector(axi_master_amount*axi_slave_iden_width-1 downto 0);
         reduced_data_enables : in std_logic_vector(axi_slave_amount-1 downto 0) ) return
         std_logic_vector is
@@ -170,7 +170,7 @@ architecture Behavioral of plasoc_crossbar_axi4_read_cntrl is
         for each_slave in 0 to axi_slave_amount-1 loop
             for each_master in 0 to axi_master_amount-1 loop
                 slave_iden_buff := to_integer(unsigned(slave_iden((1+each_master)*axi_slave_iden_width-1 downto each_master*axi_slave_iden_width)));
-                if each_slave=slave_iden_buff and response_master_handshakes(each_master)='1' and reduced_data_enables(slave_iden_buff)='0' then
+                if each_slave=slave_iden_buff and master_valid(each_master)='1' and reduced_data_enables(slave_iden_buff)='0' then
                     master_permissions(each_master) := '1';
                     exit;
                 end if;
@@ -223,9 +223,9 @@ begin
     begin
         reduced_address_read_enables <= reduce_enables_master(axi_address_read_enables_buff);
     end process;
-    process (address_slave_handshakes,axi_read_master_iden,reduced_address_read_enables)
+    process (s_axi_arvalid,axi_read_master_iden,reduced_address_read_enables)
     begin
-        slave_permissions <= get_slave_permissions(address_slave_handshakes,axi_read_master_iden,reduced_address_read_enables);
+        slave_permissions <= get_slave_permissions(s_axi_arvalid,axi_read_master_iden,reduced_address_read_enables);
     end process;
     
     process (m_axi_rvalid,s_axi_rready,axi_read_slave_iden)
@@ -236,9 +236,9 @@ begin
     begin
         reduced_data_read_enables <= reduce_enables_slave(axi_data_read_enables_buff);
     end process;
-    process (data_master_handshakes,axi_read_slave_iden,reduced_data_read_enables)
+    process (m_axi_rvalid,axi_read_slave_iden,reduced_data_read_enables)
     begin
-        master_permissions <= get_master_permissions(data_master_handshakes,axi_read_slave_iden,reduced_data_read_enables);
+        master_permissions <= get_master_permissions(m_axi_rvalid,axi_read_slave_iden,reduced_data_read_enables);
     end process;
     
     process (aclk)
