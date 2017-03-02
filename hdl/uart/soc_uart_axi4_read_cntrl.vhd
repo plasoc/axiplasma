@@ -105,29 +105,24 @@ begin
                 when state_wait=>
                     if axi_arvalid='1' and axi_arready_buff='1' then
                         axi_arready_buff <= '0';
-                        axi_araddr_buff <= axi_araddr;
+                        out_ready <= '1';
+                        axi_rvalid_buff <= '1';
+                        if axi_araddr=reg_control_offset then 
+                            axi_rdata <= reg_control;
+                        elsif axi_araddr=reg_in_fifo_offset and out_not_valid='0' then
+                            axi_rdata <= reg_out_fifo_buff;
+                        else
+                            axi_rdata <= (others=>'0');
+                        end if;
                         state <= state_read;
                     else
                         axi_arready_buff <= '1';
                     end if;
                 when state_read=>
+                    out_ready <= '0';
                     if axi_rvalid_buff='1' and axi_rready='1' then
                         axi_rvalid_buff <= '0';
                         state <= state_wait;
-                    else
-                        axi_rvalid_buff <= '1';
-                        if axi_araddr_buff=reg_control_offset then 
-                            axi_rdata <= reg_control;
-                        elsif axi_araddr_buff=reg_in_fifo_offset and out_not_valid='0' then
-                            axi_rdata <= reg_out_fifo_buff;
-                        else
-                            axi_rdata <= (others=>'0');
-                        end if;
-                    end if;
-                    if axi_rvalid_buff='0' and axi_araddr_buff=reg_in_fifo_offset and out_not_valid='0' then
-                        out_ready <= '1';
-                    else
-                        out_ready <= '0';
                     end if;
                 end case;
             end if;

@@ -35,7 +35,8 @@ set_property -dict { PACKAGE_PIN V14   IOSTANDARD LVCMOS33 } [get_ports { gpio_o
 set_property -dict { PACKAGE_PIN V12   IOSTANDARD LVCMOS33 } [get_ports { gpio_output[14] }]; #IO_L20N_T3_A07_D23_14 Sch=led[14]
 set_property -dict { PACKAGE_PIN V11   IOSTANDARD LVCMOS33 } [get_ports { gpio_output[15] }]; #IO_L21N_T3_DQS_A06_D22_14 Sch=led[15]
 
-#set_false_path -from [get_pins raw_clock] -to [get_pins ip_block_design_wrapper_inst/ip_block_design_i/clk_wiz_0/inst/mmcm_adv_inst/CLKIN1]
+set_property -dict {PACKAGE_PIN C4 IOSTANDARD LVCMOS33} [get_ports { uart_rx }];
+set_property -dict {PACKAGE_PIN D4 IOSTANDARD LVCMOS33} [get_ports { uart_tx }];
 
 create_clock -period 20.000 -name VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0 -waveform {0.000 10.000}
 set_input_delay -clock [get_clocks VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0] -min -add_delay 2.000 [get_ports {gpio_input[*]}]
@@ -44,3 +45,9 @@ set_input_delay -clock [get_clocks VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0]
 set_input_delay -clock [get_clocks VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0] -max -add_delay 2.000 [get_ports raw_nreset]
 set_output_delay -clock [get_clocks VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0] -min -add_delay 0.000 [get_ports {gpio_output[*]}]
 set_output_delay -clock [get_clocks VIRTUAL_clk_out1_ip_block_design_clk_wiz_0_0] -max -add_delay 0.000 [get_ports {gpio_output[*]}]
+
+create_clock -period 104166.67 -name virtual_uart_baud_clock -waveform {0.00 52083.33}
+set_input_delay -clock [get_clocks virtual_uart_baud_clock] -min -add_delay 2.000 [get_ports { uart_rx }];
+set_input_delay -clock [get_clocks virtual_uart_baud_clock] -max -add_delay 2.000 [get_ports { uart_rx }];
+set_output_delay -clock [get_clocks virtual_uart_baud_clock] -min -add_delay 2.000 [get_ports { uart_tx }];
+set_output_delay -clock [get_clocks virtual_uart_baud_clock] -max -add_delay 2.000 [get_ports { uart_tx }];

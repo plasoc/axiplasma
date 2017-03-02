@@ -29,11 +29,13 @@ end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
     component axiplasma_wrapper is
-        port( 
-            raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
-            raw_nreset : in std_logic;
-            gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
-            gpio_input : in std_logic_vector(default_data_in_width-1 downto 0));
+       port( 
+             raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
+             raw_nreset : in std_logic;
+             gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
+             gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
+             uart_tx : out std_logic;
+             uart_rx : in std_logic);
     end component;
     constant clock_period : time := 10 ns;
     constant time_out_threshold : integer := 2**30;
@@ -44,13 +46,14 @@ architecture Behavioral of testbench_vivado_0 is
     signal gpio_input : gpio_type := (others=>'0');
 begin
     -- Instantiation of device under test.
-    axiplasma_wrapper_inst : 
-    axiplasma_wrapper 
+    axiplasma_wrapper_inst : axiplasma_wrapper 
         port map ( 
             raw_clock => raw_clock,
             raw_nreset => raw_nreset,
             gpio_output => gpio_output,
-            gpio_input => gpio_input);
+            gpio_input => gpio_input,
+            uart_tx => open,
+            uart_rx => '0');
     -- Drive syncrhonization signals.
     raw_clock <= not raw_clock after clock_period/2;
     raw_nreset <= '1' after 10*clock_period+input_delay;

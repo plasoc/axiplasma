@@ -14,10 +14,10 @@ component plasoc_0_crossbar_wrap is
 		axi_address_width : integer := 32;
 		axi_data_width : integer := 32;
 		axi_slave_id_width : integer := 0;
-		axi_master_amount : integer := 5;
+		axi_master_amount : integer := 6;
 		axi_slave_amount : integer := 2;
-		axi_master_base_address : std_logic_vector := X"44a3000044a2000044a1000044a0000000000000";
-		axi_master_high_address : std_logic_vector := X"44a3ffff44a2ffff44a1ffff44a0ffff0000ffff"
+		axi_master_base_address : std_logic_vector := X"44a4000044a3000044a2000044a1000044a0000000000000";
+		axi_master_high_address : std_logic_vector := X"44a4ffff44a3ffff44a2ffff44a1ffff44a0ffff0000ffff"
 	);
 	port
 	(
@@ -294,6 +294,45 @@ component plasoc_0_crossbar_wrap is
 		cdma_m_axi_rlast :  in  std_logic;
 		cdma_m_axi_rvalid :  in  std_logic;
 		cdma_m_axi_rready :  out  std_logic;
+		uart_m_axi_awid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
+		uart_m_axi_awaddr :  out  std_logic_vector(axi_address_width-1 downto 0);
+		uart_m_axi_awlen :  out  std_logic_vector(7 downto 0);
+		uart_m_axi_awsize :  out  std_logic_vector(2 downto 0);
+		uart_m_axi_awburst :  out  std_logic_vector(1 downto 0);
+		uart_m_axi_awlock :  out  std_logic;
+		uart_m_axi_awcache :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_awprot :  out  std_logic_vector(2 downto 0);
+		uart_m_axi_awqos :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_awregion :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_awvalid :  out  std_logic;
+		uart_m_axi_awready :  in  std_logic;
+		uart_m_axi_wdata :  out  std_logic_vector(axi_data_width-1 downto 0);
+		uart_m_axi_wstrb :  out  std_logic_vector(axi_data_width/8-1 downto 0);
+		uart_m_axi_wlast :  out  std_logic;
+		uart_m_axi_wvalid :  out  std_logic;
+		uart_m_axi_wready :  in  std_logic;
+		uart_m_axi_bid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
+		uart_m_axi_bresp :  in  std_logic_vector(1 downto 0);
+		uart_m_axi_bvalid :  in  std_logic;
+		uart_m_axi_bready :  out  std_logic;
+		uart_m_axi_arid :  out  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
+		uart_m_axi_araddr :  out  std_logic_vector(axi_address_width-1 downto 0);
+		uart_m_axi_arlen :  out  std_logic_vector(7 downto 0);
+		uart_m_axi_arsize :  out  std_logic_vector(2 downto 0);
+		uart_m_axi_arburst :  out  std_logic_vector(1 downto 0);
+		uart_m_axi_arlock :  out  std_logic;
+		uart_m_axi_arcache :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_arprot :  out  std_logic_vector(2 downto 0);
+		uart_m_axi_arqos :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_arregion :  out  std_logic_vector(3 downto 0);
+		uart_m_axi_arvalid :  out  std_logic;
+		uart_m_axi_arready :  in  std_logic;
+		uart_m_axi_rid :  in  std_logic_vector((clogb2(axi_slave_amount)+axi_slave_id_width)-1 downto 0);
+		uart_m_axi_rdata :  in  std_logic_vector(axi_data_width-1 downto 0);
+		uart_m_axi_rresp :  in  std_logic_vector(1 downto 0);
+		uart_m_axi_rlast :  in  std_logic;
+		uart_m_axi_rvalid :  in  std_logic;
+		uart_m_axi_rready :  out  std_logic;
 		aclk : in std_logic;
 		aresetn : in std_logic
 	);
