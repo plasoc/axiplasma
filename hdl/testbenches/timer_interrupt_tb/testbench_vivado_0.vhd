@@ -44,6 +44,7 @@ architecture Behavioral of testbench_vivado_0 is
     signal raw_nreset : std_logic := '0';
     signal gpio_output : gpio_type;
     signal gpio_input : gpio_type := (others=>'0');
+    signal uart_tx : std_logic;
 begin
     -- Instantiation of device under test.
     axiplasma_wrapper_inst : axiplasma_wrapper 
@@ -52,7 +53,7 @@ begin
             raw_nreset => raw_nreset,
             gpio_output => gpio_output,
             gpio_input => gpio_input,
-            uart_tx => open,
+            uart_tx => uart_tx,
             uart_rx => '0');
     -- Drive syncrhonization signals.
     raw_clock <= not raw_clock after clock_period/2;

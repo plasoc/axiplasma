@@ -77,7 +77,7 @@ begin
     reg_in_avail <= not in_not_ready;
     reg_out_fifo <= out_fifo;
     reg_out_fifo_valid <=  not out_not_valid;
-    out_ready <= not reg_out_fifo_ready;
+    out_ready <= reg_out_fifo_ready;
     
     in_fifo <= reg_in_fifo(7 downto 0);
 

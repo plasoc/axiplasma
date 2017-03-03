@@ -55,7 +55,6 @@ architecture Behavioral of plasoc_uart_axi4_read_cntrl is
     signal state : state_type := state_wait;
     signal axi_arready_buff : std_logic := '0';
     signal axi_rvalid_buff : std_logic := '0';
-    signal axi_araddr_buff : std_logic_vector(axi_address_width-1 downto 0);
     
     signal reg_control : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
     signal reg_out_fifo_buff : std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
