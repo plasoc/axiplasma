@@ -1,7 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-package soc_uart_pack is
+package plasoc_uart_pack is
 
     constant default_uart_fifo_depth : integer := 8;
     constant default_uart_axi_control_offset : integer := 0;
@@ -14,7 +14,7 @@ package soc_uart_pack is
 
     constant axi_resp_okay : std_logic_vector := "00";
 
-    component soc_uart is
+    component plasoc_uart is
         generic (
             fifo_depth : integer := default_uart_fifo_depth;
             axi_address_width : integer := 16;
@@ -57,7 +57,7 @@ package soc_uart_pack is
 
 end package;
 
-package body soc_uart_pack is
+package body plasoc_uart_pack is
 
     function flogb2(bit_depth : in natural ) return integer is
 		variable result : integer := 0;

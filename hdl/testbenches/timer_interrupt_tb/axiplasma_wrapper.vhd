@@ -8,7 +8,7 @@ use work.plasoc_timer_pack.plasoc_timer;
 use work.plasoc_gpio_pack.plasoc_gpio;
 use work.plasoc_gpio_pack.default_data_out_width;
 use work.plasoc_gpio_pack.default_data_in_width;
-use work.soc_uart_pack.soc_uart;
+use work.plasoc_uart_pack.plasoc_uart;
 use work.plasoc_0_crossbar_wrap_pack.plasoc_0_crossbar_wrap; 
 use work.plasoc_0_crossbar_wrap_pack.clogb2;
 use work.plasoc_axi4_full2lite_pack.plasoc_axi4_full2lite;
@@ -1562,7 +1562,7 @@ begin
          m_axi_bresp => cdma_axi_full_bresp,
          cdma_tvect_out => open);
          
-    soc_uart_inst : soc_uart 
+    plasoc_uart_inst : plasoc_uart 
         generic map (
             axi_address_width => axi_lite_address_width,
             axi_data_width => axi_data_width)

@@ -1,9 +1,9 @@
 library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.all;
-    use work.soc_uart_pack.all;
+    use work.plasoc_uart_pack.all;
 
-entity soc_uart_fifo is
+entity generic_fifo is
     generic (
         FIFO_WIDTH : positive := 32;
         FIFO_DEPTH : positive := 1024
@@ -22,7 +22,7 @@ entity soc_uart_fifo is
     );
 end entity;
 
-architecture RTL of soc_uart_fifo is
+architecture RTL of generic_fifo is
     ---------------------------------------------------------------------------
     -- Functions
     ---------------------------------------------------------------------------

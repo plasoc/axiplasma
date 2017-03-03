@@ -1,9 +1,9 @@
 library ieee;
 use ieee.std_logic_1164.all;          
 use ieee.numeric_std.all;                  
-use work.soc_uart_pack.all;
+use work.plasoc_uart_pack.all;
 
-entity soc_uart is
+entity plasoc_uart is
     generic (
         fifo_depth : integer := 8;
         axi_address_width : integer := 16;
@@ -40,11 +40,11 @@ entity soc_uart is
         tx : out std_logic;
         rx : in  std_logic;
         status_in_avail : out std_logic);
-end soc_uart;
+end plasoc_uart;
 
-architecture Behavioral of soc_uart is
+architecture Behavioral of plasoc_uart is
 
-    component soc_uart_core is
+    component uart is
         generic (
             baud                : positive;
             clock_frequency     : positive
@@ -62,7 +62,7 @@ architecture Behavioral of soc_uart is
         );
     end component;
     
-    component soc_uart_axi4_write_cntrl is
+    component plasoc_uart_axi4_write_cntrl is
         generic (
             fifo_depth : integer := 8;
             axi_address_width : integer := 16;
@@ -92,7 +92,7 @@ architecture Behavioral of soc_uart is
             reg_in_avail : out std_logic);
     end component;
     
-    component soc_uart_axi4_read_cntrl is
+    component plasoc_uart_axi4_read_cntrl is
         generic (
             fifo_depth : integer := 8;
             axi_address_width : integer := 16;
@@ -134,7 +134,7 @@ architecture Behavioral of soc_uart is
 
 begin
 
-    soc_uart_core_inst : soc_uart_core
+    uart_inst : uart
         generic map (
             baud => baud,
             clock_frequency => clock_frequency)
@@ -148,7 +148,7 @@ begin
             data_stream_out_stb => in_fifo_valid,
             tx => tx, rx => rx);
 
-    soc_uart_axi4_write_cntrl_inst : soc_uart_axi4_write_cntrl
+    plasoc_uart_axi4_write_cntrl_inst : plasoc_uart_axi4_write_cntrl
         generic map (
             fifo_depth => fifo_depth,
             axi_address_width => axi_address_width,
@@ -177,7 +177,7 @@ begin
             reg_out_fifo_ready => out_fifo_ready,
             reg_in_avail => reg_in_avail);
             
-    soc_uart_axi4_read_cntrl_inst : soc_uart_axi4_read_cntrl
+    plasoc_uart_axi4_read_cntrl_inst : plasoc_uart_axi4_read_cntrl
         generic map (
             fifo_depth => fifo_depth,
             axi_address_width => axi_address_width,

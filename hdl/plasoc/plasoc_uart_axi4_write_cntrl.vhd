@@ -1,8 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
-use work.soc_uart_pack.all;
+use work.plasoc_uart_pack.all;
 
-entity soc_uart_axi4_write_cntrl is
+entity plasoc_uart_axi4_write_cntrl is
     generic (
         fifo_depth : integer := 8;
         axi_address_width : integer := 16;
@@ -30,11 +30,11 @@ entity soc_uart_axi4_write_cntrl is
         reg_out_fifo_valid : out std_logic;
         reg_out_fifo_ready : in std_logic;
         reg_in_avail : out std_logic);
-end soc_uart_axi4_write_cntrl;
+end plasoc_uart_axi4_write_cntrl;
 
-architecture Behavioral of soc_uart_axi4_write_cntrl is
+architecture Behavioral of plasoc_uart_axi4_write_cntrl is
 
-    component soc_uart_fifo is
+    component generic_fifo is
         generic (
             FIFO_WIDTH : positive := 32;
             FIFO_DEPTH : positive := 1024
@@ -81,7 +81,7 @@ begin
     
     in_fifo <= reg_in_fifo(7 downto 0);
 
-    soc_uart_fifo_inst : soc_uart_fifo 
+    soc_uart_fifo_inst : generic_fifo 
         generic map (
             FIFO_WIDTH => 8,
             FIFO_DEPTH => fifo_depth)
