@@ -1,23 +1,3 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 01/26/2017 07:19:22 PM
--- Design Name: 
--- Module Name: testbench_vivado_0 - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
-
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -38,6 +18,7 @@ architecture Behavioral of testbench_vivado_0 is
              uart_rx : in std_logic);
     end component;
     constant clock_period : time := 10 ns;
+    constant uart_period : time := 104167 ns;
     constant time_out_threshold : integer := 2**30;
     subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
     signal raw_clock : std_logic := '1';
@@ -45,8 +26,18 @@ architecture Behavioral of testbench_vivado_0 is
     signal gpio_output : gpio_type;
     signal gpio_input : gpio_type := (others=>'0');
     signal uart_tx : std_logic;
+    signal uart_clock : std_logic := '1';
+    signal uart_tx_started : boolean := false;
+    signal uart_tx_counter : integer range 0 to 8 := 0;
+    signal uart_tx_buffer : std_logic_vector(7 downto 0) := (others=>'0');
+    signal uart_tx_data : std_logic_vector(7 downto 0) := (others=>'0');
+    signal uart_rx : std_logic;
+    signal uart_rx_enable : std_logic := '0';
+    signal uart_rx_done : std_logic := '0';
+    signal uart_rx_data : std_logic_vector(7 downto 0) := (others=>'0');
+    signal uart_rx_counter : integer range 0 to 9 := 0;
 begin
-    -- Instantiation of device under test.
+
     axiplasma_wrapper_inst : axiplasma_wrapper 
         port map ( 
             raw_clock => raw_clock,
@@ -54,10 +45,72 @@ begin
             gpio_output => gpio_output,
             gpio_input => gpio_input,
             uart_tx => uart_tx,
-            uart_rx => '0');
-    -- Drive syncrhonization signals.
+            uart_rx => uart_rx);
+
     raw_clock <= not raw_clock after clock_period/2;
     raw_nreset <= '1' after 10*clock_period+input_delay;
+    
+    -- Get uart_tx
+    uart_clock <= not uart_clock after uart_period/2;
+    process (uart_clock)
+    begin
+        if rising_edge(uart_clock) then
+            if uart_tx_started then
+                uart_tx_counter <= uart_tx_counter+1;
+                if uart_tx_counter=8 then
+                    uart_tx_data <= uart_tx_buffer;
+                    uart_tx_started <= false;
+                else
+                    uart_tx_buffer(uart_tx_counter) <= uart_tx;
+                end if;
+            elsif uart_tx='0' then
+                uart_tx_started <= true;
+                uart_tx_counter <= 0;
+            end if;
+        end if;
+    end process;
+    
+    -- Set uart_rx
+    uart_rx_done <= '1' when uart_rx_counter=9 else '0';
+    process (uart_clock)
+    begin
+        if rising_edge(uart_clock) then
+            if uart_rx_enable='1' then
+                if uart_rx_counter/=9 then
+                    uart_rx_counter <= uart_rx_counter+1;
+                    if uart_rx_counter=0 then
+                        uart_rx <= '0';
+                    elsif uart_rx_counter<= 8 then
+                        uart_rx <= uart_rx_data(uart_rx_counter-1);
+                    end if;
+                else
+                    uart_rx <= '1';
+                end if;
+            else
+                uart_rx_counter <= 0;
+                uart_rx <= '1';
+            end if;
+        end if;
+    end process;
+    
+    process 
+        procedure set_uart_rx( byte : in std_logic_vector(7 downto 0) ) is
+        begin
+            uart_rx_data <= byte;
+            uart_rx_enable <= '1';
+            wait until uart_rx_done='1';
+            wait for clock_period;
+            uart_rx_enable <= '0';
+            wait for clock_period;
+        end;
+    begin
+        wait until raw_nreset='1';
+        wait until gpio_output=X"0001";
+        wait for 2 ms;
+        set_uart_rx(X"01");
+        wait;
+    end process;
+    
     -- Run testbench application.
     process 
         -- This procedure should force the simulation to stop if a 
