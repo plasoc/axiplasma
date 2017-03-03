@@ -99,15 +99,17 @@ begin
             uart_rx_data <= byte;
             uart_rx_enable <= '1';
             wait until uart_rx_done='1';
-            wait for clock_period;
+            wait for uart_period;
             uart_rx_enable <= '0';
-            wait for clock_period;
+            wait for uart_period;
         end;
     begin
         wait until raw_nreset='1';
         wait until gpio_output=X"0001";
         wait for 2 ms;
         set_uart_rx(X"01");
+        set_uart_rx(X"03");
+        set_uart_rx(X"7a");
         wait;
     end process;
     

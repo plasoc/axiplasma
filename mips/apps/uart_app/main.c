@@ -64,7 +64,8 @@ int main()
 	/* Run application's main loop. */
 	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
-	if (0 ) {
+	if (0) 
+	{
 		unsigned value = 0;
 		while (1) 
 			if (plasoc_uart_get_status_out_avail(&uart_obj))
