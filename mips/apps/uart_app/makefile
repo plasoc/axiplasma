@@ -13,7 +13,7 @@ LDFLAGS = -L$(LD_DIR) -static
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
-C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
+C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(PLASOC_DIR)/printf.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
 

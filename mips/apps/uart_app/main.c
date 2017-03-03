@@ -1,3 +1,4 @@
+#include <printf.h>
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
@@ -41,6 +42,13 @@ void uart_isr(void* ptr)
 	plasoc_uart_set_out(&uart_obj,data);	
 }
 
+void putc_port( void* p, char c)
+{
+	while (!plasoc_uart_get_status_out_avail(&uart_obj))
+		plasoc_uart_set_out(&uart_obj,(unsigned)c);
+}
+
+
 int main()
 {
 	/* Configure the interrupt controller. */
@@ -52,6 +60,7 @@ int main()
 
 	/* Configure uart. */
 	plasoc_uart_setup(&uart_obj,PLASOC_UART_BASE_ADDRESS);
+	init_printf(0,putc_port);
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_UART_ID,uart_isr,0);
 
 	/* Configure the interrupts of the CPU. */
@@ -64,6 +73,9 @@ int main()
 	/* Run application's main loop. */
 	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
+	
+	printf("Hello World!\n\r");
+
 	if (0) 
 	{
 		unsigned value = 0;
@@ -74,5 +86,4 @@ int main()
 
 	return 0;
 }
-
 

@@ -107,9 +107,9 @@ begin
         wait until raw_nreset='1';
         wait until gpio_output=X"0001";
         wait for 2 ms;
-        set_uart_rx(X"01");
-        set_uart_rx(X"03");
-        set_uart_rx(X"7a");
+--        set_uart_rx(X"01");
+--        set_uart_rx(X"03");
+--        set_uart_rx(X"7a");
         wait;
     end process;
     
