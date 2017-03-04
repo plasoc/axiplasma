@@ -21,7 +21,10 @@ entity plasoc_cpu_l1_cache_cntrl is
         cache_way_width : integer := 1;
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
-        cache_policy : string := "plru"); 
+        cache_policy : string := "plru";
+        oper_base : std_logic_vector := X"200000"; -- msb
+        oper_invalidate_offset : std_logic_vector := X"00";
+        oper_flush_offset : std_logic_vector := X"04"); 
     port ( 
         clock : in std_logic;
         resetn : in std_logic;
@@ -48,6 +51,8 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
 
     constant tag_width : integer := cache_cacheable_width-cache_index_width-cache_offset_width;
     constant block_word_width : integer := cache_offset_width-clogb2(cpu_data_width/8);
+    constant oper_base_width : integer := oper_base'length;
+    constant oper_offset_width : integer := oper_invalidate_offset'length;
     
     function plru_width return integer is
         variable result : integer := 0;
@@ -64,7 +69,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     type tag_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*tag_width-1 downto 0);
     type valid_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width-1 downto 0);
     type plru_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(plru_width-1 downto 0);
-    type memory_access_mode_type is (msm_read_block,msm_exchange_block,msm_write_word,msm_read_word);
+    type memory_access_mode_type is (msm_read_block,msm_write_block,msm_exchange_block,msm_write_word,msm_read_word);
     
     signal block_rows : block_rows_type := (others=>(others=>'0'));
     signal tag_rows : tag_rows_type := (others=>(others=>'0'));
@@ -93,6 +98,12 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal memory_write_valid_buff : std_logic := '0';
     signal memory_read_ready_buff : std_logic := '0';
     signal memory_index : integer range 0 to 2**cache_index_width-1 := 0;
+    signal oper_request : Boolean := False;
+    signal oper_request_invalidate : Boolean := False;
+    signal oper_request_flush : Boolean := False;
+    signal oper_started : Boolean := False;
+    signal oper_started_invalidate : Boolean := False;
+    signal oper_started_flush : Boolean := False;
     
 --    attribute keep : boolean;
 --    attribute keep of cpu_next_address : signal is true;
@@ -115,6 +126,11 @@ begin
     memory_write_valid <= memory_write_valid_buff;
     memory_read_ready <= memory_read_ready_buff;
     memory_read_enable <= memory_read_enable_buff;
+    
+    oper_request <= True when cpu_next_address(cpu_address_width-1 downto cpu_address_width-oper_base_width)=oper_base and and_reduce(cpu_write_enables)='1' else False;
+    oper_request_invalidate <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_invalidate_offset else False;
+    oper_request_flush <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_flush_offset else False;
+    oper_started <= True when (oper_started_invalidate or oper_started_flush) and and_reduce(cpu_write_enables)='1' else False;
     
     process(cpu_index,cpu_tag,tag_rows,valid_rows)
         variable cpu_hit_buff : Boolean;
@@ -184,7 +200,9 @@ begin
             if rising_edge(clock) then
                 if resetn='0' then
                     plru_rows <= (others=>(others=>'0'));
-                elsif not memory_access_needed and cpu_cacheable and not cpu_hit and memory_prepared then
+                elsif not memory_access_needed and 
+                        not oper_started and not oper_request and 
+                        cpu_cacheable and not cpu_hit and memory_prepared then
                     plru_rows(cpu_index) <= replace_plru;
                 end if;
             end if;
@@ -195,7 +213,8 @@ begin
     process (clock)
         variable memory_write_handshake : Boolean;
         variable memory_read_handshake : Boolean;
-        variable memory_access_block : Boolean;
+        variable memory_access_exread_block : Boolean;
+        variable memory_access_exwrite_block : Boolean;
         variable memory_access_word : Boolean;
     begin
         if rising_edge(clock) then
@@ -208,21 +227,24 @@ begin
                 memory_read_enable_buff <= '0';
                 cpu_pause_buff <= '0';
                 valid_rows <= (others=>(others=>'0'));
+                oper_started_flush <= False;
+                oper_started_invalidate <= False;
             else
                 if memory_access_needed then
                 
                     memory_write_handshake := memory_write_valid_buff='1' and memory_write_ready='1';
                     memory_read_handshake := memory_read_valid='1' and memory_read_ready_buff='1';
-                    memory_access_block := memory_access_mode=msm_read_block or memory_access_mode=msm_exchange_block;
+                    memory_access_exread_block := memory_access_mode=msm_read_block or memory_access_mode=msm_exchange_block;
+                    memory_access_exwrite_block := memory_access_mode=msm_write_block or memory_access_mode=msm_exchange_block;
                     memory_access_word := memory_access_mode=msm_read_word or memory_access_mode=msm_write_word;
                 
-                    if memory_write_handshake and memory_access_mode=msm_exchange_block and memory_write_counter/=2**block_word_width-1 then
+                    if memory_write_handshake and memory_access_exwrite_block and memory_write_counter/=2**block_word_width-1 then
                         memory_write_data <= 
                             block_rows(memory_index)(
                             memory_way*2**cache_offset_width*8+(memory_write_counter+2)*cpu_data_width-1 downto 
                             memory_way*2**cache_offset_width*8+(memory_write_counter+1)*cpu_data_width);
                     end if;
-                    if memory_read_handshake and memory_access_block then
+                    if memory_read_handshake and memory_access_exread_block then
                         block_rows(memory_index)(
                             memory_way*2**cache_offset_width*8+(memory_read_counter+1)*cpu_data_width-1 downto 
                             memory_way*2**cache_offset_width*8+memory_read_counter*cpu_data_width) <=
@@ -232,16 +254,16 @@ begin
                         cpu_read_data <= memory_read_data;
                     end if;
                     
-                    if (memory_access_mode=msm_exchange_block and memory_write_counter=2**block_word_width-1) or 
+                    if (memory_access_exwrite_block and memory_write_counter=2**block_word_width-1) or 
                             (memory_access_mode=msm_write_word and memory_write_handshake) then
                         memory_write_enable_buff <= '0';
                     end if;
-                    if (memory_access_block and memory_read_counter=2**block_word_width-1) or
+                    if (memory_access_exread_block and memory_read_counter=2**block_word_width-1) or
                             (memory_access_mode=msm_read_word and memory_read_handshake) then
                         memory_read_enable_buff <= '0';
                     end if;
                     
-                    if (memory_access_mode=msm_exchange_block and memory_write_counter/=2**block_word_width-1) or 
+                    if (memory_access_exwrite_block and memory_write_counter/=2**block_word_width-1) or 
                             (memory_access_mode=msm_write_word and not memory_write_handshake) then
                         memory_write_valid_buff <= '1';
                     else
@@ -254,7 +276,7 @@ begin
                         memory_read_ready_buff <= '0';
                     end if;
                     
-                    if memory_access_mode=msm_exchange_block and
+                    if memory_access_exwrite_block and
                             memory_write_handshake and
                             memory_write_counter/=2**block_word_width-1 then
                         memory_write_counter <= memory_write_counter+1;
@@ -265,7 +287,7 @@ begin
                         memory_read_counter <= memory_read_counter+1;
                     end if;
                     
-                    if memory_access_block and memory_read_counter=2**block_word_width-1 then
+                    if memory_access_exread_block and memory_read_counter=2**block_word_width-1 then
                         for each_byte in 0 to cpu_data_width/8-1 loop
                             if or_reduce(replace_write_enables)='1' then
                                 if replace_write_enables(each_byte)='1' then
@@ -282,10 +304,44 @@ begin
                             end if;
                         end loop;
                     end if;
-                    if (memory_access_block and memory_write_valid_buff='0' and memory_read_enable_buff='0') or
+                    if ((memory_access_exwrite_block or memory_access_exread_block) and memory_write_valid_buff='0' and memory_read_enable_buff='0') or
                             (memory_access_word and (memory_write_handshake or memory_read_handshake)) then
                         memory_access_needed <= False;
                         cpu_pause_buff <= '0';
+                    end if;
+                    
+                elsif oper_started then
+                    if cpu_hit then
+                        if oper_started_invalidate then
+                            valid_rows(cpu_index)(cpu_way) <='0';
+                        elsif oper_started_flush then
+                            cpu_pause_buff <= '1';
+                            memory_access_mode <= msm_write_block; 
+                            memory_access_needed <= True;
+                            memory_way <= cpu_way;
+                            memory_cacheable <= '1';
+                            memory_index <= cpu_index;
+                            memory_write_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
+                            memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                                tag_rows(cpu_index)((1+cpu_way)*tag_width-1 downto cpu_way*tag_width) & 
+                                std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                            memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                            memory_write_counter <= 0;
+                            memory_write_enables <= (others=>'1');
+                            memory_write_enable_buff <= '1';
+                            memory_write_data <= 
+                                block_rows(cpu_index)(
+                                cpu_way*2**cache_offset_width*8+cpu_data_width-1 downto 
+                                cpu_way*2**cache_offset_width*8);
+                        end if;
+                    end if;
+                    oper_started_invalidate <= False;
+                    oper_started_flush <= False;
+                elsif oper_request then
+                    if oper_request_invalidate then
+                        oper_started_invalidate <= True;
+                    elsif oper_request_flush then
+                        oper_started_flush <= True;
                     end if;
                 elsif not cpu_cacheable then
                     cpu_pause_buff <= '1';

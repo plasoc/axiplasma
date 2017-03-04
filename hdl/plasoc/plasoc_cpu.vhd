@@ -34,8 +34,10 @@ entity plasoc_cpu is
         cache_index_width : integer := default_cache_index_width;				--! Cache Size (rows) = 2^cache_index_width.
         cache_offset_width : integer := default_cache_offset_width;				--! Line Size (bytes) = 2^cache_offset_width.
         cache_replace_strat : string := default_cache_replace_strat;			--! Defines the replacement strategy in case of miss. Only "plru" is available.
-        cache_base_address : std_logic_vector := default_cache_base_address;	--! Defines the base address of the cache controller registers.
-        cache_enable : boolean := default_cache_enable							--! Defines whether or not the cache is enabled. 
+        cache_enable : boolean := default_cache_enable;							--! Defines whether or not the cache is enabled.
+        oper_base : std_logic_vector := default_oper_base; -- msb
+        oper_invalidate_offset : integer := default_oper_invalidate_offset;
+        oper_flush_offset : integer := default_oper_flush_offset
 	);
     port(
         -- Global interface.
@@ -97,7 +99,10 @@ architecture Behavioral of plasoc_cpu is
             cache_way_width : integer := 1;
             cache_index_width : integer := 4;
             cache_offset_width : integer := 5;
-            cache_policy : string := "plru"); 
+            cache_policy : string := "plru";
+            oper_base : std_logic_vector := X"200000"; -- msb
+            oper_invalidate_offset : std_logic_vector := X"00";
+            oper_flush_offset : std_logic_vector := X"04"); 
         port ( 
             clock : in std_logic;
             resetn : in std_logic;
@@ -233,6 +238,9 @@ architecture Behavioral of plasoc_cpu is
     constant cache_tag_width : integer := cache_address_width-cache_index_width-cache_offset_width;
     constant cache_word_offset_width : integer := cache_offset_width-clogb2(cpu_width/8);
     constant cache_line_width : integer := (cache_tag_width+8*2**cache_offset_width);
+    constant oper_offset_width : integer := cpu_width-oper_base'length;
+    constant oper_invalidate_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(oper_invalidate_offset,oper_offset_width));
+    constant oper_flush_offset_slv : std_logic_vector := std_logic_vector(to_unsigned(oper_flush_offset,oper_offset_width));
     constant axi_user_width : integer := 1;
     subtype cache_index_type is std_logic_vector(cache_index_width-1 downto 0);
     subtype cache_data_type is std_logic_vector(cache_line_width*2**cache_way_width-1 downto 0);
@@ -330,7 +338,10 @@ begin
                 cache_way_width => cache_way_width,
                 cache_index_width => cache_index_width,
                 cache_offset_width => cache_offset_width,
-                cache_policy => cache_replace_strat)
+                cache_policy => cache_replace_strat,
+                oper_base => oper_base,
+                oper_invalidate_offset => oper_invalidate_offset_slv,
+                oper_flush_offset => oper_flush_offset_slv)
             port map ( 
                 clock => aclk,
                 resetn => aresetn,

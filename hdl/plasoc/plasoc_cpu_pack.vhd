@@ -18,8 +18,10 @@ package plasoc_cpu_pack is
     constant default_cache_index_width : integer := 5;									--! Cache Size (rows) = 2^default_cache_index_width.
     constant default_cache_offset_width : integer := 4;									--! Line Size (bytes) = 2^default_cache_offset_width.
     constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
-    constant default_cache_base_address : std_logic_vector := X"10000000";				--! Defines the default base address of the cache controller registers.
     constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
+    constant default_oper_base : std_logic_vector := X"200000"; -- msb
+    constant default_oper_invalidate_offset : integer := 0;
+    constant default_oper_flush_offset : integer := 4;
     
     -- AXI4-Full error constants.
     constant error_axi_read_exokay : integer := 0;
@@ -58,8 +60,10 @@ package plasoc_cpu_pack is
             cache_index_width : integer := default_cache_index_width;
             cache_offset_width : integer := default_cache_offset_width;
             cache_replace_strat : string := default_cache_replace_strat;
-            cache_base_address : std_logic_vector := default_cache_base_address;
-            cache_enable : boolean := default_cache_enable );
+            cache_enable : boolean := default_cache_enable;
+            oper_base : std_logic_vector := default_oper_base; -- msb
+            oper_invalidate_offset : integer := default_oper_invalidate_offset;
+            oper_flush_offset : integer := default_oper_flush_offset );
         port(
             -- global signals
             aclk : in std_logic;
