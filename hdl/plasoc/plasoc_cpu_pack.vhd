@@ -17,7 +17,7 @@ package plasoc_cpu_pack is
     constant default_cache_way_width : integer := 1; 									--! Associativity = 2^default_cache_way_width.	
     constant default_cache_index_width : integer := 5;									--! Cache Size (rows) = 2^default_cache_index_width.
     constant default_cache_offset_width : integer := 4;									--! Line Size (bytes) = 2^default_cache_offset_width.
-    constant default_cache_replace_strat : string := "plru";							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
+    constant default_cache_replace_strat : string := "rr"; -- rr							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
     constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
     constant default_oper_base : std_logic_vector := X"200000"; -- msb
     constant default_oper_invalidate_offset : integer := 0;

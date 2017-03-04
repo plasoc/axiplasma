@@ -21,7 +21,7 @@ entity plasoc_cpu_l1_cache_cntrl is
         cache_way_width : integer := 1;
         cache_index_width : integer := 4;
         cache_offset_width : integer := 5;
-        cache_policy : string := "plru";
+        cache_policy : string := "rr"; -- rr
         oper_base : std_logic_vector := X"200000"; -- msb
         oper_invalidate_offset : std_logic_vector := X"00";
         oper_flush_offset : std_logic_vector := X"04"); 
@@ -64,6 +64,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
         end if;
         return result;
     end; 
+    constant rr_lfsr_width : integer := 16;
     
     type block_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*2**cache_offset_width*8-1 downto 0);
     type tag_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*tag_width-1 downto 0);
@@ -104,6 +105,7 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal oper_started : Boolean := False;
     signal oper_started_invalidate : Boolean := False;
     signal oper_started_flush : Boolean := False;
+    signal rr_lfsr : std_logic_vector(rr_lfsr_width-1 downto 0) := X"ace1";
     
 --    attribute keep : boolean;
 --    attribute keep of cpu_next_address : signal is true;
@@ -209,6 +211,31 @@ begin
         end process;
     end generate 
     generate_policy_plru;
+    
+    generate_policy_rr:
+    if cache_policy= "rr" generate
+        process (clock)
+            variable lfsr_buff_0 : unsigned(rr_lfsr_width-1 downto 0);
+            variable lfsr_buff_1 : unsigned(rr_lfsr_width-1 downto 0);
+            variable lfsr_buff_2 : unsigned(rr_lfsr_width-1 downto 0);
+        begin
+            if rising_edge(clock) then
+                lfsr_buff_0 := unsigned(rr_lfsr);
+                lfsr_buff_1 := ((lfsr_buff_0 srl 0) xor (lfsr_buff_0 srl 2) xor (lfsr_buff_0 srl 3) xor (lfsr_buff_0 srl 5)) and to_unsigned(1,rr_lfsr_width);
+                lfsr_buff_2 := (lfsr_buff_0 srl 1) or (lfsr_buff_1 sll 15);
+                rr_lfsr <= std_logic_vector(lfsr_buff_2);
+            end if;
+        end process;
+        process (rr_lfsr)
+        begin
+            if cache_way_width/=0 then
+                replace_way <= to_integer(unsigned(rr_lfsr(cache_way_width-1 downto 0)));
+            else
+                replace_way <= 0;
+            end if; 
+        end process;
+    end generate
+    generate_policy_rr;
 
     process (clock)
         variable memory_write_handshake : Boolean;
