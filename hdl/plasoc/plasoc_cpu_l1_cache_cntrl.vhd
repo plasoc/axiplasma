@@ -304,7 +304,7 @@ begin
                             end if;
                         end loop;
                     end if;
-                    if ((memory_access_exwrite_block or memory_access_exread_block) and memory_write_valid_buff='0' and memory_read_enable_buff='0') or
+                    if ((memory_access_exwrite_block or memory_access_exread_block) and memory_write_enable_buff='0' and memory_read_enable_buff='0') or
                             (memory_access_word and (memory_write_handshake or memory_read_handshake)) then
                         memory_access_needed <= False;
                         cpu_pause_buff <= '0';
