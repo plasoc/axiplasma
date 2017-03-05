@@ -17,7 +17,7 @@ extern "C"
 	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
 	#define L1_CACHE_OFFSET_WIDTH				(4)				
 	#define L1_CACHE_OFFSET_MASK				((1<<L1_CACHE_OFFSET_WIDTH)-1)	
-	#define L1_CACHE_ADDRESS_WIDTH				(15)				
+	#define L1_CACHE_ADDRESS_WIDTH				(16)				
 	#define L1_CACHE_NONCACHEABLE_BASE_ADDRESS		(1<<L1_CACHE_ADDRESS_WIDTH)	
 	#define L1_CACHE_ADDRESS_BASE				(0x20000000)			
 	#define L1_CACHE_INVALIDATE_OFFSET			(0)				
