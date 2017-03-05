@@ -1,7 +1,9 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use ieee.numeric_std.all;
 use work.plasoc_gpio_pack.all;
+use work.boot_app_bram_pack.all;
 
 entity testbench_vivado_0 is
     generic ( gpio_width : integer := 16; input_delay : time := 0 ns );
@@ -27,6 +29,8 @@ architecture Behavioral of testbench_vivado_0 is
     signal gpio_input : gpio_type := (others=>'0');
     signal uart_tx : std_logic;
     signal uart_clock : std_logic := '1';
+    signal uart_tx_data_avail : std_logic := '0';
+    signal uart_tx_data_ack : std_logic := '0';
     signal uart_tx_started : boolean := false;
     signal uart_tx_counter : integer range 0 to 8 := 0;
     signal uart_tx_buffer : std_logic_vector(7 downto 0) := (others=>'0');
@@ -67,6 +71,11 @@ begin
                 uart_tx_started <= true;
                 uart_tx_counter <= 0;
             end if;
+            if uart_tx_data_ack='1' then
+                uart_tx_data_avail <= '0';
+            elsif uart_tx_started and uart_tx_counter=8 then
+                uart_tx_data_avail <= '1';
+            end if;
         end if;
     end process;
     
@@ -94,7 +103,23 @@ begin
     end process;
     
     process 
-        procedure set_uart_rx( byte : in std_logic_vector(7 downto 0) ) is
+        constant word_width : integer := 32;
+        subtype byte_type is std_logic_vector(7 downto 0);
+        subtype word_type is std_logic_vector(word_width-1 downto 0);
+        
+        constant BOOT_LOADER_START_WORD : word_type := x"f0f0f0f0";
+        constant BOOT_LOADER_ACK_SUCCESS_BYTE : byte_type := x"01";
+        constant BOOT_LOADER_ACK_FAILURE_BYTE : byte_type := x"02";
+        constant BOOT_LOADER_STATUS_MORE : byte_type := x"01";
+        constant BOOT_LOADER_STATUS_DONE : byte_type := x"02";
+        constant BOOT_LOADER_CHECKSUM_DIVISOR : integer := 230;
+        
+        variable word : word_type;
+        variable byte : byte_type;
+        variable app_data : ram_type := load_hex;
+        variable app_ptr : integer := 0;
+        
+        procedure set_uart_rx( byte : in byte_type ) is
         begin
             uart_rx_data <= byte;
             uart_rx_enable <= '1';
@@ -103,10 +128,76 @@ begin
             uart_rx_enable <= '0';
             wait for uart_period;
         end;
+        
+        procedure set_uart_word ( word : in word_type ) is
+        begin
+            for each_byte in 0 to word_width/8-1 loop
+                set_uart_rx(word(7+each_byte*8 downto each_byte*8));
+            end loop;
+        end;
+        
+        procedure get_uart_tx is
+        begin
+            wait until uart_tx_data_avail='1';
+            wait for uart_period;
+            byte := uart_tx_data;
+            uart_tx_data_ack <= '1';
+            wait for uart_period;
+            uart_tx_data_ack <= '0';
+            wait for uart_period;
+        end;
+        
     begin
         wait until raw_nreset='1';
         wait until gpio_output=X"0001";
         wait for 2 ms;
+        
+        set_uart_word(BOOT_LOADER_START_WORD);
+        get_uart_tx;
+        
+        if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
+            report "Success ACK";
+        elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
+            report "Failed ACK";
+            wait;
+        else
+            report "???";
+            wait;
+        end if;
+        
+        while true loop
+        
+            -- instruction
+            word := app_data(app_ptr);
+            set_uart_word(word);
+            
+            -- checksum
+            word := std_logic_vector(to_unsigned(to_integer(unsigned(word)) mod BOOT_LOADER_CHECKSUM_DIVISOR,word_width));
+            set_uart_rx(word(7 downto 0));
+        
+            -- status
+            app_ptr := app_ptr+1;
+            if app_ptr=ram_size then
+                set_uart_rx(BOOT_LOADER_STATUS_DONE);
+                exit;
+            else
+                set_uart_rx(BOOT_LOADER_STATUS_MORE);
+            end if;
+        
+            -- ack
+            get_uart_tx;
+            if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
+                report "Success ACK";
+            elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
+                report "Failed ACK";
+                wait;
+            else
+                report "???";
+                wait;
+            end if;
+        
+        end loop;
+        
 --        set_uart_rx(X"01");
 --        set_uart_rx(X"03");
 --        set_uart_rx(X"7a");

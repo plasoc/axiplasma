@@ -21,7 +21,7 @@ l1_cache_operate_on_line_range:
 	sw	$4,56($fp)
 	sw	$5,60($fp)
 	sw	$6,64($fp)
-	li	$2,32			# 0x20
+	li	$2,16			# 0x10
 	sw	$2,0($fp)
 	lw	$2,64($fp)
 	#nop
@@ -36,7 +36,7 @@ l1_cache_operate_on_line_range:
 	sw	$2,12($fp)
 	addiu	$2,$fp,44
 	sw	$2,16($fp)
-	li	$2,32			# 0x20
+	li	$2,16			# 0x10
 	sw	$2,20($fp)
 	lw	$3,4($fp)
 	lw	$2,8($fp)
@@ -44,11 +44,11 @@ l1_cache_operate_on_line_range:
 	addu	$2,$3,$2
 	sw	$2,24($fp)
 	lw	$3,24($fp)
-	li	$2,-32			# 0xffffffffffffffe0
+	li	$2,-16			# 0xfffffffffffffff0
 	and	$2,$3,$2
 	sw	$2,28($fp)
 	lw	$3,4($fp)
-	li	$2,-32			# 0xffffffffffffffe0
+	li	$2,-16			# 0xfffffffffffffff0
 	and	$3,$3,$2
 	lw	$2,12($fp)
 	#nop
@@ -85,13 +85,13 @@ $L7:
 	sw	$3,32($fp)
 	sw	$2,36($fp)
 	lw	$3,32($fp)
-	li	$2,268435456			# 0x10000000
+	li	$2,536870912			# 0x20000000
 	addu	$2,$3,$2
 	lw	$4,36($fp)
-	li	$3,-32			# 0xffffffffffffffe0
+	li	$3,-16			# 0xfffffffffffffff0
 	and	$3,$4,$3
  #APP
- # 36 "../../plasoc/plasoc_cpu.h" 1
+ # 34 "../../plasoc/plasoc_cpu.h" 1
 	sw $3, 0($2)
 sw $0, 0($3)
 

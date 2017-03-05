@@ -124,7 +124,7 @@ extern "C"
 	}
 
 	/**
-	 * @brief Enables a specific device interrupt.
+	 * @brief Enables a specific device interrupt. NOT ATOMIC.
 	 * @param obj Pointer to the object.
 	 * @param id Identifier of the device interrupt to enable.
 	 */
@@ -136,7 +136,7 @@ extern "C"
 	}
 
 	/**
-	 * @brief Disables a specific device interrupt.
+	 * @brief Disables a specific device interrupt. NOT ATOMIC.
 	 * @param obj Pointer to the object.
 	 * @param id Identifier of the device interrupt to enable.
 	 */

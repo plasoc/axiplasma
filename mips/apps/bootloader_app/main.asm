@@ -11,32 +11,55 @@
 	.ent	run
 	.type	run, @function
 run:
-	.frame	$fp,40,$31		# vars= 16, regs= 2/0, args= 16, gp= 0
+	.frame	$fp,64,$31		# vars= 40, regs= 2/0, args= 16, gp= 0
 	.mask	0xc0000000,-4
 	.fmask	0x00000000,0
-	addiu	$sp,$sp,-40
-	sw	$31,36($sp)
-	sw	$fp,32($sp)
+	addiu	$sp,$sp,-64
+	sw	$31,60($sp)
+	sw	$fp,56($sp)
 	move	$fp,$sp
-$L6:
+	li	$2,1151467520			# 0x44a20000
+	ori	$2,$2,0x8
+	li	$3,1			# 0x1
+	sw	$3,0($2)
+$L8:
 	jal	getword
-	sw	$2,20($fp)
-	lw	$3,20($fp)
+	sw	$2,28($fp)
+	lw	$3,28($fp)
 	li	$2,-252706816			# 0xfffffffff0f00000
 	ori	$2,$2,0xf0f0
-	bne	$3,$2,$L6
-	li	$2,268435456			# 0x10000000
+	bne	$3,$2,$L8
+	li	$2,1151467520			# 0x44a20000
+	ori	$2,$2,0x8
+	li	$3,2			# 0x2
+	sw	$3,0($2)
+	li	$2,2048			# 0x800
 	sw	$2,16($fp)
+	sw	$0,20($fp)
+	li	$2,2048			# 0x800
+	sw	$2,24($fp)
 	li	$4,1			# 0x1
 	jal	setbyte
-$L5:
+$L7:
 	jal	getword
-	sw	$2,24($fp)
+	sw	$2,32($fp)
 	jal	getbyte
-	sb	$2,28($fp)
+	sb	$2,36($fp)
 	jal	getbyte
-	sb	$2,29($fp)
-	lw	$3,24($fp)
+	sb	$2,37($fp)
+	li	$2,1151467520			# 0x44a20000
+	ori	$2,$2,0x8
+	lw	$3,32($fp)
+	#nop
+	srl	$3,$3,16
+	sw	$3,0($2)
+	li	$2,1151467520			# 0x44a20000
+	ori	$2,$2,0x8
+	lw	$3,32($fp)
+	#nop
+	andi	$3,$3,0xff
+	sw	$3,0($2)
+	lw	$3,32($fp)
 	li	$2,230			# 0xe6
 	divu	$0,$3,$2
 	bne	$2,$0,1f
@@ -45,33 +68,66 @@ $L5:
 1:
 	mfhi	$2
 	move	$3,$2
-	lbu	$2,28($fp)
+	lbu	$2,36($fp)
 	#nop
 	bne	$3,$2,$L3
-	lw	$2,16($fp)
-	#nop
-	addiu	$3,$2,4
-	sw	$3,16($fp)
-	lw	$3,24($fp)
+	lw	$2,24($fp)
+	lw	$3,32($fp)
 	#nop
 	sw	$3,0($2)
+	lw	$2,24($fp)
+	#nop
+	addiu	$2,$2,4
+	sw	$2,24($fp)
+	lw	$3,20($fp)
+	li	$2,3			# 0x3
+	bne	$3,$2,$L4
+	lw	$2,16($fp)
+	#nop
+	sw	$2,40($fp)
+	li	$2,16			# 0x10
+	sw	$2,44($fp)
+	lw	$6,44($fp)
+	lw	$5,40($fp)
+	li	$4,4			# 0x4
+	jal	l1_cache_operate_on_line_range
+	lw	$2,24($fp)
+	#nop
+	sw	$2,16($fp)
+	sw	$0,20($fp)
+	b	$L5
+$L4:
+	lw	$2,20($fp)
+	#nop
+	addiu	$2,$2,1
+	sw	$2,20($fp)
+$L5:
 	li	$4,1			# 0x1
 	jal	setbyte
-	b	$L4
+	b	$L6
 $L3:
 	li	$4,2			# 0x2
 	jal	setbyte
-$L4:
-	lbu	$3,29($fp)
+$L6:
+	lbu	$3,37($fp)
 	li	$2,2			# 0x2
-	bne	$3,$2,$L5
-	li	$2,268435456			# 0x10000000
+	bne	$3,$2,$L7
+	lw	$2,16($fp)
+	#nop
+	sw	$2,48($fp)
+	li	$2,16			# 0x10
+	sw	$2,52($fp)
+	lw	$6,52($fp)
+	lw	$5,48($fp)
+	li	$4,4			# 0x4
+	jal	l1_cache_operate_on_line_range
+	li	$2,2048			# 0x800
  #APP
- # 42 "main.c" 1
+ # 73 "main.c" 1
 	jr $2
  # 0 "" 2
  #NO_APP
-	b	$L6
+	b	$L8
 	.end	run
 	.size	run, .-run
 	.align	2

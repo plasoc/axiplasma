@@ -349,80 +349,65 @@ $L17:
 	.ent	getbyte
 	.type	getbyte, @function
 getbyte:
-	.frame	$fp,32,$31		# vars= 24, regs= 1/0, args= 0, gp= 0
-	.mask	0x40000000,-4
+	.frame	$fp,32,$31		# vars= 8, regs= 2/0, args= 16, gp= 0
+	.mask	0xc0000000,-4
 	.fmask	0x00000000,0
+	.set	noreorder
+	.set	nomacro
 	addiu	$sp,$sp,-32
-	sw	$fp,28($sp)
+	sw	$31,28($sp)
+	sw	$fp,24($sp)
 	move	$fp,$sp
-	lui	$2,%hi(int_obj)
-	addiu	$2,$2,%lo(int_obj)
-	sw	$2,4($fp)
-	li	$2,3			# 0x3
-	sw	$2,8($fp)
-	lw	$2,4($fp)
-	#nop
-	lw	$2,0($2)
-	#nop
-	move	$5,$2
-	lw	$2,4($fp)
-	#nop
-	lw	$2,0($2)
-	#nop
-	lw	$2,0($2)
-	li	$4,1			# 0x1
-	lw	$3,8($fp)
-	#nop
-	sll	$3,$4,$3
-	or	$2,$2,$3
-	sw	$2,0($5)
-	b	$L19
-$L20:
+$L21:
+	move	$4,$0
+	jal	OS_AsmInterruptEnable
+	nop
+
+	lw	$3,%gp_rel(uart_in_ptr)($28)
+	lw	$2,%gp_rel(uart_out_ptr)($28)
+	nop
+	beq	$3,$2,$L19
+	nop
+
 	lw	$3,%gp_rel(uart_out_ptr)($28)
 	lui	$2,%hi(uart_fifo)
 	addiu	$2,$2,%lo(uart_fifo)
 	addu	$2,$3,$2
 	lbu	$2,0($2)
-	#nop
+	nop
 	andi	$2,$2,0x00ff
-	sw	$2,0($fp)
+	sw	$2,16($fp)
 	lw	$2,%gp_rel(uart_out_ptr)($28)
-	#nop
+	nop
 	addiu	$2,$2,1
 	andi	$2,$2,0x1ff
 	sw	$2,%gp_rel(uart_out_ptr)($28)
+	b	$L23
+	nop
+
 $L19:
-	lw	$3,%gp_rel(uart_in_ptr)($28)
-	lw	$2,%gp_rel(uart_out_ptr)($28)
-	#nop
-	beq	$3,$2,$L20
-	lui	$2,%hi(int_obj)
-	addiu	$2,$2,%lo(int_obj)
-	sw	$2,12($fp)
-	li	$2,3			# 0x3
-	sw	$2,16($fp)
-	lw	$2,12($fp)
-	#nop
-	lw	$2,0($2)
-	#nop
-	move	$5,$2
-	lw	$2,12($fp)
-	#nop
-	lw	$2,0($2)
-	#nop
-	lw	$2,0($2)
 	li	$4,1			# 0x1
-	lw	$3,16($fp)
-	#nop
-	sll	$3,$4,$3
-	nor	$3,$0,$3
-	and	$2,$2,$3
-	sw	$2,0($5)
-	lw	$2,0($fp)
+	jal	OS_AsmInterruptEnable
+	nop
+
+	b	$L21
+	nop
+
+$L23:
+	li	$4,1			# 0x1
+	jal	OS_AsmInterruptEnable
+	nop
+
+	lw	$2,16($fp)
 	move	$sp,$fp
-	lw	$fp,28($sp)
+	lw	$31,28($sp)
+	lw	$fp,24($sp)
 	addiu	$sp,$sp,32
 	jr	$31
+	nop
+
+	.set	macro
+	.set	reorder
 	.end	getbyte
 	.size	getbyte, .-getbyte
 	.align	2
@@ -443,10 +428,10 @@ setword:
 	move	$fp,$sp
 	sw	$4,32($fp)
 	sw	$0,16($fp)
-	b	$L23
+	b	$L25
 	nop
 
-$L24:
+$L26:
 	lw	$2,32($fp)
 	nop
 	andi	$2,$2,0xff
@@ -462,11 +447,11 @@ $L24:
 	nop
 	addiu	$2,$2,1
 	sw	$2,16($fp)
-$L23:
+$L25:
 	lw	$2,16($fp)
 	nop
 	sltu	$2,$2,4
-	bne	$2,$0,$L24
+	bne	$2,$0,$L26
 	nop
 
 	nop
@@ -499,10 +484,10 @@ getword:
 	move	$fp,$sp
 	sw	$0,20($fp)
 	sw	$0,16($fp)
-	b	$L26
+	b	$L28
 	nop
 
-$L27:
+$L29:
 	jal	getbyte
 	nop
 
@@ -519,11 +504,11 @@ $L27:
 	nop
 	addiu	$2,$2,1
 	sw	$2,16($fp)
-$L26:
+$L28:
 	lw	$2,16($fp)
 	nop
 	sltu	$2,$2,4
-	bne	$2,$0,$L27
+	bne	$2,$0,$L29
 	nop
 
 	lw	$2,20($fp)
