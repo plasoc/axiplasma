@@ -5,6 +5,9 @@
 extern "C" 
 {
 #endif
+	#include "plasoc_cpu.h"
+	#include "plasoc_int.h"
+	#include "plasoc_uart.h"
 
 	void initialize(void (*run)(void));
 	void setbyte(unsigned byte);

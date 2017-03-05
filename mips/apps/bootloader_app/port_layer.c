@@ -1,6 +1,4 @@
-#include "plasoc_cpu.h"
-#include "plasoc_int.h"
-#include "plasoc_uart.h"
+#include "port_layer.h"
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 #define PLASOC_UART_BASE_ADDRESS		(0x44a40000)
 #define INT_PLASOC_UART_ID				(3)
