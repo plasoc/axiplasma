@@ -1467,7 +1467,7 @@ begin
             m_axi_rready => uart_axi_lite_rready,
             m_axi_rresp => uart_axi_lite_rresp);
             
-    ram_cntrl_inst : axi_bram_ctrl_0
+    bram_cntrl_inst : axi_bram_ctrl_0
         port map (
             s_axi_aclk => aclk,
             s_axi_aresetn => aresetn(0),
@@ -1524,7 +1524,7 @@ begin
             bram_wrdata_a => bram_bram_wrdata_a,
             bram_rddata_a => bram_bram_rddata_a);
             
-    ram_inst : axi_bram_ctrl_1 
+    ram_cntrl_inst : axi_bram_ctrl_1 
         port map (
             s_axi_aclk => aclk,
             s_axi_aresetn => aresetn(0),
@@ -1571,7 +1571,7 @@ begin
             bram_wrdata_a => ram_bram_wrdata_a,
             bram_rddata_a => ram_bram_rddata_a);
             
-    empty_ram_inst : empty_ram 
+    ram_inst : empty_ram 
         generic map (
             address_width => axi_ram_address_width,
             data_width => axi_data_width,

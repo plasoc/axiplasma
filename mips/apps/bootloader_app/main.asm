@@ -17,26 +17,26 @@ run:
 	addiu	$sp,$sp,-64
 	li	$3,1			# 0x1
 	li	$2,1151467520			# 0x44a20000
-	sw	$18,32($sp)
-	li	$18,-252706816			# 0xfffffffff0f00000
+	sw	$19,36($sp)
+	li	$19,-252706816			# 0xfffffffff0f00000
 	sw	$22,48($sp)
 	sw	$20,40($sp)
-	sw	$19,36($sp)
+	sw	$16,24($sp)
 	sw	$31,60($sp)
 	sw	$fp,56($sp)
 	sw	$23,52($sp)
 	sw	$21,44($sp)
+	sw	$18,32($sp)
 	sw	$17,28($sp)
-	sw	$16,24($sp)
-	ori	$18,$18,0xf0f0
+	ori	$19,$19,0xf0f0
 	sw	$3,8($2)
-	li	$19,1151467520			# 0x44a20000
+	li	$16,1151467520			# 0x44a20000
 	li	$20,2			# 0x2
-	li	$22,2048			# 0x800
+	li	$22,16777216			# 0x1000000
 $L2:
 	jal	getword
-	bne	$2,$18,$L2
-	sw	$20,8($19)
+	bne	$2,$19,$L2
+	sw	$20,8($16)
 	.set	noreorder
 	.set	nomacro
 	jal	setbyte
@@ -44,9 +44,9 @@ $L2:
 	.set	macro
 	.set	reorder
 
-	li	$17,2048			# 0x800
-	move	$16,$0
-	li	$21,2048			# 0x800
+	li	$18,16777216			# 0x1000000
+	move	$17,$0
+	li	$21,16777216			# 0x1000000
 	li	$fp,3			# 0x3
 $L7:
 	jal	getword
@@ -64,38 +64,31 @@ $L7:
 	.set	macro
 	.set	reorder
 
-	lw	$3,20($sp)
+	lw	$3,16($sp)
+	lw	$4,20($sp)
 	andi	$23,$2,0x00ff
-	srl	$2,$3,16
-	sw	$2,8($19)
 	andi	$2,$3,0xff
-	sw	$2,8($19)
-	li	$2,230			# 0xe6
+	li	$3,230			# 0xe6
 	.set	noreorder
-	bne	$2,$0,1f
-	divu	$0,$3,$2
+	bne	$3,$0,1f
+	divu	$0,$4,$3
 	break	7
 	.set	reorder
 1:
-	lw	$4,16($sp)
-	#nop
-	andi	$4,$4,0xff
-	mfhi	$2
+	sw	$2,8($16)
+	mfhi	$3
+	sw	$3,8($16)
+	sw	$17,8($16)
+	bne	$2,$3,$L3
+	sw	$4,0($18)
 	.set	noreorder
 	.set	nomacro
-	bne	$4,$2,$L12
-	li	$4,2			# 0x2
+	bne	$17,$fp,$L4
+	addiu	$18,$18,4
 	.set	macro
 	.set	reorder
 
-	sw	$3,0($17)
-	.set	noreorder
-	.set	nomacro
-	bne	$16,$fp,$L4
-	addiu	$17,$17,4
-	.set	macro
-	.set	reorder
-
+	sw	$17,8($16)
 	move	$5,$21
 	li	$6,16			# 0x10
 	.set	noreorder
@@ -105,8 +98,10 @@ $L7:
 	.set	macro
 	.set	reorder
 
-	move	$21,$17
-	move	$16,$0
+	li	$2,4			# 0x4
+	move	$21,$18
+	sw	$2,8($16)
+	move	$17,$0
 $L5:
 	li	$4,1			# 0x1
 $L12:
@@ -127,7 +122,7 @@ $L12:
 	.set	reorder
 
  #APP
- # 73 "main.c" 1
+ # 81 "main.c" 1
 	jr $22
  # 0 "" 2
  #NO_APP
@@ -136,7 +131,15 @@ $L4:
 	.set	noreorder
 	.set	nomacro
 	b	$L5
-	addiu	$16,$16,1
+	addiu	$17,$17,1
+	.set	macro
+	.set	reorder
+
+$L3:
+	.set	noreorder
+	.set	nomacro
+	b	$L12
+	li	$4,2			# 0x2
 	.set	macro
 	.set	reorder
 

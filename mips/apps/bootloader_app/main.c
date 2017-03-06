@@ -1,5 +1,5 @@
 #include "port_layer.h"
-#define BOOT_LOADER_START_ADDRESS		(0x00000800)
+#define BOOT_LOADER_START_ADDRESS		(0x01000000)
 #define BOOT_LOADER_START_WORD			(0xf0f0f0f0)
 #define BOOT_LOADER_ACK_SUCCESS_BYTE		(0x01)	
 #define BOOT_LOADER_ACK_FAILURE_BYTE		(0x02)
@@ -40,8 +40,10 @@ static void run()
 				status = getbyte();
 
 				/* DEBUG */
-				*((volatile unsigned*)0x44a20008) = code_word>>16;
-				*((volatile unsigned*)0x44a20008) = code_word&(0xff);
+				*((volatile unsigned*)0x44a20008) = checksum;
+				*((volatile unsigned*)0x44a20008) = (code_word%BOOT_LOADER_CHECKSUM_DIVISOR);
+				*((volatile unsigned*)0x44a20008) = cache_counter;
+
 				
 				if ((code_word%BOOT_LOADER_CHECKSUM_DIVISOR)==checksum)
 				{
@@ -50,9 +52,15 @@ static void run()
 					
 					if (cache_counter==(BOOT_LOADER_CACHE_FLUSH_THRESHOLD-1))
 					{
+						/* DEBUG */
+						*((volatile unsigned*)0x44a20008) = 3;
+						
 						l1_cache_flush_range(cache_address,BOOT_LOADER_CACHE_FLUSH_THRESHOLD<<2);
 						cache_address = (unsigned)load_address;
 						cache_counter = 0;
+
+						/* DEBUG */
+						*((volatile unsigned*)0x44a20008) = 4;
 					}
 					else
 					{

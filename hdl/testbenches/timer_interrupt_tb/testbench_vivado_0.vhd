@@ -40,6 +40,7 @@ architecture Behavioral of testbench_vivado_0 is
     signal uart_rx_done : std_logic := '0';
     signal uart_rx_data : std_logic_vector(7 downto 0) := (others=>'0');
     signal uart_rx_counter : integer range 0 to 9 := 0;
+    signal boot_checksum : std_logic_vector(7 downto 0) := (others=>'0');
 begin
 
     axiplasma_wrapper_inst : axiplasma_wrapper 
@@ -173,6 +174,7 @@ begin
             
             -- checksum
             word := std_logic_vector(to_unsigned(to_integer(unsigned(word)) mod BOOT_LOADER_CHECKSUM_DIVISOR,word_width));
+            boot_checksum <= word(7 downto 0);
             set_uart_rx(word(7 downto 0));
         
             -- status

@@ -1,8 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-package bram_pack is
-
+package boot_app_bram_pack is
+	-- App should start at 0x01000000
 	constant cpu_width : integer := 32;
 	constant ram_size : integer := 16384;
 	subtype word_type is std_logic_vector(cpu_width-1 downto 0);
@@ -11,26 +11,26 @@ package bram_pack is
 
 end package;
 
-package body bram_pack is
+package body boot_app_bram_pack is
 
 	function load_hex return ram_type is
 		variable ram_buffer : ram_type := (others=>(others=>'0'));
 	begin
-		ram_buffer(0) := X"3C1C0001";
+		ram_buffer(0) := X"3C1C0101";
 		ram_buffer(1) := X"279C8520";
-		ram_buffer(2) := X"3C050000";
+		ram_buffer(2) := X"3C050100";
 		ram_buffer(3) := X"24A50528";
-		ram_buffer(4) := X"3C040000";
+		ram_buffer(4) := X"3C040100";
 		ram_buffer(5) := X"248407B4";
-		ram_buffer(6) := X"3C1D0000";
+		ram_buffer(6) := X"3C1D0100";
 		ram_buffer(7) := X"27BD0718";
 		ram_buffer(8) := X"ACA00000";
 		ram_buffer(9) := X"00A4182A";
 		ram_buffer(10) := X"1460FFFD";
 		ram_buffer(11) := X"24A50004";
-		ram_buffer(12) := X"0C00007C";
+		ram_buffer(12) := X"0C40007C";
 		ram_buffer(13) := X"00000000";
-		ram_buffer(14) := X"0800000E";
+		ram_buffer(14) := X"0840000E";
 		ram_buffer(15) := X"23BDFF98";
 		ram_buffer(16) := X"AFA10010";
 		ram_buffer(17) := X"AFA20014";
@@ -57,7 +57,7 @@ package body bram_pack is
 		ram_buffer(38) := X"AFBB005C";
 		ram_buffer(39) := X"0000D812";
 		ram_buffer(40) := X"AFBB0060";
-		ram_buffer(41) := X"0C0000D1";
+		ram_buffer(41) := X"0C4000D1";
 		ram_buffer(42) := X"23A50000";
 		ram_buffer(43) := X"8FA10010";
 		ram_buffer(44) := X"8FA20014";
@@ -89,7 +89,7 @@ package body bram_pack is
 		ram_buffer(70) := X"40026000";
 		ram_buffer(71) := X"03E00008";
 		ram_buffer(72) := X"40846000";
-		ram_buffer(73) := X"3C050000";
+		ram_buffer(73) := X"3C050100";
 		ram_buffer(74) := X"24A50150";
 		ram_buffer(75) := X"8CA60000";
 		ram_buffer(76) := X"AC06003C";
@@ -143,10 +143,10 @@ package body bram_pack is
 		ram_buffer(124) := X"27BDFFE8";
 		ram_buffer(125) := X"3C0244A0";
 		ram_buffer(126) := X"AFB00010";
-		ram_buffer(127) := X"3C100000";
+		ram_buffer(127) := X"3C100100";
 		ram_buffer(128) := X"AE020730";
-		ram_buffer(129) := X"3C030000";
-		ram_buffer(130) := X"3C020000";
+		ram_buffer(129) := X"3C030100";
+		ram_buffer(130) := X"3C020100";
 		ram_buffer(131) := X"AFBF0014";
 		ram_buffer(132) := X"24420734";
 		ram_buffer(133) := X"24630774";
@@ -155,12 +155,12 @@ package body bram_pack is
 		ram_buffer(136) := X"AC40FFF8";
 		ram_buffer(137) := X"3C0244A2";
 		ram_buffer(138) := X"AF828008";
-		ram_buffer(139) := X"3C020000";
+		ram_buffer(139) := X"3C020100";
 		ram_buffer(140) := X"26030730";
 		ram_buffer(141) := X"24420334";
 		ram_buffer(142) := X"AC62000C";
 		ram_buffer(143) := X"AC600010";
-		ram_buffer(144) := X"0C000046";
+		ram_buffer(144) := X"0C400046";
 		ram_buffer(145) := X"24040001";
 		ram_buffer(146) := X"8E020730";
 		ram_buffer(147) := X"240300FF";
@@ -179,7 +179,7 @@ package body bram_pack is
 		ram_buffer(160) := X"24420002";
 		ram_buffer(161) := X"1445FFFB";
 		ram_buffer(162) := X"AC64FFFC";
-		ram_buffer(163) := X"3C100000";
+		ram_buffer(163) := X"3C100100";
 		ram_buffer(164) := X"26100774";
 		ram_buffer(165) := X"02001825";
 		ram_buffer(166) := X"00001025";
@@ -193,28 +193,28 @@ package body bram_pack is
 		ram_buffer(174) := X"AC430008";
 		ram_buffer(175) := X"24060040";
 		ram_buffer(176) := X"02002825";
-		ram_buffer(177) := X"0C0000EE";
+		ram_buffer(177) := X"0C4000EE";
 		ram_buffer(178) := X"24040004";
 		ram_buffer(179) := X"8F828008";
 		ram_buffer(180) := X"24030003";
 		ram_buffer(181) := X"AC430008";
 		ram_buffer(182) := X"24060040";
 		ram_buffer(183) := X"02002825";
-		ram_buffer(184) := X"0C0000EE";
+		ram_buffer(184) := X"0C4000EE";
 		ram_buffer(185) := X"00002025";
 		ram_buffer(186) := X"8F828008";
 		ram_buffer(187) := X"24030004";
 		ram_buffer(188) := X"AC430008";
 		ram_buffer(189) := X"24060040";
 		ram_buffer(190) := X"00002825";
-		ram_buffer(191) := X"0C000102";
+		ram_buffer(191) := X"0C400102";
 		ram_buffer(192) := X"02002025";
 		ram_buffer(193) := X"8F828008";
 		ram_buffer(194) := X"24030005";
 		ram_buffer(195) := X"AC430008";
 		ram_buffer(196) := X"24060040";
 		ram_buffer(197) := X"02002825";
-		ram_buffer(198) := X"0C0000EE";
+		ram_buffer(198) := X"0C4000EE";
 		ram_buffer(199) := X"24040004";
 		ram_buffer(200) := X"8F828008";
 		ram_buffer(201) := X"24030006";
@@ -225,12 +225,12 @@ package body bram_pack is
 		ram_buffer(206) := X"24030003";
 		ram_buffer(207) := X"03E00008";
 		ram_buffer(208) := X"AC430000";
-		ram_buffer(209) := X"3C030000";
+		ram_buffer(209) := X"3C030100";
 		ram_buffer(210) := X"8C620730";
 		ram_buffer(211) := X"27BDFFE0";
 		ram_buffer(212) := X"8C420004";
 		ram_buffer(213) := X"AFB10018";
-		ram_buffer(214) := X"3C110000";
+		ram_buffer(214) := X"3C110100";
 		ram_buffer(215) := X"AFB00014";
 		ram_buffer(216) := X"AFBF001C";
 		ram_buffer(217) := X"00608025";

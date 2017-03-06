@@ -7,8 +7,12 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+LDSTART_ADDRESS = 0x01000000
+LDABIFLAGS_ADDRESS = 0x0103ff00
+LDREGINFO_ADDRESS =  0x0103ff18
 LDFLAGS = -L$(LD_DIR) -static
-LDSTART_ADDRESS = 0x00000000
+LDAFTERFLAGS = -lc --section-start=.text=$(LDSTART_ADDRESS) --section-start=.MIPS.abiflags=$(LDABIFLAGS_ADDRESS) --section-start=.reginfo=$(LDREGINFO_ADDRESS)
+
 
 # Following are REQUIRED variables, but can be editted
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
@@ -40,11 +44,11 @@ OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 all: $(OBJECTS)
 ifdef DEBUG_MAKE
 	$(LD_MIPS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
-		$(notdir $(OBJECTS:=.o)) -lc --section-start=.text=$(LDSTART_ADDRESS)
+		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
 else
 	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
-		$(notdir $(OBJECTS:=.o)) -lc --section-start=.text=$(LDSTART_ADDRESS)
+		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
 	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).vhdl
