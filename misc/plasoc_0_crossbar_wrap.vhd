@@ -13,8 +13,8 @@ entity plasoc_0_crossbar_wrap is
 		axi_slave_id_width : integer := 0;
 		axi_master_amount : integer := 7;
 		axi_slave_amount : integer := 2;
-		axi_master_base_address : std_logic_vector := X"44a4000044a3000044a2000044a1000044a000001000000000000000";
-		axi_master_high_address : std_logic_vector := X"44a4ffff44a3ffff44a2ffff44a1ffff44a0ffff1003ffff0000ffff"
+		axi_master_base_address : std_logic_vector := X"44a4000044a3000044a2000044a1000044a000000100000000000000";
+		axi_master_high_address : std_logic_vector := X"44a4ffff44a3ffff44a2ffff44a1ffff44a0ffff0103ffff0000ffff"
 	);
 	port
 	(

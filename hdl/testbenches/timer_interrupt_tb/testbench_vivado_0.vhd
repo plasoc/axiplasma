@@ -173,13 +173,14 @@ begin
             set_uart_word(word);
             
             -- checksum
-            word := std_logic_vector(to_unsigned(to_integer(unsigned(word)) mod BOOT_LOADER_CHECKSUM_DIVISOR,word_width));
+            word := std_logic_vector(unsigned(word) mod BOOT_LOADER_CHECKSUM_DIVISOR);
             boot_checksum <= word(7 downto 0);
             set_uart_rx(word(7 downto 0));
         
             -- status
             app_ptr := app_ptr+1;
-            if app_ptr=ram_size then
+            --if app_ptr=ram_size then
+            if app_ptr=13 then
                 set_uart_rx(BOOT_LOADER_STATUS_DONE);
                 exit;
             else
