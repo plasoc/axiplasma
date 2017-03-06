@@ -63,11 +63,11 @@ unsigned getbyte()
 		{
 			byte = (unsigned)uart_fifo[uart_out_ptr];
 			uart_out_ptr = (uart_out_ptr+1)%PLASOC_UART_FIFO_DEPTH;
+			OS_AsmInterruptEnable(1);
 			break;
 		}
 		OS_AsmInterruptEnable(1);
 	}
-	OS_AsmInterruptEnable(1);
 	
 	return byte;
 }

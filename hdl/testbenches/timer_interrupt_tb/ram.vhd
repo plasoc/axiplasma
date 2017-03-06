@@ -22,28 +22,19 @@ architecture Behavioral of ram is
     signal base_index : integer;
     signal ram_buffer : ram_type := load_hex;
 begin
-    
-    -- Acquire index into array. Every memory access should be aligned,
-    -- so this shouldn't cause any problems.
+
     base_index <= to_integer(unsigned(bram_addr_a))/bytes_per_word;
-    -- Drive ram interface for axiplasma. The ram is implemented with a combination of the Xilinx
-    -- axi bram controller and an array into which the binary is uplosed.
     process (bram_clk_a) 
     begin
-        -- Perform operation on rising clock edge.
         if rising_edge(bram_clk_a) then
-            -- Drive interface to axi bram controller.
             if bram_rst_a='0' then
-                -- Check to see if bram is enabled.
                 if bram_en_a='1' then
-                    -- Store word based on which bytes are enabled.
                     for each_byte in 0 to bytes_per_word-1 loop
                         if bram_we_a(each_byte)='1' then
                             ram_buffer(base_index)(each_byte*8+7 downto each_byte*8) <= 
                                 bram_wrdata_a(each_byte*8+7 downto each_byte*8);
                         end if;
                     end loop;
-                    -- Read word to BRAM read interface, as well.
                     bram_rddata_a <= ram_buffer(base_index);
                 end if;
             end if;

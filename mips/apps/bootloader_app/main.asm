@@ -11,125 +11,138 @@
 	.ent	run
 	.type	run, @function
 run:
-	.frame	$fp,64,$31		# vars= 40, regs= 2/0, args= 16, gp= 0
-	.mask	0xc0000000,-4
+	.frame	$sp,64,$31		# vars= 8, regs= 10/0, args= 16, gp= 0
+	.mask	0xc0ff0000,-4
 	.fmask	0x00000000,0
 	addiu	$sp,$sp,-64
+	li	$3,1			# 0x1
+	li	$2,1151467520			# 0x44a20000
+	sw	$18,32($sp)
+	li	$18,-252706816			# 0xfffffffff0f00000
+	sw	$22,48($sp)
+	sw	$20,40($sp)
+	sw	$19,36($sp)
 	sw	$31,60($sp)
 	sw	$fp,56($sp)
-	move	$fp,$sp
-	li	$2,1151467520			# 0x44a20000
-	ori	$2,$2,0x8
-	li	$3,1			# 0x1
-	sw	$3,0($2)
-$L8:
+	sw	$23,52($sp)
+	sw	$21,44($sp)
+	sw	$17,28($sp)
+	sw	$16,24($sp)
+	ori	$18,$18,0xf0f0
+	sw	$3,8($2)
+	li	$19,1151467520			# 0x44a20000
+	li	$20,2			# 0x2
+	li	$22,2048			# 0x800
+$L2:
 	jal	getword
-	sw	$2,28($fp)
-	lw	$3,28($fp)
-	li	$2,-252706816			# 0xfffffffff0f00000
-	ori	$2,$2,0xf0f0
-	bne	$3,$2,$L8
-	li	$2,1151467520			# 0x44a20000
-	ori	$2,$2,0x8
-	li	$3,2			# 0x2
-	sw	$3,0($2)
-	li	$2,2048			# 0x800
-	sw	$2,16($fp)
-	sw	$0,20($fp)
-	li	$2,2048			# 0x800
-	sw	$2,24($fp)
-	li	$4,1			# 0x1
+	bne	$2,$18,$L2
+	sw	$20,8($19)
+	.set	noreorder
+	.set	nomacro
 	jal	setbyte
+	li	$4,1			# 0x1
+	.set	macro
+	.set	reorder
+
+	li	$17,2048			# 0x800
+	move	$16,$0
+	li	$21,2048			# 0x800
+	li	$fp,3			# 0x3
 $L7:
 	jal	getword
-	sw	$2,32($fp)
+	.set	noreorder
+	.set	nomacro
 	jal	getbyte
-	sb	$2,36($fp)
+	sw	$2,20($sp)
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
 	jal	getbyte
-	sb	$2,37($fp)
-	li	$2,1151467520			# 0x44a20000
-	ori	$2,$2,0x8
-	lw	$3,32($fp)
-	#nop
-	srl	$3,$3,16
-	sw	$3,0($2)
-	li	$2,1151467520			# 0x44a20000
-	ori	$2,$2,0x8
-	lw	$3,32($fp)
-	#nop
-	andi	$3,$3,0xff
-	sw	$3,0($2)
-	lw	$3,32($fp)
+	sw	$2,16($sp)
+	.set	macro
+	.set	reorder
+
+	lw	$3,20($sp)
+	andi	$23,$2,0x00ff
+	srl	$2,$3,16
+	sw	$2,8($19)
+	andi	$2,$3,0xff
+	sw	$2,8($19)
 	li	$2,230			# 0xe6
-	divu	$0,$3,$2
+	.set	noreorder
 	bne	$2,$0,1f
-	nop
+	divu	$0,$3,$2
 	break	7
+	.set	reorder
 1:
+	lw	$4,16($sp)
+	#nop
+	andi	$4,$4,0xff
 	mfhi	$2
-	move	$3,$2
-	lbu	$2,36($fp)
-	#nop
-	bne	$3,$2,$L3
-	lw	$2,24($fp)
-	lw	$3,32($fp)
-	#nop
-	sw	$3,0($2)
-	lw	$2,24($fp)
-	#nop
-	addiu	$2,$2,4
-	sw	$2,24($fp)
-	lw	$3,20($fp)
-	li	$2,3			# 0x3
-	bne	$3,$2,$L4
-	lw	$2,16($fp)
-	#nop
-	sw	$2,40($fp)
-	li	$2,16			# 0x10
-	sw	$2,44($fp)
-	lw	$6,44($fp)
-	lw	$5,40($fp)
-	li	$4,4			# 0x4
+	.set	noreorder
+	.set	nomacro
+	bne	$4,$2,$L12
+	li	$4,2			# 0x2
+	.set	macro
+	.set	reorder
+
+	sw	$3,0($17)
+	.set	noreorder
+	.set	nomacro
+	bne	$16,$fp,$L4
+	addiu	$17,$17,4
+	.set	macro
+	.set	reorder
+
+	move	$5,$21
+	li	$6,16			# 0x10
+	.set	noreorder
+	.set	nomacro
 	jal	l1_cache_operate_on_line_range
-	lw	$2,24($fp)
-	#nop
-	sw	$2,16($fp)
-	sw	$0,20($fp)
-	b	$L5
-$L4:
-	lw	$2,20($fp)
-	#nop
-	addiu	$2,$2,1
-	sw	$2,20($fp)
+	li	$4,4			# 0x4
+	.set	macro
+	.set	reorder
+
+	move	$21,$17
+	move	$16,$0
 $L5:
 	li	$4,1			# 0x1
+$L12:
 	jal	setbyte
-	b	$L6
-$L3:
-	li	$4,2			# 0x2
-	jal	setbyte
-$L6:
-	lbu	$3,37($fp)
-	li	$2,2			# 0x2
-	bne	$3,$2,$L7
-	lw	$2,16($fp)
-	#nop
-	sw	$2,48($fp)
-	li	$2,16			# 0x10
-	sw	$2,52($fp)
-	lw	$6,52($fp)
-	lw	$5,48($fp)
-	li	$4,4			# 0x4
+	.set	noreorder
+	.set	nomacro
+	bne	$23,$20,$L7
+	li	$6,16			# 0x10
+	.set	macro
+	.set	reorder
+
+	move	$5,$21
+	.set	noreorder
+	.set	nomacro
 	jal	l1_cache_operate_on_line_range
-	li	$2,2048			# 0x800
+	li	$4,4			# 0x4
+	.set	macro
+	.set	reorder
+
  #APP
  # 73 "main.c" 1
-	jr $2
+	jr $22
  # 0 "" 2
  #NO_APP
-	b	$L8
+	b	$L2
+$L4:
+	.set	noreorder
+	.set	nomacro
+	b	$L5
+	addiu	$16,$16,1
+	.set	macro
+	.set	reorder
+
 	.end	run
 	.size	run, .-run
+	.section	.text.startup,"ax",@progbits
 	.align	2
 	.globl	main
 	.set	nomips16
@@ -137,27 +150,21 @@ $L6:
 	.ent	main
 	.type	main, @function
 main:
-	.frame	$fp,24,$31		# vars= 0, regs= 2/0, args= 16, gp= 0
-	.mask	0xc0000000,-4
+	.frame	$sp,24,$31		# vars= 0, regs= 1/0, args= 16, gp= 0
+	.mask	0x80000000,-4
 	.fmask	0x00000000,0
 	.set	noreorder
 	.set	nomacro
+	lui	$4,%hi(run)
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
-	sw	$fp,16($sp)
-	move	$fp,$sp
-	lui	$2,%hi(run)
-	addiu	$4,$2,%lo(run)
 	jal	initialize
-	nop
+	addiu	$4,$4,%lo(run)
 
-	move	$2,$0
-	move	$sp,$fp
 	lw	$31,20($sp)
-	lw	$fp,16($sp)
-	addiu	$sp,$sp,24
+	move	$2,$0
 	jr	$31
-	nop
+	addiu	$sp,$sp,24
 
 	.set	macro
 	.set	reorder

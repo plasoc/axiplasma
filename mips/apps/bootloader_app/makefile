@@ -6,7 +6,7 @@ LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
-CFLAGS = -O0 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDFLAGS = -L$(LD_DIR) -static
 LDSTART_ADDRESS = 0x00000000
 

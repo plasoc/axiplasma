@@ -25,62 +25,29 @@ end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
     -- Component declarations.
-    component ram is      port(
-        bram_rst_a : in STD_LOGIC;
-        bram_clk_a : in STD_LOGIC;
-        bram_en_a : in STD_LOGIC;
-        bram_we_a : in STD_LOGIC_VECTOR(3 DOWNTO 0);
-        bram_addr_a : in STD_LOGIC_VECTOR(15 DOWNTO 0);
-        bram_wrdata_a : in STD_LOGIC_VECTOR(31 DOWNTO 0);
-        bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
+    component ram is
+        port(
+            bram_rst_a : in STD_LOGIC;
+            bram_clk_a : in STD_LOGIC;
+            bram_en_a : in STD_LOGIC;
+            bram_we_a : in STD_LOGIC_VECTOR(3 DOWNTO 0);
+            bram_addr_a : in STD_LOGIC_VECTOR(15 DOWNTO 0);
+            bram_wrdata_a : in STD_LOGIC_VECTOR(31 DOWNTO 0);
+            bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
     end component; 
-    component axi_bram_address_cntrl is
+    component empty_ram is
         generic (
-            axi_id_width : integer := 1;
-            axi_address_width : integer := 16);
-        port (
-            aclk : in std_logic;
-            aresetn : in std_logic;
-            s_axi_awid : in std_logic_vector(axi_id_width-1 downto 0);
-            s_axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0); 
-            s_axi_awlen : in std_logic_vector(7 downto 0);
-            s_axi_awsize : in std_logic_vector(2 downto 0);
-            s_axi_awburst : in std_logic_vector(1 downto 0);
-            s_axi_awlock : in std_logic;
-            s_axi_awcache : in std_logic_vector(3 downto 0);
-            s_axi_awprot : in std_logic_vector(2 downto 0);
-            s_axi_awvalid : in std_logic;
-            s_axi_awready : out std_logic;
-            m_axi_awid : out std_logic_vector(axi_id_width-1 downto 0) := (others=>'0');
-            m_axi_awaddr : out std_logic_vector(axi_address_width-1 downto 0) := (others=>'0');
-            m_axi_awlen : out std_logic_vector(7 downto 0) := (others=>'0');
-            m_axi_awsize : out std_logic_vector(2 downto 0) := (others=>'0');
-            m_axi_awburst : out std_logic_vector(1 downto 0) := (others=>'0');
-            m_axi_awlock : out std_logic := '0';
-            m_axi_awcache : out std_logic_vector(3 downto 0) := (others=>'0');
-            m_axi_awprot : out std_logic_vector(2 downto 0) := (others=>'0');
-            m_axi_awvalid : out std_logic;
-            m_axi_awready : in std_logic;
-            s_axi_arid : in std_logic_vector(axi_id_width-1 downto 0);
-            s_axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-            s_axi_arlen : in std_logic_vector(7 downto 0);
-            s_axi_arsize : in std_logic_vector(2 downto 0);
-            s_axi_arburst : in std_logic_vector(1 downto 0);
-            s_axi_arlock : in std_logic;
-            s_axi_arcache : in std_logic_vector(3 downto 0);
-            s_axi_arprot : in std_logic_vector(2 downto 0);
-            s_axi_arvalid : in std_logic;
-            s_axi_arready : out std_logic;
-            m_axi_arid : out std_logic_vector(axi_id_width-1 downto 0) := (others=>'0');
-            m_axi_araddr : out std_logic_vector(axi_address_width-1 downto 0) := (others=>'0');
-            m_axi_arlen : out std_logic_vector(7 downto 0) := (others=>'0');
-            m_axi_arsize : out std_logic_vector(2 downto 0) := (others=>'0');
-            m_axi_arburst : out std_logic_vector(1 downto 0) := (others=>'0');
-            m_axi_arlock : out std_logic := '0';
-            m_axi_arcache : out std_logic_vector(3 downto 0) := (others=>'0');
-            m_axi_arprot : out std_logic_vector(2 downto 0) := (others=>'0');
-            m_axi_arvalid : out std_logic;
-            m_axi_arready : in std_logic);
+            address_width : integer := 18;
+            data_width : integer := 32;
+            bram_depth : integer := 65536);
+        port(
+            bram_rst_a : in STD_LOGIC;
+            bram_clk_a : in STD_LOGIC;
+            bram_en_a : in STD_LOGIC;
+            bram_we_a : in STD_LOGIC_VECTOR(data_width/8-1 DOWNTO 0);
+            bram_addr_a : in STD_LOGIC_VECTOR(address_width-1 DOWNTO 0);
+            bram_wrdata_a : in STD_LOGIC_VECTOR(data_width-1 DOWNTO 0);
+            bram_rddata_a : out STD_LOGIC_VECTOR(data_width-1 DOWNTO 0) := (others=>'0'));
     end component;
     component axi_cdma_0 IS
       PORT (
@@ -205,6 +172,54 @@ architecture Behavioral of axiplasma_wrapper is
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
       );
     END component;
+    component axi_bram_ctrl_1 IS
+      PORT (
+        s_axi_aclk : IN STD_LOGIC;
+        s_axi_aresetn : IN STD_LOGIC;
+        s_axi_awid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+        s_axi_awaddr : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
+        s_axi_awlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_awsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_awlock : IN STD_LOGIC;
+        s_axi_awcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_awprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_awvalid : IN STD_LOGIC;
+        s_axi_awready : OUT STD_LOGIC;
+        s_axi_wdata : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_wstrb : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_wlast : IN STD_LOGIC;
+        s_axi_wvalid : IN STD_LOGIC;
+        s_axi_wready : OUT STD_LOGIC;
+        s_axi_bid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
+        s_axi_bresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_bvalid : OUT STD_LOGIC;
+        s_axi_bready : IN STD_LOGIC;
+        s_axi_arid : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
+        s_axi_araddr : IN STD_LOGIC_VECTOR(17 DOWNTO 0);
+        s_axi_arlen : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+        s_axi_arsize : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arburst : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_arlock : IN STD_LOGIC;
+        s_axi_arcache : IN STD_LOGIC_VECTOR(3 DOWNTO 0);
+        s_axi_arprot : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        s_axi_arvalid : IN STD_LOGIC;
+        s_axi_arready : OUT STD_LOGIC;
+        s_axi_rid : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
+        s_axi_rdata : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        s_axi_rresp : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+        s_axi_rlast : OUT STD_LOGIC;
+        s_axi_rvalid : OUT STD_LOGIC;
+        s_axi_rready : IN STD_LOGIC;
+        bram_rst_a : OUT STD_LOGIC;
+        bram_clk_a : OUT STD_LOGIC;
+        bram_en_a : OUT STD_LOGIC;
+        bram_we_a : OUT STD_LOGIC_VECTOR(3 DOWNTO 0);
+        bram_addr_a : OUT STD_LOGIC_VECTOR(17 DOWNTO 0);
+        bram_wrdata_a : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
+      );
+    END component;
     constant axi_address_width : integer := 32;
     constant axi_data_width : integer := 32;
     constant axi_master_amount : integer := 5;
@@ -212,6 +227,8 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_slave_id_width : integer := 0;
     constant axi_master_id_width : integer := clogb2(axi_slave_amount)+axi_slave_id_width;
     constant axi_lite_address_width : integer := 16; -- a misnomer. 
+    constant axi_ram_address_width : integer := 18;
+    constant axi_ram_depth : integer := 65536;
     signal aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
     signal cross_aresetn : std_logic_vector(0 downto 0);
@@ -294,6 +311,52 @@ architecture Behavioral of axiplasma_wrapper is
     signal cdma_axi_full_rlast : std_logic;
     signal cdma_axi_full_rvalid : std_logic;
     signal cdma_axi_full_rready : std_logic;
+    signal bram_axi_full_awid : std_logic_vector(axi_master_id_width-1 downto 0);
+    signal bram_axi_full_awaddr : std_logic_vector(axi_address_width-1 downto 0);
+    signal bram_axi_full_awlen : std_logic_vector(7 downto 0);
+    signal bram_axi_full_awsize : std_logic_vector(2 downto 0);
+    signal bram_axi_full_awburst : std_logic_vector(1 downto 0);
+    signal bram_axi_full_awlock : std_logic;
+    signal bram_axi_full_awcache : std_logic_vector(3 downto 0);
+    signal bram_axi_full_awprot : std_logic_vector(2 downto 0);
+    signal bram_axi_full_awqos : std_logic_vector(3 downto 0);
+    signal bram_axi_full_awregion : std_logic_vector(3 downto 0);
+    signal bram_axi_full_awvalid : std_logic;
+    signal bram_axi_full_awready : std_logic;
+    signal bram_axi_full_wdata : std_logic_vector(axi_data_width-1 downto 0);
+    signal bram_axi_full_wstrb : std_logic_vector(axi_data_width/8-1 downto 0);
+    signal bram_axi_full_wlast : std_logic;
+    signal bram_axi_full_wvalid : std_logic;
+    signal bram_axi_full_wready : std_logic;
+    signal bram_axi_full_bid : std_logic_vector(axi_master_id_width-1 downto 0);
+    signal bram_axi_full_bresp : std_logic_vector(1 downto 0);
+    signal bram_axi_full_bvalid : std_logic;
+    signal bram_axi_full_bready : std_logic;
+    signal bram_axi_full_arid : std_logic_vector(axi_master_id_width-1 downto 0);
+    signal bram_axi_full_araddr : std_logic_vector(axi_address_width-1 downto 0);
+    signal bram_axi_full_arlen : std_logic_vector(7 downto 0);
+    signal bram_axi_full_arsize : std_logic_vector(2 downto 0);
+    signal bram_axi_full_arburst : std_logic_vector(1 downto 0);
+    signal bram_axi_full_arlock : std_logic;
+    signal bram_axi_full_arcache : std_logic_vector(3 downto 0);
+    signal bram_axi_full_arprot : std_logic_vector(2 downto 0);
+    signal bram_axi_full_arqos : std_logic_vector(3 downto 0);
+    signal bram_axi_full_arregion : std_logic_vector(3 downto 0);
+    signal bram_axi_full_arvalid : std_logic;
+    signal bram_axi_full_arready : std_logic;
+    signal bram_axi_full_rid : std_logic_vector(axi_master_id_width-1 downto 0);
+    signal bram_axi_full_rdata : std_logic_vector(axi_data_width-1 downto 0);
+    signal bram_axi_full_rresp : std_logic_vector(1 downto 0);
+    signal bram_axi_full_rlast : std_logic;
+    signal bram_axi_full_rvalid : std_logic;
+    signal bram_axi_full_rready : std_logic;
+    signal bram_bram_rst_a : STD_LOGIC;
+    signal bram_bram_clk_a : STD_LOGIC;
+    signal bram_bram_en_a : STD_LOGIC;
+    signal bram_bram_we_a : STD_LOGIC_VECTOR(3 DOWNTO 0);
+    signal bram_bram_addr_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    signal bram_bram_wrdata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_bram_rddata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
     signal ram_axi_full_awid : std_logic_vector(axi_master_id_width-1 downto 0);
     signal ram_axi_full_awaddr : std_logic_vector(axi_address_width-1 downto 0);
     signal ram_axi_full_awlen : std_logic_vector(7 downto 0);
@@ -336,10 +399,10 @@ architecture Behavioral of axiplasma_wrapper is
     signal ram_bram_rst_a : STD_LOGIC;
     signal ram_bram_clk_a : STD_LOGIC;
     signal ram_bram_en_a : STD_LOGIC;
-    signal ram_bram_we_a : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal ram_bram_addr_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    signal ram_bram_wrdata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal ram_bram_rddata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal ram_bram_we_a : STD_LOGIC_VECTOR(axi_data_width/8-1 DOWNTO 0);
+    signal ram_bram_addr_a : STD_LOGIC_VECTOR(axi_ram_address_width-1 DOWNTO 0);
+    signal ram_bram_wrdata_a : STD_LOGIC_VECTOR(axi_data_width-1 DOWNTO 0);
+    signal ram_bram_rddata_a : STD_LOGIC_VECTOR(axi_data_width-1 DOWNTO 0);
     signal int_axi_full_awid : std_logic_vector(axi_master_id_width-1 downto 0);
     signal int_axi_full_awaddr : std_logic_vector(axi_address_width-1 downto 0);
     signal int_axi_full_awlen : std_logic_vector(7 downto 0);
@@ -748,6 +811,45 @@ begin
             cdma_s_axi_rlast => cdma_axi_full_rlast,
             cdma_s_axi_rvalid => cdma_axi_full_rvalid,
             cdma_s_axi_rready => cdma_axi_full_rready,
+            bram_m_axi_awid => bram_axi_full_awid,
+            bram_m_axi_awaddr => bram_axi_full_awaddr,
+            bram_m_axi_awlen => bram_axi_full_awlen,
+            bram_m_axi_awsize => bram_axi_full_awsize,
+            bram_m_axi_awburst => bram_axi_full_awburst,
+            bram_m_axi_awlock => bram_axi_full_awlock,
+            bram_m_axi_awcache => bram_axi_full_awcache,
+            bram_m_axi_awprot => bram_axi_full_awprot,
+            bram_m_axi_awqos => bram_axi_full_awqos,
+            bram_m_axi_awregion => bram_axi_full_awregion,
+            bram_m_axi_awvalid => bram_axi_full_awvalid,
+            bram_m_axi_awready => bram_axi_full_awready,
+            bram_m_axi_wdata => bram_axi_full_wdata,
+            bram_m_axi_wstrb => bram_axi_full_wstrb,
+            bram_m_axi_wlast => bram_axi_full_wlast,
+            bram_m_axi_wvalid => bram_axi_full_wvalid,
+            bram_m_axi_wready => bram_axi_full_wready,
+            bram_m_axi_bid => bram_axi_full_bid,
+            bram_m_axi_bresp => bram_axi_full_bresp,
+            bram_m_axi_bvalid => bram_axi_full_bvalid,
+            bram_m_axi_bready => bram_axi_full_bready,
+            bram_m_axi_arid => bram_axi_full_arid,
+            bram_m_axi_araddr => bram_axi_full_araddr,
+            bram_m_axi_arlen => bram_axi_full_arlen,
+            bram_m_axi_arsize => bram_axi_full_arsize,
+            bram_m_axi_arburst => bram_axi_full_arburst,
+            bram_m_axi_arlock => bram_axi_full_arlock,
+            bram_m_axi_arcache => bram_axi_full_arcache,
+            bram_m_axi_arprot => bram_axi_full_arprot,
+            bram_m_axi_arqos => bram_axi_full_arqos,
+            bram_m_axi_arregion => bram_axi_full_arregion,
+            bram_m_axi_arvalid => bram_axi_full_arvalid,
+            bram_m_axi_arready => bram_axi_full_arready,
+            bram_m_axi_rid => bram_axi_full_rid,
+            bram_m_axi_rdata => bram_axi_full_rdata,
+            bram_m_axi_rresp => bram_axi_full_rresp,
+            bram_m_axi_rlast => bram_axi_full_rlast,
+            bram_m_axi_rvalid => bram_axi_full_rvalid,
+            bram_m_axi_rready => bram_axi_full_rready,
             ram_m_axi_awid => ram_axi_full_awid,
             ram_m_axi_awaddr => ram_axi_full_awaddr,
             ram_m_axi_awlen => ram_axi_full_awlen,
@@ -1369,8 +1471,65 @@ begin
         port map (
             s_axi_aclk => aclk,
             s_axi_aresetn => aresetn(0),
+            s_axi_awid => bram_axi_full_awid,
+            s_axi_awaddr => bram_axi_full_awaddr(axi_lite_address_width-1 downto 0),
+            s_axi_awlen => bram_axi_full_awlen,
+            s_axi_awsize => bram_axi_full_awsize,
+            s_axi_awburst => bram_axi_full_awburst,
+            s_axi_awlock => bram_axi_full_awlock,
+            s_axi_awcache => bram_axi_full_awcache,
+            s_axi_awprot => bram_axi_full_awprot,
+            s_axi_awvalid => bram_axi_full_awvalid,
+            s_axi_awready => bram_axi_full_awready,
+            s_axi_wdata => bram_axi_full_wdata,
+            s_axi_wstrb => bram_axi_full_wstrb,
+            s_axi_wlast => bram_axi_full_wlast,
+            s_axi_wvalid => bram_axi_full_wvalid,
+            s_axi_wready => bram_axi_full_wready,
+            s_axi_bid => bram_axi_full_bid,
+            s_axi_bresp => bram_axi_full_bresp,
+            s_axi_bvalid => bram_axi_full_bvalid,
+            s_axi_bready => bram_axi_full_bready,
+            s_axi_arid => bram_axi_full_arid,
+            s_axi_araddr => bram_axi_full_araddr(axi_lite_address_width-1 downto 0),
+            s_axi_arlen => bram_axi_full_arlen,
+            s_axi_arsize => bram_axi_full_arsize,
+            s_axi_arburst => bram_axi_full_arburst,
+            s_axi_arlock => bram_axi_full_arlock,
+            s_axi_arcache => bram_axi_full_arcache,
+            s_axi_arprot => bram_axi_full_arprot,
+            s_axi_arvalid => bram_axi_full_arvalid,
+            s_axi_arready => bram_axi_full_arready,
+            s_axi_rid => bram_axi_full_rid,
+            s_axi_rdata => bram_axi_full_rdata,
+            s_axi_rresp => bram_axi_full_rresp,
+            s_axi_rlast => bram_axi_full_rlast,
+            s_axi_rvalid => bram_axi_full_rvalid,
+            s_axi_rready => bram_axi_full_rready,
+            bram_rst_a => bram_bram_rst_a,
+            bram_clk_a => bram_bram_clk_a,
+            bram_en_a => bram_bram_en_a,
+            bram_we_a => bram_bram_we_a,
+            bram_addr_a => bram_bram_addr_a,
+            bram_wrdata_a => bram_bram_wrdata_a,
+            bram_rddata_a => bram_bram_rddata_a);
+            
+    bram_inst : ram 
+        port map (
+            bram_rst_a => bram_bram_rst_a,
+            bram_clk_a => bram_bram_clk_a,
+            bram_en_a => bram_bram_en_a,
+            bram_we_a => bram_bram_we_a,
+            bram_addr_a => bram_bram_addr_a,
+            bram_wrdata_a => bram_bram_wrdata_a,
+            bram_rddata_a => bram_bram_rddata_a);
+            
+    ram_inst : axi_bram_ctrl_1 
+        port map (
+            s_axi_aclk => aclk,
+            s_axi_aresetn => aresetn(0),
             s_axi_awid => ram_axi_full_awid,
-            s_axi_awaddr => ram_axi_full_awaddr(axi_lite_address_width-1 downto 0),
+            s_axi_awaddr => ram_axi_full_awaddr(axi_ram_address_width-1 downto 0),
             s_axi_awlen => ram_axi_full_awlen,
             s_axi_awsize => ram_axi_full_awsize,
             s_axi_awburst => ram_axi_full_awburst,
@@ -1389,7 +1548,7 @@ begin
             s_axi_bvalid => ram_axi_full_bvalid,
             s_axi_bready => ram_axi_full_bready,
             s_axi_arid => ram_axi_full_arid,
-            s_axi_araddr => ram_axi_full_araddr(axi_lite_address_width-1 downto 0),
+            s_axi_araddr => ram_axi_full_araddr(axi_ram_address_width-1 downto 0),
             s_axi_arlen => ram_axi_full_arlen,
             s_axi_arsize => ram_axi_full_arsize,
             s_axi_arburst => ram_axi_full_arburst,
@@ -1412,7 +1571,11 @@ begin
             bram_wrdata_a => ram_bram_wrdata_a,
             bram_rddata_a => ram_bram_rddata_a);
             
-    ram_bram_inst : ram 
+    empty_ram_inst : empty_ram 
+        generic map (
+            address_width => axi_ram_address_width,
+            data_width => axi_data_width,
+            bram_depth => axi_ram_depth)
         port map (
             bram_rst_a => ram_bram_rst_a,
             bram_clk_a => ram_bram_clk_a,

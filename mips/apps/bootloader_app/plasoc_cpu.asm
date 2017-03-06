@@ -12,111 +12,51 @@
 	.ent	l1_cache_operate_on_line_range
 	.type	l1_cache_operate_on_line_range, @function
 l1_cache_operate_on_line_range:
-	.frame	$fp,56,$31		# vars= 48, regs= 1/0, args= 0, gp= 0
-	.mask	0x40000000,-4
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, gp= 0
+	.mask	0x00000000,0
 	.fmask	0x00000000,0
-	addiu	$sp,$sp,-56
-	sw	$fp,52($sp)
-	move	$fp,$sp
-	sw	$4,56($fp)
-	sw	$5,60($fp)
-	sw	$6,64($fp)
-	li	$2,16			# 0x10
-	sw	$2,0($fp)
-	lw	$2,64($fp)
-	#nop
-	beq	$2,$0,$L8
-	lw	$2,60($fp)
-	#nop
-	sw	$2,4($fp)
-	lw	$2,64($fp)
-	#nop
-	sw	$2,8($fp)
-	addiu	$2,$fp,40
-	sw	$2,12($fp)
-	addiu	$2,$fp,44
-	sw	$2,16($fp)
-	li	$2,16			# 0x10
-	sw	$2,20($fp)
-	lw	$3,4($fp)
-	lw	$2,8($fp)
-	#nop
-	addu	$2,$3,$2
-	sw	$2,24($fp)
-	lw	$3,24($fp)
+	.set	noreorder
+	.set	nomacro
+	beq	$6,$0,$L8
+	addu	$6,$6,$5
+	.set	macro
+	.set	reorder
+
 	li	$2,-16			# 0xfffffffffffffff0
-	and	$2,$3,$2
-	sw	$2,28($fp)
-	lw	$3,4($fp)
-	li	$2,-16			# 0xfffffffffffffff0
-	and	$3,$3,$2
-	lw	$2,12($fp)
-	#nop
-	sw	$3,0($2)
-	lw	$3,20($fp)
-	lw	$2,28($fp)
-	#nop
-	addu	$3,$3,$2
-	lw	$2,16($fp)
-	#nop
-	sw	$3,0($2)
-	lw	$2,16($fp)
-	#nop
-	lw	$3,0($2)
-	lw	$4,24($fp)
-	lw	$2,28($fp)
-	#nop
-	sltu	$2,$2,$4
-	beq	$2,$0,$L4
-	lw	$2,20($fp)
-	b	$L5
-$L4:
-	move	$2,$0
-$L5:
-	addu	$3,$3,$2
-	lw	$2,16($fp)
-	#nop
-	sw	$3,0($2)
-	b	$L6
-$L7:
-	lw	$2,40($fp)
-	lw	$3,56($fp)
-	#nop
-	sw	$3,32($fp)
-	sw	$2,36($fp)
-	lw	$3,32($fp)
+	and	$3,$6,$2
+	sltu	$6,$3,$6
+	and	$5,$5,$2
+	sll	$6,$6,4
+	addiu	$2,$3,16
+	addu	$6,$2,$6
 	li	$2,536870912			# 0x20000000
-	addu	$2,$3,$2
-	lw	$4,36($fp)
-	li	$3,-16			# 0xfffffffffffffff0
-	and	$3,$4,$3
+	addu	$4,$4,$2
+	li	$2,-16			# 0xfffffffffffffff0
+$L4:
+	.set	noreorder
+	.set	nomacro
+	bne	$6,$5,$L5
+	and	$3,$5,$2
+	.set	macro
+	.set	reorder
+
+$L8:
+	jr	$31
+$L5:
  #APP
  # 34 "../../plasoc/plasoc_cpu.h" 1
-	sw $3, 0($2)
+	sw $3, 0($4)
 sw $0, 0($3)
 
  # 0 "" 2
  #NO_APP
-	lw	$3,40($fp)
-	lw	$2,0($fp)
-	#nop
-	addu	$2,$3,$2
-	sw	$2,40($fp)
-$L6:
-	lw	$3,40($fp)
-	lw	$2,44($fp)
-	#nop
-	bne	$3,$2,$L7
-	b	$L1
-$L8:
 	.set	noreorder
-	nop
+	.set	nomacro
+	b	$L4
+	addiu	$5,$5,16
+	.set	macro
 	.set	reorder
-$L1:
-	move	$sp,$fp
-	lw	$fp,52($sp)
-	addiu	$sp,$sp,56
-	jr	$31
+
 	.end	l1_cache_operate_on_line_range
 	.size	l1_cache_operate_on_line_range, .-l1_cache_operate_on_line_range
 	.ident	"GCC: (GNU) 6.3.0"
