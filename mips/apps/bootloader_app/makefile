@@ -63,7 +63,6 @@ endif
 $(ASM_OBJECTS):%:%.asm
 	$(AS_MIPS) -o $(notdir $@).o $@.asm
 
-
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
@@ -72,6 +71,16 @@ else
 	@echo Not installing, no installation directory selected
 endif
 
+jump_build:
+	$(AS_MIPS) -o jumpboot.o jumpboot.asm
+	$(LD_MIPS) -Ttext=0 -e entry -Map jumpboot.map -s -N -o jumpboot.axf jumpboot.o
+	$(DUMP_MIPS) --disassemble-all jumpboot.axf > jumpboot.lst
+	$(OBJCOPY_MIPS) -I elf32-big -O binary jumpboot.axf jumpboot.bin
+	$(BIN2COE) jumpboot.bin jumpboot.vhdl
+
+jump_install:
+	install -d $(INSTALL_DIR)
+	install -c jumpboot.vhdl $(INSTALL_DIR)
 
 clean:
 	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))

@@ -37,6 +37,7 @@ architecture Behavioral of axiplasma_wrapper is
     end component; 
     component empty_ram is
         generic (
+            load_flag : Boolean := False;
             address_width : integer := 18;
             data_width : integer := 32;
             bram_depth : integer := 65536);
@@ -220,6 +221,7 @@ architecture Behavioral of axiplasma_wrapper is
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
       );
     END component;
+    constant load_ram : boolean := true;
     constant axi_address_width : integer := 32;
     constant axi_data_width : integer := 32;
     constant axi_master_amount : integer := 5;
@@ -1573,6 +1575,7 @@ begin
             
     ram_inst : empty_ram 
         generic map (
+            load_flag => load_ram,
             address_width => axi_ram_address_width,
             data_width => axi_data_width,
             bram_depth => axi_ram_depth)

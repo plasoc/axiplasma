@@ -110,18 +110,17 @@ $L5:
 	.ent	main
 	.type	main, @function
 main:
-	.frame	$sp,32,$31		# vars= 0, regs= 3/0, args= 16, gp= 0
-	.mask	0x80030000,-4
+	.frame	$sp,24,$31		# vars= 0, regs= 2/0, args= 16, gp= 0
+	.mask	0x80010000,-4
 	.fmask	0x00000000,0
-	addiu	$sp,$sp,-32
+	addiu	$sp,$sp,-24
 	li	$2,1151336448			# 0x44a00000
-	sw	$16,20($sp)
+	sw	$16,16($sp)
 	lui	$16,%hi(int_obj)
 	sw	$2,%lo(int_obj)($16)
 	lui	$3,%hi(int_obj+68)
 	lui	$2,%hi(int_obj+4)
-	sw	$31,28($sp)
-	sw	$17,24($sp)
+	sw	$31,20($sp)
 	addiu	$2,$2,%lo(int_obj+4)
 	addiu	$3,$3,%lo(int_obj+68)
 $L9:
@@ -133,16 +132,16 @@ $L9:
 	.set	macro
 	.set	reorder
 
+	li	$2,1151467520			# 0x44a20000
 	lui	$3,%hi(gpio_isr)
-	addiu	$2,$16,%lo(int_obj)
+	sw	$2,%gp_rel(gpio_obj)($28)
 	addiu	$3,$3,%lo(gpio_isr)
+	addiu	$2,$16,%lo(int_obj)
 	sw	$3,12($2)
 	li	$3,24969216			# 0x17d0000
 	li	$4,1151401984			# 0x44a10000
-	li	$17,1151467520			# 0x44a20000
 	addiu	$3,$3,30784
 	sw	$4,%gp_rel(timer_obj)($28)
-	sw	$17,%gp_rel(gpio_obj)($28)
 	sw	$0,16($2)
 	sw	$3,4($4)
 	lui	$3,%hi(timer_isr)
@@ -168,10 +167,9 @@ $L9:
 	lw	$2,%gp_rel(timer_obj)($28)
 	li	$3,3			# 0x3
 	sw	$3,0($2)
-	lw	$3,%gp_rel(gpio_obj)($28)
-	li	$2,1			# 0x1
-	sw	$2,0($3)
-	sw	$2,8($17)
+	lw	$2,%gp_rel(gpio_obj)($28)
+	li	$3,1			# 0x1
+	sw	$3,0($2)
 	li	$3,255			# 0xff
 $L10:
 	lw	$2,%gp_rel(update_flag)($28)

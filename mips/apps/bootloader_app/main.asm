@@ -115,8 +115,9 @@ $L12:
 	.set	macro
 	.set	reorder
 
+	jal	cleanup
  #APP
- # 66 "main.c" 1
+ # 68 "main.c" 1
 	jr $22
  # 0 "" 2
  #NO_APP

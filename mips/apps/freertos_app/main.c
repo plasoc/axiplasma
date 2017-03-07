@@ -63,8 +63,14 @@ extern void FreeRTOS_UserISR()
 
 /* So, I think it's best not to let FreeRTOS have control over the CPU's interrupt
   due to the fact the ISR already has the job of enabling the CPU's int. */
-extern void FreeRTOS_EnableInterrupts() { plasoc_int_enable_all(&int_obj); }
-extern void FreeRTOS_DisableInterrupts() { plasoc_int_disable_all(&int_obj); }
+extern void FreeRTOS_EnableInterrupts() 
+{ 
+	plasoc_int_set_enables(&int_obj,(1<<INT_PLASOC_TIMER_ID)|(1<<INT_PLASOC_GPIO_ID)|(1<<INT_XILINX_CDMA_ID));
+}
+extern void FreeRTOS_DisableInterrupts() 
+{ 
+	plasoc_int_disable_all(&int_obj); 
+}
 
 extern void vAssertCalled(const char* str, int val)
 {

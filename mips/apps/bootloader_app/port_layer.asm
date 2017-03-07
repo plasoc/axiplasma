@@ -166,6 +166,41 @@ $L9:
 	.end	initialize
 	.size	initialize, .-initialize
 	.align	2
+	.globl	cleanup
+	.set	nomips16
+	.set	nomicromips
+	.ent	cleanup
+	.type	cleanup, @function
+cleanup:
+	.frame	$sp,24,$31		# vars= 0, regs= 1/0, args= 16, gp= 0
+	.mask	0x80000000,-4
+	.fmask	0x00000000,0
+	addiu	$sp,$sp,-24
+	sw	$31,20($sp)
+	.set	noreorder
+	.set	nomacro
+	jal	OS_AsmInterruptEnable
+	move	$4,$0
+	.set	macro
+	.set	reorder
+
+	lui	$2,%hi(int_obj)
+	lw	$3,%lo(int_obj)($2)
+	lw	$31,20($sp)
+	lw	$2,0($3)
+	li	$4,-9			# 0xfffffffffffffff7
+	and	$2,$2,$4
+	sw	$2,0($3)
+	.set	noreorder
+	.set	nomacro
+	jr	$31
+	addiu	$sp,$sp,24
+	.set	macro
+	.set	reorder
+
+	.end	cleanup
+	.size	cleanup, .-cleanup
+	.align	2
 	.globl	setbyte
 	.set	nomips16
 	.set	nomicromips
@@ -179,11 +214,11 @@ setbyte:
 	.set	nomacro
 	lw	$3,%gp_rel(uart_obj)($28)
 	nop
-$L15:
+$L17:
 	lw	$2,0($3)
 	nop
 	andi	$2,$2,0x2
-	beq	$2,$0,$L15
+	beq	$2,$0,$L17
 	nop
 
 	sw	$4,8($3)
@@ -209,23 +244,23 @@ getbyte:
 	addiu	$sp,$sp,-24
 	sw	$31,20($sp)
 	sw	$16,16($sp)
-$L20:
+$L22:
 	jal	OS_AsmInterruptEnable
 	move	$4,$0
 
 	lw	$3,%gp_rel(uart_in_ptr)($28)
 	lw	$2,%gp_rel(uart_out_ptr)($28)
 	nop
-	bne	$3,$2,$L22
+	bne	$3,$2,$L24
 	nop
 
 	jal	OS_AsmInterruptEnable
 	li	$4,1			# 0x1
 
-	b	$L20
+	b	$L22
 	nop
 
-$L22:
+$L24:
 	lw	$2,%gp_rel(uart_out_ptr)($28)
 	lui	$3,%hi(uart_fifo)
 	addiu	$3,$3,%lo(uart_fifo)
@@ -265,12 +300,12 @@ setword:
 	move	$6,$4
 	li	$5,4			# 0x4
 	sw	$31,20($sp)
-$L25:
+$L27:
 	jal	setbyte
 	andi	$4,$6,0x00ff
 
 	addiu	$5,$5,-1
-	bne	$5,$0,$L25
+	bne	$5,$0,$L27
 	srl	$6,$6,8
 
 	lw	$31,20($sp)
@@ -302,13 +337,13 @@ getword:
 	move	$16,$0
 	move	$17,$0
 	li	$18,32			# 0x20
-$L29:
+$L31:
 	jal	getbyte
 	nop
 
 	sll	$2,$2,$16
 	addiu	$16,$16,8
-	bne	$16,$18,$L29
+	bne	$16,$18,$L31
 	or	$17,$17,$2
 
 	lw	$31,28($sp)
