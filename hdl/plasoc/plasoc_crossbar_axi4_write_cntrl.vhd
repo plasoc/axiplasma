@@ -106,7 +106,10 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
             if slave_permissions(each_slave)='1' then
                 slave_enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '1';
             elsif slave_handshakes(each_slave)='1' and slave_last(each_slave)='1' then
-                slave_enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '0';
+                for each_master in 0 to axi_master_amount-1 loop
+                    slave_enables_buff(each_slave+each_master*axi_slave_amount) := '0';
+                end loop;
+                --slave_enables_buff(each_slave+master_iden_buff*axi_slave_amount) := '0';
             end if;
         end loop;
         return slave_enables_buff;
@@ -180,7 +183,9 @@ architecture Behavioral of plasoc_crossbar_axi4_write_cntrl is
             if master_permissions(each_master)='1' then
                 master_enables_buff(slave_iden_buff+each_master*axi_slave_amount) := '1';
             elsif master_handshakes(each_master)='1' then
-                master_enables_buff(slave_iden_buff+each_master*axi_slave_amount) := '0';
+                for each_slave in 0 to axi_slave_amount-1 loop
+                    master_enables_buff(each_slave+each_master*axi_slave_amount) := '0';
+                end loop;
             end if;
         end loop;
         return master_enables_buff;
