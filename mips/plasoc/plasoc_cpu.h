@@ -91,6 +91,7 @@ extern "C"
 
 	extern unsigned OS_AsmInterruptEnable(unsigned enable);
 	extern void OS_Syscall();
+	extern void OS_AsmInterruptInit();
 
 #ifdef __cplusplus
 }

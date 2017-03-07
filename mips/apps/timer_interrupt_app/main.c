@@ -58,7 +58,8 @@ int main()
 	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_HALF_SECOND_CYCLES);
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,timer_isr,0);
 
-	/* Configure the interrupts of the CPU. */
+	/* Configure the interrupts of the CPU. This is needed to patch the interrupt handler. */
+	OS_AsmInterruptInit();
 	OS_AsmInterruptEnable(1);
 	
 	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */

@@ -143,6 +143,7 @@ void task_main_code()
 {
 	unsigned cur_value=0;
 	unsigned led_value=0;
+
 	while (1)
 	{
 		unsigned new_value;
@@ -188,15 +189,10 @@ void task_main_code()
 			plasoc_gpio_set_data_out(&gpio_obj,led_value);
 		}
 	}
-}
-
-
+} 
 
 int main()
 {
-	/* Probably not necessary, but let's ensure the CPU interrupt is diasabled. */
-	OS_AsmInterruptEnable(0);
-
 	/* Configure the interrupt controller. */
 	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
 

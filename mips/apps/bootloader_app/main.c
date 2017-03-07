@@ -11,7 +11,7 @@
 static void run()
 {
 	/* DEBUG */
-	*((volatile unsigned*)0x44a20008) = 1;
+	//*((volatile unsigned*)0x44a20008) = 1;
 
 	while (1)
 	{
@@ -25,9 +25,6 @@ static void run()
 			unsigned char status;
 			unsigned* load_address;
 
-			/* DEBUG */
-			*((volatile unsigned*)0x44a20008) = 2;
-
 			cache_address = BOOT_LOADER_START_ADDRESS;
 			cache_counter = 0;
 			load_address = (unsigned*)BOOT_LOADER_START_ADDRESS;
@@ -38,12 +35,6 @@ static void run()
 				code_word = getword();
 				checksum = getbyte();
 				status = getbyte();
-
-				/* DEBUG */
-				*((volatile unsigned*)0x44a20008) = checksum;
-				*((volatile unsigned*)0x44a20008) = (code_word%BOOT_LOADER_CHECKSUM_DIVISOR);
-				*((volatile unsigned*)0x44a20008) = cache_counter;
-
 				
 				if ((code_word%BOOT_LOADER_CHECKSUM_DIVISOR)==checksum)
 				{
@@ -52,15 +43,9 @@ static void run()
 					
 					if (cache_counter==(BOOT_LOADER_CACHE_FLUSH_THRESHOLD-1))
 					{
-						/* DEBUG */
-						*((volatile unsigned*)0x44a20008) = 3;
-						
 						l1_cache_flush_range(cache_address,BOOT_LOADER_CACHE_FLUSH_THRESHOLD<<2);
 						cache_address = (unsigned)load_address;
 						cache_counter = 0;
-
-						/* DEBUG */
-						*((volatile unsigned*)0x44a20008) = 4;
 					}
 					else
 					{
@@ -77,6 +62,8 @@ static void run()
 			while (status!=BOOT_LOADER_STATUS_DONE);
 
 			l1_cache_flush_range(cache_address,BOOT_LOADER_CACHE_FLUSH_THRESHOLD<<2);
+
+			cleanup();
 			
 			__asm__ __volatile__ ("jr %0"::"r"(BOOT_LOADER_START_ADDRESS):"memory");
 		}

@@ -155,8 +155,8 @@ OS_AsmInterruptInit:
 OS_AsmPatchValue:
    #Registers $26 and $27 are reserved for the OS
    #Code to place at address 0x3c
-   lui   $26, 0x1000
-   ori   $26, $26, 0x3c
+   lui   $26, %hi(interrupt_service_routine)
+   ori   $26, %lo(interrupt_service_routine)
    jr    $26
    nop
 

@@ -1,4 +1,6 @@
 #include "port_layer.h"
+#include "plasoc_int.h"
+#include "plasoc_uart.h"
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 #define PLASOC_UART_BASE_ADDRESS		(0x44a40000)
 #define INT_PLASOC_UART_ID				(3)
@@ -44,6 +46,12 @@ void initialize(void (*run)(void))
 	OS_AsmInterruptEnable(1);
 	
 	if (run!=0) run();
+}
+
+void cleanup()
+{
+	OS_AsmInterruptEnable(0);
+	plasoc_int_disable(&int_obj,INT_PLASOC_UART_ID);
 }
 
 void setbyte(unsigned byte)

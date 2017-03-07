@@ -3,7 +3,6 @@ import argparse, struct, binascii, array, time, serial
 def send_word(serial_obj,bytes_per_word,word):
 	for each_byte in range(bytes_per_word):
 		byte = bytearray([word&255])
-		#print("%0.2X" % byte[0])
 		serial_obj.write(byte)
 		word = word>>8
 
@@ -65,13 +64,10 @@ if __name__ == '__main__':
 
 		send_word(serial_obj,bytes_per_word,BOOT_LOADER_START_WORD)
 		status = array.array('B',serial_obj.read())[0]
-		#print("%0.2X" % status)
-		#print("%0.2X" % BOOT_LOADER_ACK_SUCCESS_BYTE[0])
 		assert(status==BOOT_LOADER_ACK_SUCCESS_BYTE[0])
 
 		if verbose_flag: print('Writing the data...')	
 
-		#words_in_binary = 14 # Debug
 		for each_word in range(words_in_binary):
 
 			word_packed = binary_content[each_word*bytes_per_word:(each_word+1)*bytes_per_word]

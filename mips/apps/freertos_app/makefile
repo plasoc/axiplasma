@@ -8,16 +8,26 @@ PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
-LDFLAGS = -static -lc
-ASFLAGS = 
+
+# When configuring the address, it is important to consider the addresses of
+# the abi flags and reg info. Both sections should be located immediately after 
+# the end of the application. 
+LDSTART_ADDRESS = 0x01000000
+LDABIFLAGS_ADDRESS = 0x01007000 
+LDREGINFO_ADDRESS =  0x01007018
+LDFLAGS = -L$(LD_DIR) -static
+LDAFTERFLAGS = -lc --section-start=.text=$(LDSTART_ADDRESS) --section-start=.MIPS.abiflags=$(LDABIFLAGS_ADDRESS) --section-start=.reginfo=$(LDREGINFO_ADDRESS)
 
 # Following are REQUIRED variables, but can be editted
+SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
+ICSP = python2 $(MISC_DIR)/icsp.py 
+ICSPFLAGS = --serial_port $(SERIALPORT)
 
 # No user editing or variables below this line
 
@@ -43,11 +53,11 @@ OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 all: check $(OBJECTS)
 ifdef DEBUG_MAKE
 	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
-		$(notdir $(OBJECTS:=.o)) -lc
+		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
 else
 	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
-		$(notdir $(OBJECTS:=.o)) -lc
+		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
 	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).vhdl
@@ -78,6 +88,8 @@ else
 	@echo Not installing, no installation directory selected
 endif
 
+launch:
+	$(ICSP) $(EXEC_NAME).bin $(ICSPFLAGS)
 
 clean:
 	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))

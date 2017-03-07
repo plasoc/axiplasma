@@ -101,6 +101,13 @@ extern "C"
 		return (unsigned)(*((unsigned volatile*)(obj->base_address+PLASOC_INT_ACTIVE_OFFSET)));
 	}
 
+	static inline __attribute__ ((always_inline))
+	void plasoc_int_set_enables(plasoc_int* obj,unsigned mask)
+	{
+		__asm__ __volatile__ ( "" : : : "memory");
+		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = mask;
+	}
+
 	/**
 	 * @brief Enables all device interrupts.
 	 * @param obj Pointer to the object.

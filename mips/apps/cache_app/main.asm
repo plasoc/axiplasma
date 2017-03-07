@@ -215,7 +215,7 @@ $L11:
 	.type	noncacheable, @object
 	.size	noncacheable, 4
 noncacheable:
-	.word	65536
+	.word	33554432
 
 	.comm	data,64,4
 

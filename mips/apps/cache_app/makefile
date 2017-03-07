@@ -7,20 +7,27 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+
+# When configuring the address, it is important to consider the addresses of
+# the abi flags and reg info. Both sections should be located immediately after 
+# the end of the application. 
 LDSTART_ADDRESS = 0x01000000
-LDABIFLAGS_ADDRESS = 0x0103ff00
-LDREGINFO_ADDRESS =  0x0103ff18
+LDABIFLAGS_ADDRESS = 0x01000800
+LDREGINFO_ADDRESS =  0x01000818
 LDFLAGS = -L$(LD_DIR) -static
 LDAFTERFLAGS = -lc --section-start=.text=$(LDSTART_ADDRESS) --section-start=.MIPS.abiflags=$(LDABIFLAGS_ADDRESS) --section-start=.reginfo=$(LDREGINFO_ADDRESS)
 
-
 # Following are REQUIRED variables, but can be editted
+SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
+ICSP = python2 $(MISC_DIR)/icsp.py 
+ICSPFLAGS = --serial_port $(SERIALPORT)
+
 
 # No user editing or variables below this line
 
@@ -72,6 +79,9 @@ else
 	@echo Not installing, no installation directory selected
 endif
 
+launch:
+	$(ICSP) $(EXEC_NAME).bin $(ICSPFLAGS)
+	
 
 clean:
 	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
