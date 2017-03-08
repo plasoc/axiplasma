@@ -221,7 +221,7 @@ architecture Behavioral of axiplasma_wrapper is
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
       );
     END component;
-    constant load_ram : boolean := true;
+    constant load_ram : boolean := false;
     constant axi_address_width : integer := 32;
     constant axi_data_width : integer := 32;
     constant axi_master_amount : integer := 5;

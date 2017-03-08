@@ -14,6 +14,8 @@
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
 
 #define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
+#define XILINX_CDMA_SOURCE_ADDRESS		(0x00008000)
+#define XILINX_CDMA_DESTINATION_ADDRESS		(0x00009000)
 #define XILINX_CDMA_BYTES_TO_TRANSFER		(64)
 
 #define INT_PLASOC_TIMER_ID			(0)
@@ -21,7 +23,7 @@
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
-#define TICK_THRESHOLD				(2)
+#define TICK_THRESHOLD				(250)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
@@ -35,8 +37,6 @@ SemaphoreHandle_t sem_time_obj;
 TaskHandle_t task_input_obj;
 TaskHandle_t task_copy_obj;
 volatile unsigned ticks_ary[GPIO_AMOUNT];
-volatile unsigned char cdma_src_ary[XILINX_CDMA_BYTES_TO_TRANSFER];
-volatile unsigned char cdma_dst_ary[XILINX_CDMA_BYTES_TO_TRANSFER];
 
 /* This ISR is necessary to ensure FreeRTOS runs in preemptive mode with
   time slices. */
@@ -63,18 +63,12 @@ extern void FreeRTOS_UserISR()
 
 /* So, I think it's best not to let FreeRTOS have control over the CPU's interrupt
   due to the fact the ISR already has the job of enabling the CPU's int. */
-extern void FreeRTOS_EnableInterrupts() 
-{ 
-	plasoc_int_set_enables(&int_obj,(1<<INT_PLASOC_TIMER_ID)|(1<<INT_PLASOC_GPIO_ID)|(1<<INT_XILINX_CDMA_ID));
-}
-extern void FreeRTOS_DisableInterrupts() 
-{ 
-	plasoc_int_disable_all(&int_obj); 
-}
+extern void FreeRTOS_EnableInterrupts() { plasoc_int_enable_all(&int_obj); }
+extern void FreeRTOS_DisableInterrupts() { plasoc_int_disable_all(&int_obj); }
 
 extern void vAssertCalled(const char* str, int val)
 {
-	plasoc_gpio_set_data_out(&gpio_obj,0xffff);
+	plasoc_gpio_set_data_out(&gpio_obj,(unsigned)val);
 	while (1);
 }
 
@@ -120,28 +114,18 @@ void task_time_code(void* ptr)
 
 void task_copy_code(void* ptr)
 {
-	unsigned char val=0;
-	
-	while (1)
 	{
 		unsigned char each_byte;
-		
-		for (each_byte=0;each_byte<sizeof(cdma_src_ary);++each_byte)
-			cdma_src_ary[each_byte] = val++;
-			
-		l1_cache_flush_range((unsigned)cdma_src_ary,sizeof(cdma_src_ary));
-		l1_cache_invalidate_range((unsigned)cdma_dst_ary,sizeof(cdma_dst_ary));
-
-		xcdma_start_transfer(&xcdma_obj,(unsigned)cdma_src_ary,(unsigned)cdma_dst_ary,sizeof(cdma_src_ary));
-
+		for (each_byte=0;each_byte<XILINX_CDMA_BYTES_TO_TRANSFER;++each_byte)
+			*(((volatile unsigned char*)XILINX_CDMA_SOURCE_ADDRESS)+each_byte) = each_byte;
+	}
+	while (1)
+	{
+		xcdma_start_transfer(&xcdma_obj,XILINX_CDMA_SOURCE_ADDRESS,XILINX_CDMA_DESTINATION_ADDRESS,XILINX_CDMA_BYTES_TO_TRANSFER);
 		ulTaskNotifyTake(pdTRUE,portMAX_DELAY);	
-
 		configASSERT(xcdma_check_status_decode(&xcdma_obj)==0);
 		configASSERT(xcdma_check_status_slave(&xcdma_obj)==0);
 		configASSERT(xcdma_check_status_idle(&xcdma_obj)!=0);
-
-		for (each_byte=0;each_byte<sizeof(cdma_src_ary);++each_byte)
-			configASSERT(cdma_src_ary[each_byte]==cdma_dst_ary[each_byte]);
 	}
 }
 
@@ -149,7 +133,6 @@ void task_main_code()
 {
 	unsigned cur_value=0;
 	unsigned led_value=0;
-
 	while (1)
 	{
 		unsigned new_value;
@@ -195,10 +178,15 @@ void task_main_code()
 			plasoc_gpio_set_data_out(&gpio_obj,led_value);
 		}
 	}
-} 
+}
+
+
 
 int main()
 {
+	/* Probably not necessary, but let's ensure the CPU interrupt is diasabled. */
+	OS_AsmInterruptEnable(0);
+
 	/* Configure the interrupt controller. */
 	plasoc_int_setup(&int_obj,PLASOC_INT_BASE_ADDRESS);
 
