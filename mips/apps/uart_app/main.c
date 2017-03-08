@@ -64,6 +64,7 @@ int main()
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_UART_ID,uart_isr,0);
 
 	/* Configure the interrupts of the CPU. */
+	OS_AsmInterruptInit();
 	OS_AsmInterruptEnable(1);
 	
 	/* Enable all interrupts in the interrupt controller and start the timer in reload mode. */

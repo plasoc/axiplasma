@@ -1,20 +1,20 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-#MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
-#MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
-MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
-MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
+MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
+MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
+#MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
+#MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
 
 # When configuring the address, it is important to consider the addresses of
 # the abi flags and reg info. Both sections should be located immediately after 
 # the end of the application. 
 LDSTART_ADDRESS = 0x01000000
-LDABIFLAGS_ADDRESS = 0x01007000 
-LDREGINFO_ADDRESS =  0x01007018
+LDABIFLAGS_ADDRESS = 0x0100b000
+LDREGINFO_ADDRESS =  0x0100b018
 LDFLAGS = -L$(LD_DIR) -static
 LDAFTERFLAGS = -lc --section-start=.text=$(LDSTART_ADDRESS) --section-start=.MIPS.abiflags=$(LDABIFLAGS_ADDRESS) --section-start=.reginfo=$(LDREGINFO_ADDRESS)
 
