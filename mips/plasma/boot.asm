@@ -10,6 +10,7 @@
 #    Initializes the stack pointer and jumps to main().
 ##################################################################
    #Reserve 512 bytes for stack
+   .data
    .globl InitStack
    .comm InitStack, 512
 

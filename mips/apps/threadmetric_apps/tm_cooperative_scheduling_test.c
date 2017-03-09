@@ -37,7 +37,8 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include "stdio.h"
+//#include "stdio.h"
+#include "printf.h" // stdio.h is not supported.
 
 /* Define the counters used in the demo application...  */
 
@@ -213,7 +214,7 @@ unsigned long   average;
         relative_time =  relative_time + TM_TEST_DURATION;
 #ifdef ENABLE_PRINTF
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Cooperative Scheduling Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Cooperative Scheduling Test **** Relative Time: %u\n\r", relative_time);
 #endif
         /* Calculate the total of all the counters.  */
         total =  tm_cooperative_thread_0_counter + tm_cooperative_thread_1_counter + tm_cooperative_thread_2_counter
@@ -235,7 +236,7 @@ unsigned long   average;
             (tm_cooperative_thread_4_counter > (average + 1)))
         {
 #ifdef ENABLE_PRINTF
-            printf("ERROR: Invalid counter value(s). Cooperative counters should not be more that 1 different than the average!\n");
+            printf("ERROR: Invalid counter value(s). Cooperative counters should not be more that 1 different than the average!\n\r");
 #else
             while(1)
             {
@@ -247,7 +248,7 @@ unsigned long   average;
 
 #ifdef ENABLE_PRINTF
         /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", total - last_total);
+        printf("Time Period Total:  %u\n\r\n\r", total - last_total);
 #endif
         /* Save the last total.  */
         last_total =  total;

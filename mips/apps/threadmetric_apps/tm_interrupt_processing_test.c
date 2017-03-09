@@ -37,7 +37,7 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include <stdio.h>
+#include "printf.h" // stdio.h is not supported.
 
 
 /* Define the counters used in the demo application...  */
@@ -118,12 +118,12 @@ int status;
 
     while(1)
     {
-
+		extern void FreeRTOS_CallSoftInt();
+		
         /* Force an interrupt. The underlying RTOS must see that the 
            the interrupt handler is called from the appropriate software
            interrupt or trap. */
-		tm_thread_relinquish(); /* This is specific to the FreeRTOS Plasma-SoC port. */
-        /*asm(" svc 0\n");*/    /* This is Cortex-M specific.  */
+		FreeRTOS_CallSoftInt(); /* This is specific to the FreeRTOS Plasma-SoC port. */
 
         /* We won't get back here until the interrupt processing is complete,
            including the setting of the semaphore from the interrupt 
@@ -180,7 +180,7 @@ unsigned long   average;
         relative_time =  relative_time + TM_TEST_DURATION;
 #ifdef ENABLE_PRINTF
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Interrupt Processing Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Interrupt Processing Test **** Relative Time: %u\n\r", relative_time);
 #endif
         /* Calculate the total of all the counters.  */
         total =  tm_interrupt_thread_0_counter + tm_interrupt_handler_counter;
@@ -195,7 +195,7 @@ unsigned long   average;
             (tm_interrupt_handler_counter > (average + 1)))
         {
 #ifdef ENABLE_PRINTF
-            printf("ERROR: Invalid counter value(s). Interrupt processing test has failed!\n");
+            printf("ERROR: Invalid counter value(s). Interrupt processing test has failed!\n\r");
 #else
             while(1)
             {
@@ -205,7 +205,7 @@ unsigned long   average;
         }
 #ifdef ENABLE_PRINTF
         /* Show the total interrupts for the time period.  */
-        printf("Time Period Total:  %lu\n\n", tm_interrupt_handler_counter - last_total);
+        printf("Time Period Total: %u\n\r\n\r", tm_interrupt_handler_counter-last_total);
 #endif
         /* Save the last total number of interrupts.  */
         last_total =  tm_interrupt_handler_counter;

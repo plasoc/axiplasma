@@ -7,17 +7,25 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
-LDFLAGS = -static -lc
+CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) -DENABLE_PRINTF
+
+# When configuring the address, it is important to consider the addresses of
+# the abi flags and reg info. Both sections should be located immediately after 
+# the end of the application. 
+LDSTART_ADDRESS = 0x01000000
+LDFLAGS = -L$(LD_DIR) -static
+LDAFTERFLAGS = -lc -T$(PLASOC_DIR)/linker.ld
 ASFLAGS = 
 
 # Following are REQUIRED variables, but can be editted
+SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
-C_SOURCES = ./tm_porting_layer_freertos.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
+C_SOURCES = ./tm_porting_layer_freertos.c $(PLASOC_DIR)/printf.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
+ICSPFLAGS = --serial_port $(SERIALPORT)
 
 # No user editing or variables below this line
 
@@ -33,6 +41,7 @@ AS_MIPS = $(PREFIX)as$(SUFFIX)
 LD_MIPS = $(PREFIX)ld$(SUFFIX)
 DUMP_MIPS = $(PREFIX)objdump$(SUFFIX)
 OBJCOPY_MIPS = $(PREFIX)objcopy$(SUFFIX)
+STRIP_MIPS = $(PREFIX)strip$(SUFFIX)
 
 ASM_OBJECTS = $(ASM_SOURCES:.asm=)
 C_OBJECTS = $(C_SOURCES:.c=)
@@ -99,12 +108,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_0).map -s -N -o $(EXEC_NAME_0).axf \
-		$(notdir $(OBJECTS_0:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_0).map -s -N -o $(EXEC_NAME_0).axf \
+		$(notdir $(OBJECTS_0:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_0).axf > $(EXEC_NAME_0).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_0).axf \
-		$(notdir $(OBJECTS_0:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_0).axf \
+		$(notdir $(OBJECTS_0:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_0).axf $(EXEC_NAME_0).bin
 	$(BIN2COE) $(EXEC_NAME_0).bin $(EXEC_NAME_0).vhdl
@@ -117,12 +126,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_1).map -s -N -o $(EXEC_NAME_1).axf \
-		$(notdir $(OBJECTS_1:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_1).map -s -N -o $(EXEC_NAME_1).axf \
+		$(notdir $(OBJECTS_1:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_1).axf > $(EXEC_NAME_1).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_1).axf \
-		$(notdir $(OBJECTS_1:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_1).axf \
+		$(notdir $(OBJECTS_1:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_1).axf $(EXEC_NAME_1).bin
 	$(BIN2COE) $(EXEC_NAME_1).bin $(EXEC_NAME_1).vhdl
@@ -135,12 +144,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_2).map -s -N -o $(EXEC_NAME_2).axf \
-		$(notdir $(OBJECTS_2:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_2).map -s -N -o $(EXEC_NAME_2).axf \
+		$(notdir $(OBJECTS_2:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_2).axf > $(EXEC_NAME_2).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_2).axf \
-		$(notdir $(OBJECTS_2:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_2).axf \
+		$(notdir $(OBJECTS_2:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_2).axf $(EXEC_NAME_2).bin
 	$(BIN2COE) $(EXEC_NAME_2).bin $(EXEC_NAME_2).vhdl
@@ -153,12 +162,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_3).map -s -N -o $(EXEC_NAME_3).axf \
-		$(notdir $(OBJECTS_3:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_3).map -s -N -o $(EXEC_NAME_3).axf \
+		$(notdir $(OBJECTS_3:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_3).axf > $(EXEC_NAME_3).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_3).axf \
-		$(notdir $(OBJECTS_3:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_3).axf \
+		$(notdir $(OBJECTS_3:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_3).axf $(EXEC_NAME_3).bin
 	$(BIN2COE) $(EXEC_NAME_3).bin $(EXEC_NAME_3).vhdl
@@ -171,12 +180,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_4).map -s -N -o $(EXEC_NAME_4).axf \
-		$(notdir $(OBJECTS_4:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_4).map -s -N -o $(EXEC_NAME_4).axf \
+		$(notdir $(OBJECTS_4:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_4).axf > $(EXEC_NAME_4).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_4).axf \
-		$(notdir $(OBJECTS_4:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_4).axf \
+		$(notdir $(OBJECTS_4:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_4).axf $(EXEC_NAME_4).bin
 	$(BIN2COE) $(EXEC_NAME_4).bin $(EXEC_NAME_4).vhdl
@@ -189,12 +198,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_5).map -s -N -o $(EXEC_NAME_5).axf \
-		$(notdir $(OBJECTS_5:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_5).map -s -N -o $(EXEC_NAME_5).axf \
+		$(notdir $(OBJECTS_5:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_5).axf > $(EXEC_NAME_5).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_5).axf \
-		$(notdir $(OBJECTS_5:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_5).axf \
+		$(notdir $(OBJECTS_5:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_5).axf $(EXEC_NAME_5).bin
 	$(BIN2COE) $(EXEC_NAME_5).bin $(EXEC_NAME_5).vhdl
@@ -207,12 +216,12 @@ ifdef DEBUG_MAKE
 endif
 
 ifdef DEBUG_MAKE
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -Map $(EXEC_NAME_6).map -s -N -o $(EXEC_NAME_6).axf \
-		$(notdir $(OBJECTS_6:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_6).map -s -N -o $(EXEC_NAME_6).axf \
+		$(notdir $(OBJECTS_6:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_6).axf > $(EXEC_NAME_6).lst
 else
-	$(LD_MIPS) $(LDFLAGS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME_6).axf \
-		$(notdir $(OBJECTS_6:=.o)) -lc
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_6).axf \
+		$(notdir $(OBJECTS_6:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_6).axf $(EXEC_NAME_6).bin
 	$(BIN2COE) $(EXEC_NAME_6).bin $(EXEC_NAME_6).vhdl

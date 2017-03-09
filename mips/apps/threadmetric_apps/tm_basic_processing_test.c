@@ -37,7 +37,8 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include "stdio.h"
+//#include "stdio.h"
+#include "printf.h" // stdio.h is not supported.
 
 
 /* Define the counters used in the demo application...  */
@@ -156,17 +157,17 @@ unsigned long   relative_time;
 #ifdef ENABLE_PRINTF
 
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Basic Single Thread Processing Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Basic Single Thread Processing Test **** Relative Time: %u\n\r", relative_time);
 
         /* See if there are any errors.  */
         if (tm_basic_processing_counter == last_counter)
         {
 
-            printf("ERROR: Invalid counter value(s). Basic processing thread died!\n");
+            printf("ERROR: Invalid counter value(s). Basic processing thread died!\n\r");
         }
 
         /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", tm_basic_processing_counter - last_counter);
+        printf("Time Period Total:  %u\n\r\n\r", tm_basic_processing_counter - last_counter);
 #endif
 
         /* Save the last counter.  */

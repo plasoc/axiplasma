@@ -51,6 +51,8 @@
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
 #include "plasoc_gpio.h"
+#include "plasoc_uart.h"
+#include "printf.h"
 
 /* Define FreeRTOS mapping constants.  */
 #define TM_FREERTOS_MAX_THREADS          	(10)
@@ -58,10 +60,10 @@
 #define TM_FREERTOS_MAX_SEMAPHORES       	(1)
 #define TM_FREERTOS_MAX_MEMORY_POOLS     	(1)
 
-#define TM_FREERTOS_THREAD_STACK_SIZE    	(512)
+#define TM_FREERTOS_THREAD_STACK_SIZE    	(configMINIMAL_STACK_SIZE)
 #define TM_FREERTOS_QUEUE_SIZE           	(200)
 #define TM_FREERTOS_QUEUE_BYTES_PER_ITEM	(16)
-#define TM_FREERTOS_TICKS_PER_SECOND    	(100)
+#define TM_FREERTOS_TICKS_PER_SECOND    	(1000)
 #define TM_FREERTOS_MEMORY_POOL_SIZE		(128)
 
 #define TM_MAX_PRIORITY						(31)
@@ -70,24 +72,30 @@
 #define PLASOC_INT_BASE_ADDRESS				(0x44a00000)
 #define PLASOC_TIMER_BASE_ADDRESS			(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS			(0x44a20000)
+#define XILINX_CDMA_BASE_ADDRESS			(0x44a30000)
+#define PLASOC_UART_BASE_ADDRESS			(0x44a40000)
 #define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
 #define INT_PLASOC_TIMER_ID					(0)
 #define INT_PLASOC_GPIO_ID					(1)
+#define INT_PLASOC_UART_ID					(3)
 
 /* Define ThreadMetric FreeRTOS data structures. */
 TaskHandle_t tm_thread_array[TM_FREERTOS_MAX_THREADS];
 QueueHandle_t tm_queue_array[TM_FREERTOS_MAX_QUEUES];
 SemaphoreHandle_t tm_semaphore_array[TM_FREERTOS_MAX_SEMAPHORES];
-void* tm_block_pool_array[TM_FREERTOS_MAX_MEMORY_POOLS];
+volatile void* tm_block_pool_array[TM_FREERTOS_MAX_MEMORY_POOLS];
 
 /* This flag is necessary in order to indicate to 
   to benchmark port functions when inside an interrupt. */
 volatile unsigned FreeRTOS_InsideInt = 0;
 
+volatile unsigned FreeRTOS_SoftInt = 0;
+
 /* Define Plasma-SoC objects. */
 plasoc_int int_obj;
 plasoc_timer timer_obj;
 plasoc_gpio gpio_obj;
+plasoc_uart uart_obj;
 
  __attribute__ ((weak))
 void  tm_interrupt_preemption_handler(void)
@@ -112,7 +120,11 @@ extern void FreeRTOS_UserISR()
 	  threadmetric. */
 	FreeRTOS_InsideInt = 1;
 	plasoc_int_service_interrupts(&int_obj); 
-	tm_interrupt_preemption_handler();
+	if (FreeRTOS_SoftInt)
+	{
+		FreeRTOS_SoftInt = 0;
+		tm_interrupt_preemption_handler();
+	}
 	FreeRTOS_InsideInt = 0;
 	
 	/* The FreeRTOS_Yield flag is defined in portmacro. This flag is needed
@@ -128,12 +140,32 @@ extern void FreeRTOS_UserISR()
 extern void vAssertCalled(const char* str, int val)
 {
 	plasoc_gpio_set_data_out(&gpio_obj,0xffff);
-	while (1);
+	while (1)
+		printf("Assert:\n\rMessage:%s\n\rLine:%d\n\r",str,val);
 }
 
 /* Define the port's interface to toggling the external interrupts. */
 extern void FreeRTOS_EnableInterrupts() { plasoc_int_enable_all(&int_obj); }
 extern void FreeRTOS_DisableInterrupts() { plasoc_int_disable_all(&int_obj); }
+
+void uart_isr(void* ptr)
+{
+	(void)plasoc_uart_get_in(&uart_obj);
+	printf("Alive...\n\r");
+}
+
+/* Needed for the portable printf function. */
+void putc_port( void* p, char c)
+{
+	while (plasoc_uart_get_status_out_avail(&uart_obj)==0);
+	plasoc_uart_set_out(&uart_obj,(unsigned)c);
+}
+
+void FreeRTOS_CallSoftInt()
+{
+	FreeRTOS_SoftInt = 1;
+	taskYIELD();
+}
 
 
 /* This function called from main performs basic RTOS initialization, 
@@ -153,6 +185,11 @@ void  tm_initialize(void (*test_initialization_function)(void))
 	plasoc_timer_setup(&timer_obj,PLASOC_TIMER_BASE_ADDRESS);
 	plasoc_timer_set_trig_value(&timer_obj,PLASOC_TIMER_MILLISECOND_CYCLES);
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_TIMER_ID,FreeRTOS_TickISR,0);
+	
+	/* Configure the uart. */
+	plasoc_uart_setup(&uart_obj,PLASOC_UART_BASE_ADDRESS);
+	plasoc_int_attach_isr(&int_obj,INT_PLASOC_UART_ID,uart_isr,0);
+	init_printf(0,putc_port);
 	
 	/* Configure ThreadMetric application. */
 	test_initialization_function();
@@ -181,7 +218,8 @@ int  tm_thread_create(int thread_id, int priority, void (*entry_function)(void))
 	BaseType_t xReturned; 
 	UBaseType_t xFreeRTOSPriority = (TM_MAX_PRIORITY-priority)*configMAX_PRIORITIES/(TM_MAX_PRIORITY-1);
 	xReturned = xTaskCreate((FreeRTOSCodeType*)entry_function,NULL,TM_FREERTOS_THREAD_STACK_SIZE,NULL,xFreeRTOSPriority,tm_thread_array+thread_id);
-	return (xReturned==pdPASS)?TM_SUCCESS:TM_ERROR;
+	configASSERT(xReturned==pdPASS);
+	return TM_SUCCESS;
 }
 
 
@@ -237,7 +275,8 @@ int  tm_queue_create(int queue_id)
 	QueueHandle_t queue_hdl;
 	queue_hdl = xQueueCreate(TM_FREERTOS_MAX_QUEUES,TM_FREERTOS_QUEUE_BYTES_PER_ITEM);
 	tm_queue_array[queue_id] = queue_hdl;
-	return (queue_hdl!=NULL)?TM_SUCCESS:TM_ERROR;
+	configASSERT(queue_hdl!=NULL);
+	return TM_SUCCESS;
 }
 
 
@@ -256,7 +295,8 @@ int  tm_queue_send(int queue_id, unsigned long *message_ptr)
 	{
 		xReturned = xQueueSend(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
 	}
-	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
+	configASSERT(xReturned==pdTRUE);
+	return TM_SUCCESS;
 }
 
 
@@ -275,7 +315,8 @@ int  tm_queue_receive(int queue_id, unsigned long *message_ptr)
 	{
 		xReturned = xQueueReceive(tm_queue_array[queue_id],message_ptr,portMAX_DELAY);
 	}
-	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
+	configASSERT(xReturned==pdTRUE);
+	return TM_SUCCESS;
 }
 
 
@@ -286,7 +327,8 @@ int  tm_semaphore_create(int semaphore_id)
 	SemaphoreHandle_t semphr_hdl;
 	semphr_hdl = xSemaphoreCreateCounting(1,1);
 	tm_semaphore_array[semaphore_id] = semphr_hdl;
-	return (semphr_hdl!=NULL)?TM_SUCCESS:TM_ERROR;
+	configASSERT(semphr_hdl!=NULL);
+	return TM_SUCCESS;
 }
 
 
@@ -305,7 +347,8 @@ int  tm_semaphore_get(int semaphore_id)
 	{
 		xReturned = xSemaphoreTake(tm_semaphore_array[semaphore_id],portMAX_DELAY);
 	}
-	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
+	configASSERT(xReturned==pdTRUE);
+	return TM_SUCCESS;
 }
 
 
@@ -324,7 +367,8 @@ int  tm_semaphore_put(int semaphore_id)
 	{
 		xReturned = xSemaphoreGive(tm_semaphore_array[semaphore_id]);
 	}
-	return (xReturned==pdTRUE)?TM_SUCCESS:TM_ERROR;
+	configASSERT(xReturned==pdTRUE);
+	return TM_SUCCESS;
 }
 
 /* This function creates the specified memory pool that can support one or more
@@ -346,7 +390,8 @@ int  tm_memory_pool_allocate(int pool_id, unsigned char **memory_ptr)
 	pool_ptr = pvPortMalloc(TM_FREERTOS_MEMORY_POOL_SIZE);
 	tm_block_pool_array[pool_id] = pool_ptr;
 	*memory_ptr = (unsigned char*)pool_ptr;
-	return (pool_ptr!=NULL)?TM_SUCCESS:TM_ERROR; 
+	configASSERT(pool_ptr!=NULL);
+	return TM_SUCCESS; 
 }
 
 

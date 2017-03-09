@@ -31,7 +31,7 @@ ICSPFLAGS = --serial_port $(SERIALPORT)
 
 # No user editing or variables below this line
 
-CFLAGS += -c -fno-pic -mips1 -mno-abicalls
+CFLAGS += -c -fno-pic -mips1 -mno-abicalls 
 LDFLAGS += -L$(MIPS_GCC_LIB)
 ASFLAGS += 
 

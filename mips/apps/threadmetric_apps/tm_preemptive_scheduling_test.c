@@ -37,7 +37,7 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include "stdio.h"
+#include "printf.h" // stdio.h is not supported.
 
 
 /* Define the counters used in the demo application...  */
@@ -85,19 +85,19 @@ void  tm_preemptive_scheduling_initialize(void)
 {
 
     /* Create thread 0 at priority 10.  */
-    tm_thread_create(0, 10, tm_preemptive_thread_0_entry);
+    tm_thread_create(0, 24, tm_preemptive_thread_0_entry);
 
     /* Create thread 1 at priority 9.  */
-    tm_thread_create(1, 9, tm_preemptive_thread_1_entry);
+    tm_thread_create(1, 18, tm_preemptive_thread_1_entry);
 
     /* Create thread 2 at priority 8.  */
-    tm_thread_create(2, 8, tm_preemptive_thread_2_entry);
+    tm_thread_create(2, 12, tm_preemptive_thread_2_entry);
 
     /* Create thread 3 at priority 7.  */
-    tm_thread_create(3, 7, tm_preemptive_thread_3_entry);
+    tm_thread_create(3, 6, tm_preemptive_thread_3_entry);
 
     /* Create thread 4 at priority 6.  */
-    tm_thread_create(4, 6, tm_preemptive_thread_4_entry);
+    tm_thread_create(4, 0, tm_preemptive_thread_4_entry);
 
     /* Resume just thread 0.  */
     tm_thread_resume(0);
@@ -234,7 +234,7 @@ unsigned long   average;
         relative_time =  relative_time + TM_TEST_DURATION;
 #ifdef ENABLE_PRINTF
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Preemptive Scheduling Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Preemptive Scheduling Test **** Relative Time: %u\n\r", relative_time);
 #endif
         /* Calculate the total of all the counters.  */
         total =  tm_preemptive_thread_0_counter + tm_preemptive_thread_1_counter + tm_preemptive_thread_2_counter
@@ -256,7 +256,7 @@ unsigned long   average;
             (tm_preemptive_thread_4_counter > (average + 1)))
         {
 #ifdef ENABLE_PRINTF
-            printf("ERROR: Invalid counter value(s). Preemptive counters should not be more that 1 different than the average!\n");
+            printf("ERROR: Invalid counter value(s). Preemptive counters should not be more that 1 different than the average!\n\r");
 #else
             while(1)
             {
@@ -266,7 +266,13 @@ unsigned long   average;
         }
 #ifdef ENABLE_PRINTF
         /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", total - last_total);
+		printf("Time tm_preemptive_thread_0_counter Total:  %u\n\r",tm_preemptive_thread_0_counter);
+		printf("Time tm_preemptive_thread_1_counter Total:  %u\n\r",tm_preemptive_thread_1_counter);
+		printf("Time tm_preemptive_thread_2_counter Total:  %u\n\r",tm_preemptive_thread_2_counter);
+		printf("Time tm_preemptive_thread_3_counter Total:  %u\n\r",tm_preemptive_thread_3_counter);
+		printf("Time tm_preemptive_thread_4_counter Total:  %u\n\r",tm_preemptive_thread_4_counter);
+        printf("Time Period Total:  %u\n\r\n\r", total - last_total);
+		
 #endif
         /* Save the last total.  */
         last_total =  total;

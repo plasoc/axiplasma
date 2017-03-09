@@ -37,7 +37,7 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include "stdio.h"
+#include "printf.h" // stdio.h is not supported.
 
 /* Define the counters used in the demo application...  */
 
@@ -142,13 +142,13 @@ unsigned long   relative_time;
         relative_time =  relative_time + TM_TEST_DURATION;
 #ifdef ENABLE_PRINTF
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Memory Allocation Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Memory Allocation Test **** Relative Time: %u\n\r", relative_time);
 #endif
         /* See if there are any errors.  */
         if (tm_memory_allocation_counter == last_counter)
         {
 #ifdef ENABLE_PRINTF
-            printf("ERROR: Invalid counter value(s). Error allocating/deallocating memory!\n");
+            printf("ERROR: Invalid counter value(s). Error allocating/deallocating memory!\n\r");
 #else
             while(1)
             {
@@ -158,7 +158,7 @@ unsigned long   relative_time;
         }
 #ifdef ENABLE_PRINTF
         /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", tm_memory_allocation_counter - last_counter);
+        printf("Time Period Total: %u\n\r\n\r", tm_memory_allocation_counter-last_counter);
 #endif
         /* Save the last counter.  */
         last_counter =  tm_memory_allocation_counter;
