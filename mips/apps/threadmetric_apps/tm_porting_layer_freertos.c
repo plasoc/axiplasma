@@ -44,7 +44,7 @@
 #include "queue.h"
 
 /* Include ThreadMetric header. */
-#include "tm_api.h"
+#include "TM_API.H"
 
 /* Include Plasma-SoC headers. */
 #include "plasoc_cpu.h"

@@ -36,8 +36,7 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#include "tm_api.h"
-//#include "stdio.h"
+#include "TM_API.H"
 #include "printf.h" // stdio.h is not supported.
 
 /* Define the counters used in the demo application...  */

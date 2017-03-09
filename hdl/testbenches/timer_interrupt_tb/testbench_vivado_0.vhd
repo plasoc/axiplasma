@@ -149,61 +149,58 @@ begin
         end;
         
     begin
-        wait until raw_nreset='1';
-        wait until gpio_output=X"0001";
-        wait for 2 ms;
+--        wait until raw_nreset='1';
+--        wait until gpio_output=X"0001";
+--        wait for 2 ms;
         
-        set_uart_word(BOOT_LOADER_START_WORD);
-        get_uart_tx;
+--        set_uart_word(BOOT_LOADER_START_WORD);
+--        get_uart_tx;
         
-        if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
-            report "Success ACK";
-        elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
-            report "Failed ACK";
-            wait;
-        else
-            report "???";
-            wait;
-        end if;
+--        if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
+--            report "Success ACK";
+--        elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
+--            report "Failed ACK";
+--            wait;
+--        else
+--            report "???";
+--            wait;
+--        end if;
         
-        while true loop
+--        while true loop
         
-            -- instruction
-            word := app_data(app_ptr);
-            set_uart_word(word);
+--            -- instruction
+--            word := app_data(app_ptr);
+--            set_uart_word(word);
             
-            -- checksum
-            word := std_logic_vector(unsigned(word) mod BOOT_LOADER_CHECKSUM_DIVISOR);
-            boot_checksum <= word(7 downto 0);
-            set_uart_rx(word(7 downto 0));
+--            -- checksum
+--            word := std_logic_vector(unsigned(word) mod BOOT_LOADER_CHECKSUM_DIVISOR);
+--            boot_checksum <= word(7 downto 0);
+--            set_uart_rx(word(7 downto 0));
         
-            -- status
-            app_ptr := app_ptr+1;
-            --if app_ptr=ram_size then
-            if app_ptr=13 then
-                set_uart_rx(BOOT_LOADER_STATUS_DONE);
-                exit;
-            else
-                set_uart_rx(BOOT_LOADER_STATUS_MORE);
-            end if;
+--            -- status
+--            app_ptr := app_ptr+1;
+--            --if app_ptr=ram_size then
+--            if app_ptr=13 then
+--                set_uart_rx(BOOT_LOADER_STATUS_DONE);
+--                exit;
+--            else
+--                set_uart_rx(BOOT_LOADER_STATUS_MORE);
+--            end if;
         
-            -- ack
-            get_uart_tx;
-            if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
-                report "Success ACK";
-            elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
-                report "Failed ACK";
-                wait;
-            else
-                report "???";
-                wait;
-            end if;
+--            -- ack
+--            get_uart_tx;
+--            if byte=BOOT_LOADER_ACK_SUCCESS_BYTE then
+--                report "Success ACK";
+--            elsif byte=BOOT_LOADER_ACK_FAILURE_BYTE then
+--                report "Failed ACK";
+--                wait;
+--            else
+--                report "???";
+--                wait;
+--            end if;
         
-        end loop;
+--        end loop;
         
---        set_uart_rx(X"01");
---        set_uart_rx(X"03");
---        set_uart_rx(X"7a");
         wait;
     end process;
     
@@ -240,27 +237,27 @@ begin
             wait for clock_period;
         end;
     begin
-        wait until raw_nreset='1';
-        wait until gpio_output=X"0001";
-        wait for 500 us;
-        gpio_input <= X"0003" after input_delay;
-        wait for 2 ms;
-        gpio_input <= X"00f3" after input_delay;
-        wait for 2 ms;
-        while True loop
-            gpio_input <= X"00f1" after input_delay;
-            wait for 50 us;
-            gpio_input <= X"00f0" after input_delay;
-            wait for 50 us;
-            gpio_input <= X"00f5" after input_delay;
-            wait for 50 us;
-            gpio_input <= X"00ff" after input_delay;
-            wait for 50 us;
-            gpio_input <= X"05f7" after input_delay;
-            wait for 50 us;
-            gpio_input <= X"10f0" after input_delay;
-            wait for 50 us;
-        end loop;
+--        wait until raw_nreset='1';
+--        wait until gpio_output=X"0001";
+--        wait for 500 us;
+--        gpio_input <= X"0003" after input_delay;
+--        wait for 2 ms;
+--        gpio_input <= X"00f3" after input_delay;
+--        wait for 2 ms;
+--        while True loop
+--            gpio_input <= X"00f1" after input_delay;
+--            wait for 50 us;
+--            gpio_input <= X"00f0" after input_delay;
+--            wait for 50 us;
+--            gpio_input <= X"00f5" after input_delay;
+--            wait for 50 us;
+--            gpio_input <= X"00ff" after input_delay;
+--            wait for 50 us;
+--            gpio_input <= X"05f7" after input_delay;
+--            wait for 50 us;
+--            gpio_input <= X"10f0" after input_delay;
+--            wait for 50 us;
+--        end loop;
         wait;
     end process;
 end Behavioral;

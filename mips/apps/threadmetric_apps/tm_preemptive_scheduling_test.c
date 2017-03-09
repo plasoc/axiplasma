@@ -36,7 +36,7 @@
 /**************************************************************************/
 /**************************************************************************/
 
-#include "tm_api.h"
+#include "TM_API.H"
 #include "printf.h" // stdio.h is not supported.
 
 
@@ -84,20 +84,25 @@ int main()
 void  tm_preemptive_scheduling_initialize(void)
 {
 
-    /* Create thread 0 at priority 10.  */
-    tm_thread_create(0, 24, tm_preemptive_thread_0_entry);
+    /* Create thread 0 at priority 10. Changed for FreeRTOS 
+      to ensure each task has a distinct priority. */
+    tm_thread_create(0, 30, tm_preemptive_thread_0_entry);
 
-    /* Create thread 1 at priority 9.  */
-    tm_thread_create(1, 18, tm_preemptive_thread_1_entry);
+    /* Create thread 1 at priority 9. Changed for FreeRTOS 
+      to ensure each task has a distinct priority. */
+    tm_thread_create(1, 24, tm_preemptive_thread_1_entry);
 
-    /* Create thread 2 at priority 8.  */
-    tm_thread_create(2, 12, tm_preemptive_thread_2_entry);
+    /* Create thread 2 at priority 8. Changed for FreeRTOS 
+      to ensure each task has a distinct priority. */
+    tm_thread_create(2, 18, tm_preemptive_thread_2_entry);
 
-    /* Create thread 3 at priority 7.  */
-    tm_thread_create(3, 6, tm_preemptive_thread_3_entry);
+    /* Create thread 3 at priority 7. Changed for FreeRTOS 
+      to ensure each task has a distinct priority. */
+    tm_thread_create(3, 12, tm_preemptive_thread_3_entry);
 
-    /* Create thread 4 at priority 6.  */
-    tm_thread_create(4, 0, tm_preemptive_thread_4_entry);
+    /* Create thread 4 at priority 6. Changed for FreeRTOS 
+      to ensure each task has a distinct priority. */
+    tm_thread_create(4, 6, tm_preemptive_thread_4_entry);
 
     /* Resume just thread 0.  */
     tm_thread_resume(0);
@@ -130,6 +135,9 @@ void  tm_preemptive_thread_0_entry(void)
 /* Define the second preemptive thread.  */
 void  tm_preemptive_thread_1_entry(void)
 {
+    /* Needed by FreeRTOS to ensure initial state
+      of task is suspended. */
+    tm_thread_suspend(1);
 
     while(1)
     {
@@ -151,6 +159,9 @@ void  tm_preemptive_thread_1_entry(void)
 /* Define the third preemptive thread.  */
 void  tm_preemptive_thread_2_entry(void)
 {
+    /* Needed by FreeRTOS to ensure initial state
+      of task is suspended. */
+    tm_thread_suspend(2);
 
     while(1)
     {
@@ -173,6 +184,9 @@ void  tm_preemptive_thread_2_entry(void)
 /* Define the fourth preemptive thread.  */
 void  tm_preemptive_thread_3_entry(void)
 {
+    /* Needed by FreeRTOS to ensure initial state
+      of task is suspended. */
+    tm_thread_suspend(3);
 
     while(1)
     {
@@ -195,6 +209,9 @@ void  tm_preemptive_thread_3_entry(void)
 /* Define the fifth preemptive thread.  */
 void  tm_preemptive_thread_4_entry(void)
 {
+    /* Needed by FreeRTOS to ensure initial state
+      of task is suspended. */
+    tm_thread_suspend(4);
 
     while(1)
     {
@@ -265,12 +282,6 @@ unsigned long   average;
 #endif
         }
 #ifdef ENABLE_PRINTF
-        /* Show the time period total.  */
-		printf("Time tm_preemptive_thread_0_counter Total:  %u\n\r",tm_preemptive_thread_0_counter);
-		printf("Time tm_preemptive_thread_1_counter Total:  %u\n\r",tm_preemptive_thread_1_counter);
-		printf("Time tm_preemptive_thread_2_counter Total:  %u\n\r",tm_preemptive_thread_2_counter);
-		printf("Time tm_preemptive_thread_3_counter Total:  %u\n\r",tm_preemptive_thread_3_counter);
-		printf("Time tm_preemptive_thread_4_counter Total:  %u\n\r",tm_preemptive_thread_4_counter);
         printf("Time Period Total:  %u\n\r\n\r", total - last_total);
 		
 #endif
