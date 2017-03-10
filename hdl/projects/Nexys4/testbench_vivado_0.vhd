@@ -3,7 +3,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
 use work.plasoc_gpio_pack.all;
-use work.boot_app_bram_pack.all;
+use work.boot_pack.all;
 
 entity testbench_vivado_0 is
     generic ( gpio_width : integer := 16; input_delay : time := 0 ns );
@@ -11,6 +11,9 @@ end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
     component axiplasma_wrapper is
+        generic (
+            lower_app : string := "jump";
+            upper_app : string := "main");
        port( 
              raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
              raw_nreset : in std_logic;
