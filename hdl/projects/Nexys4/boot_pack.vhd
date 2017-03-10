@@ -1,7 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 
-package bram_pack is
+package boot_pack is
 
 	constant cpu_width : integer := 32;
 	constant ram_size : integer := 398;
@@ -11,7 +11,7 @@ package bram_pack is
 
 end package;
 
-package body bram_pack is
+package body boot_pack is
 
 	function load_hex return ram_type is
 		variable ram_buffer : ram_type := (others=>(others=>'0'));

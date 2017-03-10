@@ -7,12 +7,9 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
-LDFLAGS = -L$(LD_DIR) -static
 LDSTART_ADDRESS = 0x00000000
-LDABIFLAGS_ADDRESS = 0x0000ff00
-LDREGINFO_ADDRESS =  0x0000ff18
-LDFLAGS = -L$(LD_DIR) -static
-LDAFTERFLAGS = -lc --section-start=.text=$(LDSTART_ADDRESS) --section-start=.MIPS.abiflags=$(LDABIFLAGS_ADDRESS) --section-start=.reginfo=$(LDREGINFO_ADDRESS)
+LDFLAGS = 
+LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
 
 # Following are REQUIRED variables, but can be editted
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
@@ -20,7 +17,7 @@ PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c port_layer.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex --word_count 8192 --full_count 16384
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
 
 # No user editing or variables below this line
 
@@ -43,11 +40,11 @@ OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 
 all: $(OBJECTS)
 ifdef DEBUG_MAKE
-	$(LD_MIPS) -Ttext=0 -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
+	$(LD_MIPS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
 		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME).axf > $(EXEC_NAME).lst
 else
-	$(LD_MIPS) -Ttext=0 -e entry -s -N -o $(EXEC_NAME).axf \
+	$(LD_MIPS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME).axf \
 		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
@@ -73,7 +70,7 @@ endif
 
 jump_build:
 	$(AS_MIPS) -o jumpboot.o jumpboot.asm
-	$(LD_MIPS) -Ttext=0 -e entry -Map jumpboot.map -s -N -o jumpboot.axf jumpboot.o
+	$(LD_MIPS) -Ttext=0 -e entry -Map jumpboot.map -s -N -o jumpboot.axf jumpboot.o $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all jumpboot.axf > jumpboot.lst
 	$(OBJCOPY_MIPS) -I elf32-big -O binary jumpboot.axf jumpboot.bin
 	$(BIN2COE) jumpboot.bin jumpboot.vhdl

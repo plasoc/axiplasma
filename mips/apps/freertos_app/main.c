@@ -14,8 +14,6 @@
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
 
 #define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
-#define XILINX_CDMA_SOURCE_ADDRESS		(0x00008000)
-#define XILINX_CDMA_DESTINATION_ADDRESS		(0x00009000)
 #define XILINX_CDMA_BYTES_TO_TRANSFER		(64)
 
 #define INT_PLASOC_TIMER_ID			(0)
@@ -37,6 +35,8 @@ SemaphoreHandle_t sem_time_obj;
 TaskHandle_t task_input_obj;
 TaskHandle_t task_copy_obj;
 volatile unsigned ticks_ary[GPIO_AMOUNT];
+__attribute__ ((aligned (4))) volatile unsigned char cdma_src_ary[XILINX_CDMA_BYTES_TO_TRANSFER];
+__attribute__ ((aligned (4))) volatile unsigned char cdma_des_ary[XILINX_CDMA_BYTES_TO_TRANSFER];
 
 /* This ISR is necessary to ensure FreeRTOS runs in preemptive mode with
   time slices. */
@@ -117,11 +117,12 @@ void task_copy_code(void* ptr)
 	{
 		unsigned char each_byte;
 		for (each_byte=0;each_byte<XILINX_CDMA_BYTES_TO_TRANSFER;++each_byte)
-			*(((volatile unsigned char*)XILINX_CDMA_SOURCE_ADDRESS)+each_byte) = each_byte;
+			cdma_src_ary[each_byte] = each_byte;
+		l1_cache_flush_range((unsigned)cdma_src_ary,sizeof(cdma_src_ary));
 	}
 	while (1)
 	{
-		xcdma_start_transfer(&xcdma_obj,XILINX_CDMA_SOURCE_ADDRESS,XILINX_CDMA_DESTINATION_ADDRESS,XILINX_CDMA_BYTES_TO_TRANSFER);
+		xcdma_start_transfer(&xcdma_obj,(unsigned)cdma_src_ary,(unsigned)cdma_des_ary,XILINX_CDMA_BYTES_TO_TRANSFER);
 		ulTaskNotifyTake(pdTRUE,portMAX_DELAY);	
 		configASSERT(xcdma_check_status_decode(&xcdma_obj)==0);
 		configASSERT(xcdma_check_status_slave(&xcdma_obj)==0);

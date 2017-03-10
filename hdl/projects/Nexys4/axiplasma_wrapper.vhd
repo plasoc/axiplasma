@@ -25,30 +25,20 @@ end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
     -- Component declarations.
-    component ram is
-        port(
-            bram_rst_a : in STD_LOGIC;
-            bram_clk_a : in STD_LOGIC;
-            bram_en_a : in STD_LOGIC;
-            bram_we_a : in STD_LOGIC_VECTOR(3 DOWNTO 0);
-            bram_addr_a : in STD_LOGIC_VECTOR(15 DOWNTO 0);
-            bram_wrdata_a : in STD_LOGIC_VECTOR(31 DOWNTO 0);
-            bram_rddata_a : out STD_LOGIC_VECTOR(31 DOWNTO 0));
-    end component; 
-    component empty_ram is
+    component bram is
         generic (
-            load_flag : Boolean := False;
+            select_app : string := "none"; -- jump, boot, main
             address_width : integer := 18;
             data_width : integer := 32;
             bram_depth : integer := 65536);
         port(
-            bram_rst_a : in STD_LOGIC;
-            bram_clk_a : in STD_LOGIC;
-            bram_en_a : in STD_LOGIC;
-            bram_we_a : in STD_LOGIC_VECTOR(data_width/8-1 DOWNTO 0);
-            bram_addr_a : in STD_LOGIC_VECTOR(address_width-1 DOWNTO 0);
-            bram_wrdata_a : in STD_LOGIC_VECTOR(data_width-1 DOWNTO 0);
-            bram_rddata_a : out STD_LOGIC_VECTOR(data_width-1 DOWNTO 0) := (others=>'0'));
+            bram_rst_a : in std_logic;
+            bram_clk_a : in std_logic;
+            bram_en_a : in std_logic;
+            bram_we_a : in std_logic_vector(data_width/8-1 downto 0);
+            bram_addr_a : in std_logic_vector(address_width-1 downto 0);
+            bram_wrdata_a : in std_logic_vector(data_width-1 downto 0);
+            bram_rddata_a : out std_logic_vector(data_width-1 downto 0) := (others=>'0'));
     end component;
     component axi_cdma_0 IS
       PORT (
@@ -221,7 +211,6 @@ architecture Behavioral of axiplasma_wrapper is
         bram_rddata_a : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
       );
     END component;
-    constant load_ram : boolean := true;
     constant axi_address_width : integer := 32;
     constant axi_data_width : integer := 32;
     constant axi_master_amount : integer := 5;
@@ -355,10 +344,10 @@ architecture Behavioral of axiplasma_wrapper is
     signal bram_bram_rst_a : STD_LOGIC;
     signal bram_bram_clk_a : STD_LOGIC;
     signal bram_bram_en_a : STD_LOGIC;
-    signal bram_bram_we_a : STD_LOGIC_VECTOR(3 DOWNTO 0);
-    signal bram_bram_addr_a : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    signal bram_bram_wrdata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
-    signal bram_bram_rddata_a : STD_LOGIC_VECTOR(31 DOWNTO 0);
+    signal bram_bram_we_a : STD_LOGIC_VECTOR(axi_data_width/8-1 DOWNTO 0);
+    signal bram_bram_addr_a : STD_LOGIC_VECTOR(axi_lite_address_width-1 DOWNTO 0);
+    signal bram_bram_wrdata_a : STD_LOGIC_VECTOR(axi_data_width-1 DOWNTO 0);
+    signal bram_bram_rddata_a : STD_LOGIC_VECTOR(axi_data_width-1 DOWNTO 0);
     signal ram_axi_full_awid : std_logic_vector(axi_master_id_width-1 downto 0);
     signal ram_axi_full_awaddr : std_logic_vector(axi_address_width-1 downto 0);
     signal ram_axi_full_awlen : std_logic_vector(7 downto 0);
@@ -1516,7 +1505,12 @@ begin
             bram_wrdata_a => bram_bram_wrdata_a,
             bram_rddata_a => bram_bram_rddata_a);
             
-    bram_inst : ram 
+    bram_inst : bram 
+        generic map (
+            select_app => "boot",
+            address_width => axi_lite_address_width,
+            data_width => axi_data_width,
+            bram_depth => 1024 )
         port map (
             bram_rst_a => bram_bram_rst_a,
             bram_clk_a => bram_bram_clk_a,
@@ -1573,9 +1567,9 @@ begin
             bram_wrdata_a => ram_bram_wrdata_a,
             bram_rddata_a => ram_bram_rddata_a);
             
-    ram_inst : empty_ram 
+    ram_inst : bram 
         generic map (
-            load_flag => load_ram,
+            select_app => "none",
             address_width => axi_ram_address_width,
             data_width => axi_data_width,
             bram_depth => axi_ram_depth)

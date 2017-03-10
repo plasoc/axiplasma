@@ -237,27 +237,27 @@ begin
             wait for clock_period;
         end;
     begin
---        wait until raw_nreset='1';
---        wait until gpio_output=X"0001";
---        wait for 500 us;
---        gpio_input <= X"0003" after input_delay;
---        wait for 2 ms;
---        gpio_input <= X"00f3" after input_delay;
---        wait for 2 ms;
---        while True loop
---            gpio_input <= X"00f1" after input_delay;
---            wait for 50 us;
---            gpio_input <= X"00f0" after input_delay;
---            wait for 50 us;
---            gpio_input <= X"00f5" after input_delay;
---            wait for 50 us;
---            gpio_input <= X"00ff" after input_delay;
---            wait for 50 us;
---            gpio_input <= X"05f7" after input_delay;
---            wait for 50 us;
---            gpio_input <= X"10f0" after input_delay;
---            wait for 50 us;
---        end loop;
+        wait until raw_nreset='1';
+        wait until gpio_output=X"0001";
+        wait for 500 us;
+        gpio_input <= X"0003" after input_delay;
+        wait for 2 ms;
+        gpio_input <= X"00f3" after input_delay;
+        wait for 2 ms;
+        while True loop
+            gpio_input <= X"00f1" after input_delay;
+            wait for 50 us;
+            gpio_input <= X"00f0" after input_delay;
+            wait for 50 us;
+            gpio_input <= X"00f5" after input_delay;
+            wait for 50 us;
+            gpio_input <= X"00ff" after input_delay;
+            wait for 50 us;
+            gpio_input <= X"05f7" after input_delay;
+            wait for 50 us;
+            gpio_input <= X"10f0" after input_delay;
+            wait for 50 us;
+        end loop;
         wait;
     end process;
 end Behavioral;
