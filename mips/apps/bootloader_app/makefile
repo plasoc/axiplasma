@@ -7,7 +7,6 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
-DEBUG_DIR = ./debug
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDSTART_ADDRESS = 0x00000000
 LDFLAGS = 
@@ -16,8 +15,7 @@ PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c port_layer.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
-
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex 
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
 RM = find
@@ -50,7 +48,7 @@ endif
 $(C_OBJECTS):%:%.c
 	$(GCC_MIPS) -o $(notdir $@).o $@.c
 ifdef DEBUG_MAKE
-	$(GCC_MIPS) -o $(notdir $@).asm -S $@.c
+	$(GCC_MIPS) -o $(notdir $@).s -S $@.c
 endif
 	
 $(ASM_OBJECTS):%:%.asm
@@ -82,5 +80,6 @@ clean:
 	$(RM) . -name "*.map" -type f -delete
 	$(RM) . -name "*.lst" -type f -delete
 	$(RM) . -name "*.bin" -type f -delete
+	$(RM) . -name "*.vhd" -type f -delete
 	$(RM) . -name "*.s" -type f -delete
 
