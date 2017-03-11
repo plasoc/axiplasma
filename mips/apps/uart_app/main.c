@@ -39,13 +39,13 @@ void uart_isr(void* ptr)
 {
 	unsigned data;
 	data = plasoc_uart_get_in(&uart_obj);
-	plasoc_uart_set_out(&uart_obj,data);	
+	printf("The letter typed was: %c\n\r",(char)data);	
 }
 
 void putc_port( void* p, char c)
 {
-	while (!plasoc_uart_get_status_out_avail(&uart_obj))
-		plasoc_uart_set_out(&uart_obj,(unsigned)c);
+	while (!plasoc_uart_get_status_out_avail(&uart_obj));
+	plasoc_uart_set_out(&uart_obj,(unsigned)c);
 }
 
 
@@ -75,15 +75,7 @@ int main()
 	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
 	
-	printf("Hello World!\n\r");
-
-	if (0) 
-	{
-		unsigned value = 0;
-		while (1) 
-			if (plasoc_uart_get_status_out_avail(&uart_obj))
-				plasoc_uart_set_out(&uart_obj,value++);	
-	}
+	while (0);
 
 	return 0;
 }
