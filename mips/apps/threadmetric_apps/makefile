@@ -1,34 +1,25 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
-MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
-#MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
-#MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+#MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
+#MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
+MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
+MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) -DENABLE_PRINTF
-
-# When configuring the address, it is important to consider the addresses of
-# the abi flags and reg info. Both sections should be located immediately after 
-# the end of the application. 
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(MIPS_GCC_LIB) -static -lc -T$(PLASOC_DIR)/linker.ld 
-ASFLAGS = 
-
-# Following are REQUIRED variables, but can be editted
 SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = ./tm_porting_layer_freertos.c $(PLASOC_DIR)/printf.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes #--vhdl_hex --word_count 8192 --full_count 16384
+BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
 ICSP = python2 $(MISC_DIR)/icsp.py 
 ICSPFLAGS = --serial_port $(SERIALPORT)
-
-# No user editing or variables below this line
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
 RM = find 
@@ -129,7 +120,7 @@ else
 		$(notdir $(OBJECTS_0:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_0).axf $(EXEC_NAME_0).bin
-	$(BIN2COE) $(EXEC_NAME_0).bin $(EXEC_NAME_0).vhdl
+	$(BIN2COE) $(EXEC_NAME_0).bin $(EXEC_NAME_0)_pack.vhd --package_name main_pack
 	
 build_1:
 
@@ -147,7 +138,7 @@ else
 		$(notdir $(OBJECTS_1:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_1).axf $(EXEC_NAME_1).bin
-	$(BIN2COE) $(EXEC_NAME_1).bin $(EXEC_NAME_1).vhdl
+	$(BIN2COE) $(EXEC_NAME_1).bin $(EXEC_NAME_1)_pack.vhd --package_name main_pack
 	
 build_2:
 
@@ -165,7 +156,7 @@ else
 		$(notdir $(OBJECTS_2:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_2).axf $(EXEC_NAME_2).bin
-	$(BIN2COE) $(EXEC_NAME_2).bin $(EXEC_NAME_2).vhdl
+	$(BIN2COE) $(EXEC_NAME_2).bin $(EXEC_NAME_2)_pack.vhd --package_name main_pack
 	
 build_3:
 
@@ -183,7 +174,7 @@ else
 		$(notdir $(OBJECTS_3:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_3).axf $(EXEC_NAME_3).bin
-	$(BIN2COE) $(EXEC_NAME_3).bin $(EXEC_NAME_3).vhdl
+	$(BIN2COE) $(EXEC_NAME_3).bin $(EXEC_NAME_3)_pack.vhd --package_name main_pack
 	
 build_4:
 
@@ -201,7 +192,7 @@ else
 		$(notdir $(OBJECTS_4:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_4).axf $(EXEC_NAME_4).bin
-	$(BIN2COE) $(EXEC_NAME_4).bin $(EXEC_NAME_4).vhdl
+	$(BIN2COE) $(EXEC_NAME_4).bin $(EXEC_NAME_4)_pack.vhd --package_name main_pack
 	
 build_5:
 
@@ -219,7 +210,7 @@ else
 		$(notdir $(OBJECTS_5:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_5).axf $(EXEC_NAME_5).bin
-	$(BIN2COE) $(EXEC_NAME_5).bin $(EXEC_NAME_5).vhdl
+	$(BIN2COE) $(EXEC_NAME_5).bin $(EXEC_NAME_5)_pack.vhd --package_name main_pack
 	
 build_6:
 
@@ -237,7 +228,7 @@ else
 		$(notdir $(OBJECTS_6:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_6).axf $(EXEC_NAME_6).bin
-	$(BIN2COE) $(EXEC_NAME_6).bin $(EXEC_NAME_6).vhdl
+	$(BIN2COE) $(EXEC_NAME_6).bin $(EXEC_NAME_6)_pack.vhd --package_name main_pack
 
 clean:
 	$(RM) . -name "*.o" -type f -delete
@@ -245,4 +236,7 @@ clean:
 	$(RM) . -name "*.hex" -type f -delete
 	$(RM) . -name "*.map" -type f -delete
 	$(RM) . -name "*.lst" -type f -delete
+	$(RM) . -name "*.bin" -type f -delete
+	$(RM) . -name "*.vhd" -type f -delete
+	$(RM) . -name "*.s" -type f -delete
 
