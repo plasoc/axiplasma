@@ -7,18 +7,12 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
-CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR)
-
-# When configuring the address, it is important to consider the addresses of
-# the abi flags and reg info. Both sections should be located immediately after 
-# the end of the application. 
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) 
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(MIPS_GCC_LIB) -static -lc -T$(PLASOC_DIR)/linker.ld
-
-# Following are REQUIRED variables, but can be editted
 SERIALPORT = /dev/ttyUSB1
-INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
+INSTALL_DIR = ../../../hdl/projects/Nexys4/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
@@ -27,14 +21,8 @@ BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
 ICSP = python2 $(MISC_DIR)/icsp.py 
 ICSPFLAGS = --serial_port $(SERIALPORT)
 
-# No user editing or variables below this line
-
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls 
-LDFLAGS += -L$(MIPS_GCC_LIB)
-ASFLAGS += 
-
-RM = rm -rf
-
+RM = find
 EXEC_NAME = main
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
@@ -58,7 +46,7 @@ else
 		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
-	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).vhdl
+	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME)_pack.vhd --package_name $(EXEC_NAME)_pack
 
 check:
 ifndef MIPS_GCC_BIN
@@ -81,7 +69,7 @@ $(ASM_OBJECTS):%:%.asm
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
-	install -c $(EXEC_NAME).vhdl $(INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
@@ -90,4 +78,11 @@ launch:
 	$(ICSP) $(EXEC_NAME).bin $(ICSPFLAGS)
 
 clean:
-	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
+	$(RM) . -name "*.o" -type f -delete
+	$(RM) . -name "*.axf" -type f -delete
+	$(RM) . -name "*.hex" -type f -delete
+	$(RM) . -name "*.map" -type f -delete
+	$(RM) . -name "*.lst" -type f -delete
+	$(RM) . -name "*.bin" -type f -delete
+	$(RM) . -name "*.vhd" -type f -delete
+	$(RM) . -name "*.s" -type f -delete
