@@ -8,3 +8,5 @@ crossbar_wrapper:
 		--slave_names cpu cdma --master_names bram ram int timer gpio cdma uart \
 		--master_base_addresses 00000000 01000000 44a00000 44a10000 44a20000 44a30000 44a40000 \
 		--master_high_addresses 0000ffff 0103ffff 44a0ffff 44a1ffff 44a2ffff 44a3ffff 44a4ffff
+
+all: crossbar_wrapper

@@ -34,7 +34,6 @@ C_OBJECTS = $(C_SOURCES:.c=)
 SOURCES = $(ASM_SOURCES) $(C_SOURCES)
 OBJECTS = $(ASM_OBJECTS) $(C_OBJECTS)
 
-
 all: $(OBJECTS)
 ifdef DEBUG_MAKE
 	$(LD_MIPS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME).map -s -N -o $(EXEC_NAME).axf \
