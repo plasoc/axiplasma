@@ -27,6 +27,8 @@ if __name__ == '__main__':
     parser.add_argument('--vhdl_hex',dest='vhdl_hex',action='store_const',
 					const=True,default=False,
 					help='Generates VHDL package with hex.')
+    parser.add_argument('--package_name',dest='package_name',type=str,nargs=1,
+                    help='Name of VHDL package with hex',default=[None])			
     
     # Perform the parsing.
     args = parser.parse_args()
@@ -39,6 +41,8 @@ if __name__ == '__main__':
     full_count_value = args.full_count[0]
     vhdl_hex = args.vhdl_hex
     if vhdl_hex: plain_hex_flag = True
+    package_name = args.package_name[0]
+    if package_name==None: package_name = 'bram_pack'
     
 #     # Print the file names.
 #     print('Binary name: ' + binary_name)
@@ -70,7 +74,7 @@ if __name__ == '__main__':
                 'library ieee;\n'+ \
                 'use ieee.std_logic_1164.all;\n'+ \
                 '\n'+ \
-                'package bram_pack is\n'+ \
+                'package '+package_name+' is\n'+ \
                 '\n'+ \
                 '	constant cpu_width : integer := 32;\n'+ \
                 '	constant ram_size : integer := '+repr(full_count_value)+';\n'+ \
@@ -80,7 +84,7 @@ if __name__ == '__main__':
                 '\n'+ \
                 'end package;\n'+ \
                 '\n'+ \
-                'package body bram_pack is\n'+ \
+                'package body '+package_name+' is\n'+ \
                 '\n'+ \
                 '	function load_hex return ram_type is\n'+ \
                 '		variable ram_buffer : ram_type := (others=>(others=>\'0\'));\n'+ \

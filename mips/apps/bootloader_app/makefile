@@ -6,26 +6,22 @@ LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
+INSTALL_DIR = ../../../hdl/projects/Nexys4/
+DEBUG_DIR = ./debug
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDSTART_ADDRESS = 0x00000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
-
-# Following are REQUIRED variables, but can be editted
-INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c port_layer.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
 
-# No user editing or variables below this line
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
-
-RM = rm -rf
-
-EXEC_NAME = main
+RM = find
+EXEC_NAME = boot
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
 LD_MIPS = $(PREFIX)ld$(SUFFIX) $(LDFLAGS)
@@ -48,7 +44,7 @@ else
 		$(notdir $(OBJECTS:=.o)) $(LDAFTERFLAGS)
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME).axf $(EXEC_NAME).bin
-	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME).vhdl
+	$(BIN2COE) $(EXEC_NAME).bin $(EXEC_NAME)_pack.vhd --package_name $(EXEC_NAME)_pack
 
 
 $(C_OBJECTS):%:%.c
@@ -63,7 +59,7 @@ $(ASM_OBJECTS):%:%.asm
 install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
-	install -c $(EXEC_NAME).vhdl $(INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
@@ -73,12 +69,18 @@ jump_build:
 	$(LD_MIPS) -Ttext=0 -e entry -Map jumpboot.map -s -N -o jumpboot.axf jumpboot.o $(LDAFTERFLAGS)
 	$(DUMP_MIPS) --disassemble-all jumpboot.axf > jumpboot.lst
 	$(OBJCOPY_MIPS) -I elf32-big -O binary jumpboot.axf jumpboot.bin
-	$(BIN2COE) jumpboot.bin jumpboot.vhdl
+	$(BIN2COE) jumpboot.bin jump_pack.vhd --package_name jump_pack
 
 jump_install:
 	install -d $(INSTALL_DIR)
-	install -c jumpboot.vhdl $(INSTALL_DIR)
+	install -c jump_pack.vhd $(INSTALL_DIR)
 
 clean:
-	$(RM) $(EXEC_NAME).hex $(EXEC_NAME).map $(EXEC_NAME).lst $(EXEC_NAME).axf $(EXEC_NAME).bin $(notdir $(OBJECTS:=.o)) $(notdir $(C_OBJECTS:=.s))
+	$(RM) . -name "*.o" -type f -delete
+	$(RM) . -name "*.axf" -type f -delete
+	$(RM) . -name "*.hex" -type f -delete
+	$(RM) . -name "*.map" -type f -delete
+	$(RM) . -name "*.lst" -type f -delete
+	$(RM) . -name "*.bin" -type f -delete
+	$(RM) . -name "*.s" -type f -delete
 
