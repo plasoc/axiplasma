@@ -1,8 +1,8 @@
 -------------------------------------------------------
 --! @author Andrew Powell
---! @date January 17, 2017
+--! @date March 13, 2017
 --! @brief Contains the entity and architecture of the 
---! CPU's Write-Back Cache Controller. 
+--! CPU's Write-Back Cache Controller.
 -------------------------------------------------------
 
 library ieee;
@@ -12,39 +12,54 @@ use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
 use work.plasoc_cpu_pack.all;
 
-
+--! The CPU's Cache Controller is implemented generically
+--! to support cacheable addresses starting from address 0, 
+--! configurable way width, configurable cache size, configurable
+--! block size, and configurable replacement policies. The addresses 
+--! needed to initiate the flushing and invalidation operations can 
+--! also be changed.
+--!
+--! The interfaces of the Cache Controller consist of global,
+--! CPU, and Memory. Global refers to the clock and reset on
+--! low signals. The CPU interface is intended to connect to the CPU
+--! defined in the Plasma-SoC. However, in theory the Cache Controller
+--! can be adapted to other CPU's so long as the same communication protocol
+--! is followed. The same idea is applicable to the Memory interface, which
+--! of course needs to connect to the corresponding Memory Controller.
 entity plasoc_cpu_l1_cache_cntrl is
     generic (
-        cpu_address_width : integer := 32;
-        cpu_data_width : integer := 32;
-        cache_cacheable_width : integer := 16;
-        cache_way_width : integer := 1;
-        cache_index_width : integer := 4;
-        cache_offset_width : integer := 5;
-        cache_policy : string := "rr"; -- rr
-        oper_base : std_logic_vector := X"200000"; -- msb
-        oper_invalidate_offset : std_logic_vector := X"00";
-        oper_flush_offset : std_logic_vector := X"04"); 
+        cpu_address_width : integer := 32;                    --! Defines the address width of the CPU.
+        cpu_data_width : integer := 32;                       --! Defines the data width of the CPU.
+        cache_cacheable_width : integer := 16;                --! Defines the cacheable range. All addresses for which the most cpu_address_width-cache_cacheable_width significant bits are all zero are cacheable. 
+        cache_way_width : integer := 1;                       --! Defines the association of the cache. If zero, the cache is direct. In other words, 2**cache_index_width way.
+        cache_index_width : integer := 4;                     --! Defines the size of the cache. In other words, the number of rows --- where each row consists of a set of tag and block pairs --- in the cache is 2**cache_index_width.
+        cache_offset_width : integer := 5;                    --! Defines the size of each block. In other words, the number of bytes in a block is 2**cache_offset_width.
+        cache_policy : string := "rr";                        --! Defines the replacement policy. "rr" is Random Replacement. "plru" is Pseudo Recently Used.
+        oper_base : std_logic_vector := X"200000";            --! Defines the base address of the cache flushing and invalidation operations. The base address specifies the most significant bits. 
+        oper_invalidate_offset : std_logic_vector := X"00";   --! Defines the invalidation offset from the base address. Provided that the requested line is in the cache, invalidation resets the corresponding valid  it.
+        oper_flush_offset : std_logic_vector := X"04"         --! Defines the flushing offset from the base address. Provided that the requested line is in the cache, flushing writes the line back into its corresponding location in memory.
+    ); 
     port ( 
-        clock : in std_logic;
-        resetn : in std_logic;
-        cpu_next_address : in std_logic_vector(cpu_address_width-1 downto 0);
-        cpu_write_data : in std_logic_vector(cpu_data_width-1 downto 0);
-        cpu_write_enables : in std_logic_vector(cpu_data_width/8-1 downto 0);
-        cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-        cpu_pause : out std_logic;
-        memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-        memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');
-        memory_write_enable : out std_logic;
-        memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
-        memory_write_valid : out std_logic;
-        memory_write_ready : in std_logic;
-        memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');
-        memory_read_enable : out std_logic;
-        memory_read_data: in std_logic_vector(cpu_data_width-1 downto 0);
-        memory_read_valid : in std_logic;
-        memory_read_ready : out std_logic;
-        memory_cacheable : out std_logic); 
+        clock : in std_logic;                                                                            --! Clock. Tested with 50 MHz.
+        resetn : in std_logic;                                                                           --! Reset on low.
+        cpu_next_address : in std_logic_vector(cpu_address_width-1 downto 0);                            --! The address of the next word that needs to be written into memory on the next positive edge clock cycle.
+        cpu_write_data : in std_logic_vector(cpu_data_width-1 downto 0);                                 --! The word that is written on the next positive edge clock cycle.
+        cpu_write_enables : in std_logic_vector(cpu_data_width/8-1 downto 0);                            --! Each high bit indicates the respective byte in cpu_write_data should be written. 
+        cpu_read_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');                --! The word that is read from memory on the next positive edge clock cycle.
+        cpu_pause : out std_logic;                                                                       --! Forces the CPU to stall in case cpu_next_address isn't accessible on the next positive edge clock cycle.
+        memory_write_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');      --! The starting address of a memory write operation.
+        memory_write_data : out std_logic_vector(cpu_data_width-1 downto 0) := (others=>'0');            --! The word that is written to memory when a handshake occurs on a positive edge clock cyle.
+        memory_write_enable : out std_logic;                                                             --! Enables the burst writing operation to memory.
+        memory_write_enables : out std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');       --! Each high bit corresponds to a respective byte in memory_write_data to write to memory.
+        memory_write_valid : out std_logic;                                                              --! Handshaking signal indicating the word on memory_write_data is valid.
+        memory_write_ready : in std_logic;                                                               --! Handshaking signal indicating the potential word on memory_write_data is ready to be accepted.
+        memory_read_address : out std_logic_vector(cpu_address_width-1 downto 0) := (others=>'0');       --! The address of the next word that needs to be read from memory on the next positive edge clock cycle.
+        memory_read_enable : out std_logic;                                                              --! Enables the burst reading operation from memory.
+        memory_read_data: in std_logic_vector(cpu_data_width-1 downto 0);                                --! The word that is read from memory when a handshake occurs on a positive edge clock cyle.
+        memory_read_valid : in std_logic;                                                                --! Handshaking signal indicating the word on memory_read_data is valid.
+        memory_read_ready : out std_logic;                                                               --! Handshaking signal indicating the potential word on memory_read_data is ready to be accepted.
+        memory_cacheable : out std_logic                                                                 --! Indicates whether the enabled memory access operations are cacheable --- indicating a burst operation of 2**cache_offset_width/(cpu_data_width/8) words is needed --- or noncacheable --- burst size of a single word.
+    ); 
 end plasoc_cpu_l1_cache_cntrl;
 
 architecture Behavioral of plasoc_cpu_l1_cache_cntrl is

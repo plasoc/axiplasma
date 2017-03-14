@@ -70,13 +70,10 @@ begin
         variable read_occurred : boolean;
         procedure reset_state is
         begin
-            -- Clear handshake control signals.
             mem_in_ready_buff <= '0';
             mem_out_valid_buff <= '0';
-            -- Clear memory enables.
             mem_out_enable <= '0';
             mem_in_enable <= '0';
-            -- Resume CPU.
             cpu_pause_enable <= False;
         end procedure;
     begin
@@ -84,35 +81,25 @@ begin
             if resetn='0' then
                 reset_state;
             else
-                -- Acquire memory access request from CPU.
                 if not cpu_pause_enable then
-                    -- Make sure the CPU is stalled.
                     cpu_pause_enable <= True;
-                    -- Check to see what the operation is.
                     if cpu_write_access then
-                        -- Set write control information.
                         mem_out_address <= cpu_address;
                         mem_out_strobe <= cpu_strobe;
                         mem_out_enable <= '1';
                         mem_out_valid_buff <= '1';
-                        -- Set write data.
                         mem_out_data <= cpu_in_data;
                     else
-                        -- Set read control information.
                         mem_in_address <= cpu_address;
                         mem_in_enable <= '1';
                         mem_in_ready_buff <= '1';
                     end if;
-                -- Perform memory access.
                 else
-                    -- Check and see if handshakes occurred.
                     write_occurred := mem_out_valid_buff='1' and mem_out_ready='1';
                     read_occurred := mem_in_valid='1' and mem_in_ready_buff='1';
-                    -- Perform read operation on handshake.
                     if not cpu_write_access and read_occurred then
                         cpu_out_data <= mem_in_data;
                     end if;
-                    -- Once handshake completes, resume the CPU.
                     if write_occurred or read_occurred then
                         reset_state;
                     end if;

@@ -35,9 +35,9 @@ entity plasoc_cpu is
         cache_offset_width : integer := default_cache_offset_width;				--! Line Size (bytes) = 2^cache_offset_width.
         cache_replace_strat : string := default_cache_replace_strat;			--! Defines the replacement strategy in case of miss. Only "plru" is available.
         cache_enable : boolean := default_cache_enable;							--! Defines whether or not the cache is enabled.
-        oper_base : std_logic_vector := default_oper_base; -- msb
-        oper_invalidate_offset : integer := default_oper_invalidate_offset;
-        oper_flush_offset : integer := default_oper_flush_offset
+        oper_base : std_logic_vector := default_oper_base;                      --! Defines the base address of the cache flush and invalidate operations. Based address is this case is only defined by its most significant bits.
+        oper_invalidate_offset : integer := default_oper_invalidate_offset;     --! Defines the offset from the base address of the invalidation operation.
+        oper_flush_offset : integer := default_oper_flush_offset                --! Defines the offset from the base address of the flush operation.
 	);
     port(
         -- Global interface.
