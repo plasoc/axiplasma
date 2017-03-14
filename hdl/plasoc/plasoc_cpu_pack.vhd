@@ -10,18 +10,18 @@ package plasoc_cpu_pack is
 	-- modified, though, modifications will also be necessary for the corresponding header file 
 	-- for the CPU. 
 	-- default_cache_offset_width must be 4 or higher due to the nature of how the cache is implemented.
-    constant default_cpu_mult_type       : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_shifter_type    : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_alu_type        : string  := "DEFAULT"; 						--! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cache_address_width : integer := 25;								--! Defines the default address width of the cacheable addresses.
-    constant default_cache_way_width : integer := 1; 									--! Associativity = 2^default_cache_way_width.	
-    constant default_cache_index_width : integer := 5;									--! Cache Size (rows) = 2^default_cache_index_width.
-    constant default_cache_offset_width : integer := 4;									--! Line Size (bytes) = 2^default_cache_offset_width.
-    constant default_cache_replace_strat : string := "rr"; -- rr							--! Defines the default replacement strategy in case of miss. Only "plru" is available.
-    constant default_cache_enable : boolean := True;									--! Defines whether or not the cache is enabled by default. 	
-    constant default_oper_base : std_logic_vector := X"200000"; -- msb
-    constant default_oper_invalidate_offset : integer := 0;
-    constant default_oper_flush_offset : integer := 4;
+    constant default_cpu_mult_type       : string  := "DEFAULT";                        --! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cpu_shifter_type    : string  := "DEFAULT";                        --! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cpu_alu_type        : string  := "DEFAULT";                        --! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+    constant default_cache_address_width : integer := 25;                               --! Defines the default address width of the cacheable addresses.
+    constant default_cache_way_width : integer := 1;                                    --! Associativity = 2^default_cache_way_width.	
+    constant default_cache_index_width : integer := 5;                                  --! Cache Size (rows) = 2^default_cache_index_width.
+    constant default_cache_offset_width : integer := 4;                                 --! Line Size (bytes) = 2^default_cache_offset_width.
+    constant default_cache_replace_strat : string := "rr";                              --! Defines the default replacement strategy in case of miss. "rr" Random Replacement and "plru" Pseudo Least Recently Used are available.
+    constant default_cache_enable : boolean := True;                                    --! Defines whether or not the cache is enabled by default. 	
+    constant default_oper_base : std_logic_vector := X"200000";                         --! Defines the base address of the cache flush and invalidate operations. Based address is this case is only defined by its most significant bits.
+    constant default_oper_invalidate_offset : integer := 0;                             --! Defines the offset from the base address of the invalidation operation.
+    constant default_oper_flush_offset : integer := 4;                                  --! Defines the offset from the base address of the flush operation.
     
     -- AXI4-Full error constants.
     constant error_axi_read_exokay : integer := 0;
@@ -50,25 +50,21 @@ package plasoc_cpu_pack is
     -- Component declaration.
     component plasoc_cpu is
         generic(
-            -- cpu constants
-            cpu_mult_type       : string  := default_cpu_mult_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_shifter_type    : string  := default_cpu_shifter_type; -- DEFAULT --AREA_OPTIMIZED
-            cpu_alu_type        : string  := default_cpu_alu_type; --DEFAULT --AREA_OPTIMIZED
-            -- cache constants
+            cpu_mult_type       : string  := default_cpu_mult_type;
+            cpu_shifter_type    : string  := default_cpu_shifter_type;
+            cpu_alu_type        : string  := default_cpu_alu_type;
             cache_address_width : integer := default_cache_address_width;
             cache_way_width : integer := default_cache_way_width; 
             cache_index_width : integer := default_cache_index_width;
             cache_offset_width : integer := default_cache_offset_width;
             cache_replace_strat : string := default_cache_replace_strat;
             cache_enable : boolean := default_cache_enable;
-            oper_base : std_logic_vector := default_oper_base; -- msb
+            oper_base : std_logic_vector := default_oper_base;
             oper_invalidate_offset : integer := default_oper_invalidate_offset;
             oper_flush_offset : integer := default_oper_flush_offset );
         port(
-            -- global signals
             aclk : in std_logic;
             aresetn     : in std_logic;
-            -- axi write interface.
             axi_awid : out std_logic_vector(-1 downto 0);
             axi_awaddr : out std_logic_vector(31 downto 0);
             axi_awlen : out std_logic_vector(7 downto 0);
@@ -90,7 +86,6 @@ package plasoc_cpu_pack is
             axi_bresp : in  std_logic_vector(1 downto 0);
             axi_bvalid : in std_logic;
             axi_bready : out std_logic;
-            -- axi read interface.
             axi_arid : out std_logic_vector(-1 downto 0);
             axi_araddr : out std_logic_vector(31 downto 0);
             axi_arlen : out std_logic_vector(7 downto 0);
@@ -109,7 +104,6 @@ package plasoc_cpu_pack is
             axi_rlast : in std_logic;
             axi_rvalid : in std_logic;
             axi_rready : out std_logic;
-            -- cpu signals
             intr_in      : in std_logic);
     end component;
 end;

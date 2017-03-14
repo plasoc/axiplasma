@@ -1,11 +1,40 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 14, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's UART Core.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;          
 use ieee.numeric_std.all;                  
 use work.plasoc_uart_pack.all;
 
+--! The Plasma-SoC's Universeral Asynchronous Rceiver and
+--! Transmitter is implemented so that the CPU can perform
+--! 8N1 serial transactions with a host computer. The serial transactions
+--! are useful for printing detailed statuses, debugging problems related
+--! to software, and in-circuit serial programming. The UART Core depends
+--! on the UART developed by (THE AUTHOR'S NAME AND INFORMATION NEEDS TO BE
+--! ADDED LATER) for its essential functionality. In other words, the UART Core
+--! acts as a wrapper so that the UART has an Master AXI4-Lite interface and
+--! and interruption capabilities.
+--!
+--! The UART Core behaves like any other UART. In order to take advantage of
+--! this core, the CPU must read and write to the core's register space. The
+--! Control register doesn't actually require any configuration. Instead, the
+--! control bits Status In Avail and Status Out Avail indicate the status of the
+--! UART Core. If Status In Avail is high, then 8-bit data is available in the In Fifo
+--! register. If Status Out Avail is high, then 8-bit data can be written to the Out
+--! Fifo Avail register. Both the In Fifo Avail and Out Fifo Avail registers have a width
+--! of axi_data_width, however the data is always the least significant bits.
+--!
+--! Information specific to the AXI4-Lite
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_uart is
     generic (
-        fifo_depth : integer := 8;
+        fifo_depth : integer := 8;                              --! Defines the number of 8-bit words 
         axi_address_width : integer := 16;
         axi_data_width : integer := 32;
         axi_control_offset : integer := 0;

@@ -1,28 +1,51 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 14, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's GPIO Core.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;          
 use ieee.numeric_std.all;                  
 use work.plasoc_gpio_pack.all;
 
+--! The Plasma-SoC's General Purpose Input and Output (GPIO) Core is built
+--! so that the CPU has a simple, albiet inefficient, way to access
+--! signals outside of the CPU. Because the overhead incurred in a transaction,
+--! the GPIO Core should not be relied upon if large amounts of data require transfer.
+--!
+--! The operation of the GPIO Core can be described in terms of its registers, including
+--! Control, Data In, and Data Out. The bits of the Control register include the Enable and
+--! Ack. Setting the Enable bit puts the GPIO Core in interruption mode, during which Data In can
+--! only accept new data from the GPIO Core's data_in if an acknowledgement is received by 
+--! writing high to the ACK bit. With interruption mode disabled, Data In will always accept 
+--! new data from data_in. Writing to the Data Out register sets the GPIO Core's data_out.
+--!
+--! Information specific to the AXI4-Lite
+--! protocol is excluded from this documentation since the information can
+--! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_gpio is
     generic (
-        data_in_width : integer := 16;
-        data_out_width : integer := 16;
+        -- Device parameters.
+        data_in_width : integer := 16;                --! Defines the width of data_in. This value should be less than or equal to axi_data_width. 
+        data_out_width : integer := 16;               --! Defines the width of data_out. This value should be less than or equal to axi_data_width.
         -- Slave AXI4-Lite parameters.
-        axi_address_width : integer := 16;                      --! Defines the AXI4-Lite Address Width.
-        axi_data_width : integer := 32;                         --! Defines the AXI4-Lite Data Width.   
-        axi_control_offset : integer := 0;         --! Defines the offset for the Control register.
-        axi_control_enable_bit_loc : integer := 0;
-        axi_control_ack_bit_loc : integer := 1;
-        axi_data_in_offset : integer := 4;
-        axi_data_out_offset : integer := 8 
+        axi_address_width : integer := 16;            --! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;               --! Defines the AXI4-Lite Data Width.   
+        axi_control_offset : integer := 0;            --! Defines the offset for the Control register.
+        axi_control_enable_bit_loc : integer := 0;    --! Defines the bit location of the Enable bit in the Control register.
+        axi_control_ack_bit_loc : integer := 1;       --! Defines the bit location of the Ack bit in the Control register.
+        axi_data_in_offset : integer := 4;            --! Defines the offset for the Data In register.
+        axi_data_out_offset : integer := 8            --! Defines the offset for the Data Out register.
     );
     port (
         -- Global interface.
-        aclk : in std_logic;                                                --! Clock. Tested with 50 MHz.
-        aresetn : in std_logic;
-        -- Device interfaec.
-        data_in : in std_logic_vector(data_in_width-1 downto 0);
-        data_out : out std_logic_vector(data_out_width-1 downto 0);
+        aclk : in std_logic;                                                            --! Clock. Tested with 50 MHz.
+        aresetn : in std_logic;                                                         --! Reset on low. Technically supposed to be asynchronous, however asynchronous resets aren't used.
+        -- Device interface.
+        data_in : in std_logic_vector(data_in_width-1 downto 0);                        --! Data read into the GPIO Core. This input can be registered into the Data In register, depending on the right conditions.
+        data_out : out std_logic_vector(data_out_width-1 downto 0);                     --! Data written out of the GPIO Core. This output is registered by the Data Out register.
         -- Slave AXI4-Lite Write interface.
         axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);                 --! AXI4-Lite Address Write signal.
         axi_awprot : in std_logic_vector(2 downto 0);                                   --! AXI4-Lite Address Write signal.
@@ -44,8 +67,9 @@ entity plasoc_gpio is
         axi_rvalid : out std_logic;                                                     --! AXI4-Lite Read Data signal.
         axi_rready : in std_logic;                                                      --! AXI4-Lite Read Data signal.
         axi_rresp : out std_logic_vector(1 downto 0);                                   --! AXI4-Lite Read Data signal.
-        -- CPU Interface.
-        int : out std_logic);    
+        -- Interrupt interface.
+        int : out std_logic                                                             --! If the GPIO Core is configured in interruption mode, a change in Data In causes intr to go high until the GPIO Core is acknowledged.
+    );    
 end plasoc_gpio;
 
 architecture Behavioral of plasoc_gpio is

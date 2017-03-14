@@ -19,7 +19,7 @@ use work.plasoc_timer_pack.all;
 --! The operation of the Timer Core is as follows. The address space of the 
 --! Timer Core defines the registers Control, Trigger Value, and Tick Value. 
 --! Before starting the Timer Core's operation, the value written to the 
---! Trigger Value sets the value at which the Tick Value must reach. Setting the
+--! Trigger Value sets the value to which the Tick Value must reach. Setting the
 --! Start bit in the Control register starts the operation of the Timer Core, 
 --! during which the Tick Value increments every clock cycle until it reaches the Trigger Value.
 --! Once the Tick Value equals the Trigger Value, the Done bit and signal is set 
@@ -31,7 +31,7 @@ use work.plasoc_timer_pack.all;
 --! the Control register. Both the Done bit and the Tick Value register will remain
 --! zero if the Start bit is low.
 --!
---! Information specific to the AXI4-Full
+--! Information specific to the AXI4-Lite
 --! protocol is excluded from this documentation since the information can
 --! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_timer is
