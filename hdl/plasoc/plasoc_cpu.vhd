@@ -25,67 +25,67 @@ use work.plasoc_cpu_pack.all;
 entity plasoc_cpu is
     generic(
         -- CPU parameters.
-        cpu_mult_type       : string  := default_cpu_mult_type;					--! Defines the Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-        cpu_shifter_type    : string  := default_cpu_shifter_type;				--! Defines the Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-        cpu_alu_type        : string  := default_cpu_alu_type;					--! Defines the Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        cpu_mult_type       : string  := default_cpu_mult_type;                 --! Defines the Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        cpu_shifter_type    : string  := default_cpu_shifter_type;              --! Defines the Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
+        cpu_alu_type        : string  := default_cpu_alu_type;                  --! Defines the Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
         -- Cache parameters.
-        cache_address_width : integer := default_cache_address_width;			--! Defines the address width of the cacheable addresses.
-        cache_way_width : integer := default_cache_way_width;					--! Associativity = 2^cache_way_width.
-        cache_index_width : integer := default_cache_index_width;				--! Cache Size (rows) = 2^cache_index_width.
-        cache_offset_width : integer := default_cache_offset_width;				--! Line Size (bytes) = 2^cache_offset_width.
-        cache_replace_strat : string := default_cache_replace_strat;			--! Defines the replacement strategy in case of miss. Only "plru" is available.
-        cache_enable : boolean := default_cache_enable;							--! Defines whether or not the cache is enabled.
+        cache_address_width : integer := default_cache_address_width;           --! Defines the address width of the cacheable addresses.
+        cache_way_width : integer := default_cache_way_width;                   --! Associativity = 2^cache_way_width.
+        cache_index_width : integer := default_cache_index_width;               --! Cache Size (rows) = 2^cache_index_width.
+        cache_offset_width : integer := default_cache_offset_width;             --! Line Size (bytes) = 2^cache_offset_width.
+        cache_replace_strat : string := default_cache_replace_strat;            --! Defines the replacement strategy in case of miss. Only "plru" is available.
+        cache_enable : boolean := default_cache_enable;                         --! Defines whether or not the cache is enabled.
         oper_base : std_logic_vector := default_oper_base;                      --! Defines the base address of the cache flush and invalidate operations. Based address is this case is only defined by its most significant bits.
         oper_invalidate_offset : integer := default_oper_invalidate_offset;     --! Defines the offset from the base address of the invalidation operation.
         oper_flush_offset : integer := default_oper_flush_offset                --! Defines the offset from the base address of the flush operation.
 	);
     port(
         -- Global interface.
-        aclk : in std_logic;													--! Clock. Tested with 50 MHz.
-        aresetn     : in std_logic;												--! Reset on low.
+        aclk : in std_logic;                                                    --! Clock. Tested with 50 MHz.
+        aresetn     : in std_logic;                                             --! Reset on low.
         -- Master AXI4-Full Write interface.
-        axi_awid : out std_logic_vector(-1 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awaddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awburst : out std_logic_vector(1 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awlock : out std_logic;												--! AXI4-Full Address Write signal.	
-        axi_awcache : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awprot : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Write signal.
-        axi_awqos : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Write signal.	
-        axi_awregion : out std_logic_vector(3 downto 0);						--! AXI4-Full Address Write signal.					
-        axi_awvalid : out std_logic;											--! AXI4-Full Address Write signal.
-        axi_awready : in std_logic;												--! AXI4-Full Address Write signal.	
-        axi_wdata : out std_logic_vector(31 downto 0);							--! AXI4-Full Write Data signal.
-        axi_wstrb : out std_logic_vector(3 downto 0);							--! AXI4-Full Write Data signal.
-        axi_wlast : out std_logic;												--! AXI4-Full Write Data signal.
-        axi_wvalid : out std_logic;												--! AXI4-Full Write Data signal.
-        axi_wready : in std_logic;												--! AXI4-Full Write Data signal.
-        axi_bid : in std_logic_vector(-1 downto 0);								--! AXI4-Full Write Response signal.
-        axi_bresp : in  std_logic_vector(1 downto 0);							--! AXI4-Full Write Response signal.
-        axi_bvalid : in std_logic;												--! AXI4-Full Write Response signal.
-        axi_bready : out std_logic;												--! AXI4-Full Write Response signal.
+        axi_awid : out std_logic_vector(-1 downto 0);                           --! AXI4-Full Address Write signal.
+        axi_awaddr : out std_logic_vector(31 downto 0);                         --! AXI4-Full Address Write signal.
+        axi_awlen : out std_logic_vector(7 downto 0);                           --! AXI4-Full Address Write signal.
+        axi_awsize : out std_logic_vector(2 downto 0);                          --! AXI4-Full Address Write signal.
+        axi_awburst : out std_logic_vector(1 downto 0);                         --! AXI4-Full Address Write signal.
+        axi_awlock : out std_logic;                                             --! AXI4-Full Address Write signal.	
+        axi_awcache : out std_logic_vector(3 downto 0);                         --! AXI4-Full Address Write signal.
+        axi_awprot : out std_logic_vector(2 downto 0);                          --! AXI4-Full Address Write signal.
+        axi_awqos : out std_logic_vector(3 downto 0);                           --! AXI4-Full Address Write signal.	
+        axi_awregion : out std_logic_vector(3 downto 0);                        --! AXI4-Full Address Write signal.					
+        axi_awvalid : out std_logic;                                            --! AXI4-Full Address Write signal.
+        axi_awready : in std_logic;                                             --! AXI4-Full Address Write signal.	
+        axi_wdata : out std_logic_vector(31 downto 0);                          --! AXI4-Full Write Data signal.
+        axi_wstrb : out std_logic_vector(3 downto 0);                           --! AXI4-Full Write Data signal.
+        axi_wlast : out std_logic;                                              --! AXI4-Full Write Data signal.
+        axi_wvalid : out std_logic;                                             --! AXI4-Full Write Data signal.
+        axi_wready : in std_logic;                                              --! AXI4-Full Write Data signal.
+        axi_bid : in std_logic_vector(-1 downto 0);                             --! AXI4-Full Write Response signal.
+        axi_bresp : in  std_logic_vector(1 downto 0);                           --! AXI4-Full Write Response signal.
+        axi_bvalid : in std_logic;                                              --! AXI4-Full Write Response signal.
+        axi_bready : out std_logic;                                             --! AXI4-Full Write Response signal.
         -- Master AXI4-Full Read interface.
-        axi_arid : out std_logic_vector(-1 downto 0);							--! AXI4-Full Address Read signal.
-        axi_araddr : out std_logic_vector(31 downto 0);							--! AXI4-Full Address Read signal.
-        axi_arlen : out std_logic_vector(7 downto 0);							--! AXI4-Full Address Read signal.
-        axi_arsize : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Read signal.	
-        axi_arburst : out std_logic_vector(1 downto 0);							--! AXI4-Full Address Read signal.
-        axi_arlock : out std_logic;												--! AXI4-Full Address Read signal.		
-        axi_arcache : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Read signal.
-        axi_arprot : out std_logic_vector(2 downto 0);							--! AXI4-Full Address Read signal.	
-        axi_arqos : out std_logic_vector(3 downto 0);							--! AXI4-Full Address Read signal.
-        axi_arregion : out std_logic_vector(3 downto 0);						--! AXI4-Full Address Write signal.		
-        axi_arvalid : out std_logic;											--! AXI4-Full Address Read signal.
-        axi_arready : in std_logic;												--! AXI4-Full Address Read signal.
-        axi_rid : in std_logic_vector(-1 downto 0);								--! AXI4-Full Read Data signal.
-        axi_rdata : in std_logic_vector(31 downto 0);							--! AXI4-Full Read Data signal.
-        axi_rresp : in std_logic_vector(1 downto 0);							--! AXI4-Full Read Data signal.	
-        axi_rlast : in std_logic;												--! AXI4-Full Read Data signal.
-        axi_rvalid : in std_logic;												--! AXI4-Full Read Data signal.
-        axi_rready : out std_logic;												--! AXI4-Full Read Data signal.
+        axi_arid : out std_logic_vector(-1 downto 0);                           --! AXI4-Full Address Read signal.
+        axi_araddr : out std_logic_vector(31 downto 0);                         --! AXI4-Full Address Read signal.
+        axi_arlen : out std_logic_vector(7 downto 0);                           --! AXI4-Full Address Read signal.
+        axi_arsize : out std_logic_vector(2 downto 0);                          --! AXI4-Full Address Read signal.	
+        axi_arburst : out std_logic_vector(1 downto 0);	                        --! AXI4-Full Address Read signal.
+        axi_arlock : out std_logic;                                             --! AXI4-Full Address Read signal.		
+        axi_arcache : out std_logic_vector(3 downto 0);                         --! AXI4-Full Address Read signal.
+        axi_arprot : out std_logic_vector(2 downto 0);                          --! AXI4-Full Address Read signal.	
+        axi_arqos : out std_logic_vector(3 downto 0);                           --! AXI4-Full Address Read signal.
+        axi_arregion : out std_logic_vector(3 downto 0);                        --! AXI4-Full Address Write signal.		
+        axi_arvalid : out std_logic;                                            --! AXI4-Full Address Read signal.
+        axi_arready : in std_logic;                                             --! AXI4-Full Address Read signal.
+        axi_rid : in std_logic_vector(-1 downto 0);                             --! AXI4-Full Read Data signal.
+        axi_rdata : in std_logic_vector(31 downto 0);                           --! AXI4-Full Read Data signal.
+        axi_rresp : in std_logic_vector(1 downto 0);                            --! AXI4-Full Read Data signal.	
+        axi_rlast : in std_logic;                                               --! AXI4-Full Read Data signal.
+        axi_rvalid : in std_logic;                                              --! AXI4-Full Read Data signal.
+        axi_rready : out std_logic;                                             --! AXI4-Full Read Data signal.
         -- CPU signals.
-        intr_in      : in std_logic											    --! External interrupt.
+        intr_in      : in std_logic                                             --! External interrupt.
     );
 end plasoc_cpu;
 
