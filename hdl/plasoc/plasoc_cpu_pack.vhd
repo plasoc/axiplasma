@@ -5,23 +5,19 @@ use ieee.numeric_std.all;
 
 package plasoc_cpu_pack is
 
-    -- Default CPU parameters. These values are modifiable. At this current time, 
-	-- though, some parameter combinations are incompatible. If these parameters are 
-	-- modified, though, modifications will also be necessary for the corresponding header file 
-	-- for the CPU. 
-	-- default_cache_offset_width must be 4 or higher due to the nature of how the cache is implemented.
-    constant default_cpu_mult_type       : string  := "DEFAULT";                        --! Defines the default Plasma Mlite multiplier type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_shifter_type    : string  := "DEFAULT";                        --! Defines the default Plasma Mlite shifter type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cpu_alu_type        : string  := "DEFAULT";                        --! Defines the default Plasma Mlite ALU type. The possible options are "DEFAULT" and "AREA_OPTIMIZED".
-    constant default_cache_address_width : integer := 25;                               --! Defines the default address width of the cacheable addresses.
-    constant default_cache_way_width : integer := 1;                                    --! Associativity = 2^default_cache_way_width.	
-    constant default_cache_index_width : integer := 5;                                  --! Cache Size (rows) = 2^default_cache_index_width.
-    constant default_cache_offset_width : integer := 4;                                 --! Line Size (bytes) = 2^default_cache_offset_width.
-    constant default_cache_replace_strat : string := "rr";                              --! Defines the default replacement strategy in case of miss. "rr" Random Replacement and "plru" Pseudo Least Recently Used are available.
-    constant default_cache_enable : boolean := True;                                    --! Defines whether or not the cache is enabled by default. 	
-    constant default_oper_base : std_logic_vector := X"200000";                         --! Defines the base address of the cache flush and invalidate operations. Based address is this case is only defined by its most significant bits.
-    constant default_oper_invalidate_offset : integer := 0;                             --! Defines the offset from the base address of the invalidation operation.
-    constant default_oper_flush_offset : integer := 4;                                  --! Defines the offset from the base address of the flush operation.
+    -- Default parameters.
+    constant default_cpu_mult_type       : string  := "DEFAULT";
+    constant default_cpu_shifter_type    : string  := "DEFAULT";
+    constant default_cpu_alu_type        : string  := "DEFAULT";
+    constant default_cache_address_width : integer := 25;
+    constant default_cache_way_width : integer := 1;
+    constant default_cache_index_width : integer := 5;
+    constant default_cache_offset_width : integer := 4;
+    constant default_cache_replace_strat : string := "rr";
+    constant default_cache_enable : boolean := True;
+    constant default_oper_base : std_logic_vector := X"200000";
+    constant default_oper_invalidate_offset : integer := 0;
+    constant default_oper_flush_offset : integer := 4;
     
     -- AXI4-Full error constants.
     constant error_axi_read_exokay : integer := 0;
