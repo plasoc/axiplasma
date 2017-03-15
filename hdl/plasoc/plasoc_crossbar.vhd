@@ -1,19 +1,48 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 14, 2017
+--! @brief Contains the entity and architecture of the 
+--! Plasma-SoC's Crossbar Core. This core should not be
+--! utilized directly.
+-------------------------------------------------------
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use work.plasoc_crossbar_pack.all; 
 
+--! The Crossbar Core is an interconnect developed so that 
+--! one or more Slave AXI4-Full interfaces can perform 
+--! transactions with one or more Master AXI4-Full interfaces. 
+--!
+--! It is critical to have an understanding of the AXI4-Full protocol
+--! when it comes to utilizing this Crossbar. Additionally, the Crossbar Core
+--! should not be instantiated directly. Instead, a Crossbar Wrapper should
+--! be generated with the crossgen python2.7 application. Not only does the 
+--! Wrapper provide more intuitive interfaces to each of the Slave and Master
+--! interfaces, but necessary multiplexers are added to ensure all outputs
+--! do not return infinite impedance.
+--!
+--! The Crossbar is built such that split transactions are supported. Requesting
+--! interfaces, such as Slave Address interfaces and Master Response interfaces, can
+--! perform a request by presenting either an Address or an ID with an asserted valid
+--! signal. Static priorities are used; referring to the Crossbar Wrapper, requesting
+--! interfaces closest to the top of the component declaration are given priority over
+--! lower interfaces. 
+--!
+--! Information specific to the AXI4-Lite
+--! protocol is excluded from here since the information can
+--! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_crossbar is
     generic (
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        axi_master_amount : integer := 2;
-        axi_slave_id_width : integer := 2;
-        axi_slave_amount : integer := 4;
-        axi_master_base_address : std_logic_vector := X"4000000000000000";
-        axi_master_high_address : std_logic_vector := X"ffffffff3fffffff"
+        axi_address_width : integer := 16;                                     --! Defines the AXI4-Full address width.
+        axi_data_width : integer := 32;                                        --! Defines the AXI4-Full data width.
+        axi_master_amount : integer := 2;                                      --! Defines the number of Master AXI4-Full interfaces.
+        axi_slave_id_width : integer := 2;                                     --! Defines the ID width of each Slave AXI4-Full interface.
+        axi_slave_amount : integer := 4;                                       --! Defines the number of Slave AXI4-Full interfaces.
+        axi_master_base_address : std_logic_vector := X"4000000000000000";     --! Defines the base addresses that refer to the address space of each Master AXI4-Full interface. The position of the address in the address vector corresponds to the position of the Master interface in the signals vector.
+        axi_master_high_address : std_logic_vector := X"ffffffff3fffffff"      --! Defines the high addresses that refer to the address space of each Master AXI4-Full interface. The position of the address in the address vector corresponds to the position of the Master interface in the signals vector.
     );
     port (
         aclk : in std_logic;                                                    
@@ -109,8 +138,8 @@ entity plasoc_crossbar is
         m_axi_rresp : in std_logic_vector(axi_master_amount*2-1 downto 0);                            
         m_axi_rlast : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
         m_axi_rvalid : in std_logic_vector(axi_master_amount*1-1 downto 0);                                               
-        m_axi_rready : out std_logic_vector(axi_master_amount*1-1 downto 0));
-        
+        m_axi_rready : out std_logic_vector(axi_master_amount*1-1 downto 0)
+    );
 end plasoc_crossbar;
 
 architecture Behavioral of plasoc_crossbar is

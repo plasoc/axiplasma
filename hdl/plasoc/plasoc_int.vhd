@@ -33,7 +33,7 @@ use work.plasoc_int_pack.all;
 --! always have priority over the Interrupt Identifier register. The CPU
 --! interrupt will remain high until there are no active device interrupts.
 --!
---! Information specific to the AXI4-Full
+--! Information specific to the AXI4-Lite
 --! protocol is excluded from this documentation since the information can
 --! be found in official ARM AMBA4 AXI documentation.
 entity plasoc_int is
