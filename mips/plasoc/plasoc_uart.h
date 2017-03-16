@@ -1,3 +1,9 @@
+/**
+ * @author Andrew Powell
+ * @date March 16, 2017
+ * @brief Contains hardware definitions and driver for the Plasma-SoC's UART Core.
+ */
+
 #ifndef PLASOC_UART_H_
 #define PLASOC_UART_H_
 
@@ -6,24 +12,36 @@ extern "C"
 {
 #endif
 
+	/* Defines the address offsets and bit locations. */
 	#define PLASOC_UART_CONTROL_OFFSET		(0)
 	#define PLASOC_UART_STATUS_IN_AVAIL_BIT_LOC	(0)
 	#define PLASOC_UART_STATUS_OUT_AVAIL_BIT_LOC	(1)
 	#define PLASOC_UART_IN_OFFSET			(4)
 	#define PLASOC_UART_OUT_OFFSET			(8)
 
+	/**
+	 * @brief Represents the GPIO Core. 
+	 */
 	typedef struct
 	{
-		unsigned base_address;
+		unsigned base_address;	/**< Base address to GPIO Core. */
 	}
 	plasoc_uart;
 
+	/**
+	 * @brief Configures the UART Core object.
+	 * @param obj Pointer to the object.
+	 * @param base_address The address to the UART Core's register.
+	 */
 	static inline __attribute__ ((always_inline))
 	void plasoc_uart_setup(plasoc_uart* obj,unsigned base_address)
 	{
 		obj->base_address = base_address;
 	}
 
+	/**
+	 * @brief Writes an 8-bit value to the UART
+	 */
 	static inline __attribute__ ((always_inline))
 	void plasoc_uart_set_out(plasoc_uart* obj,unsigned byte)
 	{
