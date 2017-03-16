@@ -34,41 +34,48 @@ use work.plasoc_uart_pack.all;
 --! be found in official ARM AMBA4 AXI documentation. 
 entity plasoc_uart is
     generic (
-        fifo_depth : integer := 8;                              --! Defines the number of 8-bit words 
-        axi_address_width : integer := 16;
-        axi_data_width : integer := 32;
-        axi_control_offset : integer := 0;
-        axi_control_status_in_avail_bit_loc : integer := 0;
-        axi_control_status_out_avail_bit_loc : integer := 1;
-        axi_in_fifo_offset : integer := 4;
-        axi_out_fifo_offset : integer := 8;
-        baud : positive := 115200;
-        clock_frequency : positive := 50000000);
+        fifo_depth : integer := 8;                              --! Defines the number of 8-bit words that can be bufferred for each of the respective input and output queues.
+        axi_address_width : integer := 16;                      --! Defines the AXI4-Lite Address Width.
+        axi_data_width : integer := 32;                         --! Defines the AXI4-Lite Data Width. 
+        axi_control_offset : integer := 0;                      --! Defines the offset for the Control register.
+        axi_control_status_in_avail_bit_loc : integer := 0;     --! Defines the bit location of Status In Avail in the Control register.
+        axi_control_status_out_avail_bit_loc : integer := 1;    --! Defines the bit location of Status Out Avail in the Control register.
+        axi_in_fifo_offset : integer := 4;                      --! Defines the offset of the In Fifo register.
+        axi_out_fifo_offset : integer := 8;                     --! Defines the offset of the Out Fifo register.
+        baud : positive := 115200;                              --! The baud rate of the UART.
+        clock_frequency : positive := 50000000                  --! The frequency of the input clock aclk.
+    );
     port (
-        aclk : in std_logic;
-        aresetn : in std_logic;
-        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_awprot : in std_logic_vector(2 downto 0);
-        axi_awvalid : in std_logic;
-        axi_awready : out std_logic;
-        axi_wvalid : in std_logic;
-        axi_wready : out std_logic;
-        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);
-        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);
-        axi_bvalid : out std_logic;
-        axi_bready : in std_logic;
-        axi_bresp : out std_logic_vector(1 downto 0);
-        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);
-        axi_arprot : in std_logic_vector(2 downto 0);
-        axi_arvalid : in std_logic;
-        axi_arready : out std_logic;
-        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');
-        axi_rvalid : out std_logic;
-        axi_rready : in std_logic;
-        axi_rresp : out std_logic_vector(1 downto 0); 
-        tx : out std_logic;
-        rx : in  std_logic;
-        status_in_avail : out std_logic);
+        -- Global interface.
+        aclk : in std_logic;                                                               --! Clock. Tested with 50 MHz. 
+        aresetn : in std_logic;                                                            --! Reset on low. Technically supposed to be asynchronous, however asynchronous resets aren't used.
+        -- Slave AXI4-Lite Write interface.
+        axi_awaddr : in std_logic_vector(axi_address_width-1 downto 0);                    --! AXI4-Lite Address Write signal.
+        axi_awprot : in std_logic_vector(2 downto 0);                                      --! AXI4-Lite Address Write signal.
+        axi_awvalid : in std_logic;                                                        --! AXI4-Lite Address Write signal.
+        axi_awready : out std_logic;                                                       --! AXI4-Lite Address Write signal.
+        axi_wvalid : in std_logic;                                                         --! AXI4-Lite Write Data signal.
+        axi_wready : out std_logic;                                                        --! AXI4-Lite Write Data signal.
+        axi_wdata : in std_logic_vector(axi_data_width-1 downto 0);                        --! AXI4-Lite Write Data signal.
+        axi_wstrb : in std_logic_vector(axi_data_width/8-1 downto 0);                      --! AXI4-Lite Write Data signal.
+        axi_bvalid : out std_logic;                                                        --! AXI4-Lite Write Response signal.
+        axi_bready : in std_logic;                                                         --! AXI4-Lite Write Response signal.
+        axi_bresp : out std_logic_vector(1 downto 0);                                      --! AXI4-Lite Write Response signal.
+        -- Slave AXI4-Lite Read interface.
+        axi_araddr : in std_logic_vector(axi_address_width-1 downto 0);                    --! AXI4-Lite Address Read signal.
+        axi_arprot : in std_logic_vector(2 downto 0);                                      --! AXI4-Lite Address Read signal.
+        axi_arvalid : in std_logic;                                                        --! AXI4-Lite Address Read signal.
+        axi_arready : out std_logic;                                                       --! AXI4-Lite Address Read signal.
+        axi_rdata : out std_logic_vector(axi_data_width-1 downto 0) := (others=>'0');      --! AXI4-Lite Read Data signal.
+        axi_rvalid : out std_logic;                                                        --! AXI4-Lite Read Data signal.
+        axi_rready : in std_logic;                                                         --! AXI4-Lite Read Data signal.
+        axi_rresp : out std_logic_vector(1 downto 0);                                      --! AXI4-Lite Read Data signal.
+        -- UART interface.
+        tx : out std_logic;                                                                --! Serially sends bits at the rate approximately equal to the baud. The communication protocol is always 8N1.
+        rx : in  std_logic;                                                                --! Serially receives bits at the rate approximately equal to the baud. The communication protocol should always be 8N1.
+        -- CPU interface.
+        status_in_avail : out std_logic                                                    --! A signal indicating the state of the Status In Avail bit in the Control register. This signal can be used to interrupt the CPU.
+    );
 end plasoc_uart;
 
 architecture Behavioral of plasoc_uart is

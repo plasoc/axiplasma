@@ -1,3 +1,10 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 16, 2017
+--! @brief Contains the entity and architecture of the 
+--! Wrapper Plasma-SoC Top Module.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;

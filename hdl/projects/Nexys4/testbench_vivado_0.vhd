@@ -1,3 +1,9 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 16, 2017
+--! @brief Contains the testbench for simulating the 
+--! Plasma-SoC.
+-------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;

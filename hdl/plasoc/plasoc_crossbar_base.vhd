@@ -1,6 +1,13 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 16, 2017
+--! @brief Contains the entity and architecture of the 
+--! the base crossbar component of the Plasma-SoC's 
+--! AXI Crossbar.
+-------------------------------------------------------
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
 
 entity plasoc_crossbar_base is
     generic (

@@ -1,25 +1,12 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/13/2017 01:55:14 PM
--- Design Name: 
--- Module Name: plasoc_crossbar_axi4_read_controller - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 16, 2017
+--! @brief Contains the entity and architecture of the 
+--! Crossbar's Read Controller.
+-------------------------------------------------------
 
-library IEEE;
-use ieee.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.ALL;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;

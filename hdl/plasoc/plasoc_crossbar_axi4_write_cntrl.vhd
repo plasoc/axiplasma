@@ -1,7 +1,12 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 16, 2017
+--! @brief Contains the entity and architecture of the 
+--! Crossbar's Write Controller.
+-------------------------------------------------------
 
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.ALL;
 use ieee.std_logic_unsigned.all;
 use ieee.std_logic_misc.all;
 use ieee.numeric_std.all;
