@@ -1,3 +1,13 @@
+/**
+ * @author Andrew Powell
+ * @date March 17, 2017
+ * @brief Contains the example application to test the UART Core and driver.
+ *
+ * Only purpose of this application is to test the UART Core and its respective
+ * driver. The application echos a character, along with a message using the
+ * embedded printf function.
+ */
+
 #include <printf.h>
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
@@ -75,7 +85,7 @@ int main()
 	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
 	
-	while (0);
+	while (1);
 
 	return 0;
 }

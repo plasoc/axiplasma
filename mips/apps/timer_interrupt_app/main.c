@@ -1,3 +1,17 @@
+/**
+ * @author Andrew Powell
+ * @date March 17, 2017
+ * @brief Contains the example application to test interrupts.
+ *
+ * This application has the LEDs all flash concurrently at a rate
+ * of 1 Hz. The flashing is only visible for an LED if the LED's
+ * respective switch is in its high position. Please note that at 
+ * start up none of the LEDs flash. Once the state of a switch changes,
+ * the application begins.
+ *
+ * The only purpose of this application is to test the interrupts.
+ */
+
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
