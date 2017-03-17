@@ -48,41 +48,41 @@ entity plasoc_crossbar is
         aclk : in std_logic;                                                    
         aresetn : in std_logic;      
         
-        s_address_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
-        s_data_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
-        s_response_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
-        s_address_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);
-        s_data_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);     
+        s_address_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);                                       --! Indicates which Slave AXI4-Full Address Write interfaces are connected to a Master interface. 
+        s_data_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);                                          --! Indicates which Slave AXI4-Full Data Write interfaces are connected to a Master interface.
+        s_response_write_connected : out std_logic_vector(axi_slave_amount-1 downto 0);                                      --! Indicates which Slave AXI4-Full Response Write interfaces are connected to a Master interface.
+        s_address_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);                                        --! Indicates which Slave AXI4-Full Address Read interfaces are connected to a Master interface.
+        s_data_read_connected : out std_logic_vector(axi_slave_amount-1 downto 0);                                           --! Indicates which Slave AXI4-Full Data Read interfaces are connected to a Master interface.
         
-        m_address_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_data_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_response_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_address_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);
-        m_data_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);        
+        m_address_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);                                      --! Indicates which Master AXI4-Full Address Write interfaces are connected to a Slave interface. 
+        m_data_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);                                         --! Indicates which Master AXI4-Full Data Write interfaces are connected to a Slave interface.
+        m_response_write_connected : out std_logic_vector(axi_master_amount-1 downto 0);                                     --! Indicates which Master AXI4-Full Response Write interfaces are connected to a Slave interface.
+        m_address_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);                                       --! Indicates which Master AXI4-Full Address Read interfaces are connected to a Slave interface.
+        m_data_read_connected : out std_logic_vector(axi_master_amount-1 downto 0);                                          --! Indicates which Master AXI4-Full Data Read interfaces are connected to a Slave interface.
                                           
-        s_axi_awid : in std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);                                           
-        s_axi_awaddr : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);                            
-        s_axi_awlen : in std_logic_vector(axi_slave_amount*8-1 downto 0);                            
-        s_axi_awsize : in std_logic_vector(axi_slave_amount*3-1 downto 0);                            
-        s_axi_awburst : in std_logic_vector(axi_slave_amount*2-1 downto 0);                            
-        s_axi_awlock : in std_logic_vector(axi_slave_amount*1-1 downto 0);                                                
-        s_axi_awcache : in std_logic_vector(axi_slave_amount*4-1 downto 0);                            
-        s_axi_awprot : in std_logic_vector(axi_slave_amount*3-1 downto 0);                            
-        s_axi_awqos : in std_logic_vector(axi_slave_amount*4-1 downto 0);                            
-        s_axi_awregion : in std_logic_vector(axi_slave_amount*4-1 downto 0);                        
-        s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);                                            
-        s_axi_awready : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                                
-        s_axi_wdata : in std_logic_vector(axi_slave_amount*axi_data_width-1 downto 0);                            
-        s_axi_wstrb : in std_logic_vector(axi_slave_amount*axi_data_width/8-1 downto 0);                            
-        s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);                                                
-        s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
-        s_axi_wready : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                                
-        s_axi_bid : out std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);                                
-        s_axi_bresp : out std_logic_vector(axi_slave_amount*2-1 downto 0);                            
-        s_axi_bvalid : out std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
-        s_axi_bready : in std_logic_vector(axi_slave_amount*1-1 downto 0);                                               
-        s_axi_arid : in std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);                              
-        s_axi_araddr : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);                            
+        s_axi_awid : in std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);
+        s_axi_awaddr : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);
+        s_axi_awlen : in std_logic_vector(axi_slave_amount*8-1 downto 0);
+        s_axi_awsize : in std_logic_vector(axi_slave_amount*3-1 downto 0);
+        s_axi_awburst : in std_logic_vector(axi_slave_amount*2-1 downto 0);
+        s_axi_awlock : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_awcache : in std_logic_vector(axi_slave_amount*4-1 downto 0);
+        s_axi_awprot : in std_logic_vector(axi_slave_amount*3-1 downto 0);
+        s_axi_awqos : in std_logic_vector(axi_slave_amount*4-1 downto 0);
+        s_axi_awregion : in std_logic_vector(axi_slave_amount*4-1 downto 0);
+        s_axi_awvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_awready : out std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_wdata : in std_logic_vector(axi_slave_amount*axi_data_width-1 downto 0);
+        s_axi_wstrb : in std_logic_vector(axi_slave_amount*axi_data_width/8-1 downto 0);
+        s_axi_wlast : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_wvalid : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_wready : out std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_bid : out std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);
+        s_axi_bresp : out std_logic_vector(axi_slave_amount*2-1 downto 0);
+        s_axi_bvalid : out std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_bready : in std_logic_vector(axi_slave_amount*1-1 downto 0);
+        s_axi_arid : in std_logic_vector(axi_slave_amount*axi_slave_id_width-1 downto 0);
+        s_axi_araddr : in std_logic_vector(axi_slave_amount*axi_address_width-1 downto 0);
         s_axi_arlen : in std_logic_vector(axi_slave_amount*8-1 downto 0);                             
         s_axi_arsize : in std_logic_vector(axi_slave_amount*3-1 downto 0);                           
         s_axi_arburst : in std_logic_vector(axi_slave_amount*2-1 downto 0);                            
