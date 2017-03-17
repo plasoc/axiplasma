@@ -1,3 +1,11 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 17, 2017
+--! @brief Contains the package and component declaration of the 
+--! Plasma-SoC's UART Core. Please refer to the documentation
+--! in plasoc_uart.vhd for more information.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 
