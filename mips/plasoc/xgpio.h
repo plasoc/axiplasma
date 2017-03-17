@@ -1,9 +1,12 @@
 /**
  * @author Andrew Powell
  * @date 26 January 2017
- * @brief Contains a simple driver for the Xilinx XGpio core. Since this driver is mainly used
- * to verify the axiplasma design, it only implements a single interface which can either be all 
- * inputs or all outputs.
+ * @brief Contains a simple driver for the Xilinx General Purpose Input/Output (XGpio) core. 
+ *
+ * Since this driver is mainly used to verify the axiplasma design, it only implements a 
+ * single interface which can either be all inputs or all outputs. 
+ *
+ * Please view the documentation for the Xilinx XGpio core for more information.
  */
 
 #ifndef XGPIO_H_
