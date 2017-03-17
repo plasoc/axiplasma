@@ -36,17 +36,17 @@ int main()
 	/* Configure the gpio. */
 	plasoc_gpio_setup(&gpio_obj,PLASOC_GPIO_BASE_ADDRESS);
 	plasoc_int_attach_isr(&int_obj,INT_PLASOC_GPIO_ID,gpio_isr,0);
+	plasoc_gpio_set_data_out(&gpio_obj,0x1);
 
-	/* Configure the interrupts of the CPU. */
+	/* Configure the interrupts of the CPU. This is needed to patch the interrupt handler. */
+	OS_AsmInterruptInit();
 	OS_AsmInterruptEnable(1);
 	
 	/* Enable all interrupts in the interrupt controller. */
 	plasoc_int_enable_all(&int_obj);
 	plasoc_gpio_enable_int(&gpio_obj,0);
 
-	/* Run application's main loop. */
-	plasoc_gpio_set_data_out(&gpio_obj,0x1);
-
+	/* Start running the application. */
 	{
 		int each_word;
 
@@ -58,26 +58,31 @@ int main()
 		for (each_word=0; each_word<DATA_SIZE; each_word++)
 			data[each_word] = each_word*2;
 
+		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x2);		
 
 		/* Flush cache. This should force the cache to write data back to main memory. */
 		l1_cache_flush_range((unsigned)data,sizeof(data));
 
+		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x3);
 
 		/* Invalidate cache. This should force the cache to invalidate the corresponding lines. */
 		l1_cache_invalidate_range((unsigned)data,sizeof(data));
 
+		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x4);
 
 		/* Clear array. This should force cache to read data from main memory. */
 		memset((void*)data,0,sizeof(data));
 
+		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x5);
 
 		/* Flush cache. This should force the zeroed cache to go into memory. */
 		l1_cache_flush_range((unsigned)data,sizeof(data));
 
+		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x6);
 	}
 
