@@ -1,3 +1,11 @@
+# @author Andrew Powell
+# @date March 17, 2017 
+# @brief Implements the Jump application. 
+#
+# Really simple application. Its only purpose is to force the
+# Plasma-SoC's CPU to jump to the location of the main application
+# which is assumed to be in memory already.
+	
 	JUMP_ADDRESS	= 0x01000000	
 
 	.data

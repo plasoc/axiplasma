@@ -1,3 +1,12 @@
+/**
+ * @author Andrew Powell
+ * @date March 18, 2017
+ * @brief Implements the bootloader.
+ *
+ * Currently, only In Circuit Serial Programming (ICSP) is supported
+ * with this bootloader.
+ */
+
 #include "port_layer.h"
 #define BOOT_LOADER_START_ADDRESS		(0x01000000)
 #define BOOT_LOADER_START_WORD			(0xf0f0f0f0)
@@ -8,6 +17,9 @@
 #define BOOT_LOADER_CHECKSUM_DIVISOR		(230)		
 #define BOOT_LOADER_CACHE_FLUSH_THRESHOLD	(1<<(L1_CACHE_OFFSET_WIDTH-2))					
 
+/**
+ * @brief Performs the main execution of the bootloader.
+ */
 static void run()
 {
 	/* DEBUG */

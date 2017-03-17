@@ -1,13 +1,21 @@
 ##################################################################
-# TITLE: Boot Up Code
+# TITLE: Boot Up Code (MODIFIED FOR THE PLASMA-SOC)
 # AUTHOR: Steve Rhoads (rhoadss@yahoo.com)
+# MODIFIED AUTHOR: Andrew Powell (andrewandrepowell2@gmail.com)
 # DATE CREATED: 1/12/02
+# LAST MODIFIED DATA: 1/17/07
 # FILENAME: boot.asm
 # PROJECT: Plasma CPU core
 # COPYRIGHT: Software placed into the public domain by the author.
 #    Software 'as is' without warranty.  Author liable for nothing.
 # DESCRIPTION:
 #    Initializes the stack pointer and jumps to main().
+# MODIFICATIONS:
+#    Made sure the entry function is placed in the .text.startup 
+#    section. Modified the OS_AsmInterruptInit function such that
+#    when called, system calls and interruptions jump to the 
+#    interrupt_service_routine function if the application doesn't
+#    start at address zero.
 ##################################################################
    #Reserve 512 bytes for stack
    .data
