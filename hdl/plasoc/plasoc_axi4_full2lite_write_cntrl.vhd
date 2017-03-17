@@ -1,3 +1,11 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 17, 2017
+--! @brief Contains the package and component declaration of the 
+--! Full2Lite Core's Write Controller. Please refer to the documentation
+--! in plasoc_axi4_full2lite.vhd for more information.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.all; 
