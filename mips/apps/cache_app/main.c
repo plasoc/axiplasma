@@ -1,3 +1,14 @@
+/**
+ * @author Andrew Powell
+ * @date March 17, 2017
+ * @brief Contains the example application to test the cache operations.
+ *
+ * This application simply runs a few tests to test the cache controller's
+ * flushing and invalidation operations, along with the respective driver. A new
+ * value is written to the GPIO Core's output when each test is passed. At the
+ * end of the application, a value 110 base 2 is printed to the LEDs. 
+ */
+
 #include <string.h>
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
