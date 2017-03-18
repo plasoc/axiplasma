@@ -82,6 +82,7 @@ int main()
 	plasoc_gpio_enable_int(&gpio_obj,0);
 
 	/* Run application's main loop. */
+	plasoc_gpio_set_data_out(&gpio_obj,1);
 	while (1) 
 	{
 		/* In order to prevent constant access to on-chip interconnect, only update when new data is available. */
