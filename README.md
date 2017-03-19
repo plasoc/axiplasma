@@ -8,28 +8,22 @@ The major hardware components of the Plasma-SoC consist of a *CPU*, *Timer*, *In
 
 ### File Structure
 
-* one
-   * nested
-* two
-   * nested
-* three
-   * nested
 + hdl
    + plasma
    + plasoc
    + projects
       + Nexys4
 + mips
-..+ apps
-....+ bootloader_app
-....+ cache_app
-....+ freertos_app
-....+ threadmetric+apps
-....+ timer\_interrupt\_app
-....+ uart_app
-..+ freertos
-..+ plasma
-..+ plasoc
+   + apps
+      + bootloader_app
+      + cache_app
+      + freertos_app
+      + threadmetric+apps
+      + timer\_interrupt\_app
+      + uart_app
+   + freertos
+   + plasma
+   + plasoc
 + misc
 
 ### Prerequisites
