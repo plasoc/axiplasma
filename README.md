@@ -8,7 +8,7 @@ The major hardware components of the Plasma-SoC consist of a *CPU*, *Timer*, *In
 
 ### File Structure
 
-Take note of the Plasma-SoC's file structure.
+Take note of the Plasma-SoC's file structure shown below. For the sake of brevity, many of the sources are omitted from the structure. However, understand that the files not shown are still needed. Please see the sources themselves for more information.
 
 + hdl --- All the VHDL hardware sources. 
    + plasma --- Steve Rhoads' Plasma MLite Core.
@@ -19,16 +19,25 @@ Take note of the Plasma-SoC's file structure.
    + apps --- Application that can run on the Plasma-SoC.
       + bootloader_app --- Currently supports loading an application into memory with in-circuit serial programming (ICSP).
       + cache_app --- Tests the operations of the CPU's L1 cache.
-      + freertos_app
-      + threadmetric_apps
-      + timer\_interrupt\_app
-      + uart_app
-   + freertos
-   + plasma
-   + plasoc
-+ misc
+      + freertos_app --- Runs a FreeRTOS example.
+      + threadmetric_apps --- Contains several applications needed to generate benchmarks for the Plasma-SoC FreeRTOS port with ThreadMetric.
+      + timer\_interrupt\_app --- Tests the Time Core. 
+      + uart_app --- Tests the UART Core.
+   + freertos --- FreeRTOS port for the Plasma-SoC.
+   + plasma --- Sources related to Steve Rhoads' Plasma MLite Core. Note that boot source was modified for the purposes of the Plasma-SoC.
+   + plasoc --- Sources needed for the Plasma-SoC. The drivers for the peripherals are located under this directory.
++ misc --- All the utility programs.
+   + bin2coe.py
+   + gencross.py
+   + icsp.py
+
+The applications located in the "mips/apps" and "hdl/projects/Nexys4" directories all depend on Makefiles in order to perform certain operations.
 
 ### Prerequisites
+
++ Msys/Windows or Linux ---
+   + Cross compilation tools ---
++ Vivado ---
 
 ### Installing
 
