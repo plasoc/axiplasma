@@ -51,7 +51,7 @@ All RTL development and testing so far been completed in Vivado 2016.4 IDE for t
 2. In the TCL command line, use the "cd" command to change the directory to "/hdl/projects/Nexys4".
 3. Under the tools menu, use "Run TCL script.." to run the create_project.tcl script located in "/hdl/projects/Nexys4".
 
-At this point, the simulator can be started to demonstrate an application and compilation can be started to generate a bit file that already has the bootloader loaded into BRAM.
+At this point, the simulator can be started to demonstrate an application and compilation can be started to generate a bit file that already has the bootloader loaded into BRAM. More documentation can be found in the sources themselves.
 
 #### Software
 
