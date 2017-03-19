@@ -27,17 +27,17 @@ Take note of the Plasma-SoC's file structure shown below. For the sake of brevit
    + plasma --- Sources related to Steve Rhoads' Plasma MLite Core. Note that boot source was modified for the purposes of the Plasma-SoC.
    + plasoc --- Sources needed for the Plasma-SoC. The drivers for the peripherals are located under this directory.
 + misc --- All the utility programs.
-   + bin2coe.py
-   + gencross.py
-   + icsp.py
+   + bin2coe.py --- A command line program that generates either a COE file or a custom VHDL source that contains the HEX of a binary.
+   + gencross.py --- A command line program that generates the wrapper for the crossbar interconnect.
+   + icsp.py --- A command line program that loads a binary to the Plasma-SoC provided that the Plasma-SoC is running the bootloader.
 
 The applications located in the "mips/apps" and "hdl/projects/Nexys4" directories all depend on Makefiles in order to perform certain operations.
 
 ### Prerequisites
 
 + Msys/Windows or Linux ---
-   + Cross compilation tools ---
-+ Vivado ---
++ Cross compilation tools ---
++ EDA --- The project located under "hdl/projects/Nexys4" is generated with Vivado. All of the testing up to this point has also been done with Vivado. However, the Plasma-SoC is developed for portability; it should run with any EDA or configurable logic development tools. It should be noted the version of Vivado used for development was 2016.4
 
 ### Installing
 
