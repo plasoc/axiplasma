@@ -1,6 +1,6 @@
 # Plasma AXI-based System-on-Chip 
 
-The **Plasma AXI-based System-on-Chip (Plasma-SoC)** is an extension of *[Steve Rhoads' Plasma Core](https://opencores.org/project,plasma)*, a processor that implements MIPS I with a small subset of Coprocessor 0 in order to provide limited support for interrupts and system calls. As its name implies, the cores of the Plasma-SoC relies on *ARM AMBA4 Advanced eXtensible Interfaces (AXI)* for communication over a configurable AXI4-Full Crossbar Interconnect.
+The **Plasma AXI-based System-on-Chip (Plasma-SoC)** is an extension of *[Steve Rhoads' Plasma MLite Core](https://opencores.org/project,plasma)*, a processor that implements MIPS I with a small subset of Coprocessor 0 in order to provide limited support for interrupts and system calls. As its name implies, the cores of the Plasma-SoC relies on *ARM AMBA4 Advanced eXtensible Interfaces (AXI)* for communication over a configurable AXI4-Full Crossbar Interconnect.
 
 The major hardware components of the Plasma-SoC consist of a *CPU*, *Timer*, *Interrupt Controller*, *GPIO*, *UART*, *Interconnect*, and an example design created to run on the Digilent Nexys4 board. The software includes *hardware drivers*, *FreeRTOS port*, *ICSP bootloader*, *Threadmetric Benchmark port*, and several other examples to test and demonstrate the hardware's functionality. There are also several utility programs not intended to run on the hardware.
 
@@ -31,15 +31,17 @@ Take note of the Plasma-SoC's file structure shown below. For the sake of brevit
    + gencross.py --- A command line program that generates the wrapper for the crossbar interconnect.
    + icsp.py --- A command line program that loads a binary to the Plasma-SoC provided that the Plasma-SoC is running the bootloader.
 
-The applications located in the "mips/apps" and "hdl/projects/Nexys4" directories all depend on Makefiles in order to perform certain operations.
-
 ### Prerequisites
 
-+ Msys2/Windows or Linux --- 
-+ Cross compilation tools --- A GCC MIPS cross compiler and bin utilities are necessary to build binary 
-+ EDA --- The project located under "hdl/projects/Nexys4" is generated with Vivado. All of the testing up to this point has also been done with Vivado. However, the Plasma-SoC is developed for portability; it should run with any EDA or configurable logic development tools. It should be noted the version of Vivado used for development was 2016.4
++ Cross compilation tools --- A GCC MIPS cross compiler and bin utilities are necessary to build binary. It is recommended to run this [Makefile that downloads and builds the MIPS compiler and bin utilities](https://github.com/ktbarrett/gcc-cross). The Makefile has been tested on Ubuntu and Windows with Msys2. Alternatively, compilation and build tools can be immediately downloaded from [uClib's download page](https://www.uclibc.org/downloads/binaries/0.9.30.1/), although these only work on Linux and are not fully updated.
++ EDA --- The project located under "hdl/projects/Nexys4" is generated with Vivado. All of the testing up to this point has also been done with Xilinx's Vivado Design Suite IDE. However, the Plasma-SoC is developed for portability; it should run with any EDA or configurable logic development tools. It should be noted the version of Vivado used for development was [2016.4](https://www.xilinx.com/support/download.html).
++ Python2.7 --- In order to run the utility programs, a Python2.7 interpreter is needed. It is recommended to use [Anaconda](https://www.continuum.io/downloads).
++ PySerial --- The icsp.py command line utility program requires the [PySerial module](https://github.com/pyserial/pyserial) in order to operate.
++ Serial Console --- In order to view messages from the UART Core, the host computer needs a serial console. The protocol is 9600 Baud 8N1. For Ubuntu, Minicom should already be installed. On Windows, [Putty](http://www.putty.org/) is recommended.
 
 ### Installing
+
+The applications located in the "mips/apps" and "hdl/projects/Nexys4" directories all depend on Makefiles in order to perform certain operations.
 
 ## Simulations
 
@@ -60,6 +62,8 @@ The applications located in the "mips/apps" and "hdl/projects/Nexys4" directorie
 [Express Logic's ThreadMetric Download](http://rtos.com/DownloadCenter/Thread-MetricForm.php)
 
 [AMBA4 AXI Specification](http://www.gstitt.ece.ufl.edu/courses/fall15/eel4720_5721/labs/refs/AXI4_specification.pdf)
+
+[Xilinx Vivado Design Suite 2016.4](https://www.xilinx.com/support/download.html)
 
 ## Contact Information
 
