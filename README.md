@@ -88,6 +88,8 @@ The make commands are described as the following.
 
 There's also a Makefile located in "hdl/projects/Nexys4" that contains the command that generates the crossbar wrapper.
 
+## Acknowledgements
+
 ## Useful Links
 
 [Kaleb Barrett's MIPS GCC Cross Compiler Makefile](https://github.com/ktbarrett/gcc-cross)  
