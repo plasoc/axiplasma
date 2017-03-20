@@ -112,9 +112,9 @@ There's also a Makefile located in "hdl/projects/Nexys4" that contains the comma
 
 ## Contact Information
 
-Author: Andrew Powell..
-Contact: andrewandrepowell2@gmail.com..
-Blog: www.powellprojectshowcase.com..
+Author: Andrew Powell  
+Contact: andrewandrepowell2@gmail.com  
+Blog: www.powellprojectshowcase.com  
 HACKADAY.IO: https://hackaday.io/andrewandrepowell
 
 
