@@ -71,16 +71,20 @@ The make commands are described as the following.
    + make install --- Copies boot_pack.vhd into "/hdl/projects/Nexys4".
    + make jump\_build --- Builds the jump binary and generates a jump\_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
    + make jump\_install --- Copies jump\_pack.vhd into "/hdl/projects/Nexys4".
-   + make clean --- Removes all building files from directory.
-+ cache_app
+   + make clean --- Removes all built files from directory.
++ cache\_app, freertos\_app, timer\_interrupt\_app, uart\_app
    + make all --- Builds the application binary and generates a main_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
    + make install --- Copies main_pack.vhd into "/hdl/projects/Nexys4".
    + make launch --- Uploads the binary on to the hardware with ISCP. The SERIALPORT variable should be set to the serial port of the hardware.
-   + make clean --- Removes all building files from directory.
-+ freertos_app
-   + make all --- Builds the application binary and generates a main_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
-   + make install --- Copies main_pack.vhd into "/hdl/projects/Nexys4".
-   + make launch --- Uploads the binary on to the hardware with ISCP. The SERIALPORT variable should be set to the serial port of the hardware.
+   + make clean --- Removes all built files from directory.
++ threadmetric_apps --- "make all" builds all the applications, and "make clean" removes all the built files. The majority of the other commands end with either \_build or \_launch. The former builds the application, whereas the latter uploads the binary on to the hardware with ISCP. The argument DEBUG\_MAKE=1 can be used after either \_build or all to generate debugging files. The prefixes related to the ThreadMetric benchmark applications are the following.
+   + make tm\_basic\_processing\_test 
+   + make tm\_cooperative\_scheduling_test --- **PLEASE READ. In order to run this application properly, the configUSE\_PREEMPTION needs to be set to 0 before building the binary. The flag is located in FreeRTOSConfig.h under "mips/freertos". Every other applications require this flag to be set to 1.** 
+   + make tm\_interrupt\_preemption\_processing\_test
+   + make tm\_interrupt\_processing\_test
+   + make tm\_memory\_allocation\_test
+   + make tm\_message\_processing\_test
+   + make tm\_preemptive\_scheduling\_test
 
 There's also a Makefile located in "hdl/projects/Nexys4" that contains the command that generates the crossbar wrapper.
 
