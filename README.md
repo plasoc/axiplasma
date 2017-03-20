@@ -90,10 +90,6 @@ There's also a Makefile located in "hdl/projects/Nexys4" that contains the comma
 
 ## License
 
-## Acknowledgments
-
-Dr. Dennis Silage, my adviser for this work. Kaleb Barrett, for creating script that generates the cross compilation tools and implementing the Rhealstone benchmark.
-
 ## Useful Links
 
 [Kaleb Barrett's MIPS GCC Cross Compiler Makefile](https://github.com/ktbarrett/gcc-cross)  
