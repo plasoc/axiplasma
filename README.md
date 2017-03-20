@@ -92,22 +92,17 @@ There's also a Makefile located in "hdl/projects/Nexys4" that contains the comma
 
 ## Acknowledgments
 
+Dr. Dennis Silage, my adviser for this work. Kaleb Barrett, for creating script that generates the cross compilation tools and implementing the Rhealstone benchmark.
+
 ## Useful Links
 
-[Kaleb Barrett's MIPS GCC Cross Compiler Makefile](https://github.com/ktbarrett/gcc-cross)
-
-[Steve Rhoads' Plasma Core](https://opencores.org/project,plasma)
-
-[Peter Bennett's UART Core](https://github.com/pabennett/uart)
-
-[Real Time Engineer's FreeRTOS](http://www.freertos.org/)
-
-[Express Logic's ThreadMetric Download](http://rtos.com/DownloadCenter/Thread-MetricForm.php)
-
-[AMBA4 AXI Specification](http://www.gstitt.ece.ufl.edu/courses/fall15/eel4720_5721/labs/refs/AXI4_specification.pdf)
-
-[Xilinx Vivado Design Suite 2016.4](https://www.xilinx.com/support/download.html)
-
+[Kaleb Barrett's MIPS GCC Cross Compiler Makefile](https://github.com/ktbarrett/gcc-cross)  
+[Steve Rhoads' Plasma Core](https://opencores.org/project,plasma)  
+[Peter Bennett's UART Core](https://github.com/pabennett/uart)  
+[Real Time Engineer's FreeRTOS](http://www.freertos.org/)  
+[Express Logic's ThreadMetric Download](http://rtos.com/DownloadCenter/Thread-MetricForm.php)  
+[AMBA4 AXI Specification](http://www.gstitt.ece.ufl.edu/courses/fall15/eel4720_5721/labs/refs/AXI4_specification.pdf)  
+[Xilinx Vivado Design Suite 2016.4](https://www.xilinx.com/support/download.html)  
 [PySerial](https://github.com/pyserial/pyserial)
 
 ## Contact Information
