@@ -79,7 +79,7 @@ The make commands are described as the following.
    + make clean --- Removes all built files from directory.
 + threadmetric_apps --- "make all" builds all the applications, and "make clean" removes all the built files. The majority of the other commands end with either \_build or \_launch. The former builds the application, whereas the latter uploads the binary on to the hardware with ISCP. The argument DEBUG\_MAKE=1 can be used after either \_build or all to generate debugging files. The prefixes related to the ThreadMetric benchmark applications are the following.
    + make tm\_basic\_processing\_test 
-   + make tm\_cooperative\_scheduling_test --- **PLEASE READ. In order to run this application properly, the configUSE\_PREEMPTION needs to be set to 0 before building the binary. The flag is located in FreeRTOSConfig.h under "mips/freertos". Every other applications require this flag to be set to 1.** 
+   + make tm\_cooperative\_scheduling_test --- **PLEASE READ. In order to run this application properly, the configUSE\_PREEMPTION needs to be set to 0 before building the binary. The flag is located in FreeRTOSConfig.h under "mips/freertos". Every other application requires this flag to be set to 1.** 
    + make tm\_interrupt\_preemption\_processing\_test
    + make tm\_interrupt\_processing\_test
    + make tm\_memory\_allocation\_test
@@ -91,6 +91,8 @@ There's also a Makefile located in "hdl/projects/Nexys4" that contains the comma
 ## License
 
 ## Acknowledgments
+
+## Useful Links
 
 [Kaleb Barrett's MIPS GCC Cross Compiler Makefile](https://github.com/ktbarrett/gcc-cross)
 
@@ -106,9 +108,14 @@ There's also a Makefile located in "hdl/projects/Nexys4" that contains the comma
 
 [Xilinx Vivado Design Suite 2016.4](https://www.xilinx.com/support/download.html)
 
+[PySerial](https://github.com/pyserial/pyserial)
+
 ## Contact Information
 
-
+Author: Andrew Powell..
+Contact: andrewandrepowell2@gmail.com..
+Blog: www.powellprojectshowcase.com..
+HACKADAY.IO: https://hackaday.io/andrewandrepowell
 
 
 
