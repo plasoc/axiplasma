@@ -13,6 +13,13 @@ Take note of the Plasma-SoC's file structure shown below. For the sake of brevit
 + hdl --- All the VHDL hardware sources. 
    + plasma --- Steve Rhoads' Plasma MLite Core.
    + plasoc --- Plasma-SoC cores, such as peripherals and interconnect. 
+      + plasoc_cpu.vhd --- CPU Core. Consists of the MLite Core and Configurable Associative/Direct Write-Back Cache.
+      + plasoc_cross.vhd --- Crossbar Core. This core acts as the Plasma-SoC's interconnect. A wrapper should be generated instead of instantiating this core directly.
+      + plasoc\_axi4\_full2lite.vhd --- Plasma-SoC's Slave AXI4-Full to Master AXI4-Lite Core.
+      + plasoc_gpio.vhd --- GPIO Core.
+      + plasoc_int.vhd --- Interrupt Controller.
+      + plasoc_timer.vhd --- Timer Core.
+      + plasoc_uart.vhd --- UART Core.
    + projects --- RTL examples.
       + Nexys4 --- Project developed specifically for the Digilent Nexys4 Artix-7 board.
 + mips --- All the C/MIPs sources, including applications, drivers, and operating system.
@@ -55,7 +62,9 @@ At this point, the simulator can be started to demonstrate an application and co
 
 #### Software
 
-The applications located in the "mips/apps" and "hdl/projects/Nexys4" directories all depend on Makefiles in order to perform certain operations. 
+The applications located in the "mips/apps" directory all depend on Makefiles in order to perform operations, such as building a binary or loading the binary on to the hardware. 
+
+There's also a Makefile located in "hdl/projects/Nexys4" that contains the command that generates the crossbar wrapper.
 
 ## License
 
