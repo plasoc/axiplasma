@@ -62,7 +62,9 @@ At this point, the simulator can be started to demonstrate an application and co
 
 #### Software
 
-The applications located in the "mips/apps" directory all depend on Makefiles in order to perform operations, such as building a binary or loading the binary on to the hardware. The make commands are described as the following.
+The applications located in the "mips/apps" directory all depend on Makefiles in order to perform operations, such as building a binary or loading the binary on to the hardware. In each Makefile it is important that the variables BIN\_DIR and LD\_DIR are set to the appropriate directorys containing the cross compiler and libraries, respectively. In some Makefiles, these variables are instead called MIPS\_GCC\_BIN and MIPS\_GCC\_LIB respectively. They're always located at the beginning of every Makefile, however.
+
+The make commands are described as the following.
 
 + bootloader_app
    + make all --- Builds the bootloader binary and generates a boot_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
@@ -70,6 +72,15 @@ The applications located in the "mips/apps" directory all depend on Makefiles in
    + make jump\_build --- Builds the jump binary and generates a jump\_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
    + make jump\_install --- Copies jump\_pack.vhd into "/hdl/projects/Nexys4".
    + make clean --- Removes all building files from directory.
++ cache_app
+   + make all --- Builds the application binary and generates a main_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
+   + make install --- Copies main_pack.vhd into "/hdl/projects/Nexys4".
+   + make launch --- Uploads the binary on to the hardware with ISCP. The SERIALPORT variable should be set to the serial port of the hardware.
+   + make clean --- Removes all building files from directory.
++ freertos_app
+   + make all --- Builds the application binary and generates a main_pack.vhd, which contains the binary in HEX. Adding the DEBUG\_MAKE=1 argument causes the build to generate several files useful for debugging.
+   + make install --- Copies main_pack.vhd into "/hdl/projects/Nexys4".
+   + make launch --- Uploads the binary on to the hardware with ISCP. The SERIALPORT variable should be set to the serial port of the hardware.
 
 There's also a Makefile located in "hdl/projects/Nexys4" that contains the command that generates the crossbar wrapper.
 
