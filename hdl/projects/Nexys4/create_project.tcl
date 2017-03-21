@@ -160,7 +160,6 @@ set obj [get_projects rtl_project]
 set_property "corecontainer.enable" "1" $obj
 set_property "default_lib" "xil_defaultlib" $obj
 set_property "ip_cache_permissions" "read write" $obj
-set_property "ip_output_repo" "C:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/projects/Nexys4/rtl_project/rtl_project.cache/ip" $obj
 set_property "part" "xc7a100tcsg324-1" $obj
 set_property "sim.ip.auto_export_scripts" "1" $obj
 set_property "simulator_language" "Mixed" $obj
