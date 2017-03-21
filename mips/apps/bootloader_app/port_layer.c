@@ -1,3 +1,13 @@
+/**
+ * @author Andrew Powell
+ * @date March 18, 2017
+ * @brief Contains the definition of the 
+ * port layer needed to perform functions while abstracting the 
+ * low level details.
+ *
+ * See port_layer.h for more information.
+ */
+
 #include "port_layer.h"
 #include "plasoc_int.h"
 #include "plasoc_uart.h"

@@ -1,26 +1,13 @@
-----------------------------------------------------------------------------------
--- Company: 
--- Engineer: 
--- 
--- Create Date: 02/14/2017 06:35:09 PM
--- Design Name: 
--- Module Name: plasoc_axi4_full2lite_read_controller - Behavioral
--- Project Name: 
--- Target Devices: 
--- Tool Versions: 
--- Description: 
--- 
--- Dependencies: 
--- 
--- Revision:
--- Revision 0.01 - File Created
--- Additional Comments:
--- 
-----------------------------------------------------------------------------------
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 17, 2017
+--! @brief Contains the package and component declaration of the 
+--! Full2Lite Core's Read Controller. Please refer to the documentation
+--! in plasoc_axi4_full2lite.vhd for more information.
+-------------------------------------------------------
 
-
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.ALL;
 use ieee.numeric_std.all; 
 use work.plasoc_axi4_full2lite_pack.all;
 

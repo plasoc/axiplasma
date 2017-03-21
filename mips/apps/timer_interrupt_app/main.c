@@ -1,3 +1,17 @@
+/**
+ * @author Andrew Powell
+ * @date March 17, 2017
+ * @brief Contains the example application to test interrupts.
+ *
+ * This application has the LEDs all flash concurrently at a rate
+ * of 1 Hz. The flashing is only visible for an LED if the LED's
+ * respective switch is in its high position. Please note that at 
+ * start up none of the LEDs flash. Once the state of a switch changes,
+ * the application begins.
+ *
+ * The only purpose of this application is to test the interrupts.
+ */
+
 #include "plasoc_cpu.h"
 #include "plasoc_int.h"
 #include "plasoc_timer.h"
@@ -68,6 +82,7 @@ int main()
 	plasoc_gpio_enable_int(&gpio_obj,0);
 
 	/* Run application's main loop. */
+	plasoc_gpio_set_data_out(&gpio_obj,1);
 	while (1) 
 	{
 		/* In order to prevent constant access to on-chip interconnect, only update when new data is available. */
