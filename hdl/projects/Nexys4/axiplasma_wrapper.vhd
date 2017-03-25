@@ -34,6 +34,67 @@ entity axiplasma_wrapper is
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
+    component mig_wrap_wrapper is
+        port (
+            ACLK : in STD_LOGIC;
+            ARESETN : in STD_LOGIC;
+            DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
+            DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            DDR2_cas_n : out STD_LOGIC;
+            DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
+            DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_ras_n : out STD_LOGIC;
+            DDR2_we_n : out STD_LOGIC;
+            S00_ARESETN : in STD_LOGIC;
+            S00_AXI_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            S00_AXI_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            S00_AXI_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_arid : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_arlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+            S00_AXI_arlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+            S00_AXI_arprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            S00_AXI_arqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_arready : out STD_LOGIC;
+            S00_AXI_arregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_arsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            S00_AXI_arvalid : in STD_LOGIC;
+            S00_AXI_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            S00_AXI_awburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
+            S00_AXI_awcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_awid : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
+            S00_AXI_awlock : in STD_LOGIC_VECTOR ( 0 to 0 );
+            S00_AXI_awprot : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            S00_AXI_awqos : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_awready : out STD_LOGIC;
+            S00_AXI_awregion : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_awsize : in STD_LOGIC_VECTOR ( 2 downto 0 );
+            S00_AXI_awvalid : in STD_LOGIC;
+            S00_AXI_bid : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_bready : in STD_LOGIC;
+            S00_AXI_bresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            S00_AXI_bvalid : out STD_LOGIC;
+            S00_AXI_rdata : out STD_LOGIC_VECTOR ( 31 downto 0 );
+            S00_AXI_rid : out STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_rlast : out STD_LOGIC;
+            S00_AXI_rready : in STD_LOGIC;
+            S00_AXI_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            S00_AXI_rvalid : out STD_LOGIC;
+            S00_AXI_wdata : in STD_LOGIC_VECTOR ( 31 downto 0 );
+            S00_AXI_wlast : in STD_LOGIC;
+            S00_AXI_wready : out STD_LOGIC;
+            S00_AXI_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
+            S00_AXI_wvalid : in STD_LOGIC;
+            clk_ref_i : in STD_LOGIC;
+            sys_rst : in STD_LOGIC);
+    end component;
     -- Component declarations.
     component bram is
         generic (
