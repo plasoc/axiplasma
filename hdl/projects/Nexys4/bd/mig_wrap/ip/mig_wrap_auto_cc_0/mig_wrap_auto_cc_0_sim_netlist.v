@@ -1,10 +1,10 @@
 // Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
-// Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
-// Date        : Fri Mar 24 22:16:22 2017
-// Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
+// Tool Version: Vivado v.2016.4 (lin64) Build 1756540 Mon Jan 23 19:11:19 MST 2017
+// Date        : Sun Mar 26 22:18:10 2017
+// Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 // Command     : write_verilog -force -mode funcsim
-//               c:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/projects/Nexys4/rtl_project/rtl_project.srcs/sources_1/bd/mig_wrap/ip/mig_wrap_auto_cc_0/mig_wrap_auto_cc_0_sim_netlist.v
+//               /opt/Xilinx/Projects/koc/axiplasma/hdl/projects/Nexys4/bd/mig_wrap/ip/mig_wrap_auto_cc_0/mig_wrap_auto_cc_0_sim_netlist.v
 // Design      : mig_wrap_auto_cc_0
 // Purpose     : This verilog netlist is a functional simulation representation of the design and should not be modified
 //               or synthesized. This netlist cannot be used for SDF annotated simulation.

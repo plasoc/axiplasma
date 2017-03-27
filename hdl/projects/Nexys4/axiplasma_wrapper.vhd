@@ -23,14 +23,29 @@ use work.plasoc_axi4_full2lite_pack.plasoc_axi4_full2lite;
 entity axiplasma_wrapper is
     generic (
         lower_app : string := "boot";
-        upper_app : string := "none");
+        upper_app : string := "none";
+        upper_ext : boolean := true);
     port( 
         raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
         raw_nreset : in std_logic;
         gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
         gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
         uart_tx : out std_logic;
-        uart_rx : in std_logic);
+        uart_rx : in std_logic;
+        DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
+        DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+        DDR2_cas_n : out STD_LOGIC;
+        DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+        DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+        DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+        DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+        DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
+        DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
+        DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+        DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+        DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+        DDR2_ras_n : out STD_LOGIC;
+        DDR2_we_n : out STD_LOGIC);
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
@@ -167,6 +182,7 @@ architecture Behavioral of axiplasma_wrapper is
     component clk_wiz_0 is 
         port (            
             aclk : out std_logic;
+            ddr_aclk : out std_logic;
             resetn : in std_logic;
             locked : out std_logic;
             raw_clock : in std_logic);
@@ -288,6 +304,7 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_ram_address_width : integer := 18;
     constant axi_ram_depth : integer := 65536;
     signal aclk : std_logic;
+    signal ddr_aclk : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
     signal cross_aresetn : std_logic_vector(0 downto 0);
     signal dcm_locked : std_logic;
@@ -454,6 +471,12 @@ architecture Behavioral of axiplasma_wrapper is
     signal ram_axi_full_rlast : std_logic;
     signal ram_axi_full_rvalid : std_logic;
     signal ram_axi_full_rready : std_logic;
+    signal ram_axi_full_arlock_slv : std_logic_vector (0 downto 0);
+    signal ram_axi_full_awlock_slv : std_logic_vector (0 downto 0);
+    signal ram_axi_full_arid_slv : std_logic_vector(3 downto 0) := (others=>'0');
+    signal ram_axi_full_awid_slv : std_logic_vector(3 downto 0) := (others=>'0');
+    signal ram_axi_full_bid_slv : std_logic_vector(3 downto 0) := (others=>'0');
+    signal ram_axi_full_rid_slv : std_logic_vector(3 downto 0) := (others=>'0');
     signal ram_bram_rst_a : std_logic;
     signal ram_bram_clk_a : std_logic;
     signal ram_bram_en_a : std_logic;
@@ -765,11 +788,19 @@ begin
     
     cdma_axi_full_awlock <= '0';
     cdma_axi_full_arlock <= '0';
+    
+    ram_axi_full_arlock_slv(0) <= ram_axi_full_arlock;
+    ram_axi_full_awlock_slv(0) <= ram_axi_full_awlock;
+    ram_axi_full_arid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_arid;
+    ram_axi_full_awid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_awid;
+    ram_axi_full_bid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_bid;
+    ram_axi_full_rid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_rid;
 
     -- Clock instantiation.
      clk_wiz_inst : clk_wiz_0  
         port map (            
             aclk => aclk,
+            ddr_aclk => ddr_aclk,
             resetn => raw_nreset,
             locked => dcm_locked,
             raw_clock => raw_clock);
@@ -1143,7 +1174,7 @@ begin
             uart_m_axi_rvalid =>  uart_axi_full_rvalid,
             uart_m_axi_rready =>  uart_axi_full_rready,
             aclk => aclk,
-            aresetn => aresetn(0));
+            aresetn => cross_aresetn(0));
         
     plasoc_cpu_inst : plasoc_cpu
         port map (
@@ -1587,67 +1618,134 @@ begin
             bram_wrdata_a => bram_bram_wrdata_a,
             bram_rddata_a => bram_bram_rddata_a);
             
-    ram_cntrl_inst : axi_bram_ctrl_1 
+    gen_int_mm :
+    if upper_ext=false generate 
+        ram_cntrl_inst : axi_bram_ctrl_1 
+            port map (
+                s_axi_aclk => aclk,
+                s_axi_aresetn => aresetn(0),
+                s_axi_awid => ram_axi_full_awid,
+                s_axi_awaddr => ram_axi_full_awaddr(axi_ram_address_width-1 downto 0),
+                s_axi_awlen => ram_axi_full_awlen,
+                s_axi_awsize => ram_axi_full_awsize,
+                s_axi_awburst => ram_axi_full_awburst,
+                s_axi_awlock => ram_axi_full_awlock,
+                s_axi_awcache => ram_axi_full_awcache,
+                s_axi_awprot => ram_axi_full_awprot,
+                s_axi_awvalid => ram_axi_full_awvalid,
+                s_axi_awready => ram_axi_full_awready,
+                s_axi_wdata => ram_axi_full_wdata,
+                s_axi_wstrb => ram_axi_full_wstrb,
+                s_axi_wlast => ram_axi_full_wlast,
+                s_axi_wvalid => ram_axi_full_wvalid,
+                s_axi_wready => ram_axi_full_wready,
+                s_axi_bid => ram_axi_full_bid,
+                s_axi_bresp => ram_axi_full_bresp,
+                s_axi_bvalid => ram_axi_full_bvalid,
+                s_axi_bready => ram_axi_full_bready,
+                s_axi_arid => ram_axi_full_arid,
+                s_axi_araddr => ram_axi_full_araddr(axi_ram_address_width-1 downto 0),
+                s_axi_arlen => ram_axi_full_arlen,
+                s_axi_arsize => ram_axi_full_arsize,
+                s_axi_arburst => ram_axi_full_arburst,
+                s_axi_arlock => ram_axi_full_arlock,
+                s_axi_arcache => ram_axi_full_arcache,
+                s_axi_arprot => ram_axi_full_arprot,
+                s_axi_arvalid => ram_axi_full_arvalid,
+                s_axi_arready => ram_axi_full_arready,
+                s_axi_rid => ram_axi_full_rid,
+                s_axi_rdata => ram_axi_full_rdata,
+                s_axi_rresp => ram_axi_full_rresp,
+                s_axi_rlast => ram_axi_full_rlast,
+                s_axi_rvalid => ram_axi_full_rvalid,
+                s_axi_rready => ram_axi_full_rready,
+                bram_rst_a => ram_bram_rst_a,
+                bram_clk_a => ram_bram_clk_a,
+                bram_en_a => ram_bram_en_a,
+                bram_we_a => ram_bram_we_a,
+                bram_addr_a => ram_bram_addr_a,
+                bram_wrdata_a => ram_bram_wrdata_a,
+                bram_rddata_a => ram_bram_rddata_a);
+        ram_inst : bram 
+            generic map (
+                select_app => upper_app,
+                address_width => axi_ram_address_width,
+                data_width => axi_data_width,
+                bram_depth => axi_ram_depth)
+            port map (
+                bram_rst_a => ram_bram_rst_a,
+                bram_clk_a => ram_bram_clk_a,
+                bram_en_a => ram_bram_en_a,
+                bram_we_a => ram_bram_we_a,
+                bram_addr_a => ram_bram_addr_a,
+                bram_wrdata_a => ram_bram_wrdata_a,
+                bram_rddata_a => ram_bram_rddata_a);
+    end generate;
+    
+    gen_ext_mm :
+    if upper_ext=true generate         
+    mig_wrap_wrapper_inst : 
+    mig_wrap_wrapper 
         port map (
-            s_axi_aclk => aclk,
-            s_axi_aresetn => aresetn(0),
-            s_axi_awid => ram_axi_full_awid,
-            s_axi_awaddr => ram_axi_full_awaddr(axi_ram_address_width-1 downto 0),
-            s_axi_awlen => ram_axi_full_awlen,
-            s_axi_awsize => ram_axi_full_awsize,
-            s_axi_awburst => ram_axi_full_awburst,
-            s_axi_awlock => ram_axi_full_awlock,
-            s_axi_awcache => ram_axi_full_awcache,
-            s_axi_awprot => ram_axi_full_awprot,
-            s_axi_awvalid => ram_axi_full_awvalid,
-            s_axi_awready => ram_axi_full_awready,
-            s_axi_wdata => ram_axi_full_wdata,
-            s_axi_wstrb => ram_axi_full_wstrb,
-            s_axi_wlast => ram_axi_full_wlast,
-            s_axi_wvalid => ram_axi_full_wvalid,
-            s_axi_wready => ram_axi_full_wready,
-            s_axi_bid => ram_axi_full_bid,
-            s_axi_bresp => ram_axi_full_bresp,
-            s_axi_bvalid => ram_axi_full_bvalid,
-            s_axi_bready => ram_axi_full_bready,
-            s_axi_arid => ram_axi_full_arid,
-            s_axi_araddr => ram_axi_full_araddr(axi_ram_address_width-1 downto 0),
-            s_axi_arlen => ram_axi_full_arlen,
-            s_axi_arsize => ram_axi_full_arsize,
-            s_axi_arburst => ram_axi_full_arburst,
-            s_axi_arlock => ram_axi_full_arlock,
-            s_axi_arcache => ram_axi_full_arcache,
-            s_axi_arprot => ram_axi_full_arprot,
-            s_axi_arvalid => ram_axi_full_arvalid,
-            s_axi_arready => ram_axi_full_arready,
-            s_axi_rid => ram_axi_full_rid,
-            s_axi_rdata => ram_axi_full_rdata,
-            s_axi_rresp => ram_axi_full_rresp,
-            s_axi_rlast => ram_axi_full_rlast,
-            s_axi_rvalid => ram_axi_full_rvalid,
-            s_axi_rready => ram_axi_full_rready,
-            bram_rst_a => ram_bram_rst_a,
-            bram_clk_a => ram_bram_clk_a,
-            bram_en_a => ram_bram_en_a,
-            bram_we_a => ram_bram_we_a,
-            bram_addr_a => ram_bram_addr_a,
-            bram_wrdata_a => ram_bram_wrdata_a,
-            bram_rddata_a => ram_bram_rddata_a);
-            
-    ram_inst : bram 
-        generic map (
-            select_app => upper_app,
-            address_width => axi_ram_address_width,
-            data_width => axi_data_width,
-            bram_depth => axi_ram_depth)
-        port map (
-            bram_rst_a => ram_bram_rst_a,
-            bram_clk_a => ram_bram_clk_a,
-            bram_en_a => ram_bram_en_a,
-            bram_we_a => ram_bram_we_a,
-            bram_addr_a => ram_bram_addr_a,
-            bram_wrdata_a => ram_bram_wrdata_a,
-            bram_rddata_a => ram_bram_rddata_a);
+            ACLK => aclk,
+            ARESETN => cross_aresetn(0),
+            DDR2_addr => DDR2_addr,
+            DDR2_ba => DDR2_ba,
+            DDR2_cas_n => DDR2_cas_n,
+            DDR2_ck_n => DDR2_ck_n,
+            DDR2_ck_p => DDR2_ck_p,
+            DDR2_cke => DDR2_cke,
+            DDR2_cs_n => DDR2_cs_n,
+            DDR2_dm => DDR2_dm,
+            DDR2_dq => DDR2_dq,
+            DDR2_dqs_n => DDR2_dqs_n,
+            DDR2_dqs_p => DDR2_dqs_p,
+            DDR2_odt => DDR2_odt,
+            DDR2_ras_n => DDR2_ras_n,
+            DDR2_we_n => DDR2_we_n,
+            S00_ARESETN => aresetn(0),
+            S00_AXI_araddr => ram_axi_full_araddr,
+            S00_AXI_arburst => ram_axi_full_arburst,
+            S00_AXI_arcache => ram_axi_full_arcache,
+            S00_AXI_arid => ram_axi_full_arid_slv,
+            S00_AXI_arlen => ram_axi_full_arlen,
+            S00_AXI_arlock => ram_axi_full_arlock_slv,
+            S00_AXI_arprot => ram_axi_full_arprot,
+            S00_AXI_arqos => ram_axi_full_arqos,
+            S00_AXI_arready => ram_axi_full_arready,
+            S00_AXI_arregion => ram_axi_full_arregion,
+            S00_AXI_arsize => ram_axi_full_arsize,
+            S00_AXI_arvalid => ram_axi_full_arvalid,
+            S00_AXI_awaddr => ram_axi_full_awaddr,
+            S00_AXI_awburst => ram_axi_full_awburst,
+            S00_AXI_awcache => ram_axi_full_awcache,
+            S00_AXI_awid => ram_axi_full_awid_slv,
+            S00_AXI_awlen => ram_axi_full_awlen,
+            S00_AXI_awlock => ram_axi_full_awlock_slv,
+            S00_AXI_awprot => ram_axi_full_awprot,
+            S00_AXI_awqos => ram_axi_full_awqos,
+            S00_AXI_awready => ram_axi_full_awready,
+            S00_AXI_awregion => ram_axi_full_awregion,
+            S00_AXI_awsize => ram_axi_full_awsize,
+            S00_AXI_awvalid => ram_axi_full_awvalid,
+            S00_AXI_bid => ram_axi_full_bid_slv,
+            S00_AXI_bready => ram_axi_full_bready,
+            S00_AXI_bresp => ram_axi_full_bresp,
+            S00_AXI_bvalid => ram_axi_full_bvalid,
+            S00_AXI_rdata => ram_axi_full_rdata,
+            S00_AXI_rid => ram_axi_full_rid_slv,
+            S00_AXI_rlast => ram_axi_full_rlast,
+            S00_AXI_rready => ram_axi_full_rready,
+            S00_AXI_rresp => ram_axi_full_rresp,
+            S00_AXI_rvalid => ram_axi_full_rvalid,
+            S00_AXI_wdata => ram_axi_full_wdata,
+            S00_AXI_wlast => ram_axi_full_wlast,
+            S00_AXI_wready => ram_axi_full_wready,
+            S00_AXI_wstrb => ram_axi_full_wstrb,
+            S00_AXI_wvalid => ram_axi_full_wvalid,
+            clk_ref_i => ddr_aclk,
+            sys_rst => raw_nreset);
+    end generate;
             
     plasoc_int_inst : plasoc_int 
         generic map (

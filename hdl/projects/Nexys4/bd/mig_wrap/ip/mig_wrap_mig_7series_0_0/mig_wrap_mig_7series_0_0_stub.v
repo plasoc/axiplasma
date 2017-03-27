@@ -1,10 +1,10 @@
 // Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
-// Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
-// Date        : Fri Mar 24 22:17:56 2017
-// Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
+// Tool Version: Vivado v.2016.4 (lin64) Build 1756540 Mon Jan 23 19:11:19 MST 2017
+// Date        : Sun Mar 26 22:20:54 2017
+// Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 // Command     : write_verilog -force -mode synth_stub
-//               C:/Users/andrewandre/Documents/GitHub/axiplasma/hdl/projects/Nexys4/rtl_project/rtl_project.srcs/sources_1/bd/mig_wrap/ip/mig_wrap_mig_7series_0_0/mig_wrap_mig_7series_0_0_stub.v
+//               /opt/Xilinx/Projects/koc/axiplasma/hdl/projects/Nexys4/bd/mig_wrap/ip/mig_wrap_mig_7series_0_0/mig_wrap_mig_7series_0_0_stub.v
 // Design      : mig_wrap_mig_7series_0_0
 // Purpose     : Stub declaration of top-level module interface
 // Device      : xc7a100tcsg324-1

@@ -50,70 +50,68 @@ if { $list_projs eq "" } {
 # CHANGE DESIGN NAME HERE
 set design_name mig_wrap
 
-# If you do not already have an existing IP Integrator design open,
-# you can create a design using the following command:
-#    create_bd_design $design_name
+# This script was generated for a remote BD. To create a non-remote design,
+# change the variable <run_remote_bd_flow> to <0>.
 
-# Creating design if needed
-set errMsg ""
-set nRet 0
+set run_remote_bd_flow 1
+if { $run_remote_bd_flow == 1 } {
+  # Set the reference directory for source file relative paths (by default 
+  # the value is script directory path)
+  set origin_dir ./bd
 
-set cur_design [current_bd_design -quiet]
-set list_cells [get_bd_cells -quiet]
+  # Use origin directory path location variable, if specified in the tcl shell
+  if { [info exists ::origin_dir_loc] } {
+     set origin_dir $::origin_dir_loc
+  }
 
-if { ${design_name} eq "" } {
-   # USE CASES:
-   #    1) Design_name not set
+  set str_bd_folder [file normalize ${origin_dir}]
+  set str_bd_filepath ${str_bd_folder}/${design_name}/${design_name}.bd
 
-   set errMsg "Please set the variable <design_name> to a non-empty value."
-   set nRet 1
+  # Check if remote design exists on disk
+  if { [file exists $str_bd_filepath ] == 1 } {
+     catch {common::send_msg_id "BD_TCL-110" "ERROR" "The remote BD file path <$str_bd_filepath> already exists!"}
+     common::send_msg_id "BD_TCL-008" "INFO" "To create a non-remote BD, change the variable <run_remote_bd_flow> to <0>."
+     common::send_msg_id "BD_TCL-009" "INFO" "Also make sure there is no design <$design_name> existing in your current project."
 
-} elseif { ${cur_design} ne "" && ${list_cells} eq "" } {
-   # USE CASES:
-   #    2): Current design opened AND is empty AND names same.
-   #    3): Current design opened AND is empty AND names diff; design_name NOT in project.
-   #    4): Current design opened AND is empty AND names diff; design_name exists in project.
+     return 1
+  }
 
-   if { $cur_design ne $design_name } {
-      common::send_msg_id "BD_TCL-001" "INFO" "Changing value of <design_name> from <$design_name> to <$cur_design> since current design is empty."
-      set design_name [get_property NAME $cur_design]
-   }
-   common::send_msg_id "BD_TCL-002" "INFO" "Constructing design in IPI design <$cur_design>..."
+  # Check if design exists in memory
+  set list_existing_designs [get_bd_designs -quiet $design_name]
+  if { $list_existing_designs ne "" } {
+     catch {common::send_msg_id "BD_TCL-111" "ERROR" "The design <$design_name> already exists in this project! Will not create the remote BD <$design_name> at the folder <$str_bd_folder>."}
 
-} elseif { ${cur_design} ne "" && $list_cells ne "" && $cur_design eq $design_name } {
-   # USE CASES:
-   #    5) Current design opened AND has components AND same names.
+     common::send_msg_id "BD_TCL-010" "INFO" "To create a non-remote BD, change the variable <run_remote_bd_flow> to <0> or please set a different value to variable <design_name>."
 
-   set errMsg "Design <$design_name> already exists in your project, please set the variable <design_name> to another value."
-   set nRet 1
-} elseif { [get_files -quiet ${design_name}.bd] ne "" } {
-   # USE CASES: 
-   #    6) Current opened design, has components, but diff names, design_name exists in project.
-   #    7) No opened design, design_name exists in project.
+     return 1
+  }
 
-   set errMsg "Design <$design_name> already exists in your project, please set the variable <design_name> to another value."
-   set nRet 2
+  # Check if design exists on disk within project
+  set list_existing_designs [get_files */${design_name}.bd]
+  if { $list_existing_designs ne "" } {
+     catch {common::send_msg_id "BD_TCL-112" "ERROR" "The design <$design_name> already exists in this project at location:
+    $list_existing_designs"}
+     catch {common::send_msg_id "BD_TCL-113" "ERROR" "Will not create the remote BD <$design_name> at the folder <$str_bd_folder>."}
 
+     common::send_msg_id "BD_TCL-011" "INFO" "To create a non-remote BD, change the variable <run_remote_bd_flow> to <0> or please set a different value to variable <design_name>."
+
+     return 1
+  }
+
+  # Now can create the remote BD
+  # NOTE - usage of <-dir> will create <$str_bd_folder/$design_name/$design_name.bd>
+  create_bd_design -dir $str_bd_folder $design_name
 } else {
-   # USE CASES:
-   #    8) No opened design, design_name not in project.
-   #    9) Current opened design, has components, but diff names, design_name not in project.
 
-   common::send_msg_id "BD_TCL-003" "INFO" "Currently there is no design <$design_name> in project, so creating one..."
+  # Create regular design
+  if { [catch {create_bd_design $design_name} errmsg] } {
+     common::send_msg_id "BD_TCL-012" "INFO" "Please set a different value to variable <design_name>."
 
-   create_bd_design $design_name
-
-   common::send_msg_id "BD_TCL-004" "INFO" "Making design <$design_name> as current_bd_design."
-   current_bd_design $design_name
-
+     return 1
+  }
 }
 
-common::send_msg_id "BD_TCL-005" "INFO" "Currently the variable <design_name> is equal to \"$design_name\"."
-
-if { $nRet != 0 } {
-   catch {common::send_msg_id "BD_TCL-114" "ERROR" $errMsg}
-   return $nRet
-}
+current_bd_design $design_name
 
 
 ##################################################################
@@ -151,7 +149,7 @@ proc write_mig_file_mig_wrap_mig_7series_0_0 { str_mig_prj_filepath } {
    puts $mig_prj_file {        <TimePeriod>3333</TimePeriod>}
    puts $mig_prj_file {        <VccAuxIO>1.8V</VccAuxIO>}
    puts $mig_prj_file {        <PHYRatio>2:1</PHYRatio>}
-   puts $mig_prj_file {        <InputClkFreq>200.02</InputClkFreq>}
+   puts $mig_prj_file {        <InputClkFreq>100.01</InputClkFreq>}
    puts $mig_prj_file {        <UIExtraClocks>0</UIExtraClocks>}
    puts $mig_prj_file {        <MMCM_VCO>1200</MMCM_VCO>}
    puts $mig_prj_file {        <MMCMClkOut0> 1.000</MMCMClkOut0>}
@@ -399,29 +397,29 @@ CONFIG.XML_INPUT_FILE {mig_b.prj} \
   regenerate_bd_layout -layout_string {
    guistr: "# # String gsaved with Nlview 6.6.5b  2016-09-06 bk=1.3687 VDI=39 GEI=35 GUI=JA:1.6
 #  -string -flagsOSRD
-preplace port S00_AXI -pg 1 -y 150 -defaultsOSRD
-preplace port sys_rst -pg 1 -y 60 -defaultsOSRD
-preplace port ACLK -pg 1 -y 170 -defaultsOSRD
-preplace port ARESETN -pg 1 -y 190 -defaultsOSRD
-preplace port DDR2 -pg 1 -y 40 -defaultsOSRD
-preplace port clk_ref_i -pg 1 -y 80 -defaultsOSRD
-preplace port S00_ARESETN -pg 1 -y 210 -defaultsOSRD
-preplace inst mig_7series_0 -pg 1 -lvl 3 -y 80 -defaultsOSRD
-preplace inst proc_sys_reset_0 -pg 1 -lvl 1 -y 330 -defaultsOSRD
-preplace inst axi_interconnect_0 -pg 1 -lvl 2 -y 210 -defaultsOSRD
-preplace netloc sys_rst_1 1 0 3 NJ 60 NJ 60 NJ
-preplace netloc mig_7series_0_mmcm_locked 1 0 4 10 220 380J 330 NJ 330 920
-preplace netloc mig_7series_0_DDR2 1 3 1 NJ
-preplace netloc ACLK_1 1 0 2 NJ 170 400
-preplace netloc clk_ref_i_1 1 0 3 NJ 80 NJ 80 670J
-preplace netloc ARESETN_1 1 0 2 NJ 190 NJ
-preplace netloc mig_7series_0_ui_clk 1 0 4 30 240 360 350 N 350 930
-preplace netloc S00_AXI_1 1 0 2 NJ 150 NJ
+preplace port S00_AXI -pg 1 -y 230 -defaultsOSRD
+preplace port sys_rst -pg 1 -y 450 -defaultsOSRD
+preplace port ACLK -pg 1 -y 250 -defaultsOSRD
+preplace port ARESETN -pg 1 -y 270 -defaultsOSRD
+preplace port DDR2 -pg 1 -y 320 -defaultsOSRD
+preplace port clk_ref_i -pg 1 -y 420 -defaultsOSRD
+preplace port S00_ARESETN -pg 1 -y 310 -defaultsOSRD
+preplace inst mig_7series_0 -pg 1 -lvl 3 -y 360 -defaultsOSRD
+preplace inst proc_sys_reset_0 -pg 1 -lvl 1 -y 130 -defaultsOSRD
+preplace inst axi_interconnect_0 -pg 1 -lvl 2 -y 290 -defaultsOSRD
+preplace netloc sys_rst_1 1 0 3 NJ 450 NJ 450 680J
+preplace netloc mig_7series_0_mmcm_locked 1 0 4 40 440 NJ 440 690J 450 910
+preplace netloc mig_7series_0_DDR2 1 3 1 N
+preplace netloc ACLK_1 1 0 2 NJ 250 360
+preplace netloc clk_ref_i_1 1 0 3 NJ 420 NJ 420 660
+preplace netloc ARESETN_1 1 0 2 NJ 270 NJ
+preplace netloc mig_7series_0_ui_clk 1 0 4 20 460 380 460 NJ 460 920
+preplace netloc S00_AXI_1 1 0 2 NJ 230 NJ
 preplace netloc axi_interconnect_0_M00_AXI 1 2 1 660
-preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 2 400 370 670
-preplace netloc mig_7series_0_ui_clk_sync_rst 1 0 4 20 230 370J 340 NJ 340 940
-preplace netloc S00_ARESETN_1 1 0 2 NJ 210 390J
-levelinfo -pg 1 -10 200 530 810 960 -top 0 -bot 420
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 2 370 170 670J
+preplace netloc mig_7series_0_ui_clk_sync_rst 1 0 4 30 430 NJ 430 650J 270 920
+preplace netloc S00_ARESETN_1 1 0 2 NJ 310 NJ
+levelinfo -pg 1 0 200 520 800 940 -top 0 -bot 470
 ",
 }
 

@@ -31,8 +31,8 @@ Controller Options :
    Interface                     : AXI
    Design Clock Frequency        : 3333 ps (  0.00 MHz)
    Phy to Controller Clock Ratio : 2:1
-   Input Clock Period            : 4999 ps
-   CLKFBOUT_MULT (PLL)           : 6
+   Input Clock Period            : 9999 ps
+   CLKFBOUT_MULT (PLL)           : 12
    DIVCLK_DIVIDE (PLL)           : 1
    VCC_AUX IO                    : 1.8V
    Memory Type                   : Components

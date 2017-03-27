@@ -1,8 +1,8 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
---Date        : Fri Mar 24 22:14:56 2017
---Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
+--Tool Version: Vivado v.2016.4 (lin64) Build 1756540 Mon Jan 23 19:11:19 MST 2017
+--Date        : Sun Mar 26 22:16:49 2017
+--Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
 --Command     : generate_target mig_wrap.bd
 --Design      : mig_wrap
 --Purpose     : IP block netlist
@@ -834,10 +834,10 @@ entity mig_wrap is
     clk_ref_i : in STD_LOGIC;
     sys_rst : in STD_LOGIC
   );
-  attribute CORE_GENERATION_INFO : string;
-  attribute CORE_GENERATION_INFO of mig_wrap : entity is "mig_wrap,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=mig_wrap,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=5,numReposBlks=3,numNonXlnxBlks=0,numHierBlks=2,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=0,numPkgbdBlks=0,bdsource=USER,synth_mode=OOC_per_IP}";
-  attribute HW_HANDOFF : string;
-  attribute HW_HANDOFF of mig_wrap : entity is "mig_wrap.hwdef";
+  attribute core_generation_info : string;
+  attribute core_generation_info of mig_wrap : entity is "mig_wrap,IP_Integrator,{x_ipVendor=xilinx.com,x_ipLibrary=BlockDiagram,x_ipName=mig_wrap,x_ipVersion=1.00.a,x_ipLanguage=VHDL,numBlks=5,numReposBlks=3,numNonXlnxBlks=0,numHierBlks=2,maxHierDepth=0,numSysgenBlks=0,numHlsBlks=0,numHdlrefBlks=0,numPkgbdBlks=0,bdsource=USER,synth_mode=OOC_per_IP}";
+  attribute hw_handoff : string;
+  attribute hw_handoff of mig_wrap : entity is "mig_wrap.hwdef";
 end mig_wrap;
 
 architecture STRUCTURE of mig_wrap is
