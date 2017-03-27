@@ -7,6 +7,6 @@
 # of Vivado)
 ################################################################################
 create_clock -name ACLK -period 20 [get_ports ACLK]
-create_clock -name clk_ref_i -period 6.666 [get_ports clk_ref_i]
+create_clock -name clk_ref_i -period 5 [get_ports clk_ref_i]
 
 ################################################################################

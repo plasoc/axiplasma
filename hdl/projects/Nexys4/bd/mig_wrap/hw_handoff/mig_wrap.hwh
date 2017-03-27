@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Sun Mar 26 22:17:13 2017" VIVADOVERSION="2016.4">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Mon Mar 27 01:47:55 2017" VIVADOVERSION="2016.4">
 
   <SYSTEMINFO ARCH="artix7" DEVICE="7a100t" NAME="mig_wrap" PACKAGE="csg324" SPEEDGRADE="-1"/>
 
@@ -39,7 +39,7 @@
         <CONNECTION INSTANCE="mig_7series_0" PORT="sys_rst"/>
       </CONNECTIONS>
     </PORT>
-    <PORT CLKFREQUENCY="150015002" DIR="I" NAME="clk_ref_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
+    <PORT CLKFREQUENCY="200000000" DIR="I" NAME="clk_ref_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
       <CONNECTIONS>
         <CONNECTION INSTANCE="mig_7series_0" PORT="clk_ref_i"/>
         <CONNECTION INSTANCE="mig_7series_0" PORT="sys_clk_i"/>
@@ -2015,7 +2015,7 @@
         <PARAMETER NAME="C7_RLDIII_ADDR_WIDTH" VALUE="29"/>
         <PARAMETER NAME="C7_RLDIII_nCK_PER_CLK" VALUE="1"/>
         <PARAMETER NAME="C7_POLARITY" VALUE="ACTIVE_LOW"/>
-        <PARAMETER NAME="XML_INPUT_FILE" VALUE="mig_b.prj"/>
+        <PARAMETER NAME="XML_INPUT_FILE" VALUE="mig_a.prj"/>
         <PARAMETER NAME="RESET_BOARD_INTERFACE" VALUE="Custom"/>
         <PARAMETER NAME="MIG_DONT_TOUCH_PARAM" VALUE="Custom"/>
         <PARAMETER NAME="BOARD_MIG_PARAM" VALUE="Custom"/>
@@ -2031,7 +2031,7 @@
             <CONNECTION INSTANCE="External_Ports" PORT="sys_rst"/>
           </CONNECTIONS>
         </PORT>
-        <PORT CLKFREQUENCY="150015002" DIR="I" NAME="clk_ref_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
+        <PORT CLKFREQUENCY="200000000" DIR="I" NAME="clk_ref_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
           <CONNECTIONS>
             <CONNECTION INSTANCE="External_Ports" PORT="clk_ref_i"/>
           </CONNECTIONS>
@@ -2251,7 +2251,7 @@
             <CONNECTION INSTANCE="proc_sys_reset_0" PORT="dcm_locked"/>
           </CONNECTIONS>
         </PORT>
-        <PORT CLKFREQUENCY="150015002" DIR="I" NAME="sys_clk_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
+        <PORT CLKFREQUENCY="200000000" DIR="I" NAME="sys_clk_i" SIGIS="clk" SIGNAME="External_Ports_clk_ref_i">
           <CONNECTIONS>
             <CONNECTION INSTANCE="External_Ports" PORT="clk_ref_i"/>
           </CONNECTIONS>

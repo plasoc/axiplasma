@@ -206,9 +206,9 @@ module mig_wrap_mig_7series_0_0_mig #
    // The following parameters are multiplier and divisor factors for PLLE2.
    // Based on the selected design frequency these parameters vary.
    //***************************************************************************
-   parameter CLKIN_PERIOD          = 9999,
+   parameter CLKIN_PERIOD          = 4999,
                                      // Input Clock Period
-   parameter CLKFBOUT_MULT         = 12,
+   parameter CLKFBOUT_MULT         = 6,
                                      // write PLL VCO multiplier
    parameter DIVCLK_DIVIDE         = 1,
                                      // write PLL VCO divisor

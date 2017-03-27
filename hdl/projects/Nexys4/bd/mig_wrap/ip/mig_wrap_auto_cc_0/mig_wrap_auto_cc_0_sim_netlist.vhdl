@@ -1,10 +1,10 @@
 -- Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2016.4 (lin64) Build 1756540 Mon Jan 23 19:11:19 MST 2017
--- Date        : Sun Mar 26 22:18:10 2017
+-- Date        : Sun Mar 26 22:18:09 2017
 -- Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
--- Command     : write_vhdl -force -mode funcsim
---               /opt/Xilinx/Projects/koc/axiplasma/hdl/projects/Nexys4/bd/mig_wrap/ip/mig_wrap_auto_cc_0/mig_wrap_auto_cc_0_sim_netlist.vhdl
+-- Command     : write_vhdl -force -mode funcsim -rename_top mig_wrap_auto_cc_0 -prefix
+--               mig_wrap_auto_cc_0_ mig_wrap_auto_cc_0_sim_netlist.vhdl
 -- Design      : mig_wrap_auto_cc_0
 -- Purpose     : This VHDL netlist is a functional simulation representation of the design and should not be modified or
 --               synthesized. This netlist cannot be used for SDF annotated simulation.
@@ -25,8 +25,6 @@ entity mig_wrap_auto_cc_0_dmem is
     \gpregsm1.curr_fwft_state_reg[1]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
     m_aclk : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_dmem : entity is "dmem";
 end mig_wrap_auto_cc_0_dmem;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_dmem is
@@ -3657,8 +3655,6 @@ entity mig_wrap_auto_cc_0_rd_bin_cntr is
     s_aclk : in STD_LOGIC;
     \out\ : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_rd_bin_cntr : entity is "rd_bin_cntr";
 end mig_wrap_auto_cc_0_rd_bin_cntr;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_rd_bin_cntr is
@@ -4777,8 +4773,6 @@ entity mig_wrap_auto_cc_0_rd_fwft is
     \gnxpm_cdc.wr_pntr_bin_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
     Q : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_rd_fwft : entity is "rd_fwft";
 end mig_wrap_auto_cc_0_rd_fwft;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_rd_fwft is
@@ -6046,8 +6040,6 @@ entity mig_wrap_auto_cc_0_rd_status_flags_as is
     s_aclk : in STD_LOGIC;
     \ngwrdrst.grst.g7serrst.rd_rst_reg_reg[2]\ : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_rd_status_flags_as : entity is "rd_status_flags_as";
 end mig_wrap_auto_cc_0_rd_status_flags_as;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_rd_status_flags_as is
@@ -6315,8 +6307,6 @@ entity mig_wrap_auto_cc_0_synchronizer_ff is
     in0 : in STD_LOGIC_VECTOR ( 0 to 0 );
     s_aclk : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_synchronizer_ff : entity is "synchronizer_ff";
 end mig_wrap_auto_cc_0_synchronizer_ff;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_synchronizer_ff is
@@ -10138,8 +10128,6 @@ entity mig_wrap_auto_cc_0_wr_bin_cntr is
     m_aclk : in STD_LOGIC;
     AR : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_wr_bin_cntr : entity is "wr_bin_cntr";
 end mig_wrap_auto_cc_0_wr_bin_cntr;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_wr_bin_cntr is
@@ -11131,8 +11119,6 @@ entity mig_wrap_auto_cc_0_wr_status_flags_as is
     Q : in STD_LOGIC_VECTOR ( 0 to 0 );
     \gnxpm_cdc.rd_pntr_bin_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_wr_status_flags_as : entity is "wr_status_flags_as";
 end mig_wrap_auto_cc_0_wr_status_flags_as;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_wr_status_flags_as is
@@ -11570,8 +11556,6 @@ entity mig_wrap_auto_cc_0_clk_x_pntrs is
     D : in STD_LOGIC_VECTOR ( 2 downto 0 );
     \Q_reg_reg[1]\ : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_clk_x_pntrs : entity is "clk_x_pntrs";
 end mig_wrap_auto_cc_0_clk_x_pntrs;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_clk_x_pntrs is
@@ -13544,8 +13528,6 @@ entity mig_wrap_auto_cc_0_memory is
     \gic0.gc0.count_d2_reg[3]\ : in STD_LOGIC_VECTOR ( 3 downto 0 );
     \gpregsm1.curr_fwft_state_reg[1]\ : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_memory : entity is "memory";
 end mig_wrap_auto_cc_0_memory;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_memory is
@@ -16469,8 +16451,6 @@ entity mig_wrap_auto_cc_0_rd_logic is
     \gnxpm_cdc.wr_pntr_bin_reg[2]\ : in STD_LOGIC;
     \gnxpm_cdc.wr_pntr_bin_reg[3]\ : in STD_LOGIC_VECTOR ( 3 downto 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_rd_logic : entity is "rd_logic";
 end mig_wrap_auto_cc_0_rd_logic;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_rd_logic is
@@ -16790,8 +16770,6 @@ entity mig_wrap_auto_cc_0_reset_blk_ramfifo is
     m_aclk : in STD_LOGIC;
     inverted_reset : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_reset_blk_ramfifo : entity is "reset_blk_ramfifo";
 end mig_wrap_auto_cc_0_reset_blk_ramfifo;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_reset_blk_ramfifo is
@@ -18336,8 +18314,6 @@ entity mig_wrap_auto_cc_0_wr_logic is
     \gnxpm_cdc.rd_pntr_bin_reg[3]\ : in STD_LOGIC_VECTOR ( 0 to 0 );
     AR : in STD_LOGIC_VECTOR ( 0 to 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_wr_logic : entity is "wr_logic";
 end mig_wrap_auto_cc_0_wr_logic;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_wr_logic is
@@ -18588,8 +18564,6 @@ entity mig_wrap_auto_cc_0_fifo_generator_ramfifo is
     s_axi_awvalid : in STD_LOGIC;
     DI : in STD_LOGIC_VECTOR ( 64 downto 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_fifo_generator_ramfifo : entity is "fifo_generator_ramfifo";
 end mig_wrap_auto_cc_0_fifo_generator_ramfifo;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_fifo_generator_ramfifo is
@@ -19257,8 +19231,6 @@ entity mig_wrap_auto_cc_0_fifo_generator_top is
     s_axi_arvalid : in STD_LOGIC;
     I123 : in STD_LOGIC_VECTOR ( 64 downto 0 )
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_fifo_generator_top : entity is "fifo_generator_top";
 end mig_wrap_auto_cc_0_fifo_generator_top;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_fifo_generator_top is
@@ -19461,8 +19433,6 @@ entity mig_wrap_auto_cc_0_fifo_generator_v13_1_3_synth is
     s_axi_rready : in STD_LOGIC;
     s_aresetn : in STD_LOGIC
   );
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_fifo_generator_v13_1_3_synth : entity is "fifo_generator_v13_1_3_synth";
 end mig_wrap_auto_cc_0_fifo_generator_v13_1_3_synth;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_fifo_generator_v13_1_3_synth is
@@ -20173,8 +20143,6 @@ entity mig_wrap_auto_cc_0_fifo_generator_v13_1_3 is
   attribute C_WR_PNTR_WIDTH_WRCH of mig_wrap_auto_cc_0_fifo_generator_v13_1_3 : entity is 4;
   attribute C_WR_RESPONSE_LATENCY : integer;
   attribute C_WR_RESPONSE_LATENCY of mig_wrap_auto_cc_0_fifo_generator_v13_1_3 : entity is 1;
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_fifo_generator_v13_1_3 : entity is "fifo_generator_v13_1_3";
 end mig_wrap_auto_cc_0_fifo_generator_v13_1_3;
 
 architecture STRUCTURE of mig_wrap_auto_cc_0_fifo_generator_v13_1_3 is
@@ -20800,8 +20768,6 @@ entity mig_wrap_auto_cc_0_axi_clock_converter_v2_1_10_axi_clock_converter is
   attribute C_W_WIDTH of mig_wrap_auto_cc_0_axi_clock_converter_v2_1_10_axi_clock_converter : entity is 37;
   attribute DowngradeIPIdentifiedWarnings : string;
   attribute DowngradeIPIdentifiedWarnings of mig_wrap_auto_cc_0_axi_clock_converter_v2_1_10_axi_clock_converter : entity is "yes";
-  attribute ORIG_REF_NAME : string;
-  attribute ORIG_REF_NAME of mig_wrap_auto_cc_0_axi_clock_converter_v2_1_10_axi_clock_converter : entity is "axi_clock_converter_v2_1_10_axi_clock_converter";
   attribute P_ACLK_RATIO : integer;
   attribute P_ACLK_RATIO of mig_wrap_auto_cc_0_axi_clock_converter_v2_1_10_axi_clock_converter : entity is 2;
   attribute P_AXI3 : integer;

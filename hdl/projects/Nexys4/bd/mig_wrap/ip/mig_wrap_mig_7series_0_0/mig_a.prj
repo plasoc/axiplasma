@@ -25,7 +25,7 @@
         <TimePeriod>3333</TimePeriod>
         <VccAuxIO>1.8V</VccAuxIO>
         <PHYRatio>2:1</PHYRatio>
-        <InputClkFreq>100.01</InputClkFreq>
+        <InputClkFreq>200.02</InputClkFreq>
         <UIExtraClocks>0</UIExtraClocks>
         <MMCM_VCO>1200</MMCM_VCO>
         <MMCMClkOut0> 1.000</MMCMClkOut0>

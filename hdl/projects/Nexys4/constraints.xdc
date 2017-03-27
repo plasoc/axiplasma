@@ -54,4 +54,7 @@ set_output_delay -clock [get_clocks virtual_uart_baud_clock] -max -add_delay 2.0
 
 set_false_path -from [get_clocks aclk_clk_wiz_0] -to [get_clocks ddr_aclk_clk_wiz_0]
 set_false_path -from [get_clocks ddr_aclk_clk_wiz_0] -to [get_clocks aclk_clk_wiz_0]
-
+set_false_path -from [get_clocks oserdes_clk] -to [get_clocks oserdes_clkdiv]
+set_false_path -from [get_clocks oserdes_clk_1] -to [get_clocks oserdes_clkdiv_1]
+set_false_path -from [get_clocks oserdes_clk_2] -to [get_clocks oserdes_clkdiv_2]
+set_false_path -from [get_clocks oserdes_clk_3] -to [get_clocks oserdes_clkdiv_3]

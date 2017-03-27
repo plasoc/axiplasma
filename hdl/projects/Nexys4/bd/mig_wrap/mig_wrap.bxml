@@ -2,9 +2,9 @@
 <Root MajorVersion="0" MinorVersion="33">
   <CompositeFile CompositeFileTopName="mig_wrap" CanBeSetAsTop="false" CanDisplayChildGraph="true">
     <Description>Composite Fileset</Description>
-    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1490581033"/>
-    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1490581033"/>
-    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1490581033"/>
+    <Generation Name="SYNTHESIS" State="GENERATED" Timestamp="1490593675"/>
+    <Generation Name="IMPLEMENTATION" State="GENERATED" Timestamp="1490593675"/>
+    <Generation Name="SIMULATION" State="GENERATED" Timestamp="1490593675"/>
     <FileCollection Name="SOURCES" Type="SOURCES">
       <File Name="ip/mig_wrap_mig_7series_0_0/mig_wrap_mig_7series_0_0.xci" Type="IP">
         <Instance HierarchyPath="mig_7series_0"/>

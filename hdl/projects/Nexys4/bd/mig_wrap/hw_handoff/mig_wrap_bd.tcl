@@ -149,7 +149,7 @@ proc write_mig_file_mig_wrap_mig_7series_0_0 { str_mig_prj_filepath } {
    puts $mig_prj_file {        <TimePeriod>3333</TimePeriod>}
    puts $mig_prj_file {        <VccAuxIO>1.8V</VccAuxIO>}
    puts $mig_prj_file {        <PHYRatio>2:1</PHYRatio>}
-   puts $mig_prj_file {        <InputClkFreq>100.01</InputClkFreq>}
+   puts $mig_prj_file {        <InputClkFreq>200.02</InputClkFreq>}
    puts $mig_prj_file {        <UIExtraClocks>0</UIExtraClocks>}
    puts $mig_prj_file {        <MMCM_VCO>1200</MMCM_VCO>}
    puts $mig_prj_file {        <MMCMClkOut0> 1.000</MMCMClkOut0>}
@@ -343,7 +343,7 @@ CONFIG.FREQ_HZ {50000000} \
   set clk_ref_i [ create_bd_port -dir I -type clk clk_ref_i ]
   set_property -dict [ list \
 CONFIG.CLK_DOMAIN {mig_wrap_mig_7series_0_0_ui_clk} \
-CONFIG.FREQ_HZ {150015002} \
+CONFIG.FREQ_HZ {200000000} \
 CONFIG.PHASE {0} \
  ] $clk_ref_i
   set sys_rst [ create_bd_port -dir I -type rst sys_rst ]
@@ -359,7 +359,7 @@ CONFIG.NUM_MI {1} \
 
   # Generate the PRJ File for MIG
   set str_mig_folder [get_property IP_DIR [ get_ips [ get_property CONFIG.Component_Name $mig_7series_0 ] ] ]
-  set str_mig_file_name mig_b.prj
+  set str_mig_file_name mig_a.prj
   set str_mig_file_path ${str_mig_folder}/${str_mig_file_name}
 
   write_mig_file_mig_wrap_mig_7series_0_0 $str_mig_file_path
@@ -368,7 +368,7 @@ CONFIG.NUM_MI {1} \
 CONFIG.BOARD_MIG_PARAM {Custom} \
 CONFIG.MIG_DONT_TOUCH_PARAM {Custom} \
 CONFIG.RESET_BOARD_INTERFACE {Custom} \
-CONFIG.XML_INPUT_FILE {mig_b.prj} \
+CONFIG.XML_INPUT_FILE {mig_a.prj} \
  ] $mig_7series_0
 
   # Create instance: proc_sys_reset_0, and set properties
@@ -407,19 +407,19 @@ preplace port S00_ARESETN -pg 1 -y 310 -defaultsOSRD
 preplace inst mig_7series_0 -pg 1 -lvl 3 -y 360 -defaultsOSRD
 preplace inst proc_sys_reset_0 -pg 1 -lvl 1 -y 130 -defaultsOSRD
 preplace inst axi_interconnect_0 -pg 1 -lvl 2 -y 290 -defaultsOSRD
-preplace netloc sys_rst_1 1 0 3 NJ 450 NJ 450 680J
-preplace netloc mig_7series_0_mmcm_locked 1 0 4 40 440 NJ 440 690J 450 910
+preplace netloc sys_rst_1 1 0 3 NJ 450 NJ 450 700J
+preplace netloc mig_7series_0_mmcm_locked 1 0 4 30 440 NJ 440 710J 450 950
 preplace netloc mig_7series_0_DDR2 1 3 1 N
-preplace netloc ACLK_1 1 0 2 NJ 250 360
-preplace netloc clk_ref_i_1 1 0 3 NJ 420 NJ 420 660
+preplace netloc ACLK_1 1 0 2 NJ 250 370
+preplace netloc clk_ref_i_1 1 0 3 NJ 420 NJ 420 680
 preplace netloc ARESETN_1 1 0 2 NJ 270 NJ
-preplace netloc mig_7series_0_ui_clk 1 0 4 20 460 380 460 NJ 460 920
+preplace netloc mig_7series_0_ui_clk 1 0 4 10 460 390 460 NJ 460 960
 preplace netloc S00_AXI_1 1 0 2 NJ 230 NJ
-preplace netloc axi_interconnect_0_M00_AXI 1 2 1 660
-preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 2 370 170 670J
-preplace netloc mig_7series_0_ui_clk_sync_rst 1 0 4 30 430 NJ 430 650J 270 920
+preplace netloc axi_interconnect_0_M00_AXI 1 2 1 680
+preplace netloc proc_sys_reset_0_peripheral_aresetn 1 1 2 380 170 690J
+preplace netloc mig_7series_0_ui_clk_sync_rst 1 0 4 20 430 NJ 430 670J 270 960
 preplace netloc S00_ARESETN_1 1 0 2 NJ 310 NJ
-levelinfo -pg 1 0 200 520 800 940 -top 0 -bot 470
+levelinfo -pg 1 -10 200 530 830 980 -top 0 -bot 470
 ",
 }
 
