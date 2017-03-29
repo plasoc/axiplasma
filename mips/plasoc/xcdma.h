@@ -1,3 +1,15 @@
+/**
+ * @author Andrew Powell
+ * @date 17 March 2017
+ * @brief Contains a simple driver for the Xilinx Central Direct Memory Access (XCdma) core. 
+ *
+ * Since this driver is mainly used to verify the axiplasma design, it is made to only run
+ * simply transfers --- in other words, it assumes no Scatter Gather IO --- with interrupts. 
+ * It also assumes CDMA Store and Foward is enabled.
+ *
+ * Please view the documentation for the Xilinx XCdma core for more information.
+ */
+
 #ifndef XCDMA_H_
 #define XCDMA_H_
 

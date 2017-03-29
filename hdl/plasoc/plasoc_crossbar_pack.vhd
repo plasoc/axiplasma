@@ -1,3 +1,13 @@
+-------------------------------------------------------
+--! @author Andrew Powell
+--! @date March 17, 2017
+--! @brief Contains the package and component declaration of the 
+--! Plasma-SoC's Crossbar Core. Please refer to the documentation
+--! in plasoc_crossbar.vhd for more information. Also, keep
+--! in mind that this core should not be utilized directly.
+--! Instead, a wrapper should be generated from gencross.py.
+-------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 
