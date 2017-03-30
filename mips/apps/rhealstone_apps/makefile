@@ -1,10 +1,6 @@
 # define this in the envrionment, not the makefile, Andrew...
-ifeq ($(MIPS_GCC_BIN),)
-	$(error Location of MIPS cross-compiler tools not set in MIPS_GCC_BIN)
-endif
-ifeq ($(MIPS_GCC_LIB),)
-	$(error Location of MIPS cross-compiler libraries not set in MIPS_GCC_LIB)
-endif
+# MIPS_GCC_BIN is the location of gcc and the binutils
+# MIPS_GCC_LIB is the location of the gcc libraries
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
@@ -19,7 +15,7 @@ endif
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
-C_SOURCES = ./tm_porting_layer_freertos.c $(PLASOC_DIR)/printf.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
+C_SOURCES = rhealstone_benchmark_funcs.c $(PLASOC_DIR)/printf.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
 BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
 ICSP = python2 $(MISC_DIR)/icsp.py 
