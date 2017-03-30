@@ -83,6 +83,5 @@ clean:
 	$(RM) . -name "*.hex" -type f -delete
 	$(RM) . -name "*.map" -type f -delete
 	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.bin" -type f -delete
 	$(RM) . -name "*.vhd" -type f -delete
 	$(RM) . -name "*.s" -type f -delete
