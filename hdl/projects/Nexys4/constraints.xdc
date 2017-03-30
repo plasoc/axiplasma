@@ -58,3 +58,5 @@ set_false_path -from [get_clocks oserdes_clk] -to [get_clocks oserdes_clkdiv]
 set_false_path -from [get_clocks oserdes_clk_1] -to [get_clocks oserdes_clkdiv_1]
 set_false_path -from [get_clocks oserdes_clk_2] -to [get_clocks oserdes_clkdiv_2]
 set_false_path -from [get_clocks oserdes_clk_3] -to [get_clocks oserdes_clkdiv_3]
+
+#set_property strategy Performance_ExtraTimingOpt [get_runs impl_1]
