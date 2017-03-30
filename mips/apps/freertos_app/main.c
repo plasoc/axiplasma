@@ -1,3 +1,21 @@
+/**
+ * @author Andrew Powell
+ * @date March 17, 2017
+ * @brief Contains the FreeRTOS example application.
+ *
+ * The application causes the LEDs to flash at rate of 1 Hz. Each LED is
+ * paired with the switch directly below it on the Nexys board. Each LED remains
+ * off while its respective switch is set low. Blinking immediately starts 
+ * for an LED once its switch is set high. By design, it appears as though each
+ * LED blinks according to its own timer.
+ *
+ * The purpose of this example is to test some of the major components of
+ * the FreeRTOS port, such as tasks of different priorities and synchronization
+ * structures and tools.
+ *
+ * In a future version of this example, some of the low level details will be
+ * abstracted away into a port_layer source file. 
+ */
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
