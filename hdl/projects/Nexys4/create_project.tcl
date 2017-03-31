@@ -569,18 +569,6 @@ set_property "file_type" "XDC" $file_obj
 # Set 'constrs_1' fileset properties
 set obj [get_filesets constrs_1]
 
-# Create 'sim_1' fileset (if not found)
-if {[string equal [get_filesets -quiet sim_1] ""]} {
-  create_fileset -simset sim_1
-}
-
-# Set 'sim_1' fileset object
-set obj [get_filesets sim_1]
-set files [list \
- "[file normalize "$origin_dir/rtl_project/testbench_vivado_0_behav.wcfg"]"\
-]
-add_files -norecurse -fileset $obj $files
-
 # Set 'sim_1' fileset file properties for remote files
 # None
 
@@ -626,3 +614,6 @@ set_property "steps.write_bitstream.args.verbose" "0" $obj
 current_run -implementation [get_runs impl_1]
 
 puts "INFO: Project created:rtl_project"
+
+# Configure the implementation strategy for extra timing optimization.
+set_property strategy Performance_ExtraTimingOpt [get_runs impl_1]
