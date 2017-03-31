@@ -1,21 +1,21 @@
 
 
 Vivado Project Options:
-   Target Device                   : xc7a100t-csg324
-   Speed Grade                     : -1
+   Target Device                   : xc7vx485t-ffg1761
+   Speed Grade                     : -2
    HDL                             : verilog
    Synthesis Tool                  : VIVADO
 
 MIG Output Options:
    Module Name                     : mig_wrap_mig_7series_0_0
    No of Controllers               : 1
-   Selected Compatible Device(s)   : xc7a100ti-csg324
+   Selected Compatible Device(s)   : xc7v585t-ffg1761
 
 FPGA Options:
-   System Clock Type               : No Buffer
-   Reference Clock Type            : No Buffer
+   System Clock Type               : Single-Ended
+   Reference Clock Type            : Use System Clock
    Debug Port                      : OFF
-   Internal Vref                   : enabled
+   Internal Vref                   : disabled
    IO Power Reduction              : ON
    XADC instantiation in MIG       : Enabled
 
@@ -27,38 +27,58 @@ Extended FPGA Options:
 /*                  Controller 0                       */
 /*******************************************************/
 Controller Options :
-   Memory                        : DDR2_SDRAM
+   Memory                        : DDR3_SDRAM
    Interface                     : AXI
-   Design Clock Frequency        : 3333 ps (  0.00 MHz)
-   Phy to Controller Clock Ratio : 2:1
-   Input Clock Period            : 4999 ps
-   CLKFBOUT_MULT (PLL)           : 6
+   Design Clock Frequency        : 1250 ps (  0.00 MHz)
+   Phy to Controller Clock Ratio : 4:1
+   Input Clock Period            : 5000 ps
+   CLKFBOUT_MULT (PLL)           : 8
    DIVCLK_DIVIDE (PLL)           : 1
-   VCC_AUX IO                    : 1.8V
-   Memory Type                   : Components
-   Memory Part                   : MT47H64M16HR-25E
+   VCC_AUX IO                    : 2.0V
+   Memory Type                   : SODIMMs
+   Memory Part                   : MT8JTF12864HZ-1G6
    Equivalent Part(s)            : --
-   Data Width                    : 16
+   Data Width                    : 64
    ECC                           : Disabled
    Data Mask                     : enabled
-   ORDERING                      : Strict
+   ORDERING                      : Normal
 
 AXI Parameters :
-   Data Width                    : 32
+   Data Width                    : 512
    Arbitration Scheme            : RD_PRI_REG
    Narrow Burst Support          : 1
    ID Width                      : 4
 
 Memory Options:
-   Burst Length (MR0[1:0])          : 8
-   CAS Latency (MR0[6:4])           : 5
-   Output Drive Strength (MR1[5,1]) : Fullstrength
+   Burst Length (MR0[1:0])          : 8 - Fixed
+   Read Burst Type (MR0[3])         : Sequential
+   CAS Latency (MR0[6:4])           : 11
+   Output Drive Strength (MR1[5,1]) : RZQ/7
    Controller CS option             : Enable
-   Rtt_NOM - ODT (MR1[9,6,2])       : 50ohms
+   Rtt_NOM - ODT (MR1[9,6,2])       : RZQ/4
+   Rtt_WR - Dynamic ODT (MR2[10:9]) : Dynamic ODT off
    Memory Address Mapping           : BANK_ROW_COLUMN
 
 
 Bank Selections:
+	Bank: 37
+		Byte Group T0:	DQ[32-39]
+		Byte Group T1:	DQ[40-47]
+		Byte Group T2:	DQ[48-55]
+		Byte Group T3:	DQ[56-63]
+	Bank: 38
+		Byte Group T0:	Address/Ctrl-0
+		Byte Group T1:	Address/Ctrl-1
+		Byte Group T2:	Address/Ctrl-2
+	Bank: 39
+		Byte Group T0:	DQ[0-7]
+		Byte Group T1:	DQ[8-15]
+		Byte Group T2:	DQ[16-23]
+		Byte Group T3:	DQ[24-31]
+
+System_Clock: 
+	SignalName: sys_clk_i
+		PadLocation: J25  Bank: 36
 
 System_Control: 
 	SignalName: sys_rst

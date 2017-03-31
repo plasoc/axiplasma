@@ -13,12 +13,11 @@ use work.plasoc_int_pack.plasoc_int;
 use work.plasoc_int_pack.default_interrupt_total;
 use work.plasoc_timer_pack.plasoc_timer;
 use work.plasoc_gpio_pack.plasoc_gpio;
-use work.plasoc_gpio_pack.default_data_out_width;
-use work.plasoc_gpio_pack.default_data_in_width;
 use work.plasoc_uart_pack.plasoc_uart;
 use work.plasoc_0_crossbar_wrap_pack.plasoc_0_crossbar_wrap; 
 use work.plasoc_0_crossbar_wrap_pack.clogb2;
 use work.plasoc_axi4_full2lite_pack.plasoc_axi4_full2lite;
+use work.vc707_pack.vc707_default_gpio_width;
 
 entity axiplasma_wrapper is
     generic (
@@ -26,26 +25,28 @@ entity axiplasma_wrapper is
         upper_app : string := "none";
         upper_ext : boolean := true);
     port( 
-        raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
+        raw_clock_p : in std_logic; -- 200 MHz on the VC707.
+        raw_clock_n : in std_logic; -- 200 MHz on the VC707.
         raw_nreset : in std_logic;
-        gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
-        gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
+        gpio_output : out std_logic_vector(vc707_default_gpio_width-1 downto 0);
+        gpio_input : in std_logic_vector(vc707_default_gpio_width-1 downto 0);
         uart_tx : out std_logic;
         uart_rx : in std_logic;
-        DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
-        DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
-        DDR2_cas_n : out STD_LOGIC;
-        DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-        DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
-        DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
-        DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-        DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
-        DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
-        DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-        DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-        DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
-        DDR2_ras_n : out STD_LOGIC;
-        DDR2_we_n : out STD_LOGIC);
+        DDR3_addr : out std_logic_vector(13 downto 0);
+        DDR3_ba : out std_logic_vector(2 downto 0);
+        DDR3_cas_n : out std_logic;
+        DDR3_ck_n : out std_logic_vector(0 downto 0);
+        DDR3_ck_p : out std_logic_vector(0 downto 0);
+        DDR3_cke : out std_logic_vector(0 downto 0);
+        DDR3_cs_n : out std_logic_vector(0 downto 0);
+        DDR3_dm : out std_logic_vector(7 downto 0);
+        DDR3_dq : inout std_logic_vector(63 downto 0);
+        DDR3_dqs_n : inout std_logic_vector(7 downto 0);
+        DDR3_dqs_p : inout std_logic_vector(7 downto 0);
+        DDR3_odt : out std_logic_vector(0 downto 0);
+        DDR3_ras_n : out std_logic;
+        DDR3_reset_n : out std_logic;
+        DDR3_we_n : out std_logic);
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
@@ -53,20 +54,21 @@ architecture Behavioral of axiplasma_wrapper is
         port (
             ACLK : in STD_LOGIC;
             ARESETN : in STD_LOGIC;
-            DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
-            DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
-            DDR2_cas_n : out STD_LOGIC;
-            DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
-            DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_ras_n : out STD_LOGIC;
-            DDR2_we_n : out STD_LOGIC;
+            DDR3_addr : out std_logic_vector(13 downto 0);
+            DDR3_ba : out std_logic_vector(2 downto 0);
+            DDR3_cas_n : out std_logic;
+            DDR3_ck_n : out std_logic_vector(0 downto 0);
+            DDR3_ck_p : out std_logic_vector(0 downto 0);
+            DDR3_cke : out std_logic_vector(0 downto 0);
+            DDR3_cs_n : out std_logic_vector(0 downto 0);
+            DDR3_dm : out std_logic_vector(7 downto 0);
+            DDR3_dq : inout std_logic_vector(63 downto 0);
+            DDR3_dqs_n : inout std_logic_vector(7 downto 0);
+            DDR3_dqs_p : inout std_logic_vector(7 downto 0);
+            DDR3_odt : out std_logic_vector(0 downto 0);
+            DDR3_ras_n : out std_logic;
+            DDR3_reset_n : out std_logic;
+            DDR3_we_n : out std_logic;
             S00_ARESETN : in STD_LOGIC;
             S00_AXI_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
             S00_AXI_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -107,7 +109,7 @@ architecture Behavioral of axiplasma_wrapper is
             S00_AXI_wready : out STD_LOGIC;
             S00_AXI_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
             S00_AXI_wvalid : in STD_LOGIC;
-            clk_ref_i : in STD_LOGIC;
+            sys_clk_i : in STD_LOGIC;
             sys_rst : in STD_LOGIC);
     end component;
     -- Component declarations.
@@ -185,7 +187,8 @@ architecture Behavioral of axiplasma_wrapper is
             ddr_aclk : out std_logic;
             resetn : in std_logic;
             locked : out std_logic;
-            raw_clock : in std_logic);
+            raw_clock_p : in std_logic;
+            raw_clock_n : in std_logic);
     end component;
     component proc_sys_reset_0 is
         port (
@@ -863,7 +866,8 @@ begin
             ddr_aclk => ddr_aclk,
             resetn => raw_nreset,
             locked => dcm_locked,
-            raw_clock => raw_clock);
+            raw_clock_p => raw_clock_p,
+            raw_clock_n => raw_clock_n);
             
     -- Reset core instantiation.
     proc_sys_reset_inst : proc_sys_reset_0 
@@ -1855,20 +1859,21 @@ begin
         port map (
             ACLK => aclk,
             ARESETN => cross_aresetn(0),
-            DDR2_addr => DDR2_addr,
-            DDR2_ba => DDR2_ba,
-            DDR2_cas_n => DDR2_cas_n,
-            DDR2_ck_n => DDR2_ck_n,
-            DDR2_ck_p => DDR2_ck_p,
-            DDR2_cke => DDR2_cke,
-            DDR2_cs_n => DDR2_cs_n,
-            DDR2_dm => DDR2_dm,
-            DDR2_dq => DDR2_dq,
-            DDR2_dqs_n => DDR2_dqs_n,
-            DDR2_dqs_p => DDR2_dqs_p,
-            DDR2_odt => DDR2_odt,
-            DDR2_ras_n => DDR2_ras_n,
-            DDR2_we_n => DDR2_we_n,
+            DDR3_addr => DDR3_addr,
+            DDR3_ba => DDR3_ba,
+            DDR3_cas_n => DDR3_cas_n,
+            DDR3_ck_n => DDR3_ck_n,
+            DDR3_ck_p => DDR3_ck_p,
+            DDR3_cke => DDR3_cke,
+            DDR3_cs_n => DDR3_cs_n,
+            DDR3_dm => DDR3_dm,
+            DDR3_dq => DDR3_dq,
+            DDR3_dqs_n => DDR3_dqs_n,
+            DDR3_dqs_p => DDR3_dqs_p,
+            DDR3_odt => DDR3_odt,
+            DDR3_ras_n => DDR3_ras_n,
+            DDR3_reset_n => DDR3_reset_n,
+            DDR3_we_n => DDR3_we_n,
             S00_ARESETN => aresetn(0),
             S00_AXI_araddr => ram_axi_full_araddr,
             S00_AXI_arburst => ram_axi_full_arburst,
@@ -1909,7 +1914,7 @@ begin
             S00_AXI_wready => ram_axi_full_wready,
             S00_AXI_wstrb => ram_axi_full_wstrb,
             S00_AXI_wvalid => ram_axi_full_wvalid,
-            clk_ref_i => ddr_aclk,
+            sys_clk_i => ddr_aclk,
             sys_rst => raw_nreset);
     end generate;
             
@@ -1973,7 +1978,9 @@ begin
     plasoc_gpio_inst : plasoc_gpio
         generic map (
             axi_address_width => axi_lite_address_width,
-            axi_data_width => axi_data_width)
+            axi_data_width => axi_data_width,
+            data_in_width => vc707_default_gpio_width,
+            data_out_width => vc707_default_gpio_width)
         port map (
             aclk => aclk,
             aresetn => aresetn(0),

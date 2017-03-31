@@ -53,11 +53,11 @@
 ##  \   \         Application        : MIG
 ##  /   /         Filename           : readme.txt
 ## /___/   /\     Date Last Modified : $Date: 2011/06/02 08:31:16 $
-## \   \  /  \    Date Created       : Fri Oct 14 2011
+## \   \  /  \    Date Created       : Tue Sept 21 2010
 ##  \___\/\___\
 ##
 ## Device          : 7 Series
-## Design Name     : DDR2 SDRAM
+## Design Name     : DDR3 SDRAM
 ## Purpose         : Steps to run simulations using Modelsim/QuestaSim,
 ##                   Cadence IES, and Synopsys VCS
 ## Assumptions     : Simulations are run in \sim folder of MIG output "Open IP
@@ -216,4 +216,14 @@ simulations for "Open IP Example Design"
    and calibration sequence. This could lead to simulation errors since design is not
    calibrated at all. Preferred values for parameter SIM_BYPASS_INIT_CAL to run
    simulations are FAST and OFF.
+
+6. Simulations running with parameter MAX_MEM defined uses a temporary directory for model data.
+   The default temporary directory specified in model file is /tmp which doesn't exist for Windows OS.
+   Therfore users running on Windows OS should change the ddr3_model.v file as below
+
+      tmp_model_dir = "/tmp";
+            to
+      tmp_model_dir = ".";
+
+   This change works for All OS.
 

@@ -1,5 +1,5 @@
 //*****************************************************************************
-// (c) Copyright 2009 - 2011 Xilinx, Inc. All rights reserved.
+// (c) Copyright 2009 - 2010 Xilinx, Inc. All rights reserved.
 //
 // This file contains confidential and proprietary information
 // of Xilinx, Inc. and is protected under U.S. and
@@ -53,11 +53,11 @@
 //  \   \         Application        : MIG
 //  /   /         Filename           : wiredly.v
 // /___/   /\     Date Last Modified : $Date: 2011/06/23 08:25:20 $
-// \   \  /  \    Date Created       : Fri Oct 14 2011
+// \   \  /  \    Date Created       : Tue Sept 21 2010
 //  \___\/\___\
 //
 // Device           : 7Series
-// Design Name      : DDR2 SDRAM
+// Design Name      : DDR3 SDRAM
 // Purpose          :
 //   This module provide the definition of a zero ohm component (A, B).
 //

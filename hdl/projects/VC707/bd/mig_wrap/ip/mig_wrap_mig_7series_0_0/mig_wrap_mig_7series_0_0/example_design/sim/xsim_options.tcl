@@ -57,7 +57,7 @@
 ##  \___\/\___\
 ##
 ## Device          : 7 Series
-## Design Name     : DDR2 SDRAM
+## Design Name     : DDR3 SDRAM
 ## Purpose         : To give commands to XSIM Simulator through batch mode
 ## Assumptions:
 ##      - Simulation takes place in \sim folder of MIG output directory

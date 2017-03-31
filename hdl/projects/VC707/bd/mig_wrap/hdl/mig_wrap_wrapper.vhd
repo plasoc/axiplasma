@@ -1,8 +1,8 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
---Tool Version: Vivado v.2016.4 (lin64) Build 1756540 Mon Jan 23 19:11:19 MST 2017
---Date        : Mon Mar 27 01:47:30 2017
---Host        : andrewandrepowell2-desktop running 64-bit Ubuntu 16.04 LTS
+--Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
+--Date        : Fri Mar 31 18:21:22 2017
+--Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 --Command     : generate_target mig_wrap_wrapper.bd
 --Design      : mig_wrap_wrapper
 --Purpose     : IP block netlist
@@ -15,20 +15,21 @@ entity mig_wrap_wrapper is
   port (
     ACLK : in STD_LOGIC;
     ARESETN : in STD_LOGIC;
-    DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
-    DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    DDR2_cas_n : out STD_LOGIC;
-    DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
-    DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_ras_n : out STD_LOGIC;
-    DDR2_we_n : out STD_LOGIC;
+    DDR3_addr : out STD_LOGIC_VECTOR ( 13 downto 0 );
+    DDR3_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    DDR3_cas_n : out STD_LOGIC;
+    DDR3_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_dm : out STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_dq : inout STD_LOGIC_VECTOR ( 63 downto 0 );
+    DDR3_dqs_n : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_dqs_p : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_ras_n : out STD_LOGIC;
+    DDR3_reset_n : out STD_LOGIC;
+    DDR3_we_n : out STD_LOGIC;
     S00_ARESETN : in STD_LOGIC;
     S00_AXI_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     S00_AXI_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
@@ -69,7 +70,7 @@ entity mig_wrap_wrapper is
     S00_AXI_wready : out STD_LOGIC;
     S00_AXI_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
     S00_AXI_wvalid : in STD_LOGIC;
-    clk_ref_i : in STD_LOGIC;
+    sys_clk_i : in STD_LOGIC;
     sys_rst : in STD_LOGIC
   );
 end mig_wrap_wrapper;
@@ -77,25 +78,25 @@ end mig_wrap_wrapper;
 architecture STRUCTURE of mig_wrap_wrapper is
   component mig_wrap is
   port (
-    DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
-    DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
-    DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
-    DDR2_ras_n : out STD_LOGIC;
-    DDR2_cas_n : out STD_LOGIC;
-    DDR2_we_n : out STD_LOGIC;
-    DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-    DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
-    DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_dq : inout STD_LOGIC_VECTOR ( 63 downto 0 );
+    DDR3_dqs_p : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_dqs_n : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_addr : out STD_LOGIC_VECTOR ( 13 downto 0 );
+    DDR3_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+    DDR3_ras_n : out STD_LOGIC;
+    DDR3_cas_n : out STD_LOGIC;
+    DDR3_we_n : out STD_LOGIC;
+    DDR3_reset_n : out STD_LOGIC;
+    DDR3_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+    DDR3_dm : out STD_LOGIC_VECTOR ( 7 downto 0 );
+    DDR3_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
     ACLK : in STD_LOGIC;
     ARESETN : in STD_LOGIC;
     S00_ARESETN : in STD_LOGIC;
     sys_rst : in STD_LOGIC;
-    clk_ref_i : in STD_LOGIC;
     S00_AXI_awid : in STD_LOGIC_VECTOR ( 3 downto 0 );
     S00_AXI_awaddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
     S00_AXI_awlen : in STD_LOGIC_VECTOR ( 7 downto 0 );
@@ -134,7 +135,8 @@ architecture STRUCTURE of mig_wrap_wrapper is
     S00_AXI_rresp : out STD_LOGIC_VECTOR ( 1 downto 0 );
     S00_AXI_rlast : out STD_LOGIC;
     S00_AXI_rvalid : out STD_LOGIC;
-    S00_AXI_rready : in STD_LOGIC
+    S00_AXI_rready : in STD_LOGIC;
+    sys_clk_i : in STD_LOGIC
   );
   end component mig_wrap;
 begin
@@ -142,20 +144,21 @@ mig_wrap_i: component mig_wrap
      port map (
       ACLK => ACLK,
       ARESETN => ARESETN,
-      DDR2_addr(12 downto 0) => DDR2_addr(12 downto 0),
-      DDR2_ba(2 downto 0) => DDR2_ba(2 downto 0),
-      DDR2_cas_n => DDR2_cas_n,
-      DDR2_ck_n(0) => DDR2_ck_n(0),
-      DDR2_ck_p(0) => DDR2_ck_p(0),
-      DDR2_cke(0) => DDR2_cke(0),
-      DDR2_cs_n(0) => DDR2_cs_n(0),
-      DDR2_dm(1 downto 0) => DDR2_dm(1 downto 0),
-      DDR2_dq(15 downto 0) => DDR2_dq(15 downto 0),
-      DDR2_dqs_n(1 downto 0) => DDR2_dqs_n(1 downto 0),
-      DDR2_dqs_p(1 downto 0) => DDR2_dqs_p(1 downto 0),
-      DDR2_odt(0) => DDR2_odt(0),
-      DDR2_ras_n => DDR2_ras_n,
-      DDR2_we_n => DDR2_we_n,
+      DDR3_addr(13 downto 0) => DDR3_addr(13 downto 0),
+      DDR3_ba(2 downto 0) => DDR3_ba(2 downto 0),
+      DDR3_cas_n => DDR3_cas_n,
+      DDR3_ck_n(0) => DDR3_ck_n(0),
+      DDR3_ck_p(0) => DDR3_ck_p(0),
+      DDR3_cke(0) => DDR3_cke(0),
+      DDR3_cs_n(0) => DDR3_cs_n(0),
+      DDR3_dm(7 downto 0) => DDR3_dm(7 downto 0),
+      DDR3_dq(63 downto 0) => DDR3_dq(63 downto 0),
+      DDR3_dqs_n(7 downto 0) => DDR3_dqs_n(7 downto 0),
+      DDR3_dqs_p(7 downto 0) => DDR3_dqs_p(7 downto 0),
+      DDR3_odt(0) => DDR3_odt(0),
+      DDR3_ras_n => DDR3_ras_n,
+      DDR3_reset_n => DDR3_reset_n,
+      DDR3_we_n => DDR3_we_n,
       S00_ARESETN => S00_ARESETN,
       S00_AXI_araddr(31 downto 0) => S00_AXI_araddr(31 downto 0),
       S00_AXI_arburst(1 downto 0) => S00_AXI_arburst(1 downto 0),
@@ -196,7 +199,7 @@ mig_wrap_i: component mig_wrap
       S00_AXI_wready => S00_AXI_wready,
       S00_AXI_wstrb(3 downto 0) => S00_AXI_wstrb(3 downto 0),
       S00_AXI_wvalid => S00_AXI_wvalid,
-      clk_ref_i => clk_ref_i,
+      sys_clk_i => sys_clk_i,
       sys_rst => sys_rst
     );
 end STRUCTURE;

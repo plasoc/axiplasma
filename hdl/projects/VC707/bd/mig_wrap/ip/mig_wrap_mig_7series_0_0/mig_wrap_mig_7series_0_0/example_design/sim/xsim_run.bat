@@ -58,7 +58,7 @@
 ::  \___\/\___\
 ::
 :: Device            : 7 Series
-:: Design Name       : DDR2 SDRAM
+:: Design Name       : DDR3 SDRAM
 :: Purpose           : Batch file to run Simulation through Vivado Simulator
 :: Reference         :
 :: Revision History  :

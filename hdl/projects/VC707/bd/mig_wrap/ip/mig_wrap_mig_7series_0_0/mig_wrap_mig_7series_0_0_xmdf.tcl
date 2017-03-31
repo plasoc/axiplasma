@@ -396,6 +396,10 @@ utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path mig_wrap_mig
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type verilog
 incr fcount
 
+utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path mig_wrap_mig_7series_0_0/user_design/rtl/phy/mig_7series_v4_0_ddr_skip_calib_tap.v
+utilities_xmdf::xmdfSetData $instance FileSet $fcount type verilog
+incr fcount
+
 utilities_xmdf::xmdfSetData $instance FileSet $fcount relative_path mig_wrap_mig_7series_0_0/user_design/rtl/phy/mig_7series_v4_0_poc_cc.v
 utilities_xmdf::xmdfSetData $instance FileSet $fcount type verilog
 incr fcount

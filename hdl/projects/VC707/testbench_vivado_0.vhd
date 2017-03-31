@@ -8,11 +8,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use ieee.numeric_std.all;
-use work.plasoc_gpio_pack.all;
 use work.boot_pack.all;
+use work.vc707_pack.vc707_default_gpio_width;
 
 entity testbench_vivado_0 is
-    generic ( gpio_width : integer := 16; input_delay : time := 0 ns );
+    generic ( gpio_width : integer := vc707_default_gpio_width; input_delay : time := 0 ns );
 end testbench_vivado_0;
 
 architecture Behavioral of testbench_vivado_0 is
@@ -22,32 +22,35 @@ architecture Behavioral of testbench_vivado_0 is
             upper_app : string := "main";
             upper_ext : boolean := false);
         port( 
-            raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
+            raw_clock_p : in std_logic; -- 200 MHz on the VC707.
+            raw_clock_n : in std_logic; -- 200 MHz on the VC707.
             raw_nreset : in std_logic;
-            gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
-            gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
+            gpio_output : out std_logic_vector(vc707_default_gpio_width-1 downto 0);
+            gpio_input : in std_logic_vector(vc707_default_gpio_width-1 downto 0);
             uart_tx : out std_logic;
             uart_rx : in std_logic;
-            DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
-            DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
-            DDR2_cas_n : out STD_LOGIC;
-            DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
-            DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
-            DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
-            DDR2_ras_n : out STD_LOGIC;
-            DDR2_we_n : out STD_LOGIC);
+            DDR3_addr : out std_logic_vector(13 downto 0);
+            DDR3_ba : out std_logic_vector(2 downto 0);
+            DDR3_cas_n : out std_logic;
+            DDR3_ck_n : out std_logic_vector(0 downto 0);
+            DDR3_ck_p : out std_logic_vector(0 downto 0);
+            DDR3_cke : out std_logic_vector(0 downto 0);
+            DDR3_cs_n : out std_logic_vector(0 downto 0);
+            DDR3_dm : out std_logic_vector(7 downto 0);
+            DDR3_dq : inout std_logic_vector(63 downto 0);
+            DDR3_dqs_n : inout std_logic_vector(7 downto 0);
+            DDR3_dqs_p : inout std_logic_vector(7 downto 0);
+            DDR3_odt : out std_logic_vector(0 downto 0);
+            DDR3_ras_n : out std_logic;
+            DDR3_reset_n : out std_logic;
+            DDR3_we_n : out std_logic);
     end component;
-    constant clock_period : time := 10 ns;
+    constant clock_period : time := 5 ns;
     constant uart_period : time := 104167 ns;
     constant time_out_threshold : integer := 2**30;
     subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
-    signal raw_clock : std_logic := '1';
+    signal raw_clock_p : std_logic := '1';
+    signal raw_clock_n : std_logic := '0';
     signal raw_nreset : std_logic := '0';
     signal gpio_output : gpio_type;
     signal gpio_input : gpio_type := (others=>'0');
@@ -69,28 +72,31 @@ begin
 
     axiplasma_wrapper_inst : axiplasma_wrapper 
         port map ( 
-            raw_clock => raw_clock,
+            raw_clock_p => raw_clock_p,
+            raw_clock_n => raw_clock_n,
             raw_nreset => raw_nreset,
             gpio_output => gpio_output,
             gpio_input => gpio_input,
             uart_tx => uart_tx,
             uart_rx => uart_rx,
-            DDR2_addr => open,
-            DDR2_ba => open,
-            DDR2_cas_n => open,
-            DDR2_ck_n => open,
-            DDR2_ck_p => open,
-            DDR2_cke => open,
-            DDR2_cs_n => open,
-            DDR2_dm => open,
-            DDR2_dq => open,
-            DDR2_dqs_n => open,
-            DDR2_dqs_p => open,
-            DDR2_odt => open,
-            DDR2_ras_n => open,
-            DDR2_we_n => open);
+            DDR3_addr => open,
+            DDR3_ba => open,
+            DDR3_cas_n => open,
+            DDR3_ck_n => open,
+            DDR3_ck_p => open,
+            DDR3_cke => open,
+            DDR3_cs_n => open,
+            DDR3_dm => open,
+            DDR3_dq => open,
+            DDR3_dqs_n => open,
+            DDR3_dqs_p => open,
+            DDR3_odt => open,
+            DDR3_ras_n => open,
+            DDR3_reset_n => open,
+            DDR3_we_n => open);
 
-    raw_clock <= not raw_clock after clock_period/2;
+    raw_clock_p <= not raw_clock_p after clock_period/2;
+    raw_clock_n <= not raw_clock_n after clock_period/2;
     raw_nreset <= '1' after 10*clock_period+input_delay;
     
     -- Get uart_tx
@@ -276,24 +282,24 @@ begin
         end;
     begin
         wait until raw_nreset='1';
-        wait until gpio_output=X"0001";
+        wait until gpio_output=X"01";
         wait for 500 us;
-        gpio_input <= X"0003" after input_delay;
+        gpio_input <= X"03" after input_delay;
         wait for 2 ms;
-        gpio_input <= X"00f3" after input_delay;
+        gpio_input <= X"f3" after input_delay;
         wait for 2 ms;
         while True loop
-            gpio_input <= X"00f1" after input_delay;
+            gpio_input <= X"f1" after input_delay;
             wait for 50 us;
-            gpio_input <= X"00f0" after input_delay;
+            gpio_input <= X"f0" after input_delay;
             wait for 50 us;
-            gpio_input <= X"00f5" after input_delay;
+            gpio_input <= X"f5" after input_delay;
             wait for 50 us;
-            gpio_input <= X"00ff" after input_delay;
+            gpio_input <= X"ff" after input_delay;
             wait for 50 us;
-            gpio_input <= X"05f7" after input_delay;
+            gpio_input <= X"f7" after input_delay;
             wait for 50 us;
-            gpio_input <= X"10f0" after input_delay;
+            gpio_input <= X"f0" after input_delay;
             wait for 50 us;
         end loop;
         wait;

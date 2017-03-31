@@ -94,7 +94,7 @@ ncvlog -work worklib -messages wiredly.v >> ies_sim.log
 ncvlog -work worklib -messages sim_tb_top.v >> ies_sim.log
 
 #Pass the parameters for memory model parameter file#
-ncvlog -work worklib -messages -sv +define+x1Gb +define+sg25E +define+x16 ddr2_model.v >> ies_sim.log 
+ncvlog -work worklib -messages -sv +define+x1Gb +define+sg125 +define+x8 ddr3_model.sv >> ies_sim.log 
 
 #Simulate the design with sim_tb_top as the top module
 ncelab -namemap_mixgen -timescale '1ps/1ps' -vhdlsync -v93 -messages -nettype_port_relax -access +rwc sim_tb_top glbl >> ies_sim.log

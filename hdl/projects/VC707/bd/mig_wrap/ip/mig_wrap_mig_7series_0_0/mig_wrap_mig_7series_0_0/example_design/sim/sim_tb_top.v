@@ -1,5 +1,5 @@
 //*****************************************************************************
-// (c) Copyright 2009 - 2011 Xilinx, Inc. All rights reserved.
+// (c) Copyright 2009 - 2010 Xilinx, Inc. All rights reserved.
 //
 // This file contains confidential and proprietary information
 // of Xilinx, Inc. and is protected under U.S. and
@@ -53,11 +53,11 @@
 //  \   \         Application        : MIG
 //  /   /         Filename           : sim_tb_top.v
 // /___/   /\     Date Last Modified : $Date: 2011/06/07 13:45:16 $
-// \   \  /  \    Date Created       : Fri Oct 14 2011
+// \   \  /  \    Date Created       : Tue Sept 21 2010
 //  \___\/\___\
 //
 // Device           : 7 Series
-// Design Name      : DDR2 SDRAM
+// Design Name      : DDR3 SDRAM
 // Purpose          :
 //                   Top-level testbench for testing DDR3.
 //                   Instantiates:
@@ -88,24 +88,16 @@ module sim_tb_top;
    //***************************************************************************
    // The following parameters refer to width of various ports
    //***************************************************************************
-   parameter BANK_WIDTH            = 3;
-                                     // # of memory Bank Address bits.
-   parameter CK_WIDTH              = 1;
-                                     // # of CK/CK# outputs to memory.
    parameter COL_WIDTH             = 10;
                                      // # of memory Column Address bits.
    parameter CS_WIDTH              = 1;
                                      // # of unique CS outputs to memory.
-   parameter nCS_PER_RANK          = 1;
-                                     // # of unique CS outputs per rank for phy
-   parameter CKE_WIDTH             = 1;
-                                     // # of CKE outputs to memory.
-   parameter DM_WIDTH              = 2;
+   parameter DM_WIDTH              = 8;
                                      // # of DM (data mask)
-   parameter DQ_WIDTH              = 16;
+   parameter DQ_WIDTH              = 64;
                                      // # of DQ (data)
-   parameter DQS_WIDTH             = 2;
-   parameter DQS_CNT_WIDTH         = 1;
+   parameter DQS_WIDTH             = 8;
+   parameter DQS_CNT_WIDTH         = 3;
                                      // = ceil(log2(DQS_WIDTH))
    parameter DRAM_WIDTH            = 8;
                                      // # of DQ per DQS
@@ -114,9 +106,9 @@ module sim_tb_top;
                                      // # of Ranks.
    parameter ODT_WIDTH             = 1;
                                      // # of ODT outputs to memory.
-   parameter ROW_WIDTH             = 13;
+   parameter ROW_WIDTH             = 14;
                                      // # of memory Row Address bits.
-   parameter ADDR_WIDTH            = 27;
+   parameter ADDR_WIDTH            = 28;
                                      // # = RANK_WIDTH + BANK_WIDTH
                                      //     + ROW_WIDTH + COL_WIDTH;
                                      // Chip Select is always tied to low for
@@ -131,13 +123,16 @@ module sim_tb_top;
                                      // DDR2 SDRAM:
                                      // Burst Length (Mode Register).
                                      // # = "8", "4".
+   parameter CA_MIRROR             = "OFF";
+                                     // C/A mirror opt for DDR3 dual rank
    
    //***************************************************************************
    // The following parameters are multiplier and divisor factors for PLLE2.
    // Based on the selected design frequency these parameters vary.
    //***************************************************************************
-   parameter CLKIN_PERIOD          = 4999;
+   parameter CLKIN_PERIOD          = 5000;
                                      // Input Clock Period
+
 
    //***************************************************************************
    // Simulation parameters
@@ -169,9 +164,11 @@ module sim_tb_top;
    //***************************************************************************
    // System clock frequency parameters
    //***************************************************************************
-   parameter tCK                   = 3333;
+   parameter tCK                   = 1250;
                                      // memory tCK paramter.
                      // # = Clock Period in pS.
+   parameter nCK_PER_CLK           = 4;
+                                     // # of memory CKs per fabric CLK
 
    
    //***************************************************************************
@@ -180,17 +177,18 @@ module sim_tb_top;
    parameter C_S_AXI_ID_WIDTH              = 4;
                                              // Width of all master and slave ID signals.
                                              // # = >= 1.
-   parameter C_S_AXI_ADDR_WIDTH            = 32;
+   parameter C_S_AXI_ADDR_WIDTH            = 30;
                                              // Width of S_AXI_AWADDR, S_AXI_ARADDR, M_AXI_AWADDR and
                                              // M_AXI_ARADDR for all SI/MI slots.
                                              // # = 32.
-   parameter C_S_AXI_DATA_WIDTH            = 32;
+   parameter C_S_AXI_DATA_WIDTH            = 512;
                                              // Width of WDATA and RDATA on SI slot.
                                              // Must be <= APP_DATA_WIDTH.
                                              // # = 32, 64, 128, 256.
    parameter C_S_AXI_SUPPORTS_NARROW_BURST = 1;
                                              // Indicates whether to instatiate upsizer
                                              // Range: 0, 1
+
 
    //***************************************************************************
    // Debug and Internal parameters
@@ -201,7 +199,7 @@ module sim_tb_top;
    //***************************************************************************
    // Debug and Internal parameters
    //***************************************************************************
-   parameter DRAM_TYPE             = "DDR2";
+   parameter DRAM_TYPE             = "DDR3";
 
     
 
@@ -220,10 +218,11 @@ module sim_tb_top;
   localparam real TPROP_PCB_DATA_RD  = 0.00;
                        // Delay for data signal during Read operation
 
-  localparam MEMORY_WIDTH            = 16;
+  localparam MEMORY_WIDTH            = 8;
   localparam NUM_COMP                = DQ_WIDTH/MEMORY_WIDTH;
   localparam ECC_TEST 		   	= "OFF" ;
   localparam ERR_INSERT = (ECC_TEST == "ON") ? "OFF" : ECC ;
+  
 
   localparam real REFCLK_PERIOD = (1000000.0/(2*REFCLK_FREQ));
   localparam RESET_PERIOD = 200000; //in pSec  
@@ -243,51 +242,51 @@ module sim_tb_top;
   reg clk_ref_i;
 
   
-  wire                               ddr2_reset_n;
-  wire [DQ_WIDTH-1:0]                ddr2_dq_fpga;
-  wire [DQS_WIDTH-1:0]               ddr2_dqs_p_fpga;
-  wire [DQS_WIDTH-1:0]               ddr2_dqs_n_fpga;
-  wire [ROW_WIDTH-1:0]               ddr2_addr_fpga;
-  wire [BANK_WIDTH-1:0]              ddr2_ba_fpga;
-  wire                               ddr2_ras_n_fpga;
-  wire                               ddr2_cas_n_fpga;
-  wire                               ddr2_we_n_fpga;
-  wire [CKE_WIDTH-1:0]               ddr2_cke_fpga;
-  wire [CK_WIDTH-1:0]                ddr2_ck_p_fpga;
-  wire [CK_WIDTH-1:0]                ddr2_ck_n_fpga;
+  wire                               ddr3_reset_n;
+  wire [DQ_WIDTH-1:0]                ddr3_dq_fpga;
+  wire [DQS_WIDTH-1:0]               ddr3_dqs_p_fpga;
+  wire [DQS_WIDTH-1:0]               ddr3_dqs_n_fpga;
+  wire [ROW_WIDTH-1:0]               ddr3_addr_fpga;
+  wire [3-1:0]              ddr3_ba_fpga;
+  wire                               ddr3_ras_n_fpga;
+  wire                               ddr3_cas_n_fpga;
+  wire                               ddr3_we_n_fpga;
+  wire [1-1:0]               ddr3_cke_fpga;
+  wire [1-1:0]                ddr3_ck_p_fpga;
+  wire [1-1:0]                ddr3_ck_n_fpga;
     
   
   wire                               init_calib_complete;
   wire                               tg_compare_error;
-  wire [(CS_WIDTH*nCS_PER_RANK)-1:0] ddr2_cs_n_fpga;
+  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_fpga;
     
-  wire [DM_WIDTH-1:0]                ddr2_dm_fpga;
+  wire [DM_WIDTH-1:0]                ddr3_dm_fpga;
     
-  wire [ODT_WIDTH-1:0]               ddr2_odt_fpga;
+  wire [ODT_WIDTH-1:0]               ddr3_odt_fpga;
     
   
-  reg [(CS_WIDTH*nCS_PER_RANK)-1:0] ddr2_cs_n_sdram_tmp;
+  reg [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram_tmp;
     
-  reg [DM_WIDTH-1:0]                 ddr2_dm_sdram_tmp;
+  reg [DM_WIDTH-1:0]                 ddr3_dm_sdram_tmp;
     
-  reg [ODT_WIDTH-1:0]                ddr2_odt_sdram_tmp;
+  reg [ODT_WIDTH-1:0]                ddr3_odt_sdram_tmp;
     
 
   
-  wire [DQ_WIDTH-1:0]                ddr2_dq_sdram;
-  reg [ROW_WIDTH-1:0]                ddr2_addr_sdram;
-  reg [BANK_WIDTH-1:0]               ddr2_ba_sdram;
-  reg                                ddr2_ras_n_sdram;
-  reg                                ddr2_cas_n_sdram;
-  reg                                ddr2_we_n_sdram;
-  wire [(CS_WIDTH*nCS_PER_RANK)-1:0] ddr2_cs_n_sdram;
-  wire [ODT_WIDTH-1:0]               ddr2_odt_sdram;
-  reg [CKE_WIDTH-1:0]                ddr2_cke_sdram;
-  wire [DM_WIDTH-1:0]                ddr2_dm_sdram;
-  wire [DQS_WIDTH-1:0]               ddr2_dqs_p_sdram;
-  wire [DQS_WIDTH-1:0]               ddr2_dqs_n_sdram;
-  reg [CK_WIDTH-1:0]                 ddr2_ck_p_sdram;
-  reg [CK_WIDTH-1:0]                 ddr2_ck_n_sdram;
+  wire [DQ_WIDTH-1:0]                ddr3_dq_sdram;
+  reg [ROW_WIDTH-1:0]                ddr3_addr_sdram [0:1];
+  reg [3-1:0]               ddr3_ba_sdram [0:1];
+  reg                                ddr3_ras_n_sdram;
+  reg                                ddr3_cas_n_sdram;
+  reg                                ddr3_we_n_sdram;
+  wire [(CS_WIDTH*1)-1:0] ddr3_cs_n_sdram;
+  wire [ODT_WIDTH-1:0]               ddr3_odt_sdram;
+  reg [1-1:0]                ddr3_cke_sdram;
+  wire [DM_WIDTH-1:0]                ddr3_dm_sdram;
+  wire [DQS_WIDTH-1:0]               ddr3_dqs_p_sdram;
+  wire [DQS_WIDTH-1:0]               ddr3_dqs_n_sdram;
+  reg [1-1:0]                 ddr3_ck_p_sdram;
+  reg [1-1:0]                 ddr3_ck_n_sdram;
   
     
 
@@ -323,30 +322,42 @@ module sim_tb_top;
 
 
   always @( * ) begin
-    ddr2_ck_p_sdram   <=  #(TPROP_PCB_CTRL) ddr2_ck_p_fpga;
-    ddr2_ck_n_sdram   <=  #(TPROP_PCB_CTRL) ddr2_ck_n_fpga;
-    ddr2_addr_sdram   <=  #(TPROP_PCB_CTRL) ddr2_addr_fpga;
-    ddr2_ba_sdram     <=  #(TPROP_PCB_CTRL) ddr2_ba_fpga;
-    ddr2_ras_n_sdram  <=  #(TPROP_PCB_CTRL) ddr2_ras_n_fpga;
-    ddr2_cas_n_sdram  <=  #(TPROP_PCB_CTRL) ddr2_cas_n_fpga;
-    ddr2_we_n_sdram   <=  #(TPROP_PCB_CTRL) ddr2_we_n_fpga;
-    ddr2_cke_sdram    <=  #(TPROP_PCB_CTRL) ddr2_cke_fpga;
+    ddr3_ck_p_sdram      <=  #(TPROP_PCB_CTRL) ddr3_ck_p_fpga;
+    ddr3_ck_n_sdram      <=  #(TPROP_PCB_CTRL) ddr3_ck_n_fpga;
+    ddr3_addr_sdram[0]   <=  #(TPROP_PCB_CTRL) ddr3_addr_fpga;
+    ddr3_addr_sdram[1]   <=  #(TPROP_PCB_CTRL) (CA_MIRROR == "ON") ?
+                                                 {ddr3_addr_fpga[ROW_WIDTH-1:9],
+                                                  ddr3_addr_fpga[7], ddr3_addr_fpga[8],
+                                                  ddr3_addr_fpga[5], ddr3_addr_fpga[6],
+                                                  ddr3_addr_fpga[3], ddr3_addr_fpga[4],
+                                                  ddr3_addr_fpga[2:0]} :
+                                                 ddr3_addr_fpga;
+    ddr3_ba_sdram[0]     <=  #(TPROP_PCB_CTRL) ddr3_ba_fpga;
+    ddr3_ba_sdram[1]     <=  #(TPROP_PCB_CTRL) (CA_MIRROR == "ON") ?
+                                                 {ddr3_ba_fpga[3-1:2],
+                                                  ddr3_ba_fpga[0],
+                                                  ddr3_ba_fpga[1]} :
+                                                 ddr3_ba_fpga;
+    ddr3_ras_n_sdram     <=  #(TPROP_PCB_CTRL) ddr3_ras_n_fpga;
+    ddr3_cas_n_sdram     <=  #(TPROP_PCB_CTRL) ddr3_cas_n_fpga;
+    ddr3_we_n_sdram      <=  #(TPROP_PCB_CTRL) ddr3_we_n_fpga;
+    ddr3_cke_sdram       <=  #(TPROP_PCB_CTRL) ddr3_cke_fpga;
   end
     
 
   always @( * )
-    ddr2_cs_n_sdram_tmp   <=  #(TPROP_PCB_CTRL) ddr2_cs_n_fpga;
-  assign ddr2_cs_n_sdram =  ddr2_cs_n_sdram_tmp;
+    ddr3_cs_n_sdram_tmp   <=  #(TPROP_PCB_CTRL) ddr3_cs_n_fpga;
+  assign ddr3_cs_n_sdram =  ddr3_cs_n_sdram_tmp;
     
 
   always @( * )
-    ddr2_dm_sdram_tmp <=  #(TPROP_PCB_DATA) ddr2_dm_fpga;//DM signal generation
-  assign ddr2_dm_sdram = ddr2_dm_sdram_tmp;
+    ddr3_dm_sdram_tmp <=  #(TPROP_PCB_DATA) ddr3_dm_fpga;//DM signal generation
+  assign ddr3_dm_sdram = ddr3_dm_sdram_tmp;
     
 
   always @( * )
-    ddr2_odt_sdram_tmp  <=  #(TPROP_PCB_CTRL) ddr2_odt_fpga;
-  assign ddr2_odt_sdram =  ddr2_odt_sdram_tmp;
+    ddr3_odt_sdram_tmp  <=  #(TPROP_PCB_CTRL) ddr3_odt_fpga;
+  assign ddr3_odt_sdram =  ddr3_odt_sdram_tmp;
     
 
 // Controlling the bi-directional BUS
@@ -362,8 +373,8 @@ module sim_tb_top;
        )
       u_delay_dq
        (
-        .A             (ddr2_dq_fpga[dqwd]),
-        .B             (ddr2_dq_sdram[dqwd]),
+        .A             (ddr3_dq_fpga[dqwd]),
+        .B             (ddr3_dq_sdram[dqwd]),
         .reset         (sys_rst_n),
         .phy_init_done (init_calib_complete)
        );
@@ -377,8 +388,8 @@ module sim_tb_top;
        )
       u_delay_dq_0
        (
-        .A             (ddr2_dq_fpga[0]),
-        .B             (ddr2_dq_sdram[0]),
+        .A             (ddr3_dq_fpga[0]),
+        .B             (ddr3_dq_sdram[0]),
         .reset         (sys_rst_n),
         .phy_init_done (init_calib_complete)
        );
@@ -395,8 +406,8 @@ module sim_tb_top;
        )
       u_delay_dqs_p
        (
-        .A             (ddr2_dqs_p_fpga[dqswd]),
-        .B             (ddr2_dqs_p_sdram[dqswd]),
+        .A             (ddr3_dqs_p_fpga[dqswd]),
+        .B             (ddr3_dqs_p_sdram[dqswd]),
         .reset         (sys_rst_n),
         .phy_init_done (init_calib_complete)
        );
@@ -409,8 +420,8 @@ module sim_tb_top;
        )
       u_delay_dqs_n
        (
-        .A             (ddr2_dqs_n_fpga[dqswd]),
-        .B             (ddr2_dqs_n_sdram[dqswd]),
+        .A             (ddr3_dqs_n_fpga[dqswd]),
+        .B             (ddr3_dqs_n_sdram[dqswd]),
         .reset         (sys_rst_n),
         .phy_init_done (init_calib_complete)
        );
@@ -431,11 +442,12 @@ module sim_tb_top;
      .BEGIN_ADDRESS             (BEGIN_ADDRESS),
      .END_ADDRESS               (END_ADDRESS),
      .PRBS_EADDR_MASK_POS       (PRBS_EADDR_MASK_POS),
-     .BANK_WIDTH                (BANK_WIDTH),
+
      .COL_WIDTH                 (COL_WIDTH),
      .CS_WIDTH                  (CS_WIDTH),
+     .DM_WIDTH                  (DM_WIDTH),
+    
      .DQ_WIDTH                  (DQ_WIDTH),
-     .DQS_WIDTH                 (DQS_WIDTH),
      .DQS_CNT_WIDTH             (DQS_CNT_WIDTH),
      .DRAM_WIDTH                (DRAM_WIDTH),
      .ECC_TEST                  (ECC_TEST),
@@ -443,44 +455,48 @@ module sim_tb_top;
      .ROW_WIDTH                 (ROW_WIDTH),
      .ADDR_WIDTH                (ADDR_WIDTH),
      .BURST_MODE                (BURST_MODE),
-
      .TCQ                       (TCQ),
 
+     
+    .DRAM_TYPE                 (DRAM_TYPE),
+    
+     
+    .nCK_PER_CLK               (nCK_PER_CLK),
+    
      
      .C_S_AXI_ID_WIDTH          (C_S_AXI_ID_WIDTH),
      .C_S_AXI_ADDR_WIDTH        (C_S_AXI_ADDR_WIDTH),
      .C_S_AXI_DATA_WIDTH        (C_S_AXI_DATA_WIDTH),
      .C_S_AXI_SUPPORTS_NARROW_BURST (C_S_AXI_SUPPORTS_NARROW_BURST),
     
-     .DEBUG_PORT                (DEBUG_PORT)
+     .DEBUG_PORT                (DEBUG_PORT),
     
-//     .RST_ACT_LOW               (RST_ACT_LOW)
+     .RST_ACT_LOW               (RST_ACT_LOW)
     )
    u_ip_top
      (
 
-     .ddr2_dq              (ddr2_dq_fpga),
-     .ddr2_dqs_n           (ddr2_dqs_n_fpga),
-     .ddr2_dqs_p           (ddr2_dqs_p_fpga),
+     .ddr3_dq              (ddr3_dq_fpga),
+     .ddr3_dqs_n           (ddr3_dqs_n_fpga),
+     .ddr3_dqs_p           (ddr3_dqs_p_fpga),
 
-     .ddr2_addr            (ddr2_addr_fpga),
-     .ddr2_ba              (ddr2_ba_fpga),
-     .ddr2_ras_n           (ddr2_ras_n_fpga),
-     .ddr2_cas_n           (ddr2_cas_n_fpga),
-     .ddr2_we_n            (ddr2_we_n_fpga),
-     .ddr2_ck_p            (ddr2_ck_p_fpga),
-     .ddr2_ck_n            (ddr2_ck_n_fpga),
-     .ddr2_cke             (ddr2_cke_fpga),
-     .ddr2_cs_n            (ddr2_cs_n_fpga),
+     .ddr3_addr            (ddr3_addr_fpga),
+     .ddr3_ba              (ddr3_ba_fpga),
+     .ddr3_ras_n           (ddr3_ras_n_fpga),
+     .ddr3_cas_n           (ddr3_cas_n_fpga),
+     .ddr3_we_n            (ddr3_we_n_fpga),
+     .ddr3_reset_n         (ddr3_reset_n),
+     .ddr3_ck_p            (ddr3_ck_p_fpga),
+     .ddr3_ck_n            (ddr3_ck_n_fpga),
+     .ddr3_cke             (ddr3_cke_fpga),
+     .ddr3_cs_n            (ddr3_cs_n_fpga),
     
-     .ddr2_dm              (ddr2_dm_fpga),
+     .ddr3_dm              (ddr3_dm_fpga),
     
-     .ddr2_odt             (ddr2_odt_fpga),
+     .ddr3_odt             (ddr3_odt_fpga),
     
      
      .sys_clk_i            (sys_clk_i),
-    
-     .clk_ref_i            (clk_ref_i),
     
       .init_calib_complete (init_calib_complete),
       .tg_compare_error    (tg_compare_error),
@@ -494,49 +510,25 @@ module sim_tb_top;
   genvar r,i;
   generate
     for (r = 0; r < CS_WIDTH; r = r + 1) begin: mem_rnk
-      if(DQ_WIDTH/16) begin: mem
-        for (i = 0; i < NUM_COMP; i = i + 1) begin: gen_mem
-          ddr2_model u_comp_ddr2
-            (
-             .ck      (ddr2_ck_p_sdram[0+(NUM_COMP*r)]),
-             .ck_n    (ddr2_ck_n_sdram[0+(NUM_COMP*r)]),
-             .cke     (ddr2_cke_sdram[0+(NUM_COMP*r)]),
-             .cs_n    (ddr2_cs_n_sdram[0+(NUM_COMP*r)]),
-             .ras_n   (ddr2_ras_n_sdram),
-             .cas_n   (ddr2_cas_n_sdram),
-             .we_n    (ddr2_we_n_sdram),
-             .dm_rdqs (ddr2_dm_sdram[(2*(i+1)-1):(2*i)]),
-             .ba      (ddr2_ba_sdram),
-             .addr    (ddr2_addr_sdram),
-             .dq      (ddr2_dq_sdram[16*(i+1)-1:16*(i)]),
-             .dqs     (ddr2_dqs_p_sdram[(2*(i+1)-1):(2*i)]),
-             .dqs_n   (ddr2_dqs_n_sdram[(2*(i+1)-1):(2*i)]),
-             .rdqs_n  (),
-             .odt     (ddr2_odt_sdram[0+(NUM_COMP*r)])
-             );
-        end
-      end
-      if (DQ_WIDTH%16) begin: gen_mem_extrabits
-        ddr2_model u_comp_ddr2
+      for (i = 0; i < NUM_COMP; i = i + 1) begin: gen_mem
+        ddr3_model u_comp_ddr3
           (
-           .ck      (ddr2_ck_p_sdram[0+(NUM_COMP*r)]),
-           .ck_n    (ddr2_ck_n_sdram[0+(NUM_COMP*r)]),
-           .cke     (ddr2_cke_sdram[0+(NUM_COMP*r)]),
-           .cs_n    (ddr2_cs_n_sdram[0+(NUM_COMP*r)]),
-           .ras_n   (ddr2_ras_n_sdram),
-           .cas_n   (ddr2_cas_n_sdram),
-           .we_n    (ddr2_we_n_sdram),
-           .dm_rdqs ({ddr2_dm_sdram[DM_WIDTH-1],ddr2_dm_sdram[DM_WIDTH-1]}),
-           .ba      (ddr2_ba_sdram),
-           .addr    (ddr2_addr_sdram),
-           .dq      ({ddr2_dq_sdram[DQ_WIDTH-1:(DQ_WIDTH-8)],
-                      ddr2_dq_sdram[DQ_WIDTH-1:(DQ_WIDTH-8)]}),
-           .dqs     ({ddr2_dqs_p_sdram[DQS_WIDTH-1],
-                      ddr2_dqs_p_sdram[DQS_WIDTH-1]}),
-           .dqs_n   ({ddr2_dqs_n_sdram[DQS_WIDTH-1],
-                      ddr2_dqs_n_sdram[DQS_WIDTH-1]}),
-           .rdqs_n  (),
-           .odt     (ddr2_odt_sdram[0+(NUM_COMP*r)])
+           .rst_n   (ddr3_reset_n),
+           .ck      (ddr3_ck_p_sdram[(i*MEMORY_WIDTH)/72]),
+           .ck_n    (ddr3_ck_n_sdram[(i*MEMORY_WIDTH)/72]),
+           .cke     (ddr3_cke_sdram[((i*MEMORY_WIDTH)/72)+(1*r)]),
+           .cs_n    (ddr3_cs_n_sdram[((i*MEMORY_WIDTH)/72)+(1*r)]),
+           .ras_n   (ddr3_ras_n_sdram),
+           .cas_n   (ddr3_cas_n_sdram),
+           .we_n    (ddr3_we_n_sdram),
+           .dm_tdqs (ddr3_dm_sdram[i]),
+           .ba      (ddr3_ba_sdram[r]),
+           .addr    (ddr3_addr_sdram[r]),
+           .dq      (ddr3_dq_sdram[MEMORY_WIDTH*(i+1)-1:MEMORY_WIDTH*(i)]),
+           .dqs     (ddr3_dqs_p_sdram[i]),
+           .dqs_n   (ddr3_dqs_n_sdram[i]),
+           .tdqs_n  (),
+           .odt     (ddr3_odt_sdram[((i*MEMORY_WIDTH)/72)+(1*r)])
            );
       end
     end

@@ -53,7 +53,7 @@
 ##  \   \         Application        : MIG
 ##  /   /         Filename           : sim.do
 ## /___/   /\     Date Last Modified : $Date: 2011/06/02 08:31:17 $
-## \   \  /  \    Date Created       : Fri Oct 14 2011
+## \   \  /  \    Date Created       : Tue Sept 21 2010
 ##  \___\/\___\
 ##
 ## Device           : 7 Series
@@ -91,12 +91,12 @@ vlog  example_top.v
 
 #Compile files in sim folder (excluding model parameter file)#
 #$XILINX variable must be set
-vlog -incr $env(XILINX_VIVADO)/data/verilog/src/glbl.v
+vlog  -incr $env(XILINX_VIVADO)/data/verilog/src/glbl.v
 vlog wiredly.v
 vlog sim_tb_top.v
 
 #Pass the parameters for memory model parameter file#
-vlog -incr +define+x1Gb +define+sg25E +define+x16 ddr2_model.v
+vlog -sv +define+x1Gb +define+sg125 +define+x8 ddr3_model.sv
 
 #Load the design. Use required libraries.#
 vsim -t fs -novopt +notimingchecks -L unisims_ver -L secureip work.sim_tb_top glbl
