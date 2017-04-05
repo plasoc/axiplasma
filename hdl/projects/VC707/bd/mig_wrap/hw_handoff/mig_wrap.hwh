@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Tue Apr 04 22:30:51 2017" VIVADOVERSION="2016.4">
+<EDKSYSTEM EDWVERSION="1.2" TIMESTAMP="Wed Apr 05 00:16:42 2017" VIVADOVERSION="2016.4">
 
   <SYSTEMINFO ARCH="virtex7" BOARD="xilinx.com:vc707:part0:1.3" DEVICE="7vx485t" NAME="mig_wrap" PACKAGE="ffg1761" SPEEDGRADE="-2"/>
 

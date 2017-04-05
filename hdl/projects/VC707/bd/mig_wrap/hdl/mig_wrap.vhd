@@ -1,7 +1,7 @@
 --Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 ----------------------------------------------------------------------------------
 --Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
---Date        : Tue Apr 04 22:29:24 2017
+--Date        : Wed Apr 05 00:15:23 2017
 --Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 --Command     : generate_target mig_wrap.bd
 --Design      : mig_wrap
