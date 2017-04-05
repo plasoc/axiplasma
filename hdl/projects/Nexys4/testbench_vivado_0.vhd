@@ -18,7 +18,7 @@ end testbench_vivado_0;
 architecture Behavioral of testbench_vivado_0 is
     component axiplasma_wrapper is
         generic (
-            lower_app : string := "jump";
+            lower_app : string := "boot";
             upper_app : string := "main";
             upper_ext : boolean := false);
         port( 

@@ -25,9 +25,9 @@ entity axiplasma_wrapper is
         upper_app : string := "none";
         upper_ext : boolean := true);
     port( 
-        raw_clock_p : in std_logic; -- 200 MHz on the VC707.
-        raw_clock_n : in std_logic; -- 200 MHz on the VC707.
-        raw_nreset : in std_logic;
+        sys_clk_p : in std_logic; -- 200 MHz on the VC707.
+        sys_clk_n : in std_logic; -- 200 MHz on the VC707.
+        sys_rst : in std_logic;
         gpio_output : out std_logic_vector(vc707_default_gpio_width-1 downto 0);
         gpio_input : in std_logic_vector(vc707_default_gpio_width-1 downto 0);
         uart_tx : out std_logic;
@@ -52,24 +52,21 @@ end axiplasma_wrapper;
 architecture Behavioral of axiplasma_wrapper is
     component mig_wrap_wrapper is
         port (
-            ACLK : in STD_LOGIC;
-            ARESETN : in STD_LOGIC;
-            DDR3_addr : out std_logic_vector(13 downto 0);
-            DDR3_ba : out std_logic_vector(2 downto 0);
-            DDR3_cas_n : out std_logic;
-            DDR3_ck_n : out std_logic_vector(0 downto 0);
-            DDR3_ck_p : out std_logic_vector(0 downto 0);
-            DDR3_cke : out std_logic_vector(0 downto 0);
-            DDR3_cs_n : out std_logic_vector(0 downto 0);
-            DDR3_dm : out std_logic_vector(7 downto 0);
-            DDR3_dq : inout std_logic_vector(63 downto 0);
-            DDR3_dqs_n : inout std_logic_vector(7 downto 0);
-            DDR3_dqs_p : inout std_logic_vector(7 downto 0);
-            DDR3_odt : out std_logic_vector(0 downto 0);
-            DDR3_ras_n : out std_logic;
-            DDR3_reset_n : out std_logic;
-            DDR3_we_n : out std_logic;
-            S00_ARESETN : in STD_LOGIC;
+            DDR3_addr : out STD_LOGIC_VECTOR ( 13 downto 0 );
+            DDR3_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            DDR3_cas_n : out STD_LOGIC;
+            DDR3_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR3_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR3_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR3_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR3_dm : out STD_LOGIC_VECTOR ( 7 downto 0 );
+            DDR3_dq : inout STD_LOGIC_VECTOR ( 63 downto 0 );
+            DDR3_dqs_n : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+            DDR3_dqs_p : inout STD_LOGIC_VECTOR ( 7 downto 0 );
+            DDR3_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR3_ras_n : out STD_LOGIC;
+            DDR3_reset_n : out STD_LOGIC;
+            DDR3_we_n : out STD_LOGIC;
             S00_AXI_araddr : in STD_LOGIC_VECTOR ( 31 downto 0 );
             S00_AXI_arburst : in STD_LOGIC_VECTOR ( 1 downto 0 );
             S00_AXI_arcache : in STD_LOGIC_VECTOR ( 3 downto 0 );
@@ -109,8 +106,13 @@ architecture Behavioral of axiplasma_wrapper is
             S00_AXI_wready : out STD_LOGIC;
             S00_AXI_wstrb : in STD_LOGIC_VECTOR ( 3 downto 0 );
             S00_AXI_wvalid : in STD_LOGIC;
-            sys_clk_i : in STD_LOGIC;
-            sys_rst : in STD_LOGIC);
+            SYS_CLK_clk_n : in STD_LOGIC;
+            SYS_CLK_clk_p : in STD_LOGIC;
+            interconnect_aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
+            peripheral_aresetn : out STD_LOGIC_VECTOR ( 0 to 0 );
+            sys_rst : in STD_LOGIC;
+            ui_addn_clk_0 : out STD_LOGIC;
+            ui_clk_sync_rst : out STD_LOGIC);
     end component;
     -- Component declarations.
     component bram is
@@ -180,28 +182,6 @@ architecture Behavioral of axiplasma_wrapper is
             m_axi_bvalid : in std_logic;
             m_axi_bresp : in std_logic_vector(1 downto 0);
             cdma_tvect_out : out std_logic_vector(31 downto 0));
-    end component;
-    component clk_wiz_0 is 
-        port (            
-            aclk : out std_logic;
-            ddr_aclk : out std_logic;
-            resetn : in std_logic;
-            locked : out std_logic;
-            raw_clock_p : in std_logic;
-            raw_clock_n : in std_logic);
-    end component;
-    component proc_sys_reset_0 is
-        port (
-            slowest_sync_clk : in std_logic;
-            ext_reset_in : in std_logic;
-            aux_reset_in : in std_logic;
-            mb_debug_sys_rst : in std_logic;
-            dcm_locked : in std_logic;
-            mb_reset : out std_logic;
-            bus_struct_reset : out std_logic_vector(0 downto 0);
-            peripheral_reset : out std_logic_vector(0 downto 0);
-            interconnect_aresetn : out std_logic_vector(0 downto 0);
-            peripheral_aresetn : out std_logic_vector(0 downto 0));
     end component;
     component axi_bram_ctrl_0 is
         port (
@@ -307,7 +287,8 @@ architecture Behavioral of axiplasma_wrapper is
     constant axi_ram_address_width : integer := 18;
     constant axi_ram_depth : integer := 65536;
     signal aclk : std_logic;
-    signal ddr_aclk : std_logic;
+    signal ddr_reset : std_logic;
+    signal ddr_clock : std_logic;
     signal aresetn : std_logic_vector(0 downto 0);
     signal cross_aresetn : std_logic_vector(0 downto 0);
     signal dcm_locked : std_logic;
@@ -842,6 +823,26 @@ architecture Behavioral of axiplasma_wrapper is
     signal cdma_int : std_logic;
     signal uart_int : std_logic;
     signal timer_extra_0_int : std_logic;
+    
+--    attribute mark_debug : boolean;
+--    attribute mark_debug of cpu_axi_full_awaddr : signal is true;
+--    attribute mark_debug of cpu_axi_full_awvalid : signal is true;
+--    attribute mark_debug of cpu_axi_full_awready : signal is true;
+--    attribute mark_debug of cpu_axi_full_wdata : signal is true;
+--    attribute mark_debug of cpu_axi_full_wstrb : signal is true;
+--    attribute mark_debug of cpu_axi_full_wlast : signal is true;
+--    attribute mark_debug of cpu_axi_full_wvalid : signal is true;
+--    attribute mark_debug of cpu_axi_full_wready : signal is true;
+--    attribute mark_debug of cpu_axi_full_bresp : signal is true;
+--    attribute mark_debug of cpu_axi_full_bvalid : signal is true;
+--    attribute mark_debug of cpu_axi_full_bready : signal is true;
+--    attribute mark_debug of cpu_axi_full_araddr : signal is true;
+--    attribute mark_debug of cpu_axi_full_arvalid : signal is true;
+--    attribute mark_debug of cpu_axi_full_arready : signal is true;
+--    attribute mark_debug of cpu_axi_full_rdata : signal is true;
+--    attribute mark_debug of cpu_axi_full_rlast : signal is true;
+--    attribute mark_debug of cpu_axi_full_rvalid : signal is true;
+--    attribute mark_debug of cpu_axi_full_rready : signal is true;
 begin
     int_dev_ints(0) <= timer_int;
     int_dev_ints(1) <= gpio_int;
@@ -858,30 +859,6 @@ begin
     ram_axi_full_awid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_awid;
     ram_axi_full_bid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_bid;
     ram_axi_full_rid_slv(axi_master_id_width-1 downto 0) <= ram_axi_full_rid;
-
-    -- Clock instantiation.
-     clk_wiz_inst : clk_wiz_0  
-        port map (            
-            aclk => aclk,
-            ddr_aclk => ddr_aclk,
-            resetn => raw_nreset,
-            locked => dcm_locked,
-            raw_clock_p => raw_clock_p,
-            raw_clock_n => raw_clock_n);
-            
-    -- Reset core instantiation.
-    proc_sys_reset_inst : proc_sys_reset_0 
-          PORT map (
-            slowest_sync_clk => aclk,
-            ext_reset_in => raw_nreset,
-            aux_reset_in => '0',
-            mb_debug_sys_rst => '0',
-            dcm_locked => dcm_locked,
-            mb_reset => open,
-            bus_struct_reset => open,
-            peripheral_reset => open,
-            interconnect_aresetn => cross_aresetn,
-            peripheral_aresetn => aresetn);
             
     -- Crossbar instantiation.
     plasoc_0_crossbar_wrap_inst : plasoc_0_crossbar_wrap
@@ -1854,68 +1831,70 @@ begin
     
     gen_ext_mm :
     if upper_ext=true generate         
-    mig_wrap_wrapper_inst : 
-    mig_wrap_wrapper 
-        port map (
-            ACLK => aclk,
-            ARESETN => cross_aresetn(0),
-            DDR3_addr => DDR3_addr,
-            DDR3_ba => DDR3_ba,
-            DDR3_cas_n => DDR3_cas_n,
-            DDR3_ck_n => DDR3_ck_n,
-            DDR3_ck_p => DDR3_ck_p,
-            DDR3_cke => DDR3_cke,
-            DDR3_cs_n => DDR3_cs_n,
-            DDR3_dm => DDR3_dm,
-            DDR3_dq => DDR3_dq,
-            DDR3_dqs_n => DDR3_dqs_n,
-            DDR3_dqs_p => DDR3_dqs_p,
-            DDR3_odt => DDR3_odt,
-            DDR3_ras_n => DDR3_ras_n,
-            DDR3_reset_n => DDR3_reset_n,
-            DDR3_we_n => DDR3_we_n,
-            S00_ARESETN => aresetn(0),
-            S00_AXI_araddr => ram_axi_full_araddr,
-            S00_AXI_arburst => ram_axi_full_arburst,
-            S00_AXI_arcache => ram_axi_full_arcache,
-            S00_AXI_arid => ram_axi_full_arid_slv,
-            S00_AXI_arlen => ram_axi_full_arlen,
-            S00_AXI_arlock => ram_axi_full_arlock_slv,
-            S00_AXI_arprot => ram_axi_full_arprot,
-            S00_AXI_arqos => ram_axi_full_arqos,
-            S00_AXI_arready => ram_axi_full_arready,
-            S00_AXI_arregion => ram_axi_full_arregion,
-            S00_AXI_arsize => ram_axi_full_arsize,
-            S00_AXI_arvalid => ram_axi_full_arvalid,
-            S00_AXI_awaddr => ram_axi_full_awaddr,
-            S00_AXI_awburst => ram_axi_full_awburst,
-            S00_AXI_awcache => ram_axi_full_awcache,
-            S00_AXI_awid => ram_axi_full_awid_slv,
-            S00_AXI_awlen => ram_axi_full_awlen,
-            S00_AXI_awlock => ram_axi_full_awlock_slv,
-            S00_AXI_awprot => ram_axi_full_awprot,
-            S00_AXI_awqos => ram_axi_full_awqos,
-            S00_AXI_awready => ram_axi_full_awready,
-            S00_AXI_awregion => ram_axi_full_awregion,
-            S00_AXI_awsize => ram_axi_full_awsize,
-            S00_AXI_awvalid => ram_axi_full_awvalid,
-            S00_AXI_bid => ram_axi_full_bid_slv,
-            S00_AXI_bready => ram_axi_full_bready,
-            S00_AXI_bresp => ram_axi_full_bresp,
-            S00_AXI_bvalid => ram_axi_full_bvalid,
-            S00_AXI_rdata => ram_axi_full_rdata,
-            S00_AXI_rid => ram_axi_full_rid_slv,
-            S00_AXI_rlast => ram_axi_full_rlast,
-            S00_AXI_rready => ram_axi_full_rready,
-            S00_AXI_rresp => ram_axi_full_rresp,
-            S00_AXI_rvalid => ram_axi_full_rvalid,
-            S00_AXI_wdata => ram_axi_full_wdata,
-            S00_AXI_wlast => ram_axi_full_wlast,
-            S00_AXI_wready => ram_axi_full_wready,
-            S00_AXI_wstrb => ram_axi_full_wstrb,
-            S00_AXI_wvalid => ram_axi_full_wvalid,
-            sys_clk_i => ddr_aclk,
-            sys_rst => raw_nreset);
+        mig_wrap_wrapper_inst : 
+        mig_wrap_wrapper 
+            port map (
+                DDR3_addr => DDR3_addr,
+                DDR3_ba => DDR3_ba,
+                DDR3_cas_n => DDR3_cas_n,
+                DDR3_ck_n => DDR3_ck_n,
+                DDR3_ck_p => DDR3_ck_p,
+                DDR3_cke => DDR3_cke,
+                DDR3_cs_n => DDR3_cs_n,
+                DDR3_dm => DDR3_dm,
+                DDR3_dq => DDR3_dq,
+                DDR3_dqs_n => DDR3_dqs_n,
+                DDR3_dqs_p => DDR3_dqs_p,
+                DDR3_odt => DDR3_odt,
+                DDR3_ras_n => DDR3_ras_n,
+                DDR3_reset_n => DDR3_reset_n,
+                DDR3_we_n => DDR3_we_n,
+                S00_AXI_araddr => ram_axi_full_araddr,
+                S00_AXI_arburst => ram_axi_full_arburst,
+                S00_AXI_arcache => ram_axi_full_arcache,
+                S00_AXI_arid => ram_axi_full_arid_slv,
+                S00_AXI_arlen => ram_axi_full_arlen,
+                S00_AXI_arlock => ram_axi_full_arlock_slv,
+                S00_AXI_arprot => ram_axi_full_arprot,
+                S00_AXI_arqos => ram_axi_full_arqos,
+                S00_AXI_arready => ram_axi_full_arready,
+                S00_AXI_arregion => ram_axi_full_arregion,
+                S00_AXI_arsize => ram_axi_full_arsize,
+                S00_AXI_arvalid => ram_axi_full_arvalid,
+                S00_AXI_awaddr => ram_axi_full_awaddr,
+                S00_AXI_awburst => ram_axi_full_awburst,
+                S00_AXI_awcache => ram_axi_full_awcache,
+                S00_AXI_awid => ram_axi_full_awid_slv,
+                S00_AXI_awlen => ram_axi_full_awlen,
+                S00_AXI_awlock => ram_axi_full_awlock_slv,
+                S00_AXI_awprot => ram_axi_full_awprot,
+                S00_AXI_awqos => ram_axi_full_awqos,
+                S00_AXI_awready => ram_axi_full_awready,
+                S00_AXI_awregion => ram_axi_full_awregion,
+                S00_AXI_awsize => ram_axi_full_awsize,
+                S00_AXI_awvalid => ram_axi_full_awvalid,
+                S00_AXI_bid => ram_axi_full_bid_slv,
+                S00_AXI_bready => ram_axi_full_bready,
+                S00_AXI_bresp => ram_axi_full_bresp,
+                S00_AXI_bvalid => ram_axi_full_bvalid,
+                S00_AXI_rdata => ram_axi_full_rdata,
+                S00_AXI_rid => ram_axi_full_rid_slv,
+                S00_AXI_rlast => ram_axi_full_rlast,
+                S00_AXI_rready => ram_axi_full_rready,
+                S00_AXI_rresp => ram_axi_full_rresp,
+                S00_AXI_rvalid => ram_axi_full_rvalid,
+                S00_AXI_wdata => ram_axi_full_wdata,
+                S00_AXI_wlast => ram_axi_full_wlast,
+                S00_AXI_wready => ram_axi_full_wready,
+                S00_AXI_wstrb => ram_axi_full_wstrb,
+                S00_AXI_wvalid => ram_axi_full_wvalid,
+                SYS_CLK_clk_n => sys_clk_n,
+                SYS_CLK_clk_p => sys_clk_p,
+                interconnect_aresetn => cross_aresetn,
+                peripheral_aresetn => aresetn,
+                sys_rst => sys_rst,
+                ui_addn_clk_0 => aclk,
+                ui_clk_sync_rst => open);
     end generate;
             
     plasoc_int_inst : plasoc_int 

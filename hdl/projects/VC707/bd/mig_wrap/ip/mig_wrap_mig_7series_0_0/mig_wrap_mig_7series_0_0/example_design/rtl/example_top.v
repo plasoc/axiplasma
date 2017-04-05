@@ -165,6 +165,32 @@ module example_top #
                                      // write MMCM VCO multiplier
    parameter MMCM_DIVCLK_DIVIDE    = 1,
                                      // write MMCM VCO divisor
+   parameter MMCM_CLKOUT0_EN       = "TRUE",
+                                     // "TRUE" - MMCM output clock (CLKOUT0) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT0) is disabled
+   parameter MMCM_CLKOUT1_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT1) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT1) is disabled
+   parameter MMCM_CLKOUT2_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT2) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT2) is disabled
+   parameter MMCM_CLKOUT3_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT3) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT3) is disabled
+   parameter MMCM_CLKOUT4_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT4) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT4) is disabled
+   parameter MMCM_CLKOUT0_DIVIDE   = 16.000,
+                                     // VCO output divisor for MMCM output clock (CLKOUT0)
+   parameter MMCM_CLKOUT1_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT1)
+   parameter MMCM_CLKOUT2_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT2)
+   parameter MMCM_CLKOUT3_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT3)
+   parameter MMCM_CLKOUT4_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT4)
+
 
    //***************************************************************************
    // Simulation parameters
@@ -198,7 +224,7 @@ module example_top #
                                              // Width of S_AXI_AWADDR, S_AXI_ARADDR, M_AXI_AWADDR and
                                              // M_AXI_ARADDR for all SI/MI slots.
                                              // # = 32.
-   parameter C_S_AXI_DATA_WIDTH            = 512,
+   parameter C_S_AXI_DATA_WIDTH            = 32,
                                              // Width of WDATA and RDATA on SI slot.
                                              // Must be <= APP_DATA_WIDTH.
                                              // # = 32, 64, 128, 256.
@@ -214,7 +240,7 @@ module example_top #
                                      // # = "ON" Enable debug signals/controls.
                                      //   = "OFF" Disable debug signals/controls.
       
-   parameter RST_ACT_LOW           = 1
+   parameter RST_ACT_LOW           = 0
                                      // =1 for active low reset,
                                      // =0 for active high.
    )
@@ -245,8 +271,9 @@ module example_top #
 
    // Inputs
    
-   // Single-ended system clock
-   input                                        sys_clk_i,
+   // Differential system clocks
+   input                                        sys_clk_p,
+   input                                        sys_clk_n,
    
 
    output                                       tg_compare_error,
@@ -302,6 +329,11 @@ function integer clogb2 (input integer size);
       
   wire                              clk;
   wire                              rst;
+  wire                              ui_addn_clk_0;
+  wire                              ui_addn_clk_1;
+  wire                              ui_addn_clk_2;
+  wire                              ui_addn_clk_3;
+  wire                              ui_addn_clk_4;
   wire                              mmcm_locked;
   reg                               aresetn;
   wire                              app_sr_active;
@@ -427,6 +459,11 @@ function integer clogb2 (input integer size);
        .ui_clk                         (clk),
        .ui_clk_sync_rst                (rst),
 
+       .ui_addn_clk_0                  (ui_addn_clk_0),
+       .ui_addn_clk_1                  (ui_addn_clk_1),
+       .ui_addn_clk_2                  (ui_addn_clk_2),
+       .ui_addn_clk_3                  (ui_addn_clk_3),
+       .ui_addn_clk_4                  (ui_addn_clk_4),
        .mmcm_locked                    (mmcm_locked),
        .aresetn                        (aresetn),
        .app_sr_active                  (app_sr_active),
@@ -479,7 +516,8 @@ function integer clogb2 (input integer size);
       
        
 // System Clock Ports
-       .sys_clk_i                       (sys_clk_i),
+       .sys_clk_p                       (sys_clk_p),
+       .sys_clk_n                       (sys_clk_n),
        .device_temp            (device_temp),
        `ifdef SKIP_CALIB
        .calib_tap_req                    (calib_tap_req),

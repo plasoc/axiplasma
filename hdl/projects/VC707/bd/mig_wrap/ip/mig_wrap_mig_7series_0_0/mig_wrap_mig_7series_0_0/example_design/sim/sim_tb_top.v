@@ -152,7 +152,7 @@ module sim_tb_top;
    //***************************************************************************
    // IODELAY and PHY related parameters
    //***************************************************************************
-   parameter RST_ACT_LOW           = 1;
+   parameter RST_ACT_LOW           = 0;
                                      // =1 for active low reset,
                                      // =0 for active high.
 
@@ -181,7 +181,7 @@ module sim_tb_top;
                                              // Width of S_AXI_AWADDR, S_AXI_ARADDR, M_AXI_AWADDR and
                                              // M_AXI_ARADDR for all SI/MI slots.
                                              // # = 32.
-   parameter C_S_AXI_DATA_WIDTH            = 512;
+   parameter C_S_AXI_DATA_WIDTH            = 32;
                                              // Width of WDATA and RDATA on SI slot.
                                              // Must be <= APP_DATA_WIDTH.
                                              // # = 32, 64, 128, 256.
@@ -238,6 +238,9 @@ module sim_tb_top;
 
 
   reg                     sys_clk_i;
+  wire                               sys_clk_p;
+  wire                               sys_clk_n;
+    
 
   reg clk_ref_i;
 
@@ -312,6 +315,8 @@ module sim_tb_top;
   always
     sys_clk_i = #(CLKIN_PERIOD/2.0) ~sys_clk_i;
 
+  assign sys_clk_p = sys_clk_i;
+  assign sys_clk_n = ~sys_clk_i;
 
   initial
     clk_ref_i = 1'b0;
@@ -496,7 +501,8 @@ module sim_tb_top;
      .ddr3_odt             (ddr3_odt_fpga),
     
      
-     .sys_clk_i            (sys_clk_i),
+     .sys_clk_p            (sys_clk_p),
+     .sys_clk_n            (sys_clk_n),
     
       .init_calib_complete (init_calib_complete),
       .tg_compare_error    (tg_compare_error),

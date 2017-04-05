@@ -201,7 +201,7 @@ module mig_wrap_mig_7series_0_0_mig #
                                      // Output Driver Impedance Control (Mode Register 1).
                                      // # = "HIGH" - RZQ/7,
                                      //   = "LOW" - RZQ/6.
-   parameter RTT_NOM               = "60",
+   parameter RTT_NOM               = "40",
                                      // RTT_NOM (ODT) (Mode Register 1).
                                      //   = "120" - RZQ/2,
                                      //   = "60"  - RZQ/4,
@@ -250,6 +250,32 @@ module mig_wrap_mig_7series_0_0_mig #
                                      // write MMCM VCO multiplier
    parameter MMCM_DIVCLK_DIVIDE    = 1,
                                      // write MMCM VCO divisor
+   parameter MMCM_CLKOUT0_EN       = "TRUE",
+                                     // "TRUE" - MMCM output clock (CLKOUT0) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT0) is disabled
+   parameter MMCM_CLKOUT1_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT1) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT1) is disabled
+   parameter MMCM_CLKOUT2_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT2) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT2) is disabled
+   parameter MMCM_CLKOUT3_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT3) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT3) is disabled
+   parameter MMCM_CLKOUT4_EN       = "FALSE",
+                                     // "TRUE" - MMCM output clock (CLKOUT4) is enabled
+                                     // "FALSE" - MMCM output clock (CLKOUT4) is disabled
+   parameter MMCM_CLKOUT0_DIVIDE   = 16.000,
+                                     // VCO output divisor for MMCM output clock (CLKOUT0)
+   parameter MMCM_CLKOUT1_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT1)
+   parameter MMCM_CLKOUT2_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT2)
+   parameter MMCM_CLKOUT3_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT3)
+   parameter MMCM_CLKOUT4_DIVIDE   = 1,
+                                     // VCO output divisor for MMCM output clock (CLKOUT4)
+
 
    //***************************************************************************
    // Memory Timing Parameters. These parameters varies based on the selected
@@ -336,34 +362,34 @@ module mig_wrap_mig_7series_0_0_mig #
                                      // or control Byte lane. '1' in a bit
                                      // position indicates a data byte lane and
                                      // a '0' indicates a control byte lane
-   parameter PHY_0_BITLANES        = 48'h3FE_3FE_3FE_2FF,
-   parameter PHY_1_BITLANES        = 48'h3FF_FFE_C00_000,
-   parameter PHY_2_BITLANES        = 48'h3FE_3FE_3FE_2FF,
+   parameter PHY_0_BITLANES        = 48'h3FE_1FF_1FF_2FF,
+   parameter PHY_1_BITLANES        = 48'hFFE_F30_CB4_000,
+   parameter PHY_2_BITLANES        = 48'h3FE_3FE_3BF_2FF,
 
    // control/address/data pin mapping parameters
    parameter CK_BYTE_MAP
-     = 144'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_13,
+     = 144'h00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_11,
    parameter ADDR_MAP
-     = 192'h000_000_139_138_137_136_135_134_133_132_131_130_129_128_127_126,
-   parameter BANK_MAP   = 36'h12B_12A_125,
-   parameter CAS_MAP    = 12'h123,
+     = 192'h000_000_132_136_135_133_139_124_131_129_137_134_13A_128_138_13B,
+   parameter BANK_MAP   = 36'h125_12A_12B,
+   parameter CAS_MAP    = 12'h115,
    parameter CKE_ODT_BYTE_MAP = 8'h00,
-   parameter CKE_MAP    = 96'h000_000_000_000_000_000_000_11B,
-   parameter ODT_MAP    = 96'h000_000_000_000_000_000_000_11A,
-   parameter CS_MAP     = 120'h000_000_000_000_000_000_000_000_000_121,
+   parameter CKE_MAP    = 96'h000_000_000_000_000_000_000_117,
+   parameter ODT_MAP    = 96'h000_000_000_000_000_000_000_112,
+   parameter CS_MAP     = 120'h000_000_000_000_000_000_000_000_000_114,
    parameter PARITY_MAP = 12'h000,
-   parameter RAS_MAP    = 12'h124,
-   parameter WE_MAP     = 12'h122,
+   parameter RAS_MAP    = 12'h11A,
+   parameter WE_MAP     = 12'h11B,
    parameter DQS_BYTE_MAP
-     = 144'h00_00_00_00_00_00_00_00_00_00_20_21_22_23_00_01_02_03,
-   parameter DATA0_MAP  = 96'h031_032_033_034_035_036_037_038,
-   parameter DATA1_MAP  = 96'h021_022_023_024_025_026_027_028,
-   parameter DATA2_MAP  = 96'h011_012_013_014_016_017_018_019,
-   parameter DATA3_MAP  = 96'h000_001_002_003_004_005_006_007,
-   parameter DATA4_MAP  = 96'h231_232_233_234_235_236_237_238,
-   parameter DATA5_MAP  = 96'h221_222_223_224_225_226_227_228,
-   parameter DATA6_MAP  = 96'h211_212_213_214_216_217_218_219,
-   parameter DATA7_MAP  = 96'h200_201_202_203_204_205_206_207,
+     = 144'h00_00_00_00_00_00_00_00_00_00_20_21_22_23_03_02_01_00,
+   parameter DATA0_MAP  = 96'h009_000_003_001_007_006_005_002,
+   parameter DATA1_MAP  = 96'h014_018_010_011_017_016_012_013,
+   parameter DATA2_MAP  = 96'h021_022_025_020_027_023_026_028,
+   parameter DATA3_MAP  = 96'h033_039_031_035_032_038_034_037,
+   parameter DATA4_MAP  = 96'h231_238_237_236_233_232_234_239,
+   parameter DATA5_MAP  = 96'h226_227_225_229_221_222_224_228,
+   parameter DATA6_MAP  = 96'h214_215_210_218_217_213_219_212,
+   parameter DATA7_MAP  = 96'h207_203_204_206_202_201_205_209,
    parameter DATA8_MAP  = 96'h000_000_000_000_000_000_000_000,
    parameter DATA9_MAP  = 96'h000_000_000_000_000_000_000_000,
    parameter DATA10_MAP = 96'h000_000_000_000_000_000_000_000,
@@ -374,7 +400,7 @@ module mig_wrap_mig_7series_0_0_mig #
    parameter DATA15_MAP = 96'h000_000_000_000_000_000_000_000,
    parameter DATA16_MAP = 96'h000_000_000_000_000_000_000_000,
    parameter DATA17_MAP = 96'h000_000_000_000_000_000_000_000,
-   parameter MASK0_MAP  = 108'h000_209_215_229_239_009_015_029_039,
+   parameter MASK0_MAP  = 108'h000_200_211_223_235_036_024_015_004,
    parameter MASK1_MAP  = 108'h000_000_000_000_000_000_000_000_000,
 
    parameter SLOT_0_CONFIG         = 8'b0000_0001,
@@ -422,13 +448,13 @@ module mig_wrap_mig_7series_0_0_mig #
                                      // It is associated to a set of IODELAYs with
                                      // an IDELAYCTRL that have same IODELAY CONTROLLER
                                      // clock frequency (300MHz/400MHz).
-   parameter SYSCLK_TYPE           = "SINGLE_ENDED",
+   parameter SYSCLK_TYPE           = "DIFFERENTIAL",
                                      // System clock type DIFFERENTIAL, SINGLE_ENDED,
                                      // NO_BUFFER
    parameter REFCLK_TYPE           = "USE_SYSTEM_CLOCK",
                                      // Reference clock type DIFFERENTIAL, SINGLE_ENDED,
                                      // NO_BUFFER, USE_SYSTEM_CLOCK
-   parameter SYS_RST_PORT          = "FALSE",
+   parameter SYS_RST_PORT          = "TRUE",
                                      // "TRUE" - if pin is selected for sys_rst
                                      //          and IBUF will be instantiated.
                                      // "FALSE" - if pin is not selected for sys_rst
@@ -461,7 +487,7 @@ module mig_wrap_mig_7series_0_0_mig #
    parameter nCK_PER_CLK           = 4,
    // # of memory CKs per fabric CLK
    
-   parameter DIFF_TERM_SYSCLK      = "TRUE",
+   parameter DIFF_TERM_SYSCLK      = "FALSE",
                                      // Differential Termination for System
                                      // clock input pins
       
@@ -471,7 +497,7 @@ module mig_wrap_mig_7series_0_0_mig #
    // AXI4 Shim parameters
    //***************************************************************************
    
-   parameter UI_EXTRA_CLOCKS = "FALSE",
+   parameter UI_EXTRA_CLOCKS = "TRUE",
                                      // Generates extra clocks as
                                      // 1/2, 1/4 and 1/8 of fabrick clock.
                                      // Valid for DDR2/DDR3 AXI interfaces
@@ -485,7 +511,7 @@ module mig_wrap_mig_7series_0_0_mig #
                                              // Width of S_AXI_AWADDR, S_AXI_ARADDR, M_AXI_AWADDR and
                                              // M_AXI_ARADDR for all SI/MI slots.
                                              // # = 32.
-   parameter C_S_AXI_DATA_WIDTH            = 512,
+   parameter C_S_AXI_DATA_WIDTH            = 32,
                                              // Width of WDATA and RDATA on SI slot.
                                              // Must be <= APP_DATA_WIDTH.
                                              // # = 32, 64, 128, 256.
@@ -564,7 +590,7 @@ module mig_wrap_mig_7series_0_0_mig #
                                      // # = "L", "N". When FPGA VccINT is 0.9v,
                                      // the value is "L", else it is "N"
       
-   parameter RST_ACT_LOW           = 1
+   parameter RST_ACT_LOW           = 0
                                      // =1 for active low reset,
                                      // =0 for active high.
    )
@@ -595,14 +621,20 @@ module mig_wrap_mig_7series_0_0_mig #
 
    // Inputs
    
-   // Single-ended system clock
-   input                                        sys_clk_i,
+   // Differential system clocks
+   input                                        sys_clk_p,
+   input                                        sys_clk_n,
    
    
    // user interface signals
    output                                       ui_clk,
    output                                       ui_clk_sync_rst,
    
+   output                                       ui_addn_clk_0,
+   output                                       ui_addn_clk_1,
+   output                                       ui_addn_clk_2,
+   output                                       ui_addn_clk_3,
+   output                                       ui_addn_clk_4,
    output                                       mmcm_locked,
    
    input                                        aresetn,
@@ -770,8 +802,7 @@ module mig_wrap_mig_7series_0_0_mig #
   // Interrupt output
   wire                              interrupt;
 
-  wire                              sys_clk_p;
-  wire                              sys_clk_n;
+  wire                              sys_clk_i;
   wire                              mmcm_clk;
   wire                              clk_ref_p;
   wire                              clk_ref_n;
@@ -863,8 +894,7 @@ module mig_wrap_mig_7series_0_0_mig #
   assign ui_clk = clk;
   assign ui_clk_sync_rst = rst;
   
-  assign sys_clk_p = 1'b0;
-  assign sys_clk_n = 1'b0;
+  assign sys_clk_i = 1'b0;
   assign clk_ref_i = 1'b0;
       
 
@@ -941,23 +971,34 @@ module mig_wrap_mig_7series_0_0_mig #
          
   mig_7series_v4_0_infrastructure #
     (
-     .TCQ                (TCQ),
-     .nCK_PER_CLK        (nCK_PER_CLK),
-     .CLKIN_PERIOD       (CLKIN_PERIOD),
-     .SYSCLK_TYPE        (SYSCLK_TYPE),
-     .CLKFBOUT_MULT      (CLKFBOUT_MULT),
-     .DIVCLK_DIVIDE      (DIVCLK_DIVIDE),
-     .CLKOUT0_PHASE      (CLKOUT0_PHASE),
-     .CLKOUT0_DIVIDE     (CLKOUT0_DIVIDE),
-     .CLKOUT1_DIVIDE     (CLKOUT1_DIVIDE),
-     .CLKOUT2_DIVIDE     (CLKOUT2_DIVIDE),
-     .CLKOUT3_DIVIDE     (CLKOUT3_DIVIDE),
-     .MMCM_VCO           (MMCM_VCO),
-     .MMCM_MULT_F        (MMCM_MULT_F),
-     .MMCM_DIVCLK_DIVIDE (MMCM_DIVCLK_DIVIDE),
-     .RST_ACT_LOW        (RST_ACT_LOW),
-     .tCK                (tCK),
-     .MEM_TYPE           (DRAM_TYPE)
+     .TCQ                 (TCQ),
+     .nCK_PER_CLK         (nCK_PER_CLK),
+     .CLKIN_PERIOD        (CLKIN_PERIOD),
+     .SYSCLK_TYPE         (SYSCLK_TYPE),
+     .UI_EXTRA_CLOCKS     (UI_EXTRA_CLOCKS),
+     .CLKFBOUT_MULT       (CLKFBOUT_MULT),
+     .DIVCLK_DIVIDE       (DIVCLK_DIVIDE),
+     .CLKOUT0_PHASE       (CLKOUT0_PHASE),
+     .CLKOUT0_DIVIDE      (CLKOUT0_DIVIDE),
+     .CLKOUT1_DIVIDE      (CLKOUT1_DIVIDE),
+     .CLKOUT2_DIVIDE      (CLKOUT2_DIVIDE),
+     .CLKOUT3_DIVIDE      (CLKOUT3_DIVIDE),
+     .MMCM_VCO            (MMCM_VCO),
+     .MMCM_MULT_F         (MMCM_MULT_F),
+     .MMCM_DIVCLK_DIVIDE  (MMCM_DIVCLK_DIVIDE),
+     .MMCM_CLKOUT0_EN     (MMCM_CLKOUT0_EN),
+     .MMCM_CLKOUT1_EN     (MMCM_CLKOUT1_EN),
+     .MMCM_CLKOUT2_EN     (MMCM_CLKOUT2_EN),
+     .MMCM_CLKOUT3_EN     (MMCM_CLKOUT3_EN),
+     .MMCM_CLKOUT4_EN     (MMCM_CLKOUT4_EN),
+     .MMCM_CLKOUT0_DIVIDE (MMCM_CLKOUT0_DIVIDE),
+     .MMCM_CLKOUT1_DIVIDE (MMCM_CLKOUT1_DIVIDE),
+     .MMCM_CLKOUT2_DIVIDE (MMCM_CLKOUT2_DIVIDE),
+     .MMCM_CLKOUT3_DIVIDE (MMCM_CLKOUT3_DIVIDE),
+     .MMCM_CLKOUT4_DIVIDE (MMCM_CLKOUT4_DIVIDE),
+     .RST_ACT_LOW         (RST_ACT_LOW),
+     .tCK                 (tCK),
+     .MEM_TYPE            (DRAM_TYPE)
      )
     u_ddr3_infrastructure
       (
@@ -974,11 +1015,11 @@ module mig_wrap_mig_7series_0_0_mig #
        .psdone           (psdone),
        .iddr_rst         (iddr_rst),
 //       .auxout_clk       (),
-       .ui_addn_clk_0    (),
-       .ui_addn_clk_1    (),
-       .ui_addn_clk_2    (),
-       .ui_addn_clk_3    (),
-       .ui_addn_clk_4    (),
+       .ui_addn_clk_0    (ui_addn_clk_0),
+       .ui_addn_clk_1    (ui_addn_clk_1),
+       .ui_addn_clk_2    (ui_addn_clk_2),
+       .ui_addn_clk_3    (ui_addn_clk_3),
+       .ui_addn_clk_4    (ui_addn_clk_4),
        .pll_locked       (pll_locked),
        .mmcm_locked      (mmcm_locked),
        .rst_phaser_ref   (rst_phaser_ref),

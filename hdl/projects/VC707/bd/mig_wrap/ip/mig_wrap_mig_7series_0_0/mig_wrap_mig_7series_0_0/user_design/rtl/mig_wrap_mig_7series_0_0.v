@@ -86,11 +86,17 @@ module mig_wrap_mig_7series_0_0 (
   output [7:0]     ddr3_dm,
   output [0:0]       ddr3_odt,
   // Inputs
-  // Single-ended system clock
-  input         sys_clk_i,
+  // Differential system clocks
+  input             sys_clk_p,
+  input             sys_clk_n,
   // user interface signals
   output            ui_clk,
   output            ui_clk_sync_rst,
+  output            ui_addn_clk_0,
+  output            ui_addn_clk_1,
+  output            ui_addn_clk_2,
+  output            ui_addn_clk_3,
+  output            ui_addn_clk_4,
   output            mmcm_locked,
   input         aresetn,
   output            app_sr_active,
@@ -109,8 +115,8 @@ module mig_wrap_mig_7series_0_0 (
   input         s_axi_awvalid,
   output            s_axi_awready,
   // Slave Interface Write Data Ports
-  input [511:0]         s_axi_wdata,
-  input [63:0]         s_axi_wstrb,
+  input [31:0]         s_axi_wdata,
+  input [3:0]         s_axi_wstrb,
   input         s_axi_wlast,
   input         s_axi_wvalid,
   output            s_axi_wready,
@@ -134,7 +140,7 @@ module mig_wrap_mig_7series_0_0 (
   // Slave Interface Read Data Ports
   input         s_axi_rready,
   output [3:0]          s_axi_rid,
-  output [511:0]            s_axi_rdata,
+  output [31:0]            s_axi_rdata,
   output [1:0]          s_axi_rresp,
   output            s_axi_rlast,
   output            s_axi_rvalid,
@@ -175,6 +181,11 @@ module mig_wrap_mig_7series_0_0 (
     // Application interface ports
     .ui_clk                         (ui_clk),
     .ui_clk_sync_rst                (ui_clk_sync_rst),
+    .ui_addn_clk_0                  (ui_addn_clk_0),
+    .ui_addn_clk_1                  (ui_addn_clk_1),
+    .ui_addn_clk_2                  (ui_addn_clk_2),
+    .ui_addn_clk_3                  (ui_addn_clk_3),
+    .ui_addn_clk_4                  (ui_addn_clk_4),
     .mmcm_locked                    (mmcm_locked),
     .aresetn                        (aresetn),
     .app_sr_active                  (app_sr_active),
@@ -223,7 +234,8 @@ module mig_wrap_mig_7series_0_0 (
     .s_axi_rvalid                   (s_axi_rvalid),
     .s_axi_rready                   (s_axi_rready),
     // System Clock Ports
-    .sys_clk_i                       (sys_clk_i),
+    .sys_clk_p                       (sys_clk_p),
+    .sys_clk_n                       (sys_clk_n),
        .device_temp            (device_temp),
        `ifdef SKIP_CALIB
        .calib_tap_req                    (calib_tap_req),
