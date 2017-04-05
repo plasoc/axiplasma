@@ -23,7 +23,7 @@ entity axiplasma_wrapper is
     generic (
         lower_app : string := "boot";
         upper_app : string := "none";
-        upper_ext : boolean := true);
+        upper_ext : boolean := true); -- Setting upper_ext to false for hardware deployment isn't supported!
     port( 
         sys_clk_p : in std_logic; -- 200 MHz on the VC707.
         sys_clk_n : in std_logic; -- 200 MHz on the VC707.
@@ -50,6 +50,27 @@ entity axiplasma_wrapper is
 end axiplasma_wrapper;
 
 architecture Behavioral of axiplasma_wrapper is
+    component clk_wiz_0 is
+        port (
+            aclk : out std_logic;
+            sys_rst : in std_logic;
+            locked : out std_logic;
+            sys_clk_p : in std_logic;
+            sys_clk_n : in std_logic);
+    end component;
+    component proc_sys_reset_0 IS
+        PORT (
+            slowest_sync_clk : IN STD_LOGIC;
+            ext_reset_in : IN STD_LOGIC;
+            aux_reset_in : IN STD_LOGIC;
+            mb_debug_sys_rst : IN STD_LOGIC;
+            dcm_locked : IN STD_LOGIC;
+            mb_reset : OUT STD_LOGIC;
+            bus_struct_reset : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
+            peripheral_reset : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
+            interconnect_aresetn : OUT STD_LOGIC_VECTOR(0 DOWNTO 0);
+            peripheral_aresetn : OUT STD_LOGIC_VECTOR(0 DOWNTO 0));
+    end component;
     component mig_wrap_wrapper is
         port (
             DDR3_addr : out STD_LOGIC_VECTOR ( 13 downto 0 );
@@ -1827,6 +1848,25 @@ begin
                 bram_addr_a => ram_bram_addr_a,
                 bram_wrdata_a => ram_bram_wrdata_a,
                 bram_rddata_a => ram_bram_rddata_a);
+        clk_wiz_0_inst : clk_wiz_0 
+            port map (
+                aclk => aclk,
+                sys_rst => sys_rst,
+                locked => dcm_locked,
+                sys_clk_p => sys_clk_p,
+                sys_clk_n => sys_clk_n);
+        proc_sys_reset_0_inst : proc_sys_reset_0 
+            port map (
+                slowest_sync_clk => aclk,
+                ext_reset_in => sys_rst,
+                aux_reset_in => '0',
+                mb_debug_sys_rst => '0',
+                dcm_locked => dcm_locked,
+                mb_reset => open,
+                bus_struct_reset => open,
+                peripheral_reset => open,
+                interconnect_aresetn => cross_aresetn,
+                peripheral_aresetn => aresetn);
     end generate;
     
     gen_ext_mm :

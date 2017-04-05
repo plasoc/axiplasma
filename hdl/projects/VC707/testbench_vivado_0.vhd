@@ -22,9 +22,9 @@ architecture Behavioral of testbench_vivado_0 is
             upper_app : string := "main";
             upper_ext : boolean := false);
         port( 
-            raw_clock_p : in std_logic; -- 200 MHz on the VC707.
-            raw_clock_n : in std_logic; -- 200 MHz on the VC707.
-            raw_nreset : in std_logic;
+            sys_clk_p : in std_logic; -- 200 MHz on the VC707.
+            sys_clk_n : in std_logic; -- 200 MHz on the VC707.
+            sys_rst : in std_logic;
             gpio_output : out std_logic_vector(vc707_default_gpio_width-1 downto 0);
             gpio_input : in std_logic_vector(vc707_default_gpio_width-1 downto 0);
             uart_tx : out std_logic;
@@ -49,9 +49,9 @@ architecture Behavioral of testbench_vivado_0 is
     constant uart_period : time := 104167 ns;
     constant time_out_threshold : integer := 2**30;
     subtype gpio_type is std_logic_vector(gpio_width-1 downto 0);
-    signal raw_clock_p : std_logic := '1';
-    signal raw_clock_n : std_logic := '0';
-    signal raw_nreset : std_logic := '0';
+    signal sys_clk_p : std_logic := '1';
+    signal sys_clk_n : std_logic := '0';
+    signal sys_rst : std_logic := '1';
     signal gpio_output : gpio_type;
     signal gpio_input : gpio_type := (others=>'0');
     signal uart_tx : std_logic;
@@ -72,9 +72,9 @@ begin
 
     axiplasma_wrapper_inst : axiplasma_wrapper 
         port map ( 
-            raw_clock_p => raw_clock_p,
-            raw_clock_n => raw_clock_n,
-            raw_nreset => raw_nreset,
+            sys_clk_p => sys_clk_p,
+            sys_clk_n => sys_clk_n,
+            sys_rst => sys_rst,
             gpio_output => gpio_output,
             gpio_input => gpio_input,
             uart_tx => uart_tx,
@@ -88,19 +88,19 @@ begin
             DDR3_cs_n => open,
             DDR3_dm => open,
             DDR3_dq => open,
-            DDR3_dqs_n => open,
+            DDR3_dqs_n => open, 
             DDR3_dqs_p => open,
             DDR3_odt => open,
             DDR3_ras_n => open,
             DDR3_reset_n => open,
             DDR3_we_n => open);
 
-    raw_clock_p <= not raw_clock_p after clock_period/2;
-    raw_clock_n <= not raw_clock_n after clock_period/2;
-    raw_nreset <= '1' after 10*clock_period+input_delay;
+    sys_clk_p <= not sys_clk_p after clock_period/2;
+    sys_clk_n <= not sys_clk_n after clock_period/2;
+    sys_rst <= '0' after 10*clock_period+input_delay;
     
     -- Get uart_tx
-    uart_clock <= not uart_clock after uart_period/2;
+    uart_clock <= not uart_clock after uart_period/2; 
     process (uart_clock)
     begin
         if rising_edge(uart_clock) then
@@ -193,7 +193,7 @@ begin
         end;
         
     begin
---        wait until raw_nreset='1';
+--        wait until sys_rst='1';
 --        wait until gpio_output=X"0001";
 --        wait for 2 ms;
         
@@ -281,7 +281,7 @@ begin
             wait for clock_period;
         end;
     begin
-        wait until raw_nreset='1';
+        wait until sys_rst='0';
         wait until gpio_output=X"01";
         wait for 500 us;
         gpio_input <= X"03" after input_delay;
