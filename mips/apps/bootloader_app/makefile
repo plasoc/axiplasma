@@ -7,6 +7,7 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
+VC707_INSTALL_DIR = ../../../hdl/projects/VC707/
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDSTART_ADDRESS = 0x00000000
 LDFLAGS = 
@@ -58,6 +59,8 @@ install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
 	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
+	install -d $(VC707_INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(VC707_INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
@@ -72,6 +75,8 @@ jump_build:
 jump_install:
 	install -d $(INSTALL_DIR)
 	install -c jump_pack.vhd $(INSTALL_DIR)
+	install -d $(VC707_INSTALL_DIR)
+	install -c jump_pack.vhd $(VC707_INSTALL_DIR)
 
 clean:
 	$(RM) . -name "*.o" -type f -delete

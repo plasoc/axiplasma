@@ -12,6 +12,7 @@ LDFLAGS =
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
 SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
+VC707_INSTALL_DIR = ../../../hdl/projects/VC707/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(PLASOC_DIR)/printf.c
@@ -61,6 +62,12 @@ install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
 	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
+else
+	@echo Not installing, no installation directory selected
+endif
+ifneq ($(VC707_INSTALL_DIR),)
+	install -d $(VC707_INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(VC707_INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif

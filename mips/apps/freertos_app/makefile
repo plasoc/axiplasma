@@ -13,6 +13,7 @@ LDFLAGS =
 LDAFTERFLAGS = -L$(MIPS_GCC_LIB) -static -lc -T$(PLASOC_DIR)/linker.ld
 SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
+VC707_INSTALL_DIR = ../../../hdl/projects/Nexys4/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
@@ -70,6 +71,12 @@ install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
 	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
+else
+	@echo Not installing, no installation directory selected
+endif
+ifneq ($(VC707_INSTALL_DIR),)
+	install -d $(VC707_INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(VC707_INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
