@@ -1,12 +1,13 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-#BIN_DIR = C:/mips-none-elf-newlib/bin/
-#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
-BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+BIN_DIR = C:/mips-none-elf-newlib/bin/
+LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+#BIN_DIR = /opt/mips_cross_compiler/mips/bin/
+#LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
+VC707_INSTALL_DIR = ../../../hdl/projects/VC707/
 CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
 LDSTART_ADDRESS = 0x00000000
 LDFLAGS = 
@@ -58,6 +59,8 @@ install:
 ifneq ($(INSTALL_DIR),)
 	install -d $(INSTALL_DIR)
 	install -c $(EXEC_NAME)_pack.vhd $(INSTALL_DIR)
+	install -d $(VC707_INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(VC707_INSTALL_DIR)
 else
 	@echo Not installing, no installation directory selected
 endif
@@ -72,6 +75,8 @@ jump_build:
 jump_install:
 	install -d $(INSTALL_DIR)
 	install -c jump_pack.vhd $(INSTALL_DIR)
+	install -d $(VC707_INSTALL_DIR)
+	install -c jump_pack.vhd $(VC707_INSTALL_DIR)
 
 clean:
 	$(RM) . -name "*.o" -type f -delete
@@ -79,7 +84,6 @@ clean:
 	$(RM) . -name "*.hex" -type f -delete
 	$(RM) . -name "*.map" -type f -delete
 	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.bin" -type f -delete
 	$(RM) . -name "*.vhd" -type f -delete
 	$(RM) . -name "*.s" -type f -delete
 

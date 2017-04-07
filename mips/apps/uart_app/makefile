@@ -1,8 +1,8 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-#BIN_DIR = C:/mips-none-elf-newlib/bin/
-#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
-BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+BIN_DIR = C:/mips-none-elf-newlib/bin/
+LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+#BIN_DIR = /opt/mips_cross_compiler/mips/bin/
+#LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
@@ -12,6 +12,7 @@ LDFLAGS =
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
 SERIALPORT = /dev/ttyUSB1
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
+VC707_INSTALL_DIR = ../../../hdl/projects/VC707/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c $(PLASOC_DIR)/printf.c
@@ -64,6 +65,12 @@ ifneq ($(INSTALL_DIR),)
 else
 	@echo Not installing, no installation directory selected
 endif
+ifneq ($(VC707_INSTALL_DIR),)
+	install -d $(VC707_INSTALL_DIR)
+	install -c $(EXEC_NAME)_pack.vhd $(VC707_INSTALL_DIR)
+else
+	@echo Not installing, no installation directory selected
+endif
 
 launch:
 	$(ICSP) $(EXEC_NAME).bin $(ICSPFLAGS)
@@ -74,7 +81,6 @@ clean:
 	$(RM) . -name "*.hex" -type f -delete
 	$(RM) . -name "*.map" -type f -delete
 	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.bin" -type f -delete
 	$(RM) . -name "*.vhd" -type f -delete
 	$(RM) . -name "*.s" -type f -delete
 

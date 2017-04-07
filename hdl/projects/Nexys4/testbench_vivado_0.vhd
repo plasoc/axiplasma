@@ -18,15 +18,30 @@ end testbench_vivado_0;
 architecture Behavioral of testbench_vivado_0 is
     component axiplasma_wrapper is
         generic (
-            lower_app : string := "jump";
-            upper_app : string := "main");
-       port( 
-             raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
-             raw_nreset : in std_logic;
-             gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
-             gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
-             uart_tx : out std_logic;
-             uart_rx : in std_logic);
+            lower_app : string := "boot";
+            upper_app : string := "main";
+            upper_ext : boolean := false);
+        port( 
+            raw_clock : in std_logic; -- 100 MHz on the Nexys 4.
+            raw_nreset : in std_logic;
+            gpio_output : out std_logic_vector(default_data_out_width-1 downto 0);
+            gpio_input : in std_logic_vector(default_data_in_width-1 downto 0);
+            uart_tx : out std_logic;
+            uart_rx : in std_logic;
+            DDR2_addr : out STD_LOGIC_VECTOR ( 12 downto 0 );
+            DDR2_ba : out STD_LOGIC_VECTOR ( 2 downto 0 );
+            DDR2_cas_n : out STD_LOGIC;
+            DDR2_ck_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_ck_p : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_cke : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_cs_n : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_dm : out STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_dq : inout STD_LOGIC_VECTOR ( 15 downto 0 );
+            DDR2_dqs_n : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_dqs_p : inout STD_LOGIC_VECTOR ( 1 downto 0 );
+            DDR2_odt : out STD_LOGIC_VECTOR ( 0 to 0 );
+            DDR2_ras_n : out STD_LOGIC;
+            DDR2_we_n : out STD_LOGIC);
     end component;
     constant clock_period : time := 10 ns;
     constant uart_period : time := 104167 ns;
@@ -59,7 +74,21 @@ begin
             gpio_output => gpio_output,
             gpio_input => gpio_input,
             uart_tx => uart_tx,
-            uart_rx => uart_rx);
+            uart_rx => uart_rx,
+            DDR2_addr => open,
+            DDR2_ba => open,
+            DDR2_cas_n => open,
+            DDR2_ck_n => open,
+            DDR2_ck_p => open,
+            DDR2_cke => open,
+            DDR2_cs_n => open,
+            DDR2_dm => open,
+            DDR2_dq => open,
+            DDR2_dqs_n => open,
+            DDR2_dqs_p => open,
+            DDR2_odt => open,
+            DDR2_ras_n => open,
+            DDR2_we_n => open);
 
     raw_clock <= not raw_clock after clock_period/2;
     raw_nreset <= '1' after 10*clock_period+input_delay;
