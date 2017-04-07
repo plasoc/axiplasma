@@ -1,8 +1,8 @@
 # Plasma AXI-based System-on-Chip 
 
-The **Plasma AXI-based System-on-Chip (Plasma-SoC)** is an extension of *[Steve Rhoads' Plasma MLite Core](https://opencores.org/project,plasma)*, a processor that implements MIPS I with a small subset of Coprocessor 0 in order to provide limited support for interrupts and system calls. As its name implies, the cores of the Plasma-SoC relies on *ARM AMBA4 Advanced eXtensible Interfaces (AXI)* for communication over a configurable AXI4-Full Crossbar Interconnect.
+The **Plasma AXI-based System-on-Chip (Plasma-SoC)** is an extension of *[Steve Rhoads' Plasma MLite Core](https://opencores.org/project,plasma)*, a processor that implements MIPS I with a small subset of Coprocessor 0 in order to provide limited support for interrupts and system calls. As its name implies, the cores of the Plasma-SoC rely on *ARM AMBA4 Advanced eXtensible Interfaces (AXI)* for communication over a configurable AXI4-Full Crossbar Interconnect.
 
-The major hardware components of the Plasma-SoC consist of a *CPU*, *Timer*, *Interrupt Controller*, *GPIO*, *UART*, *Interconnect*, and two example designs created to run on the Digilent Nexys4 board and the Xilinx VC707 Evalulation Kit. The software includes *hardware drivers*, *FreeRTOS port*, *ICSP bootloader*, *Threadmetric Benchmark port*, and several other examples to test and demonstrate the hardware's functionality. There are also several utility programs not intended to run on the hardware.
+The major hardware components of the Plasma-SoC consist of a *CPU*, *Timer*, *Interrupt Controller*, *GPIO*, *UART*, *Interconnect*, and an example design created to run on the Digilent Nexys4 board and another for the Xilinx VC707 Evalulation Kit. The software includes *hardware drivers*, *FreeRTOS port*, *ICSP bootloader*, *Threadmetric Benchmark port*, and several other examples to test and demonstrate the hardware's functionality. There are also several utility programs not intended to run on the hardware.
 
 ## Getting Started
 
