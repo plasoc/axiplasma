@@ -1,7 +1,7 @@
 // Copyright 1986-2016 Xilinx, Inc. All Rights Reserved.
 // --------------------------------------------------------------------------------
 // Tool Version: Vivado v.2016.4 (win64) Build 1756540 Mon Jan 23 19:11:23 MST 2017
-// Date        : Wed Mar 29 22:53:35 2017
+// Date        : Mon Apr 10 13:17:00 2017
 // Host        : LAPTOP-IQ9G3D1I running 64-bit major release  (build 9200)
 // Command     : write_verilog -force -mode synth_stub -rename_top mig_wrap_mig_7series_0_0 -prefix
 //               mig_wrap_mig_7series_0_0_ mig_wrap_mig_7series_0_0_stub.v
