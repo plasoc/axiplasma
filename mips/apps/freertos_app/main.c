@@ -42,6 +42,7 @@
 
 #define GPIO_AMOUNT				(16)
 #define TICK_THRESHOLD				(250)
+//#define TICK_THRESHOLD				(2)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
