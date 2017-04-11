@@ -1,6 +1,6 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
-MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
+#MIPS_GCC_BIN = C:/mips-none-elf-newlib/bin/
+#MIPS_GCC_LIB = C:/mips-none-elf-newlib/mips-none-elf/lib
 #MIPS_GCC_BIN = /opt/mips_cross_compiler/mips/bin/
 #MIPS_GCC_LIB = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
@@ -11,18 +11,22 @@ CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) -DENABLE
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(MIPS_GCC_LIB) -static -lc -T$(PLASOC_DIR)/linker.ld 
-SERIALPORT = /dev/ttyUSB1
+ifndef SERIALPORT
+	SERIALPORT = /dev/ttyUSB1
+endif
 INSTALL_DIR = ../../../hdl/testbenches/timer_interrupt_tb/
 PREFIX = $(MIPS_GCC_BIN)mips-none-elf-
 SUFFIX =
 C_SOURCES = ./tm_porting_layer_freertos.c $(PLASOC_DIR)/printf.c $(PLASOC_DIR)/plasoc_cpu.c $(FREERTOS_DIR)/list.c $(FREERTOS_DIR)/queue.c $(FREERTOS_DIR)/tasks.c $(FREERTOS_DIR)/port.c $(FREERTOS_DIR)/heap_4.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm $(FREERTOS_DIR)/port_asm.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
-ICSP = python2 $(MISC_DIR)/icsp.py 
-ICSPFLAGS = --serial_port $(SERIALPORT)
+ifndef PYTHON2
+	PYTHON2 = python2
+endif
+BIN2COE = $(PYTHON2) $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
+ICSP = $(PYTHON2) $(MISC_DIR)/icsp.py 
+ICSPFLAGS = --verbose --serial_port $(SERIALPORT)
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
-RM = find 
 
 EXEC_NAME = main
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX)
@@ -231,11 +235,11 @@ endif
 	$(BIN2COE) $(EXEC_NAME_6).bin $(EXEC_NAME_6)_pack.vhd --package_name main_pack
 
 clean:
-	$(RM) . -name "*.o" -type f -delete
-	$(RM) . -name "*.axf" -type f -delete
-	$(RM) . -name "*.hex" -type f -delete
-	$(RM) . -name "*.map" -type f -delete
-	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.vhd" -type f -delete
-	$(RM) . -name "*.s" -type f -delete
-
+	find . -name "*.o" -type f -delete
+	find . -name "*.axf" -type f -delete
+	find . -name "*.hex" -type f -delete
+	find . -name "*.map" -type f -delete
+	find . -name "*.lst" -type f -delete
+	find . -name "*.vhd" -type f -delete
+	find . -name "*.s" -type f -delete
+	find . -name "*.bin" -type f -delete

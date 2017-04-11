@@ -1,13 +1,13 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-BIN_DIR = C:/mips-none-elf-newlib/bin/
-LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+#BIN_DIR = C:/mips-none-elf-newlib/bin/
+#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
 #BIN_DIR = /opt/mips_cross_compiler/mips/bin/
 #LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I.
 LDSTART_ADDRESS = 0x00000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
@@ -15,10 +15,12 @@ PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c port_layer.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex 
+ifndef PYTHON2
+	PYTHON2 = python2
+endif
+BIN2COE = $(PYTHON2) $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex 
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
-RM = find
 EXEC_NAME = boot
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
@@ -74,11 +76,12 @@ jump_install:
 	install -c jump_pack.vhd $(INSTALL_DIR)
 
 clean:
-	$(RM) . -name "*.o" -type f -delete
-	$(RM) . -name "*.axf" -type f -delete
-	$(RM) . -name "*.hex" -type f -delete
-	$(RM) . -name "*.map" -type f -delete
-	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.vhd" -type f -delete
-	$(RM) . -name "*.s" -type f -delete
+	find . -name "*.o" -type f -delete
+	find . -name "*.axf" -type f -delete
+	find . -name "*.hex" -type f -delete
+	find . -name "*.map" -type f -delete
+	find . -name "*.lst" -type f -delete
+	find . -name "*.vhd" -type f -delete
+	find . -name "*.s" -type f -delete
+	find . -name "*.bin" -type f -delete
 

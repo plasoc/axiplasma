@@ -1,27 +1,31 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-BIN_DIR = C:/mips-none-elf-newlib/bin/
-LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+#BIN_DIR = C:/mips-none-elf-newlib/bin/
+#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
 #BIN_DIR = /opt/mips_cross_compiler/mips/bin/
 #LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
-CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I.
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
-SERIALPORT = /dev/ttyUSB1
+ifndef SERIALPORT
+	SERIALPORT = /dev/ttyUSB1
+endif
 INSTALL_DIR = ../../../hdl/projects/Nexys4/
 PREFIX = $(BIN_DIR)mips-none-elf-
 SUFFIX =
 C_SOURCES = main.c $(PLASOC_DIR)/plasoc_cpu.c
 ASM_SOURCES = $(PLASMA_DIR)/boot.asm
-BIN2COE = python2 $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
-ICSP = python2 $(MISC_DIR)/icsp.py 
-ICSPFLAGS = --serial_port $(SERIALPORT)
+ifndef PYTHON2
+	PYTHON2 = python2
+endif
+BIN2COE = $(PYTHON2) $(MISC_DIR)/bin2coe.py --swap_bytes --vhdl_hex
+ICSP = $(PYTHON2) $(MISC_DIR)/icsp.py 
+ICSPFLAGS = --verbose --serial_port $(SERIALPORT)
 
 CFLAGS += -c -fno-pic -mips1 -mno-abicalls
-RM = find
 EXEC_NAME = main
 GCC_MIPS = $(PREFIX)gcc$(SUFFIX) $(CFLAGS)
 AS_MIPS = $(PREFIX)as$(SUFFIX)
@@ -69,11 +73,12 @@ launch:
 	$(ICSP) $(EXEC_NAME).bin $(ICSPFLAGS)
 
 clean:
-	$(RM) . -name "*.o" -type f -delete
-	$(RM) . -name "*.axf" -type f -delete
-	$(RM) . -name "*.hex" -type f -delete
-	$(RM) . -name "*.map" -type f -delete
-	$(RM) . -name "*.lst" -type f -delete
-	$(RM) . -name "*.vhd" -type f -delete
-	$(RM) . -name "*.s" -type f -delete
+	find . -name "*.o" -type f -delete
+	find . -name "*.axf" -type f -delete
+	find . -name "*.hex" -type f -delete
+	find . -name "*.map" -type f -delete
+	find . -name "*.lst" -type f -delete
+	find . -name "*.vhd" -type f -delete
+	find . -name "*.s" -type f -delete
+	find . -name "*.bin" -type f -delete
 

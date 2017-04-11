@@ -14,6 +14,9 @@ extern "C"
 {
 #endif
 
+	/* CPU Frequency */
+	#define PLASMA_HZ (50000000)
+
 	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
 	#define L1_CACHE_OFFSET_WIDTH				(4)				
 	#define L1_CACHE_OFFSET_MASK				((1<<L1_CACHE_OFFSET_WIDTH)-1)	
@@ -121,6 +124,19 @@ extern "C"
 	 * Please note that the definition of this function can be found in /mips/plasma/boot.asm.
 	 */
 	extern void OS_AsmInterruptInit();
+
+	
+	typedef int jmp_buf[12];
+
+	/**
+	 * @brief implementation of C's setjmp function, see the C Standard for more details.
+	 */
+	extern int setjmp(jmp_buf env);
+
+	/**
+	 * @brief implementation of C's longjmp function, see the C Standard for more details.
+	 */
+	extern void longjmp(jmp_buf env, int value);
 
 #ifdef __cplusplus
 }

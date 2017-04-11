@@ -27,7 +27,7 @@
 #include "plasoc_gpio.h"
 #include "xcdma.h"
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
-#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
+#define PLASOC_TIMER_BASE_ADDRESS		(0x44a50000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
 
