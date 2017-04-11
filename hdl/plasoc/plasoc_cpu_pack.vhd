@@ -15,7 +15,7 @@ package plasoc_cpu_pack is
     constant default_cache_offset_width : integer := 4;
     constant default_cache_replace_strat : string := "rr";
     constant default_cache_enable : boolean := True;
-    constant default_oper_base : std_logic_vector := X"200000";
+    constant default_oper_base : std_logic_vector := X"ffffff";
     constant default_oper_invalidate_offset : integer := 0;
     constant default_oper_flush_offset : integer := 4;
     

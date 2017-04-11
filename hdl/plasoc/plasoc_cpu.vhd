@@ -291,18 +291,22 @@ architecture Behavioral of plasoc_cpu is
 --    attribute keep of mem_out_valid : signal is true;
 --    attribute keep of mem_out_ready : signal is true;
     
-    -- debug
-    signal debug_task_main_code : Boolean;
-    signal debug_task_input_code : Boolean;
-    signal debug_task_time_code : Boolean;  
-    signal debug_interrupt : Boolean;   
-    signal debug_write : Boolean;
-begin
---    debug_pxPortInitialiseStack <= True when X"000002c0"=cpu_address_next else False;
---    debug_FreeRTOS_AsmInterruptInit <= True when X"000003e0"=cpu_address_next else False;
-    debug_interrupt <= True when X"0000003c"=cpu_address_next else False;
-    
+--    -- debug
+--    signal debug_task_main_code : Boolean;
+--    signal debug_task_input_code : Boolean;
+--    signal debug_task_time_code : Boolean;  
+--    signal debug_interrupt : Boolean;   
+--    signal debug_write : Boolean;
 
+--    attribute mark_debug : boolean;
+--    attribute mark_debug of aclk : signal is true;
+--    attribute mark_debug of aresetn : signal is true;
+--    attribute mark_debug of cpu_write_data : signal is true;
+--    attribute mark_debug of cpu_read_data : signal is true;
+--    attribute mark_debug of cpu_address_next : signal is true;
+--    attribute mark_debug of cpu_strobe_next : signal is true;
+--    attribute mark_debug of intr_in : signal is true;
+begin
 
     cpu_address_next(1 downto 0) <= "00";
     -- CPU instantiation.
