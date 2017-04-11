@@ -10,8 +10,10 @@
 #include "printf.h"
 #include "rhealstone_benchmark_funcs.h"
 
+#define NUM_TRIALS 100
+
 static unsigned a = 0, b = 0;
-static TaskHandle_t task1_handle, task2_handle;
+static TaskHandle_t task1_handle, task2_handle, finishtask_handle;
 
 static void task1(void* ptr)
 {
@@ -39,23 +41,36 @@ static void task2(void* ptr)
 
 static void setup_benchmark_tasks(void)
 {
-    configASSERT(xTaskCreate(task1,"task1",configMINIMAL_STACK_SIZE,NULL,3,&task1_handle) == pdTrue);
-    configASSERT(xTaskCreate(task2,"task2",configMINIMAL_STACK_SIZE,NULL,3,&task2_handle) == pdTrue);
+    configASSERT(xTaskCreate(task1,"task1",configMINIMAL_STACK_SIZE,NULL,3,&task1_handle) == pdTRUE);
+    configASSERT(xTaskCreate(task2,"task2",configMINIMAL_STACK_SIZE,NULL,3,&task2_handle) == pdTRUE);
+}
+
+static void finishtask(void* ptr)
+{
+	(void)ptr;
+	uint64_t avg = 0;
+    for (int i = 0; i < NUM_TRIALS; i++)
+    {
+		setup_benchmark_tasks();
+		start_benchmark_timer();
+		taskYIELD();
+        avg += get_benchmark_time();
+		stop_benchmark_timer();
+    }
+	avg /= NUM_TRIALS;
+	while (1) {
+		printf("Finished\n");
+		printf("Average: %d\n", avg);
+	}
 }
 
 int main(void)
 {
-    setup_benchmark_tasks();
+	setup_hardware();
 
-    setup_benchmark_timer();
-
-    for (int i = 0; i < NUM_TRIALS; i++)
-    {
-        reset_benchmark_timer();
-        run_benchmark_tasks();
-        usec_t time = get_benchmark_timer();
-        printf("%ud\n", (unsigned)time);
-    }
+    configASSERT(xTaskCreate(finishtask,"finish task",configMINIMAL_STACK_SIZE,NULL,1,&finishtask_handle) == pdTRUE);
+	vTaskStartScheduler();
 
     return 0;
 }
+

@@ -10,6 +10,8 @@
 #include "printf.h"
 #include "rhealstone_benchmark_funcs.h"
 
+#define NUM_TRIAL 1
+
 static void setup_benchmark_tasks(void)
 {
     // don't have to do anything because no preemptive necessary
