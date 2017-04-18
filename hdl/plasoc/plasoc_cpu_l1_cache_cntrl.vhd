@@ -82,12 +82,14 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     constant rr_lfsr_width : integer := 16;
     
     type block_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*2**cache_offset_width*8-1 downto 0);
+    type dirty_rows_tpye is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*2**cache_offset_width*1-1 downto 0);
     type tag_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width*tag_width-1 downto 0);
     type valid_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(2**cache_way_width-1 downto 0);
     type plru_rows_type is array(0 to 2**cache_index_width-1) of std_logic_vector(plru_width-1 downto 0);
     type memory_access_mode_type is (msm_read_block,msm_write_block,msm_exchange_block,msm_write_word,msm_read_word);
     
     signal block_rows : block_rows_type := (others=>(others=>'0'));
+    signal dirty_rows : dirty_rows_tpye := (others=>(others=>'0')); 
     signal tag_rows : tag_rows_type := (others=>(others=>'0'));
     signal valid_rows : valid_rows_type := (others=>(others=>'0'));
     signal plru_rows : plru_rows_type := (others=>(others=>'0'));
@@ -258,6 +260,20 @@ begin
         variable memory_access_exread_block : Boolean;
         variable memory_access_exwrite_block : Boolean;
         variable memory_access_word : Boolean;
+        procedure set_memory_write_enables_to_dirty( index : integer; way : integer; offset : integer ) is
+        begin
+            memory_write_enables <= dirty_rows(index)(
+                way*2**cache_offset_width*1+offset*1+3 downto 
+                way*2**cache_offset_width*1+offset*1+0);
+        end;  
+        procedure clear_dirty( index : integer; way : integer; offset : integer ) is
+            variable dirty_word : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
+        begin
+            dirty_rows(index)(
+                way*2**cache_offset_width*1+offset*1+3 downto 
+                way*2**cache_offset_width*1+offset*1+0) <=
+                dirty_word;
+        end; 
     begin
         if rising_edge(clock) then
             if resetn='0' then
@@ -269,6 +285,7 @@ begin
                 memory_read_enable_buff <= '0';
                 cpu_pause_buff <= '0';
                 valid_rows <= (others=>(others=>'0'));
+                dirty_rows <= (others=>(others=>'0'));
                 oper_started_flush <= False;
                 oper_started_invalidate <= False;
             else
@@ -285,12 +302,14 @@ begin
                             block_rows(memory_index)(
                             memory_way*2**cache_offset_width*8+(memory_write_counter+2)*cpu_data_width-1 downto 
                             memory_way*2**cache_offset_width*8+(memory_write_counter+1)*cpu_data_width);
+                        set_memory_write_enables_to_dirty(memory_index,memory_way,(memory_write_counter+1)*(cpu_data_width/8));
                     end if;
                     if memory_read_handshake and memory_access_exread_block then
                         block_rows(memory_index)(
                             memory_way*2**cache_offset_width*8+(memory_read_counter+1)*cpu_data_width-1 downto 
                             memory_way*2**cache_offset_width*8+memory_read_counter*cpu_data_width) <=
                             memory_read_data;
+                        clear_dirty(memory_index,memory_way,memory_read_counter*(cpu_data_width/8));
                     end if;
                     if memory_read_handshake and memory_access_mode=msm_read_word then
                         cpu_read_data <= memory_read_data;
@@ -337,6 +356,7 @@ begin
                                         memory_way*2**cache_offset_width*8+replace_offset*8+(each_byte+1)*8-1 downto 
                                         memory_way*2**cache_offset_width*8+replace_offset*8+each_byte*8) <=
                                         replace_write_data(7+each_byte*8 downto 0+each_byte*8);
+                                    dirty_rows(memory_index)(memory_way*2**cache_offset_width*1+replace_offset*1+each_byte*1) <= '1';
                                 end if;
                             else
                                 cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
@@ -369,7 +389,8 @@ begin
                                 std_logic_vector(to_unsigned(cpu_index,cache_index_width));
                             memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
                             memory_write_counter <= 0;
-                            memory_write_enables <= (others=>'1');
+                            set_memory_write_enables_to_dirty(cpu_index,cpu_way,0);
+                            --memory_write_enables <= (others=>'1');
                             memory_write_enable_buff <= '1';
                             memory_write_data <= 
                                 block_rows(cpu_index)(
@@ -410,6 +431,7 @@ begin
                                     cpu_way*2**cache_offset_width*8+cpu_offset*8+(each_byte+1)*8-1 downto 
                                     cpu_way*2**cache_offset_width*8+cpu_offset*8+each_byte*8) <=
                                     cpu_write_data(7+each_byte*8 downto 0+each_byte*8);
+                                dirty_rows(cpu_index)(cpu_way*2**cache_offset_width*1+cpu_offset*1+each_byte*1) <= '1';
                             end if;
                         else
                             cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
@@ -440,7 +462,8 @@ begin
                                 std_logic_vector(to_unsigned(cpu_index,cache_index_width));
                             memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
                             memory_write_counter <= 0;
-                            memory_write_enables <= (others=>'1');
+                            set_memory_write_enables_to_dirty(cpu_index,replace_way,0);
+                            --memory_write_enables <= (others=>'1');
                             memory_write_enable_buff <= '1';
                             memory_write_data <= 
                                 block_rows(cpu_index)(
