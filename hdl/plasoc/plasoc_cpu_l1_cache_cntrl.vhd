@@ -263,15 +263,15 @@ begin
         procedure set_memory_write_enables_to_dirty( index : integer; way : integer; offset : integer ) is
         begin
             memory_write_enables <= dirty_rows(index)(
-                way*2**cache_offset_width*8+offset*8+3 downto 
-                way*2**cache_offset_width*8+offset*8+0);
+                way*2**cache_offset_width*1+offset*1+3 downto 
+                way*2**cache_offset_width*1+offset*1+0);
         end;  
         procedure clear_dirty( index : integer; way : integer; offset : integer ) is
             variable dirty_word : std_logic_vector(cpu_data_width/8-1 downto 0) := (others=>'0');
         begin
             dirty_rows(index)(
-                way*2**cache_offset_width*8+offset*8+3 downto 
-                way*2**cache_offset_width*8+offset*8+0) <=
+                way*2**cache_offset_width*1+offset*1+3 downto 
+                way*2**cache_offset_width*1+offset*1+0) <=
                 dirty_word;
         end; 
     begin
@@ -356,6 +356,7 @@ begin
                                         memory_way*2**cache_offset_width*8+replace_offset*8+(each_byte+1)*8-1 downto 
                                         memory_way*2**cache_offset_width*8+replace_offset*8+each_byte*8) <=
                                         replace_write_data(7+each_byte*8 downto 0+each_byte*8);
+                                    dirty_rows(memory_index)(memory_way*2**cache_offset_width*1+replace_offset*1+each_byte*1) <= '1';
                                 end if;
                             else
                                 cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=
@@ -430,7 +431,7 @@ begin
                                     cpu_way*2**cache_offset_width*8+cpu_offset*8+(each_byte+1)*8-1 downto 
                                     cpu_way*2**cache_offset_width*8+cpu_offset*8+each_byte*8) <=
                                     cpu_write_data(7+each_byte*8 downto 0+each_byte*8);
-                                dirty_rows(cpu_index)(cpu_way*2**cache_offset_width*8+cpu_offset*8+each_byte*1) <= '1';
+                                dirty_rows(cpu_index)(cpu_way*2**cache_offset_width*1+cpu_offset*1+each_byte*1) <= '1';
                             end if;
                         else
                             cpu_read_data(7+each_byte*8 downto 0+each_byte*8) <=

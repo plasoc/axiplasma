@@ -103,7 +103,7 @@ module mig_7series_v4_0_ddr_axi_upsizer #
                        // 1 = Fully-registered (needed only when upsizer propagates bursts at 1:1 width ratio)
                        // 7 = Light-weight (safe when upsizer always packs at 1:n width ratio, as in interconnect)
    parameter integer C_AXI_SUPPORTS_USER_SIGNALS      = 0,
-                       // 1 = Propagate all USER signals, 0 = Don’t propagate.
+                       // 1 = Propagate all USER signals, 0 = Dont propagate.
    parameter integer C_AXI_AWUSER_WIDTH               = 1,
                        // Width of AWUSER signals. 
                        // Range: >= 1.

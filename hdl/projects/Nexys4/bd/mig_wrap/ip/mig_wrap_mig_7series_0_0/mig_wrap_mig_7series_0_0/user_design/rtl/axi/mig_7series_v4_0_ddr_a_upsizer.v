@@ -82,7 +82,7 @@ module mig_7series_v4_0_ddr_a_upsizer #
                        // Clock output data.
                        // Range: 0, 1
    parameter integer C_AXI_SUPPORTS_USER_SIGNALS      = 0,
-                       // 1 = Propagate all USER signals, 0 = Don’t propagate.
+                       // 1 = Propagate all USER signals, 0 = Dont propagate.
    parameter integer C_AXI_AUSER_WIDTH                = 1,
                        // Width of AWUSER/ARUSER signals. 
                        // Range: >= 1.
