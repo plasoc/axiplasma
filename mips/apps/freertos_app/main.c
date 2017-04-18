@@ -27,22 +27,19 @@
 #include "plasoc_gpio.h"
 #include "xcdma.h"
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
-//#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
-#define PLASOC_TIMER_BASE_ADDRESS		(0x44a50000)
+#define PLASOC_TIMER_BASE_ADDRESS		(0x44a10000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define XILINX_CDMA_BASE_ADDRESS		(0x44a30000)
 
 #define PLASOC_TIMER_MILLISECOND_CYCLES		(50000)
 #define XILINX_CDMA_BYTES_TO_TRANSFER		(64)
 
-//#define INT_PLASOC_TIMER_ID			(0)
-#define INT_PLASOC_TIMER_ID			(4)
+#define INT_PLASOC_TIMER_ID			(0)
 #define INT_PLASOC_GPIO_ID			(1)
 #define INT_XILINX_CDMA_ID			(2)
 
 #define GPIO_AMOUNT				(16)
 #define TICK_THRESHOLD				(250)
-//#define TICK_THRESHOLD				(2)
 #define TIMER_THRESHOLD				(2)
 #define QUEUE_AMOUNT				(8)
 #define SEM_AMOUNT				(8)
