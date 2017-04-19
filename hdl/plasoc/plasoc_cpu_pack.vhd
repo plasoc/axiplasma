@@ -9,7 +9,7 @@ package plasoc_cpu_pack is
     constant default_cpu_mult_type       : string  := "DEFAULT";
     constant default_cpu_shifter_type    : string  := "DEFAULT";
     constant default_cpu_alu_type        : string  := "DEFAULT";
-    constant default_cache_address_width : integer := 25;
+    constant default_cache_address_width : integer := 29;
     constant default_cache_way_width : integer := 1;
     constant default_cache_index_width : integer := 4;
     constant default_cache_offset_width : integer := 4;
