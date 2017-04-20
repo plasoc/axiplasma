@@ -18,6 +18,7 @@ extern "C"
 	#define PLASOC_INT_ENABLES_OFFSET		(0)
 	#define PLASOC_INT_ID_OFFSET			(4)
 	#define PLASOC_INT_ACTIVE_OFFSET		(8)
+	#define PLASOC_INT_MEMORY_BARRIER		({__asm__ __volatile__ ( "" : : : "memory");})
 
 	/** @brief Interrupt Service Routine Type. */
 	typedef void (plasoc_int_isr)(void*);
@@ -83,6 +84,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_int_get_id(plasoc_int* obj)
 	{
+		PLASOC_INT_MEMORY_BARRIER;
 		return (unsigned)(*((unsigned volatile*)(obj->base_address+PLASOC_INT_ID_OFFSET)));
 	}
 
@@ -98,13 +100,14 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_int_get_active(plasoc_int* obj)
 	{
+		PLASOC_INT_MEMORY_BARRIER;
 		return (unsigned)(*((unsigned volatile*)(obj->base_address+PLASOC_INT_ACTIVE_OFFSET)));
 	}
 
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_set_enables(plasoc_int* obj,unsigned mask)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_INT_MEMORY_BARRIER;
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = mask;
 	}
 
@@ -115,7 +118,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_enable_all(plasoc_int* obj)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_INT_MEMORY_BARRIER;
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = PLASOC_INT_INTERRUPT_MASK;
 	}
 
@@ -126,7 +129,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_disable_all(plasoc_int* obj)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_INT_MEMORY_BARRIER;
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) = 0;
 	}
 
@@ -138,7 +141,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_enable(plasoc_int* obj,unsigned id)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_INT_MEMORY_BARRIER;
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) |= (1<<id);
 	}
 
@@ -150,7 +153,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_int_disable(plasoc_int* obj,unsigned id)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_INT_MEMORY_BARRIER;
 		*((unsigned volatile*)(obj->base_address+PLASOC_INT_ENABLES_OFFSET)) &= ~(1<<id);
 	}
 

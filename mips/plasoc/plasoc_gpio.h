@@ -18,6 +18,7 @@ extern "C"
 	#define PLASOC_GPIO_CONTROL_ACK_BIT_LOC        (1)
 	#define PLASOC_GPIO_DATA_IN_OFFSET             (4)
 	#define PLASOC_GPIO_DATA_OUT_OFFSET            (8)
+	#define PLASOC_GPIO_MEMORY_BARRIER				({__asm__ __volatile__ ( "" : : : "memory");})
 	
 	/**
 	 * @brief Represents the GPIO Core. 
@@ -47,7 +48,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_gpio_enable_int(plasoc_gpio* obj,unsigned ack_flag)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_GPIO_MEMORY_BARRIER;
 		*((volatile unsigned*)(obj->base_address+PLASOC_GPIO_CONTROL_OFFSET)) =
 			(1<<PLASOC_GPIO_CONTROL_ENABLE_BIT_LOC)|
 			((ack_flag)?(1<<PLASOC_GPIO_CONTROL_ACK_BIT_LOC):0);
@@ -60,7 +61,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_gpio_disable_int(plasoc_gpio* obj)
 	{
-		__asm__ __volatile__ ( "" : : : "memory");
+		PLASOC_GPIO_MEMORY_BARRIER;
 		*((volatile unsigned*)(obj->base_address+PLASOC_GPIO_CONTROL_OFFSET)) = 0;
 	}
 	
@@ -72,6 +73,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	void plasoc_gpio_set_data_out(plasoc_gpio* obj,unsigned data_out)
 	{
+		PLASOC_GPIO_MEMORY_BARRIER;
 		*((volatile unsigned*)(obj->base_address+PLASOC_GPIO_DATA_OUT_OFFSET)) = data_out;
 	}
 	
@@ -83,6 +85,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_gpio_get_data_out(plasoc_gpio* obj)
 	{
+		PLASOC_GPIO_MEMORY_BARRIER;
 		return  *((volatile unsigned*)(obj->base_address+PLASOC_GPIO_DATA_OUT_OFFSET));
 	}
 	
@@ -94,6 +97,7 @@ extern "C"
 	static inline __attribute__ ((always_inline))
 	unsigned plasoc_gpio_get_data_in(plasoc_gpio* obj)
 	{
+		PLASOC_GPIO_MEMORY_BARRIER;
 		return  *((volatile unsigned*)(obj->base_address+PLASOC_GPIO_DATA_IN_OFFSET));
 	}
 	
