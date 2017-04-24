@@ -133,7 +133,12 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
 --    attribute keep of cpu_index : signal is true;
 --    attribute keep of cpu_offset : signal is true;
 --    attribute keep of cpu_way : signal is true;
+
+-- debug
+    signal gpio_obj_reached : boolean;
 begin
+    gpio_obj_reached <= true when cpu_next_address=X"10000880" else false;
+
 
     cpu_pause <= cpu_pause_buff;
     cpu_tag <= cpu_next_address(cache_cacheable_width-1 downto cache_offset_width+cache_index_width);

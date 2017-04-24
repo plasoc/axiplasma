@@ -17,7 +17,7 @@ extern "C"
 	/* L1 cache definitions. See plasoc_pac.vhd for more information on these hardware definitions. */
 	#define L1_CACHE_OFFSET_WIDTH				(4)				
 	#define L1_CACHE_OFFSET_MASK				((1<<L1_CACHE_OFFSET_WIDTH)-1)	
-	#define L1_CACHE_ADDRESS_WIDTH				(25)				
+	#define L1_CACHE_ADDRESS_WIDTH				(29)				
 	#define L1_CACHE_NONCACHEABLE_BASE_ADDRESS		(1<<L1_CACHE_ADDRESS_WIDTH)	
 	#define L1_CACHE_ADDRESS_BASE				(0xffffff00)			
 	#define L1_CACHE_INVALIDATE_OFFSET			(0)				
@@ -25,6 +25,7 @@ extern "C"
 
 	/**
 	 * @brief Performs L1 cache operation.
+	 * @warning NOT ATOMIC.
 	 * @param oper_offset Can either be L1_CACHE_INVALIDATE_OFFSET for invalidation or L1_CACHE_FLUSH_OFFSET for flushing.
 	 * @param addr The address on which the operation is performed. 
 	 */
@@ -41,6 +42,7 @@ extern "C"
 
 	/**
 	 * @brief Performs L1 cache invalidation operation.
+	 * @warning NOT ATOMIC.
 	 * @param addr The address on which the operation is performed. 
 	 */
 	static inline __attribute__ ((always_inline))
@@ -51,6 +53,7 @@ extern "C"
 
 	/**
 	 * @brief Performs L1 cache flushing operation.
+	 * @warning NOT ATOMIC.
 	 * @param addr The address on which the operation is performed. 
 	 */
 	static inline __attribute__ ((always_inline))

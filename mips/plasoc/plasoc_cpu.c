@@ -24,12 +24,16 @@ void l1_cache_operate_on_line_range(unsigned oper_offset,unsigned addr, unsigned
 	const unsigned inc_addr = (L1_CACHE_OFFSET_MASK+1);
 	unsigned cur_addr;
 	unsigned end_addr;
+	register unsigned int_mask;
 
 	if (size==0) return;
 	l1_cache_find_range(addr,size,&cur_addr,&end_addr);
 
+	/* This operation must be completed within a critical section. */
+	int_mask = OS_AsmInterruptEnable(0);
 	for (;cur_addr!=end_addr;cur_addr += inc_addr)
 		l1_cache_operate_on_line(oper_offset,cur_addr);
+	OS_AsmInterruptEnable(int_mask);
 }
 
 
