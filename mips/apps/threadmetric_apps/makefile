@@ -7,7 +7,7 @@ MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
 FREERTOS_DIR = ../../freertos
-CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) -DENABLE_PRINTF
+CFLAGS = -Os -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I$(FREERTOS_DIR) -I./ -DENABLE_PRINTF
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(MIPS_GCC_LIB) -static -lc -T$(PLASOC_DIR)/linker.ld 
@@ -70,7 +70,12 @@ C_SOURCES_6 = ./$(EXEC_NAME_6).c $(C_SOURCES)
 C_OBJECTS_6 = $(C_SOURCES_6:.c=)
 OBJECTS_6 = $(ASM_OBJECTS) $(C_OBJECTS_6)
 
-all: tm_basic_processing_test_build tm_cooperative_scheduling_test_build tm_interrupt_preemption_processing_test_build tm_interrupt_processing_test_build tm_memory_allocation_test_build tm_message_processing_test_build tm_preemptive_scheduling_test_build
+EXEC_NAME_7 = tm_synchronization_processing_test
+C_SOURCES_7 = ./$(EXEC_NAME_7).c $(C_SOURCES)
+C_OBJECTS_7 = $(C_SOURCES_7:.c=)
+OBJECTS_7 = $(ASM_OBJECTS) $(C_OBJECTS_7)
+
+all: tm_basic_processing_test_build tm_cooperative_scheduling_test_build tm_interrupt_preemption_processing_test_build tm_interrupt_processing_test_build tm_memory_allocation_test_build tm_message_processing_test_build tm_preemptive_scheduling_test_build tm_synchronization_processing_test_build
 	
 tm_basic_processing_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_0
 tm_cooperative_scheduling_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_1
@@ -79,6 +84,7 @@ tm_interrupt_processing_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_3
 tm_memory_allocation_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_4
 tm_message_processing_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_5
 tm_preemptive_scheduling_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_6
+tm_synchronization_processing_test_build: $(ASM_OBJECTS) $(C_OBJECTS) build_7
 
 tm_basic_processing_test_launch: 
 	$(ICSP) tm_basic_processing_test.bin $(ICSPFLAGS)
@@ -94,12 +100,14 @@ tm_message_processing_test_launch:
 	$(ICSP) tm_message_processing_test.bin $(ICSPFLAGS)
 tm_preemptive_scheduling_test_launch: 
 	$(ICSP) tm_preemptive_scheduling_test.bin $(ICSPFLAGS)
+tm_synchronization_processing_test_launch: 
+	$(ICSP) tm_synchronization_processing_test_.bin $(ICSPFLAGS)
 	
 $(ASM_OBJECTS):%:%.asm
 	$(AS_MIPS) -o $(notdir $@).o $@.asm
 	
 $(C_OBJECTS):%:%.c
-	$(GCC_MIPS) $(CFLAGS) -o $(notdir $@).o $@.c
+	$(GCC_MIPS) $(CFLAGS) -o $(notdir $@).o $@.c 
 ifdef DEBUG_MAKE
 	$(GCC_MIPS) $(CFLAGS) -o $(notdir $@).s -S $@.c
 endif
@@ -229,6 +237,24 @@ else
 endif
 	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_6).axf $(EXEC_NAME_6).bin
 	$(BIN2COE) $(EXEC_NAME_6).bin $(EXEC_NAME_6)_pack.vhd --package_name main_pack
+	
+build_7:
+
+	$(GCC_MIPS) $(CFLAGS) -o $(EXEC_NAME_7).o $(EXEC_NAME_7).c
+ifdef DEBUG_MAKE
+	$(GCC_MIPS) $(CFLAGS) -o $(EXEC_NAME_7).s -S $(EXEC_NAME_7).c
+endif
+
+ifdef DEBUG_MAKE
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -Map $(EXEC_NAME_7).map -s -N -o $(EXEC_NAME_7).axf \
+		$(notdir $(OBJECTS_7:=.o)) $(LDAFTERFLAGS)
+	$(DUMP_MIPS) --disassemble-all $(EXEC_NAME_7).axf > $(EXEC_NAME_7).lst
+else
+	$(LD_MIPS) $(LDFLAGS) -Ttext=$(LDSTART_ADDRESS) -e entry -s -N -o $(EXEC_NAME_7).axf \
+		$(notdir $(OBJECTS_7:=.o)) $(LDAFTERFLAGS)
+endif
+	$(OBJCOPY_MIPS) -I elf32-big -O binary $(EXEC_NAME_7).axf $(EXEC_NAME_7).bin
+	$(BIN2COE) $(EXEC_NAME_7).bin $(EXEC_NAME_7)_pack.vhd --package_name main_pack
 
 clean:
 	$(RM) . -name "*.o" -type f -delete

@@ -37,7 +37,7 @@
 /**************************************************************************/
 
 #include "tm_api.h"
-#include "stdio.h"
+#include "printf.h" // stdio.h is not supported.
 
 
 /* Define the counters used in the demo application...  */
@@ -141,7 +141,7 @@ unsigned long   relative_time;
         relative_time =  relative_time + TM_TEST_DURATION;
 #ifdef ENABLE_PRINTF
         /* Print results to the stdio window.  */
-        printf("**** Thread-Metric Synchronization Processing Test **** Relative Time: %lu\n", relative_time);
+        printf("**** Thread-Metric Synchronization Processing Test **** Relative Time: %u\n\r", relative_time);
 #endif
         /* See if there are any errors.  */
         if (tm_synchronization_processing_counter == last_counter)
@@ -157,7 +157,7 @@ unsigned long   relative_time;
         }
 #ifdef ENABLE_PRINTF
         /* Show the time period total.  */
-        printf("Time Period Total:  %lu\n\n", tm_synchronization_processing_counter - last_counter);
+        printf("Time Period Total:  %u\n\r\n\r", tm_synchronization_processing_counter - last_counter);
 #endif
         /* Save the last counter.  */
         last_counter =  tm_synchronization_processing_counter;
