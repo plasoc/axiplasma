@@ -1,12 +1,12 @@
 # GCC MIPS cross compiler for Linux/Msys2 is assumed.
-#BIN_DIR = C:/mips-none-elf-newlib/bin/
-#LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
-BIN_DIR = /opt/mips_cross_compiler/mips/bin/
-LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
+BIN_DIR = C:/mips-none-elf-newlib/bin/
+LD_DIR = C:/mips-none-elf-newlib/mips-none-elf/lib
+#BIN_DIR = /opt/mips_cross_compiler/mips/bin/
+#LD_DIR = /opt/mips_cross_compiler/mips/mips-none-elf/lib
 MISC_DIR = ../../../misc
 PLASMA_DIR = ../../plasma
 PLASOC_DIR = ../../plasoc
-CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR)
+CFLAGS = -O3 -Wall -s -I$(PLASMA_DIR) -I$(PLASOC_DIR) -I./
 LDSTART_ADDRESS = 0x01000000
 LDFLAGS = 
 LDAFTERFLAGS = -L$(LD_DIR) -static -lc -T$(PLASOC_DIR)/linker.ld
