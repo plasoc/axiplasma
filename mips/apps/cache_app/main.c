@@ -18,7 +18,8 @@
 #define PLASOC_INT_BASE_ADDRESS			(0x44a00000)
 #define PLASOC_GPIO_BASE_ADDRESS		(0x44a20000)
 #define INT_PLASOC_GPIO_ID			(1)
-#define DATA_SIZE				(16)
+#define DATA_SIZE				(64)
+#define TEST_CACHE_ADDR_BASED_OPERS
 	
 plasoc_int int_obj;
 plasoc_gpio gpio_obj;
@@ -56,19 +57,22 @@ int main()
 	/* Enable all interrupts in the interrupt controller. */
 	plasoc_int_enable_all(&int_obj);
 	plasoc_gpio_enable_int(&gpio_obj,0);
-
-	/* Start running the application. */
+	
+	/* Write some data for the test. */
 	{
 		int each_word;
 
 		/* Store some arbitraty data directly into memory. This will force a read first from memory. */
 		for (each_word=0; each_word<DATA_SIZE; each_word++)
-			noncacheable[each_word] += each_word*2;
+			noncacheable[each_word] = each_word*2;
 
 		/* Store some arbitrary data into cache. */
 		for (each_word=0; each_word<DATA_SIZE; each_word++)
 			data[each_word] = each_word*2;
+	}
 
+	/* Start running the application. */
+	{
 		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x2);		
 
@@ -95,6 +99,37 @@ int main()
 
 		/* Signal location of application. */
 		plasoc_gpio_set_data_out(&gpio_obj,0x6);
+
+		/* Set the data once again to values that increase. */
+		{
+			int each_word;
+			for (each_word=0; each_word<DATA_SIZE; each_word++)
+				data[each_word] = each_word;
+		}
+		
+		/* Signal location of application. */
+		plasoc_gpio_set_data_out(&gpio_obj,0x7);
+		
+		/* Perform some simple, arbitrary operations. */
+		l1_cache_flush_way(0,8);
+		l1_cache_flush_way(1,9);
+		l1_cache_invalidate_way(0,8);
+		l1_cache_invalidate_way(1,7);
+		
+		/* Signal location of application. */
+		plasoc_gpio_set_data_out(&gpio_obj,0x8);
+		
+		/* Flush the entire cache. */
+		l1_cache_flush_all();
+		
+		/* Signal location of application. */
+		plasoc_gpio_set_data_out(&gpio_obj,0x9);
+		
+		/* Invalidate the entire cache. */
+		l1_cache_invalidate_all();
+		
+		/* Signal location of application. */
+		plasoc_gpio_set_data_out(&gpio_obj,0xa);
 	}
 
 	while (1);

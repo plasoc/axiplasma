@@ -15,6 +15,25 @@ extern "C"
 {
 #endif
 
+	static inline __attribute__ ((always_inline))
+	unsigned enter_critical()
+	{
+		register unsigned int_mask;
+		__asm__ __volatile__ (
+			"mfc0 %0,$12\n" 
+			"mtc0 $0,$12\n"
+			:"=r"(int_mask)::"memory");
+		return int_mask;
+	}
+	
+	static inline __attribute__ ((always_inline))
+	void leave_critical(register unsigned int_mask)
+	{
+		__asm__ __volatile__ (
+			"mtc0 %0,$12\n"
+			:"=r"(int_mask)::"memory");
+	}
+
 	/**
 	 * @brief Performs L1 cache operation.
 	 * @warning NOT ATOMIC.
@@ -80,6 +99,7 @@ extern "C"
 	 * @param addr The address on which the operation is performed. 
 	 * @param size The number of bytes over which the operation is performed.
 	 */
+	__attribute__ ((optimize("O3")))
 	void l1_cache_operate_on_line_range(unsigned oper_offset, unsigned addr, unsigned size);
 
 	/**
@@ -104,7 +124,20 @@ extern "C"
 		l1_cache_operate_on_line_range(L1_CACHE_FLUSH_OFFSET,addr,size);
 	}
 	
+	__attribute__ ((optimize("O3")))
 	void l1_cache_operate_on_line_all(unsigned oper_offset);
+
+	static inline __attribute__ ((always_inline))
+	void l1_cache_invalidate_all()
+	{
+		l1_cache_operate_on_line_all(L1_CACHE_INVALIDATE_WAY_OFFSET);
+	}
+	
+	static inline __attribute__ ((always_inline))
+	void l1_cache_flush_all()
+	{
+		l1_cache_operate_on_line_all(L1_CACHE_FLUSH_WAY_OFFSET);
+	}
 
 	/**
 	 * @brief Enables and disables the CPU's interrupt.

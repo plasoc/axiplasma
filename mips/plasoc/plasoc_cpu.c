@@ -7,7 +7,7 @@
 
 #include "plasoc_cpu.h"
 
-static inline __attribute__ ((always_inline))
+static inline __attribute__ ((always_inline,optimize("O3")))
 void l1_cache_find_range(unsigned addr, unsigned size, unsigned* cur_addr, unsigned* end_addr)
 {
 	const unsigned inc_addr = (L1_CACHE_OFFSET_MASK+1);
@@ -19,6 +19,7 @@ void l1_cache_find_range(unsigned addr, unsigned size, unsigned* cur_addr, unsig
 	*end_addr += (addr_0>addr_1)?inc_addr:0;
 }
 
+__attribute__ ((optimize("O3")))
 void l1_cache_operate_on_line_range(unsigned oper_offset,unsigned addr, unsigned size)
 {
 	const unsigned inc_addr = (L1_CACHE_OFFSET_MASK+1);
@@ -30,12 +31,13 @@ void l1_cache_operate_on_line_range(unsigned oper_offset,unsigned addr, unsigned
 	l1_cache_find_range(addr,size,&cur_addr,&end_addr);
 
 	/* This operation must be completed within a critical section. */
-	int_mask = OS_AsmInterruptEnable(0);
+	int_mask = enter_critical();
 	for (;cur_addr!=end_addr;cur_addr += inc_addr)
 		l1_cache_operate_on_line(oper_offset,cur_addr);
-	OS_AsmInterruptEnable(int_mask);
+	leave_critical(int_mask);
 }
 
+__attribute__ ((optimize("O3")))
 void l1_cache_operate_on_line_all(unsigned oper_offset)
 {
 	register unsigned int_mask;
@@ -43,12 +45,11 @@ void l1_cache_operate_on_line_all(unsigned oper_offset)
 	unsigned each_index;
 	
 	/* This operation must be completed within a critical section. */
-	int_mask = OS_AsmInterruptEnable(0);
+	int_mask = enter_critical();
 	for (each_index=0;each_index<(1<<L1_CACHE_INDEX_WIDTH);each_index++)
 		for (each_way=0;each_way<(1<<L1_CACHE_WAY_WIDTH);each_way++)
 			l1_cache_operate_way_on_line(oper_offset,each_way,each_index);
-	OS_AsmInterruptEnable(int_mask);
+	leave_critical(int_mask);
 }
-
 
 
