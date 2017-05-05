@@ -37,7 +37,9 @@ entity plasoc_cpu_l1_cache_cntrl is
         cache_policy : string := "rr";                        --! Defines the replacement policy. "rr" is Random Replacement. "plru" is Pseudo Recently Used.
         oper_base : std_logic_vector := X"200000";            --! Defines the base address of the cache flushing and invalidation operations. The base address specifies the most significant bits. 
         oper_invalidate_offset : std_logic_vector := X"00";   --! Defines the invalidation offset from the base address. Provided that the requested line is in the cache, invalidation resets the corresponding valid  it.
-        oper_flush_offset : std_logic_vector := X"04"         --! Defines the flushing offset from the base address. Provided that the requested line is in the cache, flushing writes the line back into its corresponding location in memory.
+        oper_flush_offset : std_logic_vector := X"04";         --! Defines the flushing offset from the base address. Provided that the requested line is in the cache, flushing writes the line back into its corresponding location in memory.
+        oper_invalidate_way_offset : std_logic_vector := X"08";
+        oper_flush_way_offset : std_logic_vector := X"0c"
     ); 
     port ( 
         clock : in std_logic;                                                                            --! Clock. Tested with 50 MHz.
@@ -97,7 +99,9 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal cpu_index : integer range 0 to 2**cache_index_width-1 := 0;
     signal cpu_offset : integer range 0 to 2**cache_offset_width-1 := 0;
     signal cpu_way : integer range 0 to 2**cache_way_width-1 := 0;
+    signal cpu_way_oper : integer range 0 to 2**cache_way_width-1 := 0;
     signal cpu_hit : Boolean := False;
+    signal cpu_hit_oper : Boolean := False;
     signal cpu_cacheable : Boolean := False;
     signal cpu_pause_buff : std_logic := '0';
     signal replace_plru : std_logic_vector(plru_width-1 downto 0);
@@ -119,9 +123,13 @@ architecture Behavioral of plasoc_cpu_l1_cache_cntrl is
     signal oper_request : Boolean := False;
     signal oper_request_invalidate : Boolean := False;
     signal oper_request_flush : Boolean := False;
+    signal oper_request_invalidate_way : Boolean := False;
+    signal oper_request_flush_way : Boolean := False;
     signal oper_started : Boolean := False;
     signal oper_started_invalidate : Boolean := False;
     signal oper_started_flush : Boolean := False;
+    signal oper_started_invalidate_way : Boolean := False;
+    signal oper_started_flush_way : Boolean := False;
     signal rr_lfsr : std_logic_vector(rr_lfsr_width-1 downto 0) := X"ace1";
     
 --    attribute keep : boolean;
@@ -140,6 +148,10 @@ begin
     cpu_index <= to_integer(unsigned(cpu_next_address(cache_offset_width+cache_index_width-1 downto cache_offset_width)));
     cpu_offset <= to_integer(unsigned(cpu_next_address(cache_offset_width-1 downto 0)));
     cpu_cacheable <= True when or_reduce(cpu_next_address(cpu_address_width-1 downto cache_cacheable_width))='0' else False;
+    cpu_way_oper <= to_integer(unsigned(
+        cpu_next_address(cache_offset_width+cache_index_width+cache_way_width-1 downto 
+        cache_offset_width+cache_index_width)));
+    cpu_hit_oper <= True when valid_rows(cpu_index)(cpu_way_oper)='1' else False;
     
     memory_write_enable <= memory_write_enable_buff;
     memory_write_valid <= memory_write_valid_buff;
@@ -149,7 +161,9 @@ begin
     oper_request <= True when cpu_next_address(cpu_address_width-1 downto cpu_address_width-oper_base_width)=oper_base and and_reduce(cpu_write_enables)='1' else False;
     oper_request_invalidate <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_invalidate_offset else False;
     oper_request_flush <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_flush_offset else False;
-    oper_started <= True when (oper_started_invalidate or oper_started_flush) and and_reduce(cpu_write_enables)='1' else False;
+    oper_request_invalidate_way <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_invalidate_way_offset else False;
+    oper_request_flush_way <= True when cpu_next_address(oper_offset_width-1 downto 0)=oper_flush_way_offset else False;
+    oper_started <= True when (oper_started_invalidate or oper_started_flush or oper_started_invalidate_way or oper_started_flush_way) and and_reduce(cpu_write_enables)='1' else False;
     
     process(cpu_index,cpu_tag,tag_rows,valid_rows)
         variable cpu_hit_buff : Boolean;
@@ -288,6 +302,8 @@ begin
                 dirty_rows <= (others=>(others=>'0'));
                 oper_started_flush <= False;
                 oper_started_invalidate <= False;
+                oper_started_flush_way <= False;
+                oper_started_invalidate_way <= False;
             else
                 if memory_access_needed then
                 
@@ -373,38 +389,62 @@ begin
                     end if;
                     
                 elsif oper_started then
-                    if cpu_hit then
-                        if oper_started_invalidate then
-                            valid_rows(cpu_index)(cpu_way) <='0';
-                        elsif oper_started_flush then
-                            cpu_pause_buff <= '1';
-                            memory_access_mode <= msm_write_block; 
-                            memory_access_needed <= True;
-                            memory_way <= cpu_way;
-                            memory_cacheable <= '1';
-                            memory_index <= cpu_index;
-                            memory_write_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
-                            memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
-                                tag_rows(cpu_index)((1+cpu_way)*tag_width-1 downto cpu_way*tag_width) & 
-                                std_logic_vector(to_unsigned(cpu_index,cache_index_width));
-                            memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
-                            memory_write_counter <= 0;
-                            set_memory_write_enables_to_dirty(cpu_index,cpu_way,0);
-                            --memory_write_enables <= (others=>'1');
-                            memory_write_enable_buff <= '1';
-                            memory_write_data <= 
-                                block_rows(cpu_index)(
-                                cpu_way*2**cache_offset_width*8+cpu_data_width-1 downto 
-                                cpu_way*2**cache_offset_width*8);
-                        end if;
+                    if oper_started_invalidate and cpu_hit then
+                        valid_rows(cpu_index)(cpu_way) <='0';
+                    elsif oper_started_flush and cpu_hit then
+                        cpu_pause_buff <= '1';
+                        memory_access_mode <= msm_write_block; 
+                        memory_access_needed <= True;
+                        memory_way <= cpu_way;
+                        memory_cacheable <= '1';
+                        memory_index <= cpu_index;
+                        memory_write_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
+                        memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                            tag_rows(cpu_index)((1+cpu_way)*tag_width-1 downto cpu_way*tag_width) & 
+                            std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                        memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                        memory_write_counter <= 0;
+                        set_memory_write_enables_to_dirty(cpu_index,cpu_way,0);
+                        memory_write_enable_buff <= '1';
+                        memory_write_data <= 
+                            block_rows(cpu_index)(
+                            cpu_way*2**cache_offset_width*8+cpu_data_width-1 downto 
+                            cpu_way*2**cache_offset_width*8);
+                    elsif oper_started_invalidate_way and cpu_hit_oper then
+                        valid_rows(cpu_index)(cpu_way_oper) <='0';
+                    elsif oper_started_flush_way and cpu_hit_oper then
+                        cpu_pause_buff <= '1';
+                        memory_access_mode <= msm_write_block; 
+                        memory_access_needed <= True;
+                        memory_way <= cpu_way_oper;
+                        memory_cacheable <= '1';
+                        memory_index <= cpu_index;
+                        memory_write_address(cpu_address_width-1 downto cache_cacheable_width) <= (others=>'0');
+                        memory_write_address(cache_cacheable_width-1 downto cache_offset_width) <=
+                            tag_rows(cpu_index)((1+cpu_way_oper)*tag_width-1 downto cpu_way_oper*tag_width) & 
+                            std_logic_vector(to_unsigned(cpu_index,cache_index_width));
+                        memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
+                        memory_write_counter <= 0;
+                        set_memory_write_enables_to_dirty(cpu_index,cpu_way_oper,0);
+                        memory_write_enable_buff <= '1';
+                        memory_write_data <= 
+                            block_rows(cpu_index)(
+                            cpu_way_oper*2**cache_offset_width*8+cpu_data_width-1 downto 
+                            cpu_way_oper*2**cache_offset_width*8);
                     end if;
                     oper_started_invalidate <= False;
                     oper_started_flush <= False;
+                    oper_started_invalidate_way <= False;
+                    oper_started_flush_way <= False;
                 elsif oper_request then
                     if oper_request_invalidate then
                         oper_started_invalidate <= True;
                     elsif oper_request_flush then
                         oper_started_flush <= True;
+                    elsif oper_request_invalidate_way then
+                        oper_started_invalidate_way <= True;
+                    elsif oper_request_flush_way then
+                        oper_started_flush_way <= True;
                     end if;
                 elsif not cpu_cacheable then
                     cpu_pause_buff <= '1';
@@ -463,7 +503,6 @@ begin
                             memory_write_address(cache_offset_width-1 downto 0) <= (others=>'0');
                             memory_write_counter <= 0;
                             set_memory_write_enables_to_dirty(cpu_index,replace_way,0);
-                            --memory_write_enables <= (others=>'1');
                             memory_write_enable_buff <= '1';
                             memory_write_data <= 
                                 block_rows(cpu_index)(

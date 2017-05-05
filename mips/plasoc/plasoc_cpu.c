@@ -36,5 +36,19 @@ void l1_cache_operate_on_line_range(unsigned oper_offset,unsigned addr, unsigned
 	OS_AsmInterruptEnable(int_mask);
 }
 
+void l1_cache_operate_on_line_all(unsigned oper_offset)
+{
+	register unsigned int_mask;
+	unsigned each_way;
+	unsigned each_index;
+	
+	/* This operation must be completed within a critical section. */
+	int_mask = OS_AsmInterruptEnable(0);
+	for (each_index=0;each_index<(1<<L1_CACHE_INDEX_WIDTH);each_index++)
+		for (each_way=0;each_way<(1<<L1_CACHE_WAY_WIDTH);each_way++)
+			l1_cache_operate_way_on_line(oper_offset,each_way,each_index);
+	OS_AsmInterruptEnable(int_mask);
+}
+
 
 

@@ -31,6 +31,14 @@ extern "C"
 			: "r" (L1_CACHE_ADDRESS_BASE+oper_offset), "r" (((unsigned)addr)&~L1_CACHE_OFFSET_MASK) 
 			: "memory" ); 
 	}
+	
+	static inline __attribute__ ((always_inline))
+	void l1_cache_operate_way_on_line(unsigned oper_offset,unsigned way,unsigned index)
+	{
+		l1_cache_operate_on_line(oper_offset,
+			(way<<(L1_CACHE_OFFSET_WIDTH+L1_CACHE_INDEX_WIDTH))|
+			(index<<L1_CACHE_OFFSET_WIDTH));
+	}
 
 	/**
 	 * @brief Performs L1 cache invalidation operation.
@@ -52,6 +60,18 @@ extern "C"
 	void l1_cache_flush(unsigned addr)
 	{
 		l1_cache_operate_on_line(L1_CACHE_FLUSH_OFFSET,addr);
+	}
+	
+	static inline __attribute__ ((always_inline))
+	void l1_cache_invalidate_way(unsigned way,unsigned index)
+	{
+		l1_cache_operate_way_on_line(L1_CACHE_INVALIDATE_WAY_OFFSET,way,index);
+	}
+	
+	static inline __attribute__ ((always_inline))
+	void l1_cache_flush_way(unsigned way,unsigned index)
+	{
+		l1_cache_operate_way_on_line(L1_CACHE_FLUSH_WAY_OFFSET,way,index);
 	}
 
 	/**
@@ -83,6 +103,8 @@ extern "C"
 	{
 		l1_cache_operate_on_line_range(L1_CACHE_FLUSH_OFFSET,addr,size);
 	}
+	
+	void l1_cache_operate_on_line_all(unsigned oper_offset);
 
 	/**
 	 * @brief Enables and disables the CPU's interrupt.
