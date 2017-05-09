@@ -138,6 +138,9 @@ extern "C"
 	{
 		l1_cache_operate_on_line_all(L1_CACHE_FLUSH_WAY_OFFSET);
 	}
+	
+	__attribute__ ((optimize("O3")))
+	void l1_cache_memory_barrier();
 
 	/**
 	 * @brief Enables and disables the CPU's interrupt.
