@@ -15,6 +15,14 @@ extern "C"
 {
 #endif
 
+	/**
+	 * @brief Enters a critical section defined by disabling the L1 cache.
+	 *
+	 * Can be used with leave_critical to form atomic operations.
+	 *
+	 * @return Returns the interrupt status mask which can be used to leave
+	 * the critical section with the leave_critical function.
+	 */
 	static inline __attribute__ ((always_inline))
 	unsigned enter_critical()
 	{
@@ -26,6 +34,13 @@ extern "C"
 		return int_mask;
 	}
 	
+	/**
+	 * @brief Leaves a critical section defined by possibly enabling the L1 cache.
+	 *
+	 * Can be used with leave_critical to form atomic operations.
+	 *
+	 * @param int_mask The interrupt status mask is returned by the enter_critical function.
+	 */
 	static inline __attribute__ ((always_inline))
 	void leave_critical(register unsigned int_mask)
 	{
@@ -51,6 +66,14 @@ extern "C"
 			: "memory" ); 
 	}
 	
+	/**
+	 * @brief Performs L1 cache operation.
+	 * @warning NOT ATOMIC.
+	 * @param oper_offset Can either be L1_CACHE_INVALIDATE_WAY_OFFSET for invalidation 
+	 * or L1_CACHE_FLUSH_WAY_OFFSET for flushing.
+	 * @param way The line within the row on which the operation is performed.
+	 * @param index The row on which the operation is performed.
+	 */
 	static inline __attribute__ ((always_inline))
 	void l1_cache_operate_way_on_line(unsigned oper_offset,unsigned way,unsigned index)
 	{
@@ -81,12 +104,24 @@ extern "C"
 		l1_cache_operate_on_line(L1_CACHE_FLUSH_OFFSET,addr);
 	}
 	
+	/**
+	 * @brief Performs L1 cache invalidation operation.
+	 * @warning NOT ATOMIC.
+	 * @param way The line within the row on which the operation is performed.
+	 * @param index The row on which the operation is performed.
+	 */
 	static inline __attribute__ ((always_inline))
 	void l1_cache_invalidate_way(unsigned way,unsigned index)
 	{
 		l1_cache_operate_way_on_line(L1_CACHE_INVALIDATE_WAY_OFFSET,way,index);
 	}
 	
+	/**
+	 * @brief Performs L1 cache flushing operation.
+	 * @warning NOT ATOMIC.
+	 * @param way The line within the row on which the operation is performed.
+	 * @param index The row on which the operation is performed. 
+	 */
 	static inline __attribute__ ((always_inline))
 	void l1_cache_flush_way(unsigned way,unsigned index)
 	{
@@ -103,7 +138,7 @@ extern "C"
 	void l1_cache_operate_on_line_range(unsigned oper_offset, unsigned addr, unsigned size);
 
 	/**
-	 * @brief Performs L1 cache invalidation operation over a range of addresses.\
+	 * @brief Performs L1 cache invalidation operation over a range of addresses.
 	 * @param addr The address on which the operation is performed. 
 	 * @param size The number of bytes over which the operation is performed.
 	 */
@@ -114,7 +149,7 @@ extern "C"
 	}
 
 	/**
-	 * @brief Performs L1 cache flushing operation over a range of addresses.\
+	 * @brief Performs L1 cache flushing operation over a range of addresses.
 	 * @param addr The address on which the operation is performed. 
 	 * @param size The number of bytes over which the operation is performed.
 	 */
@@ -124,21 +159,53 @@ extern "C"
 		l1_cache_operate_on_line_range(L1_CACHE_FLUSH_OFFSET,addr,size);
 	}
 	
+	/**
+	 * @brief Performs L1 cache operation over entire cache.
+	 * @param oper_offset Can either be L1_CACHE_INVALIDATE_WAY_OFFSET for invalidation or L1_CACHE_FLUSH_WAY_OFFSET for flushing.
+	 * @warning Invalidating the entire cache is actually a dangerous operation, since both data and instructions
+	 * share the same memory space. Specifically, if a portion of the CPU's stack is stored in cache, invalidation
+	 * can potentially corrupt the stack with invalid instructions. In fact, the O3 optimization is needed to ensure
+	 * the cache operation doesn't depend on the stack in order to run. Avoiding this issue can be done by either flushing
+	 * the cache so that at least the stack is flushed or calling the safer l1_cache_memory_barrier function.
+	 */
 	__attribute__ ((optimize("O3")))
 	void l1_cache_operate_on_line_all(unsigned oper_offset);
 
+	/**
+	 * @brief Performs L1 cache invalidation operation over entire cache.
+	 * @warning Invalidating the entire cache is actually a dangerous operation, since both data and instructions
+	 * share the same memory space. Specifically, if a portion of the CPU's stack is stored in cache, invalidation
+	 * can potentially corrupt the stack with invalid instructions. In fact, the O3 optimization is needed to ensure
+	 * the cache operation doesn't depend on the stack in order to run. Avoiding this issue can be done by either flushing
+	 * the cache so that at least the stack is flushed or calling the safer l1_cache_memory_barrier function.
+	 */
 	static inline __attribute__ ((always_inline))
 	void l1_cache_invalidate_all()
 	{
 		l1_cache_operate_on_line_all(L1_CACHE_INVALIDATE_WAY_OFFSET);
 	}
 	
+	/**
+	 * @brief Performs L1 cache flushing operation over entire cache.
+	 */
 	static inline __attribute__ ((always_inline))
 	void l1_cache_flush_all()
 	{
 		l1_cache_operate_on_line_all(L1_CACHE_FLUSH_WAY_OFFSET);
 	}
 	
+	/**
+	 * @brief Performs the memory barrier operation.
+	 *
+	 * This operation is mainly intended for applications in which a consistent view of the same memory space is needed
+	 * among multiple hardware components. For instance, if there are multiple CPUs that require shared access to the same
+	 * memory space, memory barriers can be applied so that each CPU can have a consistent view of the memory. However,
+	 * this particular implementation of the memory barrier operation is costly since it's currently implemented in
+	 * software.
+	 *
+	 * This memory barrier is an atomic coarse-grained operation in which the cache is first fully flushed and then fully 
+	 * invalidated.
+	 */
 	__attribute__ ((optimize("O3")))
 	void l1_cache_memory_barrier();
 
