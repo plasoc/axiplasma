@@ -46,7 +46,7 @@ extern "C"
 	{
 		__asm__ __volatile__ (
 			"mtc0 %0,$12\n"
-			:"=r"(int_mask)::"memory");
+			::"r"(int_mask):"memory");
 	}
 
 	/**

@@ -54,12 +54,13 @@ void l1_cache_operate_on_line_all(unsigned oper_offset)
 
 __attribute__ ((optimize("O3")))
 void l1_cache_memory_barrier()
-	{
-		register unsigned int_mask;
-		int_mask = enter_critical();
-		l1_cache_flush_all();
-		l1_cache_invalidate_all();
-		leave_critical(int_mask);
-	}
+{
+	register unsigned int_mask;
+	
+	int_mask = enter_critical();
+	l1_cache_flush_all();
+	l1_cache_invalidate_all();
+	leave_critical(int_mask);
+}
 
 
