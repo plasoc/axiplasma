@@ -230,6 +230,8 @@ extern "C"
 	 * @brief Patches the instructions located at 0x3c such that the function 
 	 * interrupt_service_routine is called from the correct location.
 	 *
+	 * @warning Should not be called if application's starting address is 0.
+	 *
 	 * It should be understood that when an external interrupt of a system call occurs,
 	 * one of the critical operations is that the program counter is set to 0x3c, where the
 	 * expected service routine should be located. However, because the application can
