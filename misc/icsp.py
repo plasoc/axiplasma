@@ -44,26 +44,25 @@ if __name__ == '__main__':
 
 	if verbose_flag: print('Reading binary...')
 	
-	with open(binary_name,mode='rb') as binary_file, serial.Serial() as serial_obj:
+	if verbose_flag: print('Setting up serial...')
+	serial_obj = serial.Serial()
+	serial_obj.port = serial_port
+	serial_obj.baudrate = serial_baud
+	serial_obj.bytesize = serial.EIGHTBITS
+	serial_obj.parity = serial.PARITY_NONE
+	serial_obj.stopbits = serial.STOPBITS_ONE
+	serial_obj.timeout = None
+	with open(binary_name,mode='rb') as binary_file, serial_obj as serial_obj:
 
 		bytes_per_word = 4
 		binary_content = binary_file.read()
 		words_in_binary = len(binary_content)/bytes_per_word
 
-		if verbose_flag: print('Setting up serial...')
-
-		serial_obj.port = serial_port
-		serial_obj.baudrate = serial_baud
-		serial_obj.bytesize = serial.EIGHTBITS
-		serial_obj.parity = serial.PARITY_NONE
-		serial_obj.stopbits = serial.STOPBITS_ONE
-		serial_obj.timeout = None
-		serial_obj.open()
-
 		if verbose_flag: print('Sending start word...')		
 
 		send_word(serial_obj,bytes_per_word,BOOT_LOADER_START_WORD)
 		status = array.array('B',serial_obj.read())[0]
+		print("Status: {}".format(status))
 		assert(status==BOOT_LOADER_ACK_SUCCESS_BYTE[0])
 
 		if verbose_flag: print('Writing the data...')	
