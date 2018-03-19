@@ -61,8 +61,7 @@ if __name__ == '__main__':
 		if verbose_flag: print('Sending start word...')		
 
 		send_word(serial_obj,bytes_per_word,BOOT_LOADER_START_WORD)
-		status = array.array('B',serial_obj.read())[0]
-		print("Status: {}".format(status))
+		status = array.array('B',serial_obj.read())[0]		
 		assert(status==BOOT_LOADER_ACK_SUCCESS_BYTE[0])
 
 		if verbose_flag: print('Writing the data...')	
